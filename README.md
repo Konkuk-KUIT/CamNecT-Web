@@ -19,7 +19,7 @@ Camnect는
 - 서버 통신: REST API (React Query)
 - 채팅: MVP는 쪽지형 (추후 WebSocket 실시간 채팅 확장 예정)
 
-## 기능 구성
+## 📃 기능 구성
 
 ### 🔐 인증 & 온보딩 플로우
 

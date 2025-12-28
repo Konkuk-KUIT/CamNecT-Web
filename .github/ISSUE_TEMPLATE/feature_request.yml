@@ -18,9 +18,6 @@ body:
         - [ ] 인증번호 요청 API 연결 (/auth/phone/request)
         - [ ] 인증번호 확인 API 연결 (/auth/phone/verify)
         - [ ] 타이머(3:00) 및 재전송 버튼 UX 구현
-        - [ ] 인증 실패/만료 에러 처리(토스트/인라인 메시지)
-        - [ ] 인증 완료 시 다음 단계(가입정보 입력)로 라우팅 연결
-        - [ ] 인증 상태에 따른 라우트 가드 적용(미인증 접근 차단)
     validations:
       required: true
 
