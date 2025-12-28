@@ -1,73 +1,185 @@
-# React + TypeScript + Vite
+# Camnect (캠넥트)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 대학생을 위한 동문 네트워킹 & 커피챗 기반 커뮤니티 웹앱
 
-Currently, two official plugins are available:
+Camnect는
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+동문 탐색, 포트폴리오 공유, 대외활동/팀원 모집, 커피챗(쪽지/채팅)을 통해
+대학생 간 네트워킹을 돕는 웹 애플리케이션입니다.
 
-## React Compiler
+---
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## 🔗 프로젝트 개요
 
-## Expanding the ESLint configuration
+- 프로젝트명: Camnect
+- 개발 기간: 약 45일
+- 개발 인원: 프론트엔드 3명
+- 프레임워크: React + Vite
+- 스타일링: Tailwind CSS
+- 서버 통신: REST API (React Query)
+- 채팅: MVP는 쪽지형 (추후 WebSocket 실시간 채팅 확장 예정)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 기능 구성
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🔐 인증 & 온보딩 플로우 (45%)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- 로그인 / 회원가입
+- 약관 동의
+- 휴대폰 본인인증
+- 인증번호 요청
+- 타이머 / 재전송
+- 관심 분야 선택
+- 프로필 기본 설정
+- 학교 인증 (파일 업로드)
+- 인증 상태 분기
+- 대기 / 승인 / 반려
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 💬 커피챗 / 채팅 기능
+
+**MVP (쪽지형)**
+
+- 커피챗 요청
+- 요청함 (수락 / 거절)
+- 쪽지 목록
+- 쪽지 상세
+- 읽지 않은 메시지 표시
+
+**확장 (WebSocket, 옵션)**
+
+- 실시간 메시지 송수신
+- unread 실시간 갱신
+- 재연결 처리
+- REST fallback
+
+### 🏠 홈 (25%)
+
+- 새 커피챗 요청 알림
+- 추천 공모전
+- 추천 동문
+- 가로 스크롤 카드 UI
+
+### 📬 커뮤니티 (25%)
+
+- 게시글 목록 / 상세
+- 댓글 작성
+- 글쓰기 / 수정 / 삭제
+
+### 👥 동문찾기 (25%)
+
+- 동문 리스트
+- 필터 / 검색
+- 동문 프로필 상세
+- 커피챗 요청 버튼
+
+### 📝 마이페이지 (30%)
+
+- 내 프로필 정보
+- 태그 / 자기소개
+- 포트폴리오 공개 설정
+- 학력 / 경력 / 자격증 관리
+
+### ✏️ 포트폴리오 편집 (30%)
+
+- 소개글
+- 해시태그
+- 경력 / 학력 / 기술 동적 추가
+- 저장 / 수정
+
+### 👔 대외활동 & 팀원모집 (30%)
+
+- 공모전 / 스터디 / 동아리 리스트
+- 팀원 모집 글 작성
+- 지원 / 수락 / 거절
+
+## 👥 팀 구성 및 역할 분담
+
+### 정상현 (인프라 · 인증 · 채팅)
+
+**담당 도메인**
+
+- 공통 인프라 / 프로젝트 기반
+- 인증 & 온보딩 (휴대폰 본인인증)
+- 커피챗 / 쪽지 (MVP)
+- (옵션) WebSocket 실시간 채팅
+
+### 김나연 (마이페이지 · 포트폴리오 · 대외활동)
+
+**담당 도메인**
+
+- 마이페이지 (내 정보 관리)
+- 포트폴리오 편집
+- 대외활동
+- 팀원 모집
+
+### 조은서 (홈 · 커뮤니티 · 동문찾기 · 공통 UI)
+
+**담당 도메인**
+
+- 홈
+- 커뮤니티
+- 동문찾기 (리스트 + 동문 프로필)
+
+## 🧱 기술 스택
+
+**Core**
+
+- React 19
+- Vite
+- TypeScript
+- React Router DOM
+
+**Styling**
+
+- Tailwind CSS v4
+- clsx
+
+**Data & State**
+
+- React Query (TanStack Query)
+- Axios (instance 기반)
+- react-hook-form
+- zod
+- Zustand
+
+**Tooling**
+
+- ESLint
+- SWC
+- TypeScript ESLint
+- Vite
+
+## 🗂️ 프로젝트 구조 (임시)
+
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+src/
+┣ api/ # axios 기반 API 모듈
+┃ ┣ auth.ts
+┃ ┣ chat.ts
+┃ ┣ activity.ts
+┃ ┣ portfolio.ts
+┃ ┗ community.ts
+┃
+┣ components/ # 공통 UI 컴포넌트
+┃ ┣ Button.tsx
+┃ ┣ Card.tsx
+┃ ┣ Modal.tsx
+┃ ┣ Toggle.tsx
+┃ ┗ ...
+┃
+┣ pages/
+┃ ┣ auth/ # 로그인 / 온보딩
+┃ ┣ chat/ # 커피챗 / 채팅
+┃ ┣ home/ # 홈
+┃ ┣ community/ # 커뮤니티
+┃ ┣ alumni/ # 동문찾기 / 동문프로필
+┃ ┣ mypage/ # 마이페이지
+┃ ┣ portfolio/ # 포트폴리오 편집
+┃ ┗ activity/ # 대외활동 / 팀원모집
+┃
+┣ hooks/ # custom hooks
+┣ store/ # 전역 상태 (auth 등)
+┣ router/ # 라우팅 설정
+┣ styles/ # 전역 스타일
+┣ App.tsx
+┗ main.tsx
 ```
