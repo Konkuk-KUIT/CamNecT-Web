@@ -1,0 +1,30 @@
+name: "✨ Feature"
+description: "새로운 기능 추가"
+labels: ["feature"]
+body:
+  - type: textarea
+    attributes:
+      label: "📄 설명"
+      description: 새로운 기능에 대한 설명을 작성해 주세요.
+      placeholder: 자세히 적을수록 좋습니다!
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "✔️ 작업할 내용"
+      description: 할 일을 체크박스 형태로 작성해주세요.
+      placeholder: |
+        - [ ] 인증번호 요청 API 연결 (/auth/phone/request)
+        - [ ] 인증번호 확인 API 연결 (/auth/phone/verify)
+        - [ ] 타이머(3:00) 및 재전송 버튼 UX 구현
+        - [ ] 인증 실패/만료 에러 처리(토스트/인라인 메시지)
+        - [ ] 인증 완료 시 다음 단계(가입정보 입력)로 라우팅 연결
+        - [ ] 인증 상태에 따른 라우트 가드 적용(미인증 접근 차단)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "✏️ 참고 자료"
+      description: 참고 자료가 있다면 작성해 주세요.
