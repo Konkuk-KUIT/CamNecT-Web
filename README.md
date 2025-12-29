@@ -132,6 +132,7 @@ Camnect는
 
 - Tailwind CSS v4
 - clsx
+- tailwind-merge
 
 **Data & State**
 
