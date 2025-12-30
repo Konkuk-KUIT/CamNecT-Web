@@ -49,6 +49,10 @@
     /*hn-> line-height: normal*/
  
     /* B (700) */
+    --text-B-36: 36px;
+    --text-B-36--line-height: 50.4px;
+    --text-B-36--font-weight: 700;
+
     --text-B-28: 28px;
     --text-B-28--line-height: 39.2px;
     --text-B-28--font-weight: 700;
@@ -91,6 +95,10 @@
     --text-SB-14--font-weight: 600;
 
     /* M (500) */
+    --text-M-20: 20px;
+    --text-M-20--line-height: 28px;
+    --text-M-20--font-weight: 500;
+
     --text-M-16: 16px;
     --text-M-16--line-height: 22.4px;
     --text-M-16--font-weight: 500;
@@ -143,5 +151,136 @@
 
 @layer base {
   body { font-family: var(--font-sans); }
+}
+
+/* ex. <p class = "text-b-36> -> 클래스 이름 바로 사용 가능*/
+@layer utilities {
+    /* Bold (700) */
+    .text-b-36 {
+        font-size: var(--text-B-36);
+        line-height: var(--text-B-36--line-height);
+        font-weight: var(--text-B-36--font-weight);
+    }
+    .text-b-28 {
+        font-size: var(--text-B-28);
+        line-height: var(--text-B-28--line-height);
+        font-weight: var(--text-B-28--font-weight);
+    }
+    .text-b-20 {
+        font-size: var(--text-B-20);
+        line-height: var(--text-B-20--line-height);
+        font-weight: var(--text-B-20--font-weight);
+    }
+    .text-b-18 {
+        font-size: var(--text-B-18);
+        line-height: var(--text-B-18--line-height);
+        font-weight: var(--text-B-18--font-weight);
+    }
+    .text-b-16-hn {
+        font-size: var(--text-B-16-hn);
+        line-height: var(--text-B-16-hn--line-height);
+        font-weight: var(--text-B-16-hn--font-weight);
+    }
+    .text-b-14-hn {
+        font-size: var(--text-B-14-hn);
+        line-height: var(--text-B-14-hn--line-height);
+        font-weight: var(--text-B-14-hn--font-weight);
+    }
+
+    /* SemiBold (600) */
+    .text-sb-30 {
+        font-size: var(--text-SB-30);
+        line-height: var(--text-SB-30--line-height);
+        font-weight: var(--text-SB-30--font-weight);
+    }
+    .text-sb-20 {
+        font-size: var(--text-SB-20);
+        line-height: var(--text-SB-20--line-height);
+        font-weight: var(--text-SB-20--font-weight);
+    }
+    .text-sb-18 {
+        font-size: var(--text-SB-18);
+        line-height: var(--text-SB-18--line-height);
+        font-weight: var(--text-SB-18--font-weight);
+    }
+    .text-sb-16-hn {
+        font-size: var(--text-SB-16-hn);
+        line-height: var(--text-SB-16-hn--line-height);
+        font-weight: var(--text-SB-16-hn--font-weight);
+    }
+    .text-sb-14 {
+        font-size: var(--text-SB-14);
+        line-height: var(--text-SB-14--line-height);
+        font-weight: var(--text-SB-14--font-weight);
+    }
+
+    /* Medium (500) */
+    .text-m-20 {
+        font-size: var(--text-M-20);
+        line-height: var(--text-M-20--line-height);
+        font-weight: var(--text-M-20--font-weight);
+    }
+    .text-m-16 {
+        font-size: var(--text-M-16);
+        line-height: var(--text-M-16--line-height);
+        font-weight: var(--text-M-16--font-weight);
+    }
+    .text-m-14 {
+        font-size: var(--text-M-14);
+        line-height: var(--text-M-14--line-height);
+        font-weight: var(--text-M-14--font-weight);
+    }
+    .text-m-12 {
+        font-size: var(--text-M-12);
+        line-height: var(--text-M-12--line-height);
+        font-weight: var(--text-M-12--font-weight);
+    }
+    .text-m-12-hn {
+        font-size: var(--text-M-12-hn);
+        line-height: var(--text-M-12-hn--line-height);
+        font-weight: var(--text-M-12-hn--font-weight);
+    }
+
+    /* Regular (400) */
+    .text-r-18 {
+        font-size: var(--text-R-18);
+        line-height: var(--text-R-18--line-height);
+        font-weight: var(--text-R-18--font-weight);
+    }
+    .text-r-16 {
+        font-size: var(--text-R-16);
+        line-height: var(--text-R-16--line-height);
+        font-weight: var(--text-R-16--font-weight);
+    }
+    .text-r-16-hn {
+        font-size: var(--text-R-16-hn);
+        line-height: var(--text-R-16-hn--line-height);
+        font-weight: var(--text-R-16-hn--font-weight);
+    }
+    .text-r-14 {
+        font-size: var(--text-R-14);
+        line-height: var(--text-R-14--line-height);
+        font-weight: var(--text-R-14--font-weight);
+    }
+    .text-r-12 {
+        font-size: var(--text-R-12);
+        line-height: var(--text-R-12--line-height);
+        font-weight: var(--text-R-12--font-weight);
+    }
+    .text-r-12-hn {
+        font-size: var(--text-R-12-hn);
+        line-height: var(--text-R-12-hn--line-height);
+        font-weight: var(--text-R-12-hn--font-weight);
+    }
+    .text-r-11-hn {
+        font-size: var(--text-R-11-hn);
+        line-height: var(--text-R-11-hn--line-height);
+        font-weight: var(--text-R-11-hn--font-weight);
+    }
+    .text-r-10-hn {
+        font-size: var(--text-R-10-hn);
+        line-height: var(--text-R-10-hn--line-height);
+        font-weight: var(--text-R-10-hn--font-weight);
+    }
 }
 
