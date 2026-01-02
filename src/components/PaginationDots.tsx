@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties, HTMLAttributes, PointerEvent, ReactNode, WheelEvent } from 'react';
+import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode, WheelEvent } from 'react';
 
 type Size = number | string;
 
@@ -141,6 +141,13 @@ const PaginationDots = ({
     pointerStartXRef.current = null;
   };
 
+  const handleDotKeyDown = (event: KeyboardEvent<HTMLSpanElement>, targetIndex: number) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setIndex(targetIndex);
+    }
+  };
+
   const sliderWidth = useMemo(() => toCssSize(trackWidth), [trackWidth]);
   const sliderHeight = useMemo(() => toCssSize(trackHeight), [trackHeight]);
 
@@ -180,7 +187,13 @@ const PaginationDots = ({
         {Array.from({ length: itemCount }).map((_, idx) => (
           <span
             key={idx}
-            className='rounded-full'
+            role='button'
+            tabIndex={0}
+            aria-label={`Go to item ${idx + 1}`}
+            aria-current={idx === currentIndex}
+            onClick={() => setIndex(idx)}
+            onKeyDown={(event) => handleDotKeyDown(event, idx)}
+            className='rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40'
             style={{
               width: 'var(--dot-size)',
               height: 'var(--dot-size)',

@@ -45,7 +45,7 @@ const Toggle = ({
       type='button'
       aria-pressed={isOn}
       onClick={handleClick}
-      className={`inline-flex items-center justify-center rounded-full transition-colors ${className}`}
+      className={`inline-flex items-center justify-center rounded-full transition-colors cursor-pointer ${className}`}
       style={{ ...dimensionStyle, ...style }}
       {...props}
     >
