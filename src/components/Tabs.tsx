@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 export type TabItem = {
   id: string;
@@ -15,30 +15,38 @@ type TabsProps = {
 };
 
 export function Tabs({ tabs, activeId, onChange, children, className = '' }: TabsProps) {
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [indicatorLeft, setIndicatorLeft] = useState(0);
-  const [indicatorWidth, setIndicatorWidth] = useState(0);
-  const tabsSignature = tabs.map(({ id, label }) => `${id}:${label}`).join('|');
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]); // 탭 버튼 참조
+  const indicatorRef = useRef<HTMLSpanElement>(null); // 탭 indicator(탭 버튼 밑줄) 참조
 
-  useEffect(() => {
+  // 브라우저가 화면에 painting하기 전에 실행
+  useLayoutEffect(() => {
     const index = tabs.findIndex((tab) => tab.id === activeId);
     if (index === -1) return;
-    const el = tabRefs.current[index];
+
+    const el = tabRefs.current[index]; // 현재 탭 버튼
     const parent = el?.parentElement;
-    if (!el || !parent) return;
+    const indicator = indicatorRef.current; // 현재 탭 버튼의 밑줄
+
+    if (!el || !parent || !indicator) return;
 
     const parentRect = parent.getBoundingClientRect();
     const label = el.querySelector<HTMLElement>('.tab-label') ?? el;
     const labelRect = label.getBoundingClientRect();
 
     const scrollLeft = parent.scrollLeft || 0;
-    setIndicatorLeft(labelRect.left - parentRect.left + scrollLeft);
-    setIndicatorWidth(labelRect.width);
-  }, [activeId, tabsSignature]);
+
+    // state대신 HTML요소의 style을 직접 변경 (실제 DOM 조작)
+    // 리렌더 발생 X
+    const left = labelRect.left - parentRect.left + scrollLeft;
+    const width = labelRect.width;
+
+    indicator.style.left = `${left}px`;
+    indicator.style.width = `${width}px`;
+  }, [activeId, tabs]);
 
   return (
     <div className={`w-full ${className}`}>
-      <div className='relative flex w-full justify-evenly px-6 pb-[10px]'>
+      <div className='relative flex w-full justify-evenly px-6 pb-2.5'>
         {tabs.map((tab, idx) => (
           <button
             key={tab.id}
@@ -54,13 +62,10 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
             <span className='tab-label'>{tab.label}</span>
           </button>
         ))}
-        <span className='absolute left-6 right-6 bottom-0 h-[2px] bg-gray-650 opacity-50' />
+        <span className='absolute left-6 right-6 bottom-0 h-0.5 bg-gray-650 opacity-50' />
         <span
-          className='absolute bottom-0 h-[2px] bg-gray-900 transition-[left,width] duration-200 ease-out'
-          style={{
-            width: `${indicatorWidth}px`,
-            left: `${indicatorLeft}px`,
-          }}
+          ref={indicatorRef}
+          className='absolute bottom-0 h-0.5 bg-gray-900 transition-[left,width] duration-200 ease-out'
         />
       </div>
       {children && <div className='mt-3 px-6'>{children}</div>}
