@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode, WheelEvent } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 type Size = number | string;
 
@@ -42,16 +42,16 @@ const PaginationDots = ({
   ...props
 }: PaginationDotsProps) => {
   const itemCount = items?.length ?? countProp;
-  const [internalIndex, setInternalIndex] = useState(defaultIndex);
   const isControlled = activeIndex !== undefined;
-  const currentIndex = isControlled ? activeIndex! : internalIndex;
+  
+  // [Fix: Cascading Render 해결]
+  // 기존 useEffect를 내부의 setInternalIndex는 렌더링 직후 다시 렌더링을 유발 -> cascading error 발생
+  // 따라서 useEffect를 제거하였으며, defaultIndex 변경 시 초기화가 필요하다면
+  // 부모 컴포넌트에서 <PaginationDots key={defaultIndex} ... />와 같이 key prop을 변경하여
+  // 컴포넌트를 완전히 새로 마운트하는 방식(React 권장 패턴)으로 변경 
+  const [internalIndex, setInternalIndex] = useState(defaultIndex);
 
-  useEffect(() => {
-    if (isControlled) return;
-    if (defaultIndex >= 0 && defaultIndex < itemCount) {
-      setInternalIndex(defaultIndex);
-    }
-  }, [defaultIndex, isControlled, itemCount]);
+  const currentIndex = isControlled ? activeIndex! : internalIndex;
 
   const setIndex = (next: number) => {
     const bounded = ((next % itemCount) + itemCount) % itemCount;
