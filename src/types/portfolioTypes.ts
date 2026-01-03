@@ -1,6 +1,8 @@
 export type PortfolioId = string;
 export type UserId = string;
 
+export type PortfolioVisibility = "PUBLIC" | "PRIVATE";
+
 export interface PortfolioImage {
     id: string;
     url: string;
@@ -17,8 +19,9 @@ export interface Portfolio {
     images: PortfolioImage[];
 
     viewCount: number;
-    likeCount: number;
 
     createdAt: string;
     updatedAt?: string;
+
+    visuality: PortfolioVisibility;
 }

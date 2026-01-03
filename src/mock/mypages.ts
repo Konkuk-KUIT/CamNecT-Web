@@ -22,8 +22,10 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
 
       isFollowerCountPublic: false,
       avgReplyMinutes: 20,
+
+      points: 200,
     },
-    visibility: "PUBLIC",
+    portfolioVisibility: true,
     educations: [{ id: "edu_001_1", school: "가나다대학교", status: "ENROLLED", year: 2024 }],
     careers: [],
     certificates: [{ id: "cert_001_1", name: "정보처리기사", acquiredYear: 2025 }],
@@ -46,8 +48,10 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
 
       isFollowerCountPublic: true,
       avgReplyMinutes: 30,
+
+      points: 1230,
     },
-    visibility: "PUBLIC",
+    portfolioVisibility: true,
     educations: [
       { id: "edu_002_1", school: "이화여자대학교", status: "ENROLLED", year: 2019 },
       { id: "edu_002_2", school: "동경미술대학", status: "EXCHANGED", year: 2020 },
@@ -74,8 +78,10 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
 
       isFollowerCountPublic: true,
       avgReplyMinutes: 120,
+
+      points: 530,
     },
-    visibility: "PRIVATE",
+    portfolioVisibility: false,
     educations: [{ id: "edu_003_1", school: "건국대학교", status: "ENROLLED", year: 2020 }],
     careers: [{ id: "car_003_1", organization: "디자인 스튜디오 A", status: "RESIGNED", year: 2023 }],
     certificates: [{ id: "cert_003_1", name: "컴활 1급", acquiredYear: 2021 }],

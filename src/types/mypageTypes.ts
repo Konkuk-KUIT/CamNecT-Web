@@ -3,8 +3,6 @@ export type UserId = string;
 export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
 export type CareerStatus = "EMPLOYED" | "RESIGNED";
 
-export type PortfolioVisibility = "PUBLIC" | "PRIVATE";
-
 export interface UserProfile {
   uid: UserId;
   name: string;
@@ -20,6 +18,8 @@ export interface UserProfile {
 
   isFollowerCountPublic: boolean;
   avgReplyMinutes: number;
+
+  points: number;
 }
 
 export interface EducationItem {
@@ -45,7 +45,7 @@ export interface CertificateItem {
 //프로필 상세(학력/경력/자격증 등)까지 포함
 export interface UserProfileDetail {
   user: UserProfile;
-  visibility: PortfolioVisibility;
+  portfolioVisibility: boolean;
   educations: EducationItem[];
   careers: CareerItem[];
   certificates: CertificateItem[];
