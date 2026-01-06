@@ -3,21 +3,24 @@ export type UserId = string;
 export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
 export type CareerStatus = "EMPLOYED" | "RESIGNED";
 
-export interface UserProfile {
+export interface UserInfo {
   uid: UserId;
   name: string;
 
   profileImageURL: string;
   major: string;
-  gradeNumber: string;
+  yearNumber: number
+  gradeNumber: number;
+}
+
+export interface UserProfile extends UserInfo {
   introduction: string;
   tags: string[];
 
-  followingIds: UserId[];
-  followerIds: UserId[];
+  following: UserInfo[];
+  follower: UserInfo[];
 
-  isFollowerCountPublic: boolean;
-  avgReplyMinutes: number;
+  isFollowCountPublic: boolean;
 
   points: number;
 }

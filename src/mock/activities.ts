@@ -10,11 +10,12 @@ import type {
 
 //대외활동 - 탭과 필터
 export const MOCK_ACTIVITY_TABS: { key: ActivityTab; label: string }[] = [
-  { key: "contest", label: "공모전" },
   { key: "club", label: "동아리" },
   { key: "study", label: "스터디" },
+  { key: "contest", label: "공모전" },
   { key: "external", label: "대외활동" },
   { key: "job", label: "취업 정보" },
+  { key: "recruit", label: "팀원 모집" }
 ];
 
 export const MOCK_ACTIVITY_FILTERS = {
@@ -170,58 +171,63 @@ export const MOCK_TEAM_RECRUIT_POST_BY_ID: Record<string, TeamRecruitPost> = {
       id: "tr_001",
       activityId: "act_001",
       title: "기획 포지션 한 분 구합니다. 같이 성장하실 분!",
-      authorId: "user_001", //나중에 user data에 access하여 user name data를 불러올 수 있도록
+      authorName: "김갑수",
       status: "OPEN",
-      createdAt: "2025.10.30",
-      viewCount: 12,
+      pastDays: 2,
+      bookmarkCount: 12,
       commentCount: 3,
+      isBookmarked: true,
     },
     tr_002: {
       id: "tr_002",
       activityId: "act_001",
       title: "두 분 모십니다. 열심히 하실 분",
-      authorId: "user_002",
+      authorName: "김삽수",
       status: "CLOSED",
-      createdAt: "2025.10.30",
-      viewCount: 7,
+      pastDays: 3,
+      bookmarkCount: 7,
       commentCount: 1,
+      isBookmarked: false,
     },
     tr_003: {
       id: "tr_003",
       activityId: "act_002",
       title: "숏폼 영상 편집 가능하신 분(프리미어/캡컷) 구해요",
-      authorId: "user_003",
+      authorName: "박익명",
       status: "OPEN",
-      createdAt: "2025.10.01",
-      viewCount: 21,
+      pastDays: 1,
+      bookmarkCount: 21,
       commentCount: 5,
+      isBookmarked: false,
     },
     tr_004: {
       id: "tr_004",
       activityId: "act_004",
       title: "데이터/기획 함께 할 팀원 모집(2명)",
-      authorId: "user_004",
+      authorName: "최익명",
       status: "OPEN",
-      createdAt: "2025.09.25",
-      viewCount: 18,
+      pastDays: 3,
+      bookmarkCount: 18,
       commentCount: 2,
+      isBookmarked: true,
     },
     tr_005: {
       id: "tr_005",
       activityId: "act_005",
       title: "UX 리서치+와이어프레임 같이 하실 분 구합니다",
-      authorId: "user_005",
+      authorName: "김유저",
       status: "OPEN",
-      createdAt: "2025.09.18",
-      viewCount: 9,
+      pastDays: 5,
+      bookmarkCount: 9,
       commentCount: 0,
+      isBookmarked: false,
     },
 };
 
 export const MOCK_TEAM_RECRUITS_IDS_BY_ACTIVITY_ID: Record<string, string[]> = {
     act_001: ["tr_001", "tr_002"],
-    act_002: [],
-    act_003: ["tr_003"],
+    act_002: ["tr_003"],
+    act_003: [],
     act_004: ["tr_004"],
     act_005: ["tr_005"],
     act_006: [],
@@ -234,22 +240,24 @@ export const MOCK_TEAM_RECRUIT_DETAIL_EXTRA_BY_ID: Record<
   tr_001: {
     activityTitle: "나라사랑 공모전",
     activityUrl: "/activities/act_001",
+    authorMajor: "컴퓨터공학부",
+    authorGrade: 2,
     recruitDeadline: "2025.10.31",
-    recruitTeamNumber: "4인",
+    recruitTeamNumber: 4,
     genderLimit: "성별 무관",
-    desc: "미디어 컨텐츠 학과 2학년 재학 중입니다.\n~~한 팀원 모집 중입니다 편하게 연락 주세요",
+    description: "미디어 컨텐츠 학과 2학년 재학 중입니다.\n~~한 팀원 모집 중입니다 편하게 연락 주세요",
     comments: [
       {
         id: "c_001",
         postId: "tr_001",
-        authorId: "user_002",
+        authorName: "김삽수",
         content: "요청 보냈습니다. 확인 부탁드립니다!",
         createdAt: "2025.10.30",
         replies: [
             {
                 id: "c_001_r1",
                 postId: "tr_001",
-                authorId: "user_001",
+                authorName: "김갑수",
                 content: "거절합니다.",
                 createdAt: "2025.10.30",
             }
@@ -260,10 +268,12 @@ export const MOCK_TEAM_RECRUIT_DETAIL_EXTRA_BY_ID: Record<
   tr_002: {
     activityTitle: "나라사랑 공모전",
     activityUrl: "/activities/act_001",
+    authorMajor: "컴퓨터공학부",
+    authorGrade: 1,
     recruitDeadline: "2025.10.31",
-    recruitTeamNumber: "3인",
+    recruitTeamNumber: 3,
     genderLimit: "성별 무관",
-    desc: "...",
+    description: "...",
     comments: [],
   },
 };

@@ -15,7 +15,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId, Portfolio[]> = {
       createdAt: "2025.11.11",
       updatedAt: "2025.11.11",
       viewCount: 5,
-      visuality: "PUBLIC",
+      portfolioVisibility: true,
     },
   ],
 
@@ -35,7 +35,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId, Portfolio[]> = {
       createdAt: "2025.11.11",
       updatedAt: "2025.11.11",
       viewCount: 27,
-      visuality: "PUBLIC",
+      portfolioVisibility: true,
     },
     {
       id: "pf_002_2",
@@ -50,7 +50,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId, Portfolio[]> = {
       createdAt: "2025.10.28",
       updatedAt: "2025.10.30",
       viewCount: 9,
-      visuality: "PRIVATE",
+      portfolioVisibility: false,
     },
   ],
 };

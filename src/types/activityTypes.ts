@@ -1,4 +1,4 @@
-export type ActivityTab = "contest"|"club"|"study"|"external"|"job";
+export type ActivityTab = "club"|"study"|"contest"|"external"|"job"|"recruit";
 export type ActivityTag = "광고/마케팅"|"기획/아이디어"|"개발"|"디자인" |"기타";
 export type SortKey = "추천순"|"최신순"|"마감임박순";
 
@@ -9,16 +9,17 @@ export interface ActivityListItem {
 
   tab: ActivityTab;
   title: string;
-  region: string;
-  organizer: string;
+  region?: string;
+  organizer?: string;
 
   tags: ActivityTag[];
-  thumbnailUrl: string;
-  dDay: number;
-  deadline: string;
+  thumbnailUrl?: string;
+  dDay?: number;
+  deadline?: string;
 
   bookmarkCount: number;
-  isBookmarked?: boolean;
+  isBookmarked: boolean;
+  commentCount?: number;
 
   createdAt: string; //웹에 등록된 시간
 }
@@ -50,23 +51,28 @@ export interface TeamRecruitPost {
   activityId: string; // 어떤 활동에 붙은 팀원공고인지
 
   title: string;
-  authorId: string;
+  authorName: string;
 
   status: RecruitStatus; // 모집중/완료
-  createdAt: string;
-  viewCount: number;
+  pastDays: number; // -일 전
+  bookmarkCount: number;
   commentCount: number;
+
+  isBookmarked: boolean;
 }
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
     activityTitle: string;
     activityUrl: string;
 
+    authorMajor: string;
+    authorGrade: number;
+
     recruitDeadline: string;
-    recruitTeamNumber: string;
+    recruitTeamNumber: number;
     genderLimit: string;
 
-    desc: string;
+    description: string;
 
     comments: TeamRecruitComment[];
 }
@@ -75,7 +81,7 @@ export interface TeamRecruitComment {
     id: string;
     postId: string;
 
-    authorId: string;
+    authorName: string;
     content: string;
     createdAt: string;
 
