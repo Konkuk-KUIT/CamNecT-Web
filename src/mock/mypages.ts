@@ -62,7 +62,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
       gradeNumber: 19,
       introduction: "현재 UX&UI 분야에서 일하고있습니다!\n관심있으신분들은 커피챗 주세요!",
 
-      tags: ["UX&UI", "취업", "포트폴리오", "피그마"],
+      tags: ["UX&UI", "취업", "포트폴리오", "피그마", "UX"],
 
       follower: [
         {

@@ -8,6 +8,7 @@ type IconName =
   | 'alarm'
   | 'setting'
   | 'back'
+  | 'back2'
   | 'correction'
   | 'option'
   | 'transmit'
@@ -123,6 +124,18 @@ const iconPaths: Record<IconName, IconDefinition> = {
         strokeLinejoin='round'
       />
     ),
+  },
+  back2: {
+    viewBox: '0 0 28 28',
+    content: (
+      <path 
+        d="M18.375 22.75L9.625 14L18.375 5.25" 
+        stroke="#202023" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    )
   },
   correction: {
     viewBox: '0 0 24 24',
