@@ -1,5 +1,7 @@
 import Card from '../../../components/Card';
 
+// TODO: 커뮤니티 진입 시 이동할 라우트 연결 및 포인트/알림 데이터 연동 필요.
+
 // 홈 1/2-2: 포인트 박스 UI
 const CommunityBox = () => {
 
@@ -16,30 +18,10 @@ const CommunityBox = () => {
             }}
         >
             <div className="relative z-10 flex flex-col gap-[6px]">
-                <span
-                    style={{
-                        color: 'var(--ColorWhite, #FFF)',
-                        fontFamily: 'Pretendard',
-                        fontSize: '18px',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.72px',
-                    }}
-                >
+                <span className="text-sb-18 text-white tracking-[-0.04em]">
                     커뮤니티
                 </span>
-                <span
-                    style={{
-                        color: 'var(--ColorSub2, #F2FCF8)',
-                        fontFamily: 'Pretendard',
-                        fontSize: '14px',
-                        fontStyle: 'normal',
-                        fontWeight: 500,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.56px',
-                    }}
-                >
+                <span className="text-m-14 text-[#F2FCF8] tracking-[-0.04em]">
                     바로가기
                 </span>
             </div>

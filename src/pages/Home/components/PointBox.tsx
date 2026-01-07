@@ -19,30 +19,10 @@ const PointBox = () => {
         >
             {/* 포인트/CTA 텍스트 */}
             <div className="flex flex-col gap-[8px]">
-                <span
-                    style={{
-                        color: 'var(--color-primary)',
-                        fontFamily: 'Pretendard',
-                        fontSize: '18px',
-                        fontStyle: 'normal',
-                        fontWeight: 600,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.72px',
-                    }}
-                >
+                <span className="text-sb-18 text-primary tracking-[-0.04em]">
                     {formattedPoints} P
                 </span>
-                <span
-                    style={{
-                        color: 'var(--color-gray-150)',
-                        fontFamily: 'Pretendard',
-                        fontSize: '14px',
-                        fontStyle: 'normal',
-                        fontWeight: 500,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.56px',
-                    }}
-                >
+                <span className="text-m-14 tracking-[-0.04em]" style={{ color: 'var(--color-gray-150)' }}>
                     쿠폰 교환하기
                 </span>
             </div>

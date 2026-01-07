@@ -1,5 +1,7 @@
 import Card from '../../../components/Card';
 
+// TODO: 일정 API 연동 시 실제 일정 데이터로 카드 내용/상태를 갱신해야 합니다.
+
 // 홈 1/2-1: 일정 확인 카드 UI
 const CheckScheduleBox = () => {
   return (
@@ -15,17 +17,7 @@ const CheckScheduleBox = () => {
         background: 'linear-gradient(102deg, rgba(236, 255, 225, 0.00) 10%, #ECFFE1 500%), #FFF',
       }}
     >
-      <p
-        style={{
-          color: 'var(--color-gray-900)',
-          fontFamily: 'Pretendard',
-          fontSize: '16px',
-          fontStyle: 'normal',
-          fontWeight: 600,
-          lineHeight: '140%',
-          letterSpacing: '-0.04em',
-        }}
-      >
+      <p className="text-sb-16-hn text-gray-900 tracking-[-0.04em]">
         일정 확인하기
       </p>
 

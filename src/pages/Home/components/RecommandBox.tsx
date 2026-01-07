@@ -2,6 +2,7 @@ import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import Icon from '../../../components/Icon';
 
+// TODO: 프로필 클릭 및 저장 버튼에 대한 실제 네비게이션/액션 로직을 연결해야 합니다.
 type RecommandBoxProps = {
     name: string;
     profileImage?: string;
@@ -31,42 +32,13 @@ function RecommandBox({ name, profileImage, major, studentId, intro, categories 
                     <div className='w-[54px] h-[54px] shrink-0 rounded-full bg-gray-300' aria-hidden />
                 )}
                 <div className='flex flex-col items-start gap-[5px] w-[205px]'>
-                    <p
-                        style={{
-                            fontFamily: 'Pretendard',
-                            fontWeight: 600,
-                            fontStyle: 'thin',
-                            fontSize: '18px',
-                            lineHeight: '140%',
-                            letterSpacing: '-0.04em',
-                        }}
-                    >
+                    <p className='text-sb-18 text-gray-900 tracking-[-0.04em]'>
                         {name}
                     </p>
-                    <p
-                        style={{
-                            fontFamily: 'Pretendard',
-                            fontWeight: 600,
-                            fontStyle: 'thin',
-                            fontSize: '14px',
-                            lineHeight: '140%',
-                            letterSpacing: '-0.04em',
-                            color: 'var(--color-gray-750)',
-                        }}
-                    >
+                    <p className='text-sb-14 text-gray-750 tracking-[-0.04em]'>
                         {major} {studentId}학번
                     </p>
-                    <p
-                        style={{
-                            fontFamily: 'Pretendard',
-                            fontWeight: 400,
-                            fontStyle: 'thin',
-                            fontSize: '12px',
-                            lineHeight: '140%',
-                            letterSpacing: '-0.24px',
-                            color: 'var(--ColorGray3, #646464)',
-                        }}
-                    >
+                    <p className='text-r-12 text-gray-750 tracking-[-0.02em]'>
                         {intro}
                     </p>
                     <div className='flex flex-wrap gap-[5px]'>

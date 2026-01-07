@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import MainLayout from '../../layouts/MainLayout';
+import HomeLayout from '../../layouts/HomeLayout';
 import Card from '../../components/Card';
 import CheckScheduleBox from './components/CheckScheduleBox';
 import PointBox from './components/PointBox';
@@ -15,7 +15,7 @@ const Home = () => {
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
-        <MainLayout>
+        <HomeLayout>
             <div className="w-[376px] mx-auto bg-white">
                 <section
                     className="flex flex-col"
@@ -23,30 +23,10 @@ const Home = () => {
                 >
                     {/* 1-1: 사용자 인사 메시지 */}
                     <div className="flex flex-col cursor-pointer" style={{ gap: '7px', padding: '13px 6px' }}>
-                        <p
-                            style={{
-                                color: 'var(--color-gray-900)',
-                                fontFamily: 'Pretendard',
-                                fontWeight: 600,
-                                fontStyle: 'thin',
-                                fontSize: '18px',
-                                lineHeight: '140%',
-                                letterSpacing: '-0.04em',
-                            }}
-                        >
-                            안녕하세요, <span style={{ color: 'var(--color-primary)' }}>박원빈</span>님!
+                        <p className="text-sb-18 text-gray-900 tracking-[-0.04em]">
+                            안녕하세요, <span className="text-primary">박원빈</span>님!
                         </p>
-                        <p
-                            style={{
-                                color: 'var(--ColorGray3, #646464)',
-                                fontFamily: 'Pretendard',
-                                fontWeight: 500,
-                                fontStyle: 'thin',
-                                fontSize: '14px',
-                                lineHeight: '140%',
-                                letterSpacing: '-0.56px',
-                            }}
-                        >
+                        <p className="text-m-14 text-gray-750 tracking-[-0.04em]">
                             오늘도 성공적인 캠퍼스 라이프를 응원합니다!
                         </p>
                     </div>
@@ -71,19 +51,7 @@ const Home = () => {
                         background: 'var(--color-gray-100)',
                     }}
                 >
-                    <p
-                        style={{
-                            color: '#000',
-                            fontFamily: 'Pretendard',
-                            fontWeight: 600,
-                            fontStyle: 'thin',
-                            fontSize: '20px',
-                            lineHeight: '140%',
-                            letterSpacing: '-0.8px',
-                        }}
-                    >
-                        추천동문
-                    </p>
+                    <p className="text-sb-20 text-black tracking-[-0.04em]">추천동문</p>
 
                     <div className="flex flex-col" style={{ gap: '20px' }}>
                         <div className="flex flex-col" style={{ gap: '15px' }}>
@@ -107,17 +75,7 @@ const Home = () => {
                                 className="flex items-center justify-center cursor-pointer"
                                 onClick={() => setShowAllRecommands((prev) => !prev)}
                             >
-                                <span
-                                    style={{
-                                        color: 'var(--ColorBlack, #202023)',
-                                        fontFamily: 'Pretendard',
-                                        fontWeight: 600,
-                                        fontStyle: 'thin',
-                                        fontSize: '14px',
-                                        lineHeight: '140%',
-                                        letterSpacing: '-0.56px',
-                                    }}
-                                >
+                                <span className="text-sb-14 text-gray-900 tracking-[-0.04em]">
                                     {showAllRecommands ?
                                         <div className='flex items-center justify-center gap-[5px]'>
                                             접기
@@ -143,7 +101,7 @@ const Home = () => {
                     <ContestBox contests={contests} />
                 </section>
             </div>
-        </MainLayout>
+        </HomeLayout>
     );
 };
 

@@ -1,5 +1,7 @@
 import Card from '../../../components/Card';
 
+// TODO: 공모전 데이터 fetch/필터링 로직과 onTitleClick 네비게이션을 실제 라우트로 연결해야 합니다.
+
 type Contest = {
     title: string;
     posterUrl: string;
@@ -30,19 +32,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                     if (e.key === 'Enter') onTitleClick?.();
                 }}
             >
-                <span
-                    style={{
-                        color: '#000',
-                        fontFamily: 'Pretendard',
-                        fontSize: '20px',
-                        fontStyle: 'thin',
-                        fontWeight: 600,
-                        lineHeight: '140%',
-                        letterSpacing: '-0.8px',
-                    }}
-                >
-                    주목받은 공모전
-                </span>
+                <span className="text-sb-20 text-black tracking-[-0.04em]">주목받은 공모전</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                         d="M8.25 4.5L15.75 12L8.25 19.5"
@@ -92,13 +82,8 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                                                 gap: '8px',
                                                 borderRadius: '3px',
                                                 background: 'var(--ColorHightlight1, #9362FF)',
-                                                color: '#fff',
-                                                fontFamily: 'Pretendard',
-                                                fontSize: '12px',
-                                                fontStyle: 'normal',
-                                                fontWeight: 400,
-                                                letterSpacing: '-0.24px', 
                                             }}
+                                            className="text-r-12 text-white tracking-[-0.02em]"
                                         >
                                             마감임박
                                         </span>
@@ -113,14 +98,8 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                                                 gap: '8px',
                                                 borderRadius: '3px',
                                                 background: 'var(--ColorHightlight1, #FF8C44)',
-                                                color: '#fff',
-                                                fontFamily: 'Pretendard',
-                                                fontSize: '12px',
-                                                fontStyle: 'normal',
-                                                fontWeight: 400,
-                                    
-                                                letterSpacing: '-0.24px', 
                                             }}
+                                            className="text-r-12 text-white tracking-[-0.02em]"
                                         >
                                             HOT
                                         </span>
@@ -130,84 +109,25 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                         </div>
 
                         <div className="flex flex-col" style={{ gap: '5px' }}>
-                            <p
-                                style={{
-                                    color: 'var(--ColorBlack, #202023)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '14px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 600,
-                                    lineHeight: '140%',
-                                    letterSpacing: '-0.56px',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
+                            <p className="text-sb-14 text-gray-900 tracking-[-0.04em] whitespace-nowrap">
                                 {contest.title}
                             </p>
-                            <p
-                                style={{
-                                    color: 'var(--ColorGray3, #646464)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '12px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 500,
-                                    lineHeight: '150%',
-                                    letterSpacing: '-0.48px',
-                                }}
-                            >
+                            <p className="text-m-12 text-gray-750 tracking-[-0.04em]">
                                 {contest.organizer}
                             </p>
-                            <p
-                                style={{
-                                    color: 'var(--ColorGray2, #A1A1A1)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '11px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 400,
-                                    lineHeight: 'normal',
-                                }}
-                            >
+                            <p className="text-r-11-hn text-gray-650">
                                 {contest.location}
                             </p>
-                            <p
-                                style={{
-                                    color: 'var(--ColorGray2, #A1A1A1)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '10px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 400,
-                                    lineHeight: 'normal',
-                                }}
-                            >
+                            <p className="text-r-10-hn text-gray-650">
                                 {contest.deadline}
                             </p>
                         </div>
 
                         <div className="flex items-center" style={{ gap: '5px' }}>
-                            <span
-                                style={{
-                                    color: 'var(--ColorGray3, #646464)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '12px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 400,
-                                    lineHeight: '140%',
-                                    letterSpacing: '-0.24px',
-                                }}
-                            >
+                            <span className="text-r-12 text-gray-750 tracking-[-0.02em]">
                                 조회수 {contest.views.toLocaleString()}
                             </span>
-                            <span
-                                style={{
-                                    color: 'var(--ColorGray3, #646464)',
-                                    fontFamily: 'Pretendard',
-                                    fontSize: '12px',
-                                    fontStyle: 'normal',
-                                    fontWeight: 400,
-                                    lineHeight: '140%',
-                                    letterSpacing: '-0.24px',
-                                }}
-                            >
+                            <span className="text-r-12 text-gray-750 tracking-[-0.02em]">
                                 댓글 {contest.comments.toLocaleString()}
                             </span>
                         </div>
