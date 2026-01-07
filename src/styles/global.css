@@ -10,9 +10,10 @@
 
 @theme {
     --color-primary: #00C56C; /*ColorMain*/
-    --color-sub: #ECFFE1; 
+    --color-sub: #ECFFE1; /*ColorSub*/
 
     /*green*/
+    --color-green-50: #F2FCF8; /*ColorSub2*/
     --color-green-100: #00A75B;
 
     /*gray*/
@@ -65,6 +66,10 @@
     --text-B-18--line-height: 25.2px;
     --text-B-18--font-weight: 700;
 
+    --text-B-18-hn: 18px;
+    --text-B-18-hn--line-height: normal;
+    --text-B-18-hn--font-weight: 700;
+
     --text-B-16-hn: 16px;
     --text-B-16-hn--line-height: normal;
     --text-B-16-hn--font-weight: 700;
@@ -93,6 +98,10 @@
     --text-SB-14: 14px;
     --text-SB-14--line-height: 19.6px;
     --text-SB-14--font-weight: 600;
+
+    --text-SB-14-hn: 14px;
+    --text-SB-14-hn--line-height: normal;
+    --text-SB-14-hn--font-weight: 600;
 
     /* M (500) */
     --text-M-20: 20px;
@@ -131,6 +140,10 @@
     --text-R-14: 14px;
     --text-R-14--line-height: 19.6px;
     --text-R-14--font-weight: 400;
+
+    --text-R-14-hn: 14px;
+    --text-R-14-hn--line-height: normal;
+    --text-R-14-hn--font-weight: 400;
 
     --text-R-12: 12px;
     --text-R-12--line-height: 16.8px;
