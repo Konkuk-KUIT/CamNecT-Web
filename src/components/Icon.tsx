@@ -12,7 +12,8 @@ type IconName =
   | 'option'
   | 'transmit'
   | 'edit'
-  | 'cancel';
+  | 'cancel'
+  | 'check';
 
 type IconProps = {
   name: IconName;
@@ -178,6 +179,18 @@ const iconPaths: Record<IconName, IconDefinition> = {
       <path
         d='M6 18L18 6M6 6L18 18'
         stroke='black'
+        strokeWidth='1.5'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    ),
+  },
+  check: {
+    viewBox: '0 0 17 15',
+    content: (
+      <path
+        d='M0.75 7.97222L6.75 13.75L15.75 0.75'
+        stroke='#A1A1A1'
         strokeWidth='1.5'
         strokeLinecap='round'
         strokeLinejoin='round'

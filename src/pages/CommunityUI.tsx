@@ -6,7 +6,7 @@ import Icon from '../components/Icon';
 function CommunityUI() {
     return (
         <Card
-            width='3px'
+            width='385px'
             height='304px'
             className='flex flex-col items-start justify-start px-4 py-3'
         >

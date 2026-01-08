@@ -55,25 +55,30 @@ type HomeLayoutProps = {
 
 const HomeLayout = ({ children }: HomeLayoutProps) => {
   return (
-    <div className='min-h-screen bg-[#f5f6f7] flex flex-col items-center'>
-      <header
-        className='sticky left-0 right-0 top-0 z-50 flex w-[376px] items-center justify-between bg-white px-[25px] py-[15px]'
-        style={{
-          paddingTop: 'calc(15px + env(safe-area-inset-top, 0px))',
-          top: 'env(safe-area-inset-top, 0px)',
-        }}
-        role='banner'
-        aria-label='홈 헤더'
-      >
-        <span role='img' aria-label='캠넥트 로고'>
-          <Logo />
-        </span>
-        <span role='img' aria-label='알림'>
-          <Icon name='alarm' />
-        </span>
-      </header>
+    <div
+      className='min-h-screen flex justify-center bg-[#f5f6f7]'
+      style={{ minHeight: '100dvh' }}
+    >
+      <div className='flex min-h-[100dvh] w-[375px] flex-col items-center bg-white'>
+        <header
+          className='sticky left-0 right-0 top-0 z-50 flex w-[375px] items-center justify-between bg-white px-[25px] py-[15px]'
+          style={{
+            paddingTop: 'calc(15px + env(safe-area-inset-top, 0px))',
+            top: 'env(safe-area-inset-top, 0px)',
+          }}
+          role='banner'
+          aria-label='홈 헤더'
+        >
+          <span role='img' aria-label='캠넥트 로고'>
+            <Logo />
+          </span>
+          <span role='img' aria-label='알림'>
+            <Icon name='alarm' />
+          </span>
+        </header>
 
-      <main className='w-[376px]'>{children}</main>
+        <main className='w-[375px] flex-1 bg-white'>{children}</main>
+      </div>
     </div>
   );
 };
