@@ -1,0 +1,99 @@
+import Card from '../../../components/Card';
+import Category from '../../../components/Category';
+import type { InfoPost } from '../data';
+import { formatTimeAgo } from '../time';
+
+type MainBoxPost = InfoPost & {
+  authorProfileImageUrl?: string;
+  postImageUrl?: string;
+};
+
+type MainBoxProps = {
+  post: MainBoxPost;
+};
+
+const MainBox = ({ post }: MainBoxProps) => {
+  const postImageUrl = post.postImageUrl ?? post.imageUrl;
+
+  return (
+    <Card
+      width="292px"
+      height="246px"
+      className="flex flex-col"
+      style={{ padding: '20px', gap: '24px' }}
+    >
+      <div className='flex flex-col' style={{ gap: '15px' }}>
+        <div className='flex flex-col' style={{ gap: '10px' }}>
+          <div className='flex' style={{ gap: '15px' }}>
+            {post.authorProfileImageUrl ? (
+              <img
+                src={post.authorProfileImageUrl}
+                alt={`${post.author.name} 프로필`}
+                className='h-[48px] w-[48px] rounded-full object-cover'
+              />
+            ) : (
+              <div
+                className='h-[48px] w-[48px] rounded-full'
+                style={{ backgroundColor: '#D5D5D5' }}
+                aria-hidden
+              />
+            )}
+            <div className='flex flex-col justify-center' style={{ gap: '3px' }}>
+              <div className='text-sb-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                {post.author.name}
+              </div>
+              <div className='text-r-12' style={{ color: 'var(--ColorGray3, #646464)' }}>
+                {post.author.major} {post.author.studentId}학번
+              </div>
+            </div>
+          </div>
+
+          <div className='flex' style={{ gap: '15px' }}>
+            <div className='flex flex-1 flex-col' style={{ gap: '7px' }}>
+              <div
+                className='text-sb-16-hn'
+                style={{
+                  color: 'var(--ColorBlack, #202023)',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {post.title}
+              </div>
+              <div className='line-clamp-2 text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
+                {post.content}
+              </div>
+            </div>
+            {postImageUrl && (
+              <img
+                src={postImageUrl}
+                alt=''
+                className='h-[80px] w-[80px] rounded-[8px] object-cover'
+              />
+            )}
+          </div>
+        </div>
+
+        <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
+          {post.categories.map((category) => (
+            <Category key={category} label={category} height={20} className='px-[6px]' />
+          ))}
+        </div>
+      </div>
+
+      <div className='flex items-center justify-between text-r-12' style={{ color: 'var(--ColorGray3, #646464)' }}>
+        <div className='flex items-center' style={{ gap: '10px' }}>
+          <span>좋아요 {post.likes}</span>
+          <span>댓글 {post.comments}</span>
+        </div>
+        <span>{formatTimeAgo(post.createdAt)}</span>
+      </div>
+    </Card>
+  );
+};
+
+export type { MainBoxPost };
+export default MainBox;

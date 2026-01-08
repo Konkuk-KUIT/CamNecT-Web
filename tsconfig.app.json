@@ -21,7 +21,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCastsc --versioesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"]

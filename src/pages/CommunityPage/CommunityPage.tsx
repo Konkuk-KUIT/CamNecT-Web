@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import MainLayout from '../../layouts/MainLayout';
-import ChatTab from './ChatTab';
-import InfoTab from './InfoTab';
-import MainTab from './MainTab';
-import QuestionTab from './QuestionTab';
+import ChatTab from './tabs/ChatTab';
+import InfoTab from './tabs/InfoTab';
+import MainTab from './tabs/MainTab';
+import QuestionTab from './tabs/QuestionTab';
 import { chatPosts, infoPosts, loggedInUserMajor, questionPosts } from './data';
 
 const tabItems: TabItem[] = [
