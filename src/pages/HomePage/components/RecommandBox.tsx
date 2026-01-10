@@ -16,13 +16,13 @@ function RecommandBox({ name, profileImage, major, studentId, intro, categories 
     return (
         //TODO: 동문추천 page 라우터 연결
         <Card
-            width='325px'
+            width='100%'
             height='auto'
             style={{ minHeight: '147px' }}
             className='flex items-start justify-between px-4 py-[15px]'
         >
             {/* 그룹 1: 프로필 + 정보 */}
-            <div className='flex items-start gap-[15px]'>
+            <div className='flex items-start gap-[15px] flex-1'>
                 {profileImage ? (
                     <img
                         src={profileImage}
@@ -36,7 +36,7 @@ function RecommandBox({ name, profileImage, major, studentId, intro, categories 
                         aria-hidden
                     />
                 )}
-                <div className='flex flex-col items-start gap-[5px] w-[205px]'>
+                <div className='flex flex-col items-start gap-[5px] w-full'>
                     <p className='text-sb-18 text-gray-900 tracking-[-0.04em]'>
                         {name}
                     </p>

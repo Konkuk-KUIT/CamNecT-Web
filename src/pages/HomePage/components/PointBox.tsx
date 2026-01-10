@@ -8,9 +8,9 @@ const PointBox = () => {
     return (
         //TODO: 쿠폰교환 페이지 라우터 연결
         <Card
-            width="180px"
+            width="100%"
             height="135px"
-            className="relative flex flex-col justify-between cursor-pointer"
+            className="relative flex flex-col justify-between cursor-pointer flex-[1.45]"
             style={{
                 padding: '13px 16px',
                 background: 'var(--color-gray-900)',

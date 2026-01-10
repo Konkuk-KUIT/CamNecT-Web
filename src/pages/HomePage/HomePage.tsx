@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import HomeLayout from '../../layouts/HomeLayout';
 import Card from '../../components/Card';
+import HomeLayout from '../../layouts/HomeLayout';
 import CheckScheduleBox from './components/CheckScheduleBox';
-import PointBox from './components/PointBox';
-import ComunitiyBox from './components/ComunitiyBox';
-import RecommandBox from './components/RecommandBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
+import ComunitiyBox from './components/ComunitiyBox';
 import ContestBox from './components/ContestBox';
+import PointBox from './components/PointBox';
+import RecommandBox from './components/RecommandBox';
 import { coffeeChatRequests, contests, recommandList } from './homeData';
 
 const Home = () => {
@@ -16,10 +16,10 @@ const Home = () => {
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
         <HomeLayout>
-            <div className="w-[376px] mx-auto bg-white">
+            <div className="flex flex-col gap-[15px]"> 
                 <section
                     className="flex flex-col"
-                    style={{ gap: '15px', paddingTop: '17px', paddingBottom: '30px', paddingLeft: '25px', paddingRight: '25px' }}
+                    style={{ gap: '15px', paddingTop: '17px', paddingBottom: '30px' }}
                 >
                     {/* 1-1: 사용자 인사 메시지 */}
                     <div className="flex flex-col cursor-pointer" style={{ gap: '7px', padding: '13px 6px' }}>
@@ -42,18 +42,18 @@ const Home = () => {
                     </div>
                 </section>
 
-                {/* 홈 2번 영역: 추천 동문 리스트 */}
+                {/* 홈 2번 영역: 추천 동문 리스트 (Full Width Section) */}
                 <section
-                    className="flex flex-col"
+                    className="flex flex-col -mx-[20px]"
                     style={{
                         gap: '10px',
                         padding: '30px 25px',
                         background: 'var(--color-gray-100)',
                     }}
                 >
-                    <p className="text-sb-20 text-black tracking-[-0.04em]">추천동문</p>
+                    <p className="text-sb-20 text-black tracking-[-0.04em] px-[5px]">추천동문</p>
 
-                    <div className="flex flex-col" style={{ gap: '20px' }}>
+                    <div className="flex flex-col px-[5px]" style={{ gap: '20px' }}>
                         <div className="flex flex-col" style={{ gap: '15px' }}>
                             <div className="flex flex-col" style={{ gap: '10px' }}>
                                 {visibleRecommands.map((recommand) => (
@@ -70,7 +70,7 @@ const Home = () => {
                             </div>
 
                             <Card
-                                width="325px"
+                                width="100%"
                                 height="50px"
                                 className="flex items-center justify-center cursor-pointer"
                                 onClick={() => setShowAllRecommands((prev) => !prev)}
@@ -97,7 +97,7 @@ const Home = () => {
                 </section>
 
                 {/* 홈 3번 영역: 주목받은 공모전 리스트 */}
-                <section className="flex flex-col bg-white" style={{ gap: '10px', padding: '25px' }}>
+                <section className="flex flex-col bg-white" style={{ gap: '10px', paddingTop: '25px', paddingBottom: '25px' }}>
                     <ContestBox contests={contests} />
                 </section>
             </div>

@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
 import type { TextareaHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 
 type Size = number | string;
 
@@ -14,7 +14,7 @@ const toCssSize = (value?: Size) =>
   value === undefined ? undefined : typeof value === 'number' ? `${value}px` : value;
 
 const Input = forwardRef<HTMLTextAreaElement, InputProps>(
-  ({ width = 325, height = 37, label, className = '', style, ...props }, ref) => {
+  ({ width = '100%', height = 37, label, className = '', style, ...props }, ref) => {
     const widthCss = toCssSize(width);
     const heightCss = toCssSize(height);
 

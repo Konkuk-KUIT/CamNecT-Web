@@ -7,9 +7,9 @@ const CommunityBox = () => {
     return (
         //TODO: 카드 클릭 시 Community 라우터 연결
         <Card
-            width="124px"
+            width="100%"
             height="135px"
-            className="relative cursor-pointer overflow-hidden"
+            className="relative cursor-pointer overflow-hidden flex-1"
             style={{
                 padding: '13px 0 0 15px',
                 background: 'var(--color-primary)',

@@ -12,7 +12,7 @@ type CardProps = {
 const toPx = (value: Size) => (typeof value === 'number' ? `${value}px` : value);
 
 const Card = ({
-  width = 325,
+  width = '100%',
   height = 206,
   children,
   className = '',

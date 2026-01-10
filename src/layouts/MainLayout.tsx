@@ -10,9 +10,9 @@ type MainLayoutProps = {
 
 const MainLayout = ({ title, rightElement, onBack, children }: MainLayoutProps) => {
   return (
-    <div className='min-h-screen bg-[#f5f6f7] flex flex-col items-center'>
+    <div className='w-full max-w-[430px] min-h-screen mx-auto bg-white relative shadow-md flex flex-col items-center'>
       <header
-        className='sticky left-0 right-0 top-0 z-50 grid w-[375px] grid-cols-[24px_1fr_24px] items-center bg-white px-[25px] py-[10px]'
+        className='sticky left-0 right-0 top-0 z-50 grid w-full max-w-[430px] grid-cols-[24px_1fr_24px] items-center bg-white px-[20px] py-[10px] mx-auto'
         style={{
           paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
           top: 'env(safe-area-inset-top, 0px)',
@@ -29,7 +29,7 @@ const MainLayout = ({ title, rightElement, onBack, children }: MainLayoutProps) 
         </div>
       </header>
 
-      <main className='w-[375px]'>{children}</main>
+      <main className='w-full px-[20px] pb-10'>{children}</main>
     </div>
   );
 };

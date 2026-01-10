@@ -55,9 +55,9 @@ type HomeLayoutProps = {
 
 const HomeLayout = ({ children }: HomeLayoutProps) => {
   return (
-    <div className='min-h-screen bg-[#f5f6f7] flex flex-col items-center'>
+    <div className='w-full max-w-[430px] min-h-screen mx-auto bg-white relative shadow-md flex flex-col items-center'>
       <header
-        className='sticky left-0 right-0 top-0 z-50 flex w-[376px] items-center justify-between bg-white px-[25px] py-[15px]'
+        className='sticky left-0 right-0 top-0 z-50 flex w-full max-w-[430px] items-center justify-between bg-white px-[20px] py-[15px] mx-auto'
         style={{
           paddingTop: 'calc(15px + env(safe-area-inset-top, 0px))',
           top: 'env(safe-area-inset-top, 0px)',
@@ -73,7 +73,7 @@ const HomeLayout = ({ children }: HomeLayoutProps) => {
         </span>
       </header>
 
-      <main className='w-[376px]'>{children}</main>
+      <main className='w-full px-[20px] pb-10'>{children}</main>
     </div>
   );
 };
