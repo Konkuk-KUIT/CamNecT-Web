@@ -1,11 +1,11 @@
 import Card from '../../../components/Card';
 
-// TODO: 커뮤니티 진입 시 이동할 라우트 연결 및 포인트/알림 데이터 연동 필요.
 
-// 홈 1/2-2: 포인트 박스 UI
+// 홈 1/2-2: 커뮤니티 박스 UI
 const CommunityBox = () => {
 
     return (
+        //TODO: 카드 클릭 시 Community 라우터 연결
         <Card
             width="124px"
             height="135px"

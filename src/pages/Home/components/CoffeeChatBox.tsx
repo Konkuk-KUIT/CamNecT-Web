@@ -63,6 +63,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
                         <span className="text-m-12 text-gray-750 tracking-[-0.04em]">
                             {request.name} ( {request.major} {request.studentId}학번 )
                         </span>
+                        {/*TODO: CoffeeChat page로 연결*/}
                         <span className="cursor-pointer text-m-12 text-primary tracking-[-0.04em]">
                             요청확인
                         </span>

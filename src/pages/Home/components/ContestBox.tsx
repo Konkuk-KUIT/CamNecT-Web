@@ -1,10 +1,9 @@
 import Card from '../../../components/Card';
 
-// TODO: 공모전 데이터 fetch/필터링 로직과 onTitleClick 네비게이션을 실제 라우트로 연결해야 합니다.
 
 type Contest = {
     title: string;
-    posterUrl: string;
+    posterImgUrl?: string;
     organizer: string;
     location: string;
     deadline: string;
@@ -32,6 +31,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                     if (e.key === 'Enter') onTitleClick?.();
                 }}
             >
+                {/*TODO: 주목받은 공모전 글씨 클릭 시 공모전 페이지 라우터 연결*/}
                 <span className="text-sb-20 text-black tracking-[-0.04em]">주목받은 공모전</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
@@ -45,6 +45,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
             </div>
 
             <div className="flex overflow-x-auto" style={{ gap: '10px', paddingBottom: '4px' }}>
+                {/*TODO: 공모전 카드 클릭 시 공모전 상세페이지 라우터 연결*/}
                 {contests.map((contest) => (
                     <Card
                         key={`${contest.title}-${contest.organizer}`}
@@ -60,12 +61,25 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                         }}
                     >
                         <div className="relative w-full flex justify-center">
-                            <img
-                                src={contest.posterUrl}
-                                alt={`${contest.title} 포스터`}
-                                className="object-cover"
-                                style={{ width: '135px', height: '126px', borderRadius: '6px' }}
-                            />
+                            {contest.posterImgUrl ? (
+                                <img
+                                    src={contest.posterImgUrl}
+                                    alt={`${contest.title} 포스터`}
+                                    className="object-cover"
+                                    style={{ width: '135px', height: '126px', borderRadius: '6px' }}
+                                />
+                            ) : (
+                                <div
+                                    className="shrink-0"
+                                    style={{
+                                        width: '135px',
+                                        height: '126px',
+                                        borderRadius: '6px',
+                                        background: '#D5D5D5',
+                                    }}
+                                    aria-hidden
+                                />
+                            )}
 
                             {(contest.isClosingSoon || contest.isHot) && (
                                 <div

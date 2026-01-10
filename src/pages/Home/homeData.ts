@@ -40,7 +40,7 @@ export const coffeeChatRequests: CoffeeChatRequest[] = [
 export const contests: Contest[] = [
     {
         title: '캠퍼스 친환경 아이디어 공모전',
-        posterUrl: 'https://via.placeholder.com/135x126/ECFFE1/202023',
+        posterImgUrl: 'https://via.placeholder.com/135x126/ECFFE1/202023',
         organizer: '총학생회',
         location: '서울캠퍼스',
         deadline: '마감 11.24 (일) 23:59',
@@ -51,7 +51,7 @@ export const contests: Contest[] = [
     },
     {
         title: 'AI 해커톤 with 스타트업',
-        posterUrl: 'https://via.placeholder.com/135x126/CCE5FF/202023',
+        posterImgUrl: 'https://via.placeholder.com/135x126/CCE5FF/202023',
         organizer: '컴공학부 X 산학협력단',
         location: 'IT관 B1',
         deadline: 'D-3 | 11.27(수) 자정',
@@ -62,7 +62,7 @@ export const contests: Contest[] = [
     },
     {
         title: '로컬 브랜드 디자인 챌린지',
-        posterUrl: 'https://via.placeholder.com/135x126/FFF4E6/202023',
+        posterImgUrl: 'https://via.placeholder.com/135x126/FFF4E6/202023',
         organizer: '디자인학부',
         location: '온라인',
         deadline: '12.05(목) 18:00',

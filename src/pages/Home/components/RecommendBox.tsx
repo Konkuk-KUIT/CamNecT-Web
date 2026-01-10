@@ -2,7 +2,7 @@ import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import Icon from '../../../components/Icon';
 
-// TODO: 프로필 클릭 및 저장 버튼에 대한 실제 네비게이션/액션 로직을 연결해야 합니다.
+
 type RecommendBoxProps = {
     name: string;
     profileImage?: string;
@@ -14,6 +14,7 @@ type RecommendBoxProps = {
 
 function RecommendBox({ name, profileImage, major, studentId, intro, categories }: RecommendBoxProps) {
     return (
+        //TODO: 동문추천 page 라우터 연결
         <Card
             width='325px'
             height='auto'
@@ -29,7 +30,11 @@ function RecommendBox({ name, profileImage, major, studentId, intro, categories 
                         className='w-[54px] h-[54px] shrink-0 rounded-full object-cover'
                     />
                 ) : (
-                    <div className='w-[54px] h-[54px] shrink-0 rounded-full bg-gray-300' aria-hidden />
+                    <div
+                        className='w-[54px] h-[54px] shrink-0 rounded-full'
+                        style={{ background: '#D5D5D5' }}
+                        aria-hidden
+                    />
                 )}
                 <div className='flex flex-col items-start gap-[5px] w-[205px]'>
                     <p className='text-sb-18 text-gray-900 tracking-[-0.04em]'>
@@ -49,7 +54,7 @@ function RecommendBox({ name, profileImage, major, studentId, intro, categories 
                 </div>
             </div>
 
-            {/* 그룹 2: 전송버튼 -> 나중에 라우터 연결*/}
+            {/*TODO: 동문 상세 프로필 페이지 라우터 연결*/}
             <div className='flex flex-col items-end'>
                 <Icon name='transmit' className='w-[18px] h-[18px]' />
             </div>

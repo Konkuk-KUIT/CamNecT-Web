@@ -1,10 +1,10 @@
 import Card from '../../../components/Card';
 
-// TODO: 일정 API 연동 시 실제 일정 데이터로 카드 내용/상태를 갱신해야 합니다.
 
 // 홈 1/2-1: 일정 확인 카드 UI
 const CheckScheduleBox = () => {
   return (
+    // TODO: 일정확인 page Router 연결 필요.
     <Card
       width="100%"
       height="84px"

@@ -6,6 +6,7 @@ const PointBox = () => {
     const formattedPoints = points.toLocaleString();
 
     return (
+        //TODO: 쿠폰교환 페이지 라우터 연결
         <Card
             width="180px"
             height="135px"
