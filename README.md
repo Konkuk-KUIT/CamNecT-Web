@@ -143,7 +143,7 @@ CamNecT는
 - TypeScript ESLint
 - Vite
 
-## 🗂️ 프로젝트 구조 (임시)
+## 🗂️ 프로젝트 구조
 
 ```
 src/
@@ -153,6 +153,9 @@ src/
 ┃ ┣ activity.ts
 ┃ ┣ portfolio.ts
 ┃ ┗ community.ts
+┃
+┣ mocks/ # API 개발 전 임시 데이터
+┃ ┣ activities.ts
 ┃
 ┣ components/ # 공통 UI 컴포넌트
 ┃ ┣ Button.tsx
@@ -165,6 +168,8 @@ src/
 ┃ ┣ auth/ # 로그인 / 온보딩
 ┃ ┣ chat/ # 커피챗 / 채팅
 ┃ ┣ home/ # 홈
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ HomePage.tsx # xxxPage.ts로 통일
 ┃ ┣ community/ # 커뮤니티
 ┃ ┣ alumni/ # 동문찾기 / 동문프로필
 ┃ ┣ mypage/ # 마이페이지
@@ -174,6 +179,9 @@ src/
 ┣ hooks/ # custom hooks
 ┣ store/ # 전역 상태 (auth 등)
 ┣ types/ # TS interface 정의
+┃ ┣ activity/
+┃ ┃ ┗ activityTypes.ts
+┃ ┗ ...
 ┣ router/ # 라우팅 설정
 ┣ styles/ # 전역 스타일
 ┣ App.tsx
