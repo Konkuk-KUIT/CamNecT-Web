@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import HomePage from './pages/HomePage/HomePage';
 import CommunityPage from './pages/CommunityPage/CommunityPage';
+import WritePage from './pages/CommunityPage/WritePage';
 import './styles/global.css';
 
 const router = createBrowserRouter([
@@ -11,6 +12,10 @@ const router = createBrowserRouter([
   {
     path: '/community',
     element: <CommunityPage />,
+  },
+  {
+    path: '/community/write',
+    element: <WritePage />,
   },
 ]);
 

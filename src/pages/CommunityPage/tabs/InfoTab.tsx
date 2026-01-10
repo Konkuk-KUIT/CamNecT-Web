@@ -1,6 +1,7 @@
 import Category from '../../../components/Category';
 import FilterHeader from '../components/FilterHeader';
 import FilterModal from '../components/FilterModal';
+import WriteButton from '../components/WriteButton';
 import type { InfoPost } from '../data';
 import useCommunityFilters from '../hooks/useCommunityFilters';
 import { formatTimeAgo } from '../time';
@@ -91,6 +92,8 @@ const InfoTab = ({ posts }: InfoTabProps) => {
         onCancel={handleCancel}
         onApply={handleApply}
       />
+
+      <WriteButton />
     </div>
   );
 };

@@ -31,7 +31,7 @@ const FilterModal = ({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center'
+      className='fixed inset-0 z-50 flex items-end justify-center'
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
     >
       <div
@@ -40,7 +40,7 @@ const FilterModal = ({
           width: '375px',
           height: '649px',
           padding: '38px 25px',
-          borderRadius: '10px',
+          borderRadius: '10px 10px 0 0',
           background: 'var(--Color_Gray_B, #FCFCFC)',
           boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
         }}
