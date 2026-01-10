@@ -1,8 +1,8 @@
-# Camnect (캠넥트)
+# CamNecT (캠넥트)
 
 > 대학생을 위한 동문 네트워킹 & 커피챗 기반 커뮤니티 웹앱
 
-Camnect는
+CamNecT는
 
 동문 탐색, 포트폴리오 공유, 대외활동/팀원 모집, 커피챗(쪽지/채팅)을 통해
 대학생 간 네트워킹을 돕는 웹 애플리케이션입니다.
@@ -11,13 +11,13 @@ Camnect는
 
 ## 🔗 프로젝트 개요
 
-- 프로젝트명: Camnect
+- 프로젝트명: CamNecT
 - 개발 기간: 약 45일
 - 개발 인원: 프론트엔드 3명
 - 프레임워크: React + Vite
 - 스타일링: Tailwind CSS
-- 서버 통신: REST API (React Query)
-- 채팅: MVP는 쪽지형 (추후 WebSocket 실시간 채팅 확장 예정)
+- 서버 통신: REST API (TanStack Query)
+- 채팅: MVP는 polling방식 채팅 (추후 WebSocket 실시간 채팅 확장 예정)
 
 ## 📃 기능 구성
 
@@ -25,7 +25,7 @@ Camnect는
 
 - 로그인 / 회원가입
 - 약관 동의
-- 휴대폰 본인인증
+- 이메일 본인인증
 - 인증번호 요청
 - 타이머 / 재전송
 - 관심 분야 선택
@@ -36,12 +36,12 @@ Camnect는
 
 ### 💬 커피챗 / 채팅 기능
 
-**MVP (쪽지형)**
+**MVP (Polling방식)**
 
 - 커피챗 요청
 - 요청함 (수락 / 거절)
-- 쪽지 목록
-- 쪽지 상세
+- 채팅 목록
+- 채팅 상세
 - 읽지 않은 메시지 표시
 
 **확장 (WebSocket, 옵션)**
@@ -96,7 +96,7 @@ Camnect는
 ### 정상현 (인프라 · 인증 · 채팅)
 
 - 공통 인프라 / 프로젝트 기반
-- 인증 & 온보딩 (휴대폰 본인인증)
+- 인증 & 온보딩 (이메일 본인인증)
 - 커피챗 / 쪽지 (MVP)
 - (옵션) WebSocket 실시간 채팅
 
@@ -143,7 +143,7 @@ Camnect는
 - TypeScript ESLint
 - Vite
 
-## 🗂️ 프로젝트 구조 (임시)
+## 🗂️ 프로젝트 구조
 
 ```
 src/
@@ -153,6 +153,9 @@ src/
 ┃ ┣ activity.ts
 ┃ ┣ portfolio.ts
 ┃ ┗ community.ts
+┃
+┣ mocks/ # API 개발 전 임시 데이터
+┃ ┣ activities.ts
 ┃
 ┣ components/ # 공통 UI 컴포넌트
 ┃ ┣ Button.tsx
@@ -165,6 +168,8 @@ src/
 ┃ ┣ auth/ # 로그인 / 온보딩
 ┃ ┣ chat/ # 커피챗 / 채팅
 ┃ ┣ home/ # 홈
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ HomePage.tsx # xxxPage.ts로 통일
 ┃ ┣ community/ # 커뮤니티
 ┃ ┣ alumni/ # 동문찾기 / 동문프로필
 ┃ ┣ mypage/ # 마이페이지
@@ -173,6 +178,10 @@ src/
 ┃
 ┣ hooks/ # custom hooks
 ┣ store/ # 전역 상태 (auth 등)
+┣ types/ # TS interface 정의
+┃ ┣ activity/
+┃ ┃ ┗ activityTypes.ts
+┃ ┗ ...
 ┣ router/ # 라우팅 설정
 ┣ styles/ # 전역 스타일
 ┣ App.tsx
