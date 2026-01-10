@@ -55,13 +55,13 @@ const PointBox = () => {
                             />
                         </foreignObject>
                         <g filter="url(#filter1_i_1718_6773)" data-figma-bg-blur-radius="1.4">
-                            <path d="M87.7316 146.746L74.0067 127.967C72.381 125.743 72.8613 122.623 75.0781 120.991C72.8497 122.608 69.7318 122.119 68.1057 119.895L25.2 61.1901L73.6822 25.7559L116.588 84.4608C118.213 86.685 117.733 89.8031 115.517 91.4356C117.745 89.8196 120.863 90.3088 122.489 92.533L136.214 111.312L87.7316 146.746Z" fill="#ECFFE1" fill-opacity="0.8" />
+                            <path d="M87.7316 146.746L74.0067 127.967C72.381 125.743 72.8613 122.623 75.0781 120.991C72.8497 122.608 69.7318 122.119 68.1057 119.895L25.2 61.1901L73.6822 25.7559L116.588 84.4608C118.213 86.685 117.733 89.8031 115.517 91.4356C117.745 89.8196 120.863 90.3088 122.489 92.533L136.214 111.312L87.7316 146.746Z" fill="#ECFFE1" fillOpacity="0.8" />
                         </g>
-                        <path d="M113.999 92.2439L78.3504 118.298" stroke="white" stroke-dasharray="1 1" />
+                        <path d="M113.999 92.2439L78.3504 118.298" stroke="white" strokeDasharray="1 1" />
                     </g>
                     <defs>
-                        <filter id="filter0_d_1718_6773" x="1.14441e-05" y="0.00019455" width="177.574" height="171.946" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                        <filter id="filter0_d_1718_6773" x="1.14441e-05" y="0.00019455" width="177.574" height="171.946" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
                             <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                             <feOffset />
                             <feGaussianBlur stdDeviation="12.6" />
@@ -70,8 +70,8 @@ const PointBox = () => {
                             <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1718_6773" />
                             <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1718_6773" result="shape" />
                         </filter>
-                        <filter id="filter1_i_1718_6773" x="23.8" y="24.3559" width="113.814" height="123.79" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                        <filter id="filter1_i_1718_6773" x="23.8" y="24.3559" width="113.814" height="123.79" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                            <feFlood floodOpacity="0" result="BackgroundImageFix" />
                             <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                             <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                             <feOffset />
@@ -82,8 +82,8 @@ const PointBox = () => {
                         </filter>
                         <clipPath id="bgblur_0_1718_6773_clip_path" transform="translate(-23.8 -24.3559)"><path d="M87.7316 146.746L74.0067 127.967C72.381 125.743 72.8613 122.623 75.0781 120.991C72.8497 122.608 69.7318 122.119 68.1057 119.895L25.2 61.1901L73.6822 25.7559L116.588 84.4608C118.213 86.685 117.733 89.8031 115.517 91.4356C117.745 89.8196 120.863 90.3088 122.489 92.533L136.214 111.312L87.7316 146.746Z" />
                         </clipPath><linearGradient id="paint0_linear_1718_6773" x1="61.887" y1="89.6341" x2="238.121" y2="71.1519" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#ECFFE1" stop-opacity="0" />
-                            <stop offset="1" stop-color="#ECFFE1" />
+                            <stop stopColor="#ECFFE1" stopOpacity="0" />
+                            <stop offset="1" stopColor="#ECFFE1" />
                         </linearGradient>
                     </defs>
                 </svg>

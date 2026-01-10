@@ -1,10 +1,10 @@
-import type { RecommandBoxProps } from './components/RecommandBox';
+import type { RecommendBoxProps } from './components/RecommendBox';
 import type { CoffeeChatRequest } from './components/CoffeeChatBox';
 import type { Contest } from './components/ContestBox';
 
-type Recommand = RecommandBoxProps;
+type Recommend = RecommendBoxProps;
 
-export const recommandList: Recommand[] = [
+export const recommendList: Recommend[] = [
     {
         name: '신다은',
         profileImage: 'https://via.placeholder.com/54',
