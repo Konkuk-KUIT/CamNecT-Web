@@ -3,7 +3,6 @@ import type {
   ActivityListItem,
   ActivityListUiState,
   ActivityTab,
-  SortKey,
   TeamRecruitPost,
   TeamRecruitDetail,
 } from "../types/activityPage/activityPageTypes";
