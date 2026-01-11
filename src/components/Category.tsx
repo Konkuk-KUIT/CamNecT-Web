@@ -25,9 +25,20 @@ const Category = ({
 
   return (
     <div
-      className={`inline-flex items-center rounded-[5px] border border-primary bg-sub px-[10px] py-[4px] gap-[10px] opacity-100 
-        text-primary font-[Pretendard] font-normal text-[12px] leading-[100%] tracking-[-0.04em] ${className}`}
-      style={{ width: widthCss, height: heightCss, ...style }}
+      className={`inline-flex items-center justify-center opacity-100 text-primary font-[Pretendard] font-normal text-[12px] leading-[100%] tracking-[-0.04em] ${className}`}
+      style={{
+        display: 'inline-flex',
+        padding: '3px 5px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '8px',
+        borderRadius: '3px',
+        border: '1px solid var(--ColorMain, #00C56C)',
+        background: 'var(--ColorSub2, #F2FCF8)',
+        width: widthCss,
+        height: heightCss,
+        ...style,
+      }}
       {...props}
     >
       {label}
