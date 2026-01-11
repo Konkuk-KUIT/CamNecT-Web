@@ -25,13 +25,14 @@ export const MOCK_ACTIVITY_FILTERS = {
   sort: ["추천순", "최신순", "마감임박순"] as const,
 };
 
+
 //기본 UI 데이터(처음 대외활동 탭에 들어왔을 때)
 export const MOCK_ACTIVITY_LIST_UI_STATE: ActivityListUiState = {
   activeTab: "contest",
   selectedField: "전체",
   selectedHost: "전체",
   selectedRegion: "전체",
-  sort: "추천순" as SortKey,
+  sort: "추천순",
 };
 
 //activity 데이터
@@ -122,10 +123,17 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
   },
 ];
 
+//activity 없으면 throw하는 헬퍼
+const requireActivity = (id: string) => {
+  const item = MOCK_ACTIVITIES.find((x) => x.id === id);
+  if (!item) throw new Error(`Missing MOCK_ACTIVITIES item: ${id}`);
+  return item;
+};
+
 //activity 세부사항 데이터
 export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
   act_001: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_001")!,
+    ...requireActivity("act_001"),
     posterImg: "https://picsum.photos/seed/act_001_header/375/311",
     target: "전국 대학생 및 대학원생 (팀 또는 개인)",
     applyPeriod: { start: "2025.10.30", end: "2025.10.31" },
@@ -141,7 +149,7 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
     ],
   },
   act_002: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_002")!,
+    ...requireActivity("act_002"),
     posterImg: "https://picsum.photos/seed/act_002_header/900/700",
     target: "모집 대상: 전국 누구나",
     applyPeriod: { start: "2025.09.20", end: "2025.10.12" },
@@ -152,7 +160,7 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
     ],
   },
   act_003: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_003")!,
+    ...requireActivity("act_003"),
     posterImg: "https://picsum.photos/seed/act_003_header/900/700",
     target: "모집 대상: 대학생/일반인 누구나",
     applyPeriod: { start: "2025.09.01", end: "2025.09.30" },
@@ -165,7 +173,7 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
 };
 
 
-//team recurit post+comment 데이터
+//team recruit post+comment 데이터
 export const MOCK_TEAM_RECRUIT_POST_BY_ID: Record<string, TeamRecruitPost> = {
     tr_001: {
       id: "tr_001",

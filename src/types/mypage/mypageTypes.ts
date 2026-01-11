@@ -15,11 +15,11 @@ export type CareerStatus = "EMPLOYED" | "RESIGNED";
 //   point: number; 
 // }
 
-export type UserPreivew = Omit<User, "userTags"|"introduction"|"point">;
+export type UserPreview = Omit<User, "userTags"|"introduction"|"point">;
 
 export interface UserProfile extends User {
-  following: UserPreivew[];
-  follower: UserPreivew[];
+  following: UserPreview[];
+  follower: UserPreview[];
 
   isFollowCountPublic: boolean;
 }
