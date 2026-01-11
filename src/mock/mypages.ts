@@ -1,7 +1,7 @@
 import type { UserId, UserProfileDetail } from "../types/mypageTypes";
 
 export const MOCK_SESSION = {
-  meUid: "user_002" as UserId, //현재 로그인되어 있는 유저id
+  meUid: "user_001" as UserId, //현재 로그인되어 있는 유저id
 };
 
 export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {

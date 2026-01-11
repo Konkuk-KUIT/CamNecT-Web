@@ -13,7 +13,8 @@ type IconName =
   | 'option'
   | 'transmit'
   | 'edit'
-  | 'cancel';
+  | 'cancel'
+  | 'follow';
 
 type IconProps = {
   name: IconName;
@@ -197,6 +198,16 @@ const iconPaths: Record<IconName, IconDefinition> = {
       />
     ),
   },
+  follow: {
+    viewBox: '0 0 10 10',
+    content: (
+      <path 
+        d="M8 2.75V4.25M8 4.25V5.74999M8 4.25H9.5M8 4.25H6.5M5.375 2.1875C5.375 2.63505 5.19721 3.06427 4.88074 3.38074C4.56427 3.69721 4.13505 3.875 3.6875 3.875C3.23995 3.875 2.81072 3.69721 2.49426 3.38074C2.17779 3.06427 2 2.63505 2 2.1875C2 1.73995 2.17779 1.31072 2.49426 0.994257C2.81072 0.67779 3.23995 0.5 3.6875 0.5C4.13505 0.5 4.56427 0.67779 4.88074 0.994257C5.19721 1.31072 5.375 1.73995 5.375 2.1875ZM0.5 8.61749V8.56249C0.5 7.71712 0.835825 6.90636 1.4336 6.30859C2.03137 5.71082 2.84212 5.375 3.6875 5.375C4.53288 5.375 5.34363 5.71082 5.9414 6.30859C6.53918 6.90636 6.875 7.71712 6.875 8.56249V8.61699C5.91274 9.19654 4.81031 9.50189 3.687 9.49999C2.5215 9.49999 1.431 9.17749 0.5 8.61699V8.61749Z" 
+        stroke="#00C56C" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"/>
+    ),
+  },
 };
 
 const Icon = ({ name, className = '' }: IconProps) => {
@@ -205,7 +216,7 @@ const Icon = ({ name, className = '' }: IconProps) => {
   return (
     <svg
       viewBox={icon.viewBox}
-      className={`w-6 h-6 text-primary cursor-pointer ${className}`}
+      className={`w-6 h-6 text-primary ${className}`}
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >

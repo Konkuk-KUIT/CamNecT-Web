@@ -1,5 +1,5 @@
 import TestPage from './pages/test';
-import MyPage from './pages/mypage/mypage'
+import MyPage from './pages/mypage/MypagePage'
 import './styles/global.css';
 
 function App() {
