@@ -1,0 +1,66 @@
+import { type User } from "../user/userTypes";
+
+export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
+export type CareerStatus = "EMPLOYED" | "RESIGNED";
+
+// // User 공통 인터페이스 
+// export interface User {
+//   id: string; 
+//   name: string; 
+//   profileImg: string; 
+//   major: string; 
+//   gradeNumber: string; 
+//   userTags: string[]; 
+//   introduction: string; // 자기소개 (최대 75자, 3줄)
+//   point: number; 
+// }
+
+export type UserPreview = Omit<User, "userTags"|"introduction"|"point">;
+
+export interface UserProfile extends User {
+  following: UserPreview[];
+  follower: UserPreview[];
+
+  isFollowCountPublic: boolean;
+}
+
+export interface EducationItem {
+  id: string;
+  school: string;
+  status: EducationStatus;
+  year: number;
+}
+
+export interface CareerItem {
+  id: string;
+  organization: string;
+  status: CareerStatus;
+  year: number;
+}
+
+export interface CertificateItem {
+  id: string;
+  name: string;
+  acquiredYear: number;
+}
+
+//프로필 상세(학력/경력/자격증 등)까지 포함
+export interface UserProfileDetail {
+  user: UserProfile;
+  portfolioVisibility: boolean;
+  educations: EducationItem[];
+  careers: CareerItem[];
+  certificates: CertificateItem[];
+}
+
+export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
+  ENROLLED: "입학",
+  LEAVE: "휴학",
+  EXCHANGED: "교환",
+  GRADUATED: "졸업",
+};
+
+export const CAREER_STATUS_KR: Record<CareerStatus, string> = {
+  EMPLOYED: "입사",
+  RESIGNED: "퇴사",
+};
