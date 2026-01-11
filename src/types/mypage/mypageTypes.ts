@@ -1,4 +1,4 @@
-import { type User } from "./user/userTypes";
+import { type User } from "../user/userTypes";
 
 export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
 export type CareerStatus = "EMPLOYED" | "RESIGNED";

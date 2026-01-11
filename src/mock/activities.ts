@@ -6,7 +6,7 @@ import type {
   SortKey,
   TeamRecruitPost,
   TeamRecruitDetail,
-} from "../types/activityPageTypes";
+} from "../types/activityPage/activityPageTypes";
 
 //대외활동 - 탭과 필터
 export const MOCK_ACTIVITY_TABS: { key: ActivityTab; label: string }[] = [

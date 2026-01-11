@@ -1,5 +1,5 @@
-import { type Activity } from "./activity/activityTypes";
-import { type TeamPost } from "./team/teamTypes";
+import { type Activity } from "../activity/activityTypes";
+import { type TeamPost } from "../team/teamTypes";
 
 export type ActivityTab = "club"|"study"|"contest"|"external"|"job"|"recruit";
 export type ActivityTag = "광고/마케팅"|"기획/아이디어"|"개발"|"디자인" |"기타";

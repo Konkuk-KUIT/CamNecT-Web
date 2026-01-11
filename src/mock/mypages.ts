@@ -1,4 +1,4 @@
-import type { UserProfileDetail } from "../types/mypageTypes";
+import type { UserProfileDetail } from "../types/mypage/mypageTypes";
 
 export const MOCK_SESSION = {
   meUid: "user_001" as string, //현재 로그인되어 있는 유저id
