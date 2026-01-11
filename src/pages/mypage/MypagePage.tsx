@@ -8,7 +8,7 @@ import PortfolioSection from "./components/PortfolioSection";
 export default function MyPageHome() {
     const meUid: UserId = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
-    const profileUserId: UserId = "user_003";
+    const profileUserId: UserId = "user_002";
     const isProfileOwner = meUid === profileUserId ? true : false;
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
@@ -53,14 +53,14 @@ export default function MyPageHome() {
         {/* Profile Card */}
             <section className="px-[25px] pt-[40px] pb-[33px] flex flex-col gap-[20px]">
                 <div className="flex flex-1 flex-col gap-[22px]">
-                    <div className="w-full flex flex items-start gap-[24px]">
+                    <div className="w-full flex flex items-start gap-[33px]">
                         <img
                             src={user.profileImageURL}
                             alt="프로필"
                             className="h-[84px] w-[84px] rounded-full"
                         />
                         <div className="w-full flex flex-col gap-[17px]">
-                            <div className="flex gap-[24px]">
+                            <div className="flex gap-[10px]">
                                 <div className="w-full flex flex-col gap-[6px]">
                                     <div className="text-B-18-hn text-gray-900">{user.name}</div>
                                     <div className="text-R-12-hn text-gray-750">
@@ -92,13 +92,13 @@ export default function MyPageHome() {
                         </div>
                     </div>
 
-                    <div className="flex flex-1 gap-[48px]">
+                    <div className="flex flex-1">
                         <div className="flex flex-col justify-center items-start gap-[7px] pl-[3px] pt-[3px] min-w-[51px]">
                             <div className="flex justify-start items-align gap-[3px]">
                                 <span className="text-R-14-hn text-gray-900">팔로잉</span>
                                 <span className="text-SB-14-hn text-gray-900">{user.following.length}</span>
                             </div>
-                            <div className="flex justify-start items-align gap-[3px]">
+                            <div className="flex justify-start items-align gap-[3px] w-[117px]">
                                 <span className="text-R-14-hn text-gray-900">팔로워</span>
                                 <span className="text-SB-14-hn text-gray-900">{user.follower.length}</span>
                             </div>
