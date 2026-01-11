@@ -1,14 +1,14 @@
-export type PortfolioId = string;
-export type UserId = string;
+import { type User } from "../user/userTypes";
+
+export type UserId = Pick<User, "id">;
 
 export interface PortfolioImage {
-    id: string;
+    portfolioImgId: string;
     url: string;
 }
 
-export interface Portfolio {
-    id: PortfolioId;
-    ownerId: UserId;
+export interface Portfolio extends UserId {
+    portfolioId: string;
 
     title: string;
     thumbnailUrl?: string;

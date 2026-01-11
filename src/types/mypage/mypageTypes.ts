@@ -1,28 +1,27 @@
-export type UserId = string;
+import { type User } from "../user/userTypes";
 
 export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
 export type CareerStatus = "EMPLOYED" | "RESIGNED";
 
-export interface UserInfo {
-  uid: UserId;
-  name: string;
+// // User 공통 인터페이스 
+// export interface User {
+//   id: string; 
+//   name: string; 
+//   profileImg: string; 
+//   major: string; 
+//   gradeNumber: string; 
+//   userTags: string[]; 
+//   introduction: string; // 자기소개 (최대 75자, 3줄)
+//   point: number; 
+// }
 
-  profileImageURL: string;
-  major: string;
-  yearNumber: number
-  gradeNumber: number;
-}
+export type UserPreview = Omit<User, "userTags"|"introduction"|"point">;
 
-export interface UserProfile extends UserInfo {
-  introduction: string;
-  tags: string[];
-
-  following: UserInfo[];
-  follower: UserInfo[];
+export interface UserProfile extends User {
+  following: UserPreview[];
+  follower: UserPreview[];
 
   isFollowCountPublic: boolean;
-
-  points: number;
 }
 
 export interface EducationItem {

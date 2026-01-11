@@ -1,49 +1,46 @@
-import type { UserId, UserProfileDetail } from "../types/mypageTypes";
+import type { UserProfileDetail } from "../types/mypage/mypageTypes";
 
 export const MOCK_SESSION = {
-  meUid: "user_002" as UserId, //현재 로그인되어 있는 유저id
+  meUid: "user_001" as string, //현재 로그인되어 있는 유저id
 };
 
-export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
+export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
   user_001: {
     user: {
-      uid: "user_001",
+      id: "user_001",
       name: "박익명",
-      profileImageURL: "https://picsum.photos/seed/user_001/100/100",
+      profileImg: "https://picsum.photos/seed/user_001/100/100",
 
       major: "컴퓨터공학과",
-      gradeNumber: 23,
-      yearNumber: 2,
+      gradeNumber: "23",
       introduction: "프론트엔드로 UI 구현 중입니다.",
 
-      tags: ["React", "TypeScript", "UI"],
+      userTags: ["React", "TypeScript", "UI"],
 
       follower: [
         {
-          uid: "user_002",
+          id: "user_002",
           name: "박원빈",
-          profileImageURL: "https://picsum.photos/seed/user_002/100/100",
+          profileImg: "https://picsum.photos/seed/user_002/100/100",
 
           major: "시각디자인학과",
-          yearNumber: 2,
-          gradeNumber: 19,
+          gradeNumber: "19",
         }
       ],
       following: [
         {
-          uid: "user_002",
+          id: "user_002",
           name: "박원빈",
-          profileImageURL: "https://picsum.photos/seed/user_002/100/100",
+          profileImg: "https://picsum.photos/seed/user_002/100/100",
 
           major: "시각디자인학과",
-          yearNumber: 2,
-          gradeNumber: 19,
+          gradeNumber: "19",
         }
       ],
 
       isFollowCountPublic: false,
 
-      points: 200,
+      point: 200,
     },
     portfolioVisibility: true,
     educations: [{ id: "edu_001_1", school: "가나다대학교", status: "ENROLLED", year: 2024 }],
@@ -53,51 +50,47 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
 
   user_002: {
     user: {
-      uid: "user_002",
+      id: "user_002",
       name: "박원빈",
-      profileImageURL: "https://picsum.photos/seed/user_002/100/100",
+      profileImg: "https://picsum.photos/seed/user_002/100/100",
 
       major: "시각디자인학과",
-      yearNumber: 2,
-      gradeNumber: 19,
+      gradeNumber: "19",
       introduction: "현재 UX&UI 분야에서 일하고있습니다!\n관심있으신분들은 커피챗 주세요!",
 
-      tags: ["UX&UI", "취업", "포트폴리오", "피그마", "UX"],
+      userTags: ["UX&UI", "취업", "포트폴리오", "피그마", "UX"],
 
       follower: [
         {
-          uid: "user_001",
+          id: "user_001",
           name: "박익명",
-          profileImageURL: "https://picsum.photos/seed/user_001/100/100",
+          profileImg: "https://picsum.photos/seed/user_001/100/100",
 
           major: "컴퓨터공학과",
-          gradeNumber: 23,
-          yearNumber: 2,
+          gradeNumber: "23",
         },
         {
-          uid: "user_003",
+          id: "user_003",
           name: "김익명",
-          profileImageURL: "https://picsum.photos/seed/user_003/100/100",
+          profileImg: "https://picsum.photos/seed/user_003/100/100",
 
           major: "산업디자인학과",
-          yearNumber: 4,
-          gradeNumber: 20,
+          gradeNumber: "20",
         }
       ],
       following: [
         {
-          uid: "user_001",
+          id: "user_001",
           name: "박익명",
-          profileImageURL: "https://picsum.photos/seed/user_001/100/100",
+          profileImg: "https://picsum.photos/seed/user_001/100/100",
 
           major: "컴퓨터공학과",
-          gradeNumber: 23,
-          yearNumber: 2,
+          gradeNumber: "23",
         }
       ],
 
       isFollowCountPublic: true,
-      points: 1230,
+      point: 1230,
     },
     portfolioVisibility: true,
     educations: [
@@ -111,33 +104,31 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<UserId, UserProfileDetail> = {
 
   user_003: {
     user: {
-      uid: "user_003",
+      id: "user_003",
       name: "김익명",
-      profileImageURL: "https://picsum.photos/seed/user_003/100/100",
+      profileImg: "https://picsum.photos/seed/user_003/100/100",
 
       major: "산업디자인학과",
-      yearNumber: 4,
-      gradeNumber: 20,
+      gradeNumber: "20",
       introduction: "브랜딩과 서비스 디자인에 관심이 많아요.",
 
-      tags: ["브랜딩", "서비스디자인", "리서치"],
+      userTags: ["브랜딩", "서비스디자인", "리서치"],
 
       follower: [],
       following: [
         {
-          uid: "user_002",
+          id: "user_002",
           name: "박원빈",
-          profileImageURL: "https://picsum.photos/seed/user_002/100/100",
+          profileImg: "https://picsum.photos/seed/user_002/100/100",
 
           major: "시각디자인학과",
-          yearNumber: 2,
-          gradeNumber: 19,
+          gradeNumber: "19",
         }
       ],
 
       isFollowCountPublic: true,
       
-      points: 530,
+      point: 530,
     },
     portfolioVisibility: false,
     educations: [{ id: "edu_003_1", school: "건국대학교", status: "ENROLLED", year: 2020 }],

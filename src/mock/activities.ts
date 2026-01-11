@@ -3,10 +3,9 @@ import type {
   ActivityListItem,
   ActivityListUiState,
   ActivityTab,
-  SortKey,
   TeamRecruitPost,
   TeamRecruitDetail,
-} from "../types/activityTypes";
+} from "../types/activityPage/activityPageTypes";
 
 //대외활동 - 탭과 필터
 export const MOCK_ACTIVITY_TABS: { key: ActivityTab; label: string }[] = [
@@ -25,13 +24,14 @@ export const MOCK_ACTIVITY_FILTERS = {
   sort: ["추천순", "최신순", "마감임박순"] as const,
 };
 
+
 //기본 UI 데이터(처음 대외활동 탭에 들어왔을 때)
 export const MOCK_ACTIVITY_LIST_UI_STATE: ActivityListUiState = {
   activeTab: "contest",
   selectedField: "전체",
   selectedHost: "전체",
   selectedRegion: "전체",
-  sort: "추천순" as SortKey,
+  sort: "추천순",
 };
 
 //activity 데이터
@@ -40,10 +40,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_001",
     tab: "contest",
     title: "나라사랑 공모전",
-    region: "부산",
+    location: "부산",
     organizer: "부산광역시",
     tags: ["광고/마케팅", "기획/아이디어"],
-    thumbnailUrl: "https://picsum.photos/seed/act_001_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_001_thumb/94/134",
     dDay: 34,
     deadline: "2025.10.30",
     bookmarkCount: 12,
@@ -54,10 +54,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_002",
     tab: "contest",
     title: "경기도 브랜드 홍보 콘텐츠 공모전",
-    region: "경기",
+    location: "경기",
     organizer: "경기도",
     tags: ["광고/마케팅", "기획/아이디어"],
-    thumbnailUrl: "https://picsum.photos/seed/act_002_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_002_thumb/94/134",
     dDay: 18,
     deadline: "2025.10.12",
     bookmarkCount: 28,
@@ -68,10 +68,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_003",
     tab: "contest",
     title: "우리시장 홍보 콘텐츠 공모전",
-    region: "전국",
+    location: "전국",
     organizer: "시장상인회",
     tags: ["기획/아이디어", "디자인"],
-    thumbnailUrl: "https://picsum.photos/seed/act_003_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_003_thumb/94/134",
     dDay: 7,
     deadline: "2025.09.30",
     bookmarkCount: 5,
@@ -82,10 +82,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_004",
     tab: "study",
     title: "React 심화 스터디 6주 (주 2회)",
-    region: "서울",
+    location: "서울",
     organizer: "동아리/커뮤니티",
     tags: ["개발"],
-    thumbnailUrl: "https://picsum.photos/seed/act_004_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_004_thumb/94/134",
     dDay: 12,
     deadline: "2025.10.05",
     bookmarkCount: 44,
@@ -96,10 +96,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_005",
     tab: "club",
     title: "대학 연합 디자인 동아리 신규 모집",
-    region: "서울",
+    location: "서울",
     organizer: "학교",
     tags: ["디자인", "기타"],
-    thumbnailUrl: "https://picsum.photos/seed/act_005_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_005_thumb/94/134",
     dDay: 21,
     deadline: "2025.10.15",
     bookmarkCount: 19,
@@ -110,10 +110,10 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
     id: "act_006",
     tab: "job",
     title: "프론트엔드 인턴십 지원",
-    region: "경기",
+    location: "경기",
     organizer: "기업",
     tags: ["개발", "기타"],
-    thumbnailUrl: "https://picsum.photos/seed/act_006_thumb/94/134",
+    posterImg: "https://picsum.photos/seed/act_006_thumb/94/134",
     dDay: 40,
     deadline: "2025.11.05",
     bookmarkCount: 61,
@@ -122,11 +122,18 @@ export const MOCK_ACTIVITIES: ActivityListItem[] = [
   },
 ];
 
+//activity 없으면 throw하는 헬퍼
+const requireActivity = (id: string) => {
+  const item = MOCK_ACTIVITIES.find((x) => x.id === id);
+  if (!item) throw new Error(`Missing MOCK_ACTIVITIES item: ${id}`);
+  return item;
+};
+
 //activity 세부사항 데이터
 export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
   act_001: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_001")!,
-    headerImageUrl: "https://picsum.photos/seed/act_001_header/375/311",
+    ...requireActivity("act_001"),
+    posterImg: "https://picsum.photos/seed/act_001_header/375/311",
     target: "전국 대학생 및 대학원생 (팀 또는 개인)",
     applyPeriod: { start: "2025.10.30", end: "2025.10.31" },
     announceDate: "2025.11.14",
@@ -141,8 +148,8 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
     ],
   },
   act_002: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_002")!,
-    headerImageUrl: "https://picsum.photos/seed/act_002_header/900/700",
+    ...requireActivity("act_002"),
+    posterImg: "https://picsum.photos/seed/act_002_header/900/700",
     target: "모집 대상: 전국 누구나",
     applyPeriod: { start: "2025.09.20", end: "2025.10.12" },
     announceDate: "2025.10.20",
@@ -152,8 +159,8 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
     ],
   },
   act_003: {
-    ...MOCK_ACTIVITIES.find((x) => x.id === "act_003")!,
-    headerImageUrl: "https://picsum.photos/seed/act_003_header/900/700",
+    ...requireActivity("act_003"),
+    posterImg: "https://picsum.photos/seed/act_003_header/900/700",
     target: "모집 대상: 대학생/일반인 누구나",
     applyPeriod: { start: "2025.09.01", end: "2025.09.30" },
     announceDate: "2025.10.07",
@@ -165,7 +172,7 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: Record<string, ActivityDetail> = {
 };
 
 
-//team recurit post+comment 데이터
+//team recruit post+comment 데이터
 export const MOCK_TEAM_RECRUIT_POST_BY_ID: Record<string, TeamRecruitPost> = {
     tr_001: {
       id: "tr_001",
