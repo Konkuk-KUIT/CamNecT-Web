@@ -30,17 +30,6 @@ export type QuestionPost = {
   createdAt: string;
 };
 
-export type ChatPost = {
-  id: string;
-  author: AuthorProfile;
-  categories: string[];
-  title: string;
-  content: string;
-  imageUrl?: string;
-  likes: number;
-  comments: number;
-  createdAt: string;
-};
 
 export const loggedInUserMajor = '컴퓨터공학부';
 
@@ -149,38 +138,5 @@ export const questionPosts: QuestionPost[] = [
     content: '레이아웃과 서체 선택 관련 의견을 듣고 싶습니다.',
     answers: 0,
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-  },
-];
-
-export const chatPosts: ChatPost[] = [
-  {
-    id: 'chat-1',
-    author: { name: '최다인', major: '심리학부', studentId: '18' },
-    categories: ['일상', '잡담'],
-    title: '요즘 학교 앞 카페 어디가 조용한가요?',
-    content: '스터디하기 좋은 조용한 카페 추천해주세요.',
-    likes: 7,
-    comments: 2,
-    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'chat-2',
-    author: { name: '윤시온', major: '전자공학부', studentId: '19' },
-    categories: ['동아리', '공연'],
-    title: '금요일 버스킹 같이 보러 갈 분?',
-    content: '저녁 7시에 중앙도서관 앞에서 열리는 공연 보러 가요!',
-    likes: 5,
-    comments: 4,
-    createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'chat-3',
-    author: { name: '박민지', major: '컴퓨터공학부', studentId: '21' },
-    categories: ['게임', '소모임'],
-    title: '주말 보드게임 소모임 사람 구해요',
-    content: '토요일 오후 3시에 캠퍼스 근처 카페에서 만나요!',
-    likes: 14,
-    comments: 9,
-    createdAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];

@@ -1,6 +1,5 @@
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
-import Icon from '../../../components/Icon';
 import MainBoxCarousel from '../components/MainBoxCarousel';
 import type { InfoPost, QuestionPost } from '../data';
 import { formatTimeAgo } from '../time';

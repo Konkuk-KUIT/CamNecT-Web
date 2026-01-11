@@ -20,7 +20,7 @@ const WriteButton = ({ onClick }: WriteButtonProps) => {
     <button
       type='button'
       onClick={handleClick}
-      className='fixed bottom-[50px] inline-flex flex-col items-start'
+      className='fixed bottom-[70px] inline-flex flex-col items-start'
       style={{
         left: '50%',
         transform: 'translateX(50px)',

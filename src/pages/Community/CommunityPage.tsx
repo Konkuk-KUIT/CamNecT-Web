@@ -2,17 +2,15 @@ import { useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import MainLayout from '../../layouts/MainLayout';
-import ChatTab from './tabs/ChatTab';
 import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
-import { chatPosts, infoPosts, loggedInUserMajor, questionPosts } from './data';
+import { infoPosts, loggedInUserMajor, questionPosts } from './data';
 
 const tabItems: TabItem[] = [
   { id: 'all', label: '전체' },
   { id: 'info', label: '정보' },
   { id: 'question', label: '질문' },
-  { id: 'chat', label: '잡담' },
 ];
 
 const Community = () => {
@@ -33,8 +31,6 @@ const Community = () => {
   const renderTab = () => {
     if (activeTab === 'info') return <InfoTab posts={infoPosts} />;
     if (activeTab === 'question') return <QuestionTab posts={questionPosts} />;
-    if (activeTab === 'chat') return <ChatTab posts={chatPosts} />;
-
     return (
       <MainTab
         userMajor={loggedInUserMajor}
