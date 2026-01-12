@@ -1,4 +1,4 @@
-import { type UserId, type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR, CAREER_STATUS_KR } from "../../types/mypageTypes";
+import { type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR, CAREER_STATUS_KR } from "../../types/mypage/mypageTypes";
 import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import Icon from "../../components/Icon";
@@ -6,9 +6,9 @@ import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
 
 export default function MyPageHome() {
-    const meUid: UserId = MOCK_SESSION.meUid;
+    const meUid: string = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
-    const profileUserId: UserId = "user_002";
+    const profileUserId: string = "user_002";
     const isProfileOwner = meUid === profileUserId ? true : false;
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
@@ -55,7 +55,7 @@ export default function MyPageHome() {
                 <div className="flex flex-1 flex-col gap-[22px]">
                     <div className="w-full flex flex items-start gap-[33px]">
                         <img
-                            src={user.profileImageURL}
+                            src={user.profileImg}
                             alt="프로필"
                             className="h-[84px] w-[84px] rounded-full"
                         />
@@ -80,7 +80,7 @@ export default function MyPageHome() {
                             </div>
 
                             <div className="w-full flex flex-wrap gap-[5px]">
-                                {user.tags.map((t) => (
+                                {user.userTags.map((t) => (
                                     <span
                                         key={t}
                                         className="flex justify-center items-center rounded-[3px] border border-primary bg-green-50 px-[5px] py-[3px] text-R-12-hn text-primary"

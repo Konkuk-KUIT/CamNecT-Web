@@ -1,4 +1,4 @@
-import { type Portfolio } from "../../../types/portfolioTypes";
+import { type Portfolio } from "../../../types/portfolio/portfolioTypes";
 import BaseSection from "./BaseSection";
 
 export default function PortfolioSection({
