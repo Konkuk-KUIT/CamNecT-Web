@@ -11,6 +11,7 @@ import { MyPage } from "../pages/my-page/MyPage";
 import { EmptyLayout } from "../layouts/EmptyLayout";
 import { HeaderLayout } from "../layouts/HeaderLayout";
 import { FullLayout } from "../layouts/FullLayout";
+import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
 
@@ -37,30 +38,47 @@ export const router = createBrowserRouter([
                 ]
             },
 
+            // 로그인 필수 페이지들 
             {
-                element: <FullLayout headerType="home"/>,
+                element: <AuthGuard/>,
                 children: [
                     {
-                        // todo HomeUI 연결
-                        path: "home", element: <HomePage />
+                        element: <FullLayout headerType="home"/>,
+                        children: [
+                            {
+                                // todo HomeUI 연결
+                                path: "home", element: <HomePage />
+                            },
+                        ]
                     },
-                ]
-            },
 
-            {
-                element: <FullLayout headerType="main"/>,
-                children: [
-                    { path: "alumni", element: <AlumniPage /> },
-                    { path: "chat", element: <CoffeeChatPage /> },
-                    { path: "activity", element: <ActivityPage /> },
                     {
-                        // todo MyPage 연결
-                        path: "me", element: <MyPage />
+                         element: <FullLayout headerType="main"/>,
+                         children: [
+                             {
+                                 path: "alumni",
+                                 element: <AlumniPage />
+                             },
+
+                             {
+                                 path: "chat",
+                                 element: <CoffeeChatPage />
+                             },
+
+                             {
+                                 path: "activity",
+                                 element: <ActivityPage />
+                             },
+                             
+                             {
+                                 // todo MyPage 연결
+                                 path: "me",
+                                 element: <MyPage />
+                             }
+                        ]
                     },
                 ]
             },
         ]
-
     }
-    
 ]);
