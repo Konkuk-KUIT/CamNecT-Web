@@ -1,4 +1,3 @@
-import { type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR, CAREER_STATUS_KR } from "../../types/mypage/mypageTypes";
 import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import Icon from "../../components/Icon";
@@ -16,11 +15,6 @@ export default function MyPageHome() {
     const { user, educations, careers, certificates } = meDetail;
 
     const portfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[meUid] ?? [];
-
-    const educationLines = makeEducationLines(educations);
-    const careerLines = makeCareerLines(careers);
-    const certificateLines = makeCertificateLines(certificates);
-
 
     return (
         <div className="h-dvh mx-auto w-full min-w-[360px] max-w-[450px] bg-white">
@@ -138,21 +132,21 @@ export default function MyPageHome() {
                 />
 
                 <InfoSection
-                    title="학력"
-                    lines={educationLines}
-                    emptyText="아직 학력 정보가 등록되지 않았어요!"
+                    type="education"
+                    items={educations}
+                    isEdit={true}
                 />
 
                 <InfoSection
-                    title="경력"
-                    lines={careerLines}
-                    emptyText="등록된 경력이 없습니다."
+                    type="career"
+                    items={careers}
+                    isEdit={true}
                 />
 
                 <InfoSection
-                    title="자격증 및 보유기술"
-                    lines={certificateLines}
-                    emptyText="등록된 항목이 없습니다."
+                    type="certificate"
+                    items={certificates}
+                    isEdit={true}
                 />
             </div>
         </div>
@@ -160,24 +154,3 @@ export default function MyPageHome() {
 }
 
 
-/*학력, 경력, 자격증에서 문장 조합*/
-function makeEducationLines(items: EducationItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => b.year - a.year) //최신순 정렬
-    .map((e) => `${e.year}년 ${e.school} ${EDUCATION_STATUS_KR[e.status]}`);
-}
-
-function makeCareerLines(items: CareerItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => a.year - b.year)
-    .map((c) => `${c.year}년 ${c.organization} ${CAREER_STATUS_KR[c.status]}`);
-}
-
-function makeCertificateLines(items: CertificateItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => b.acquiredYear - a.acquiredYear) // 최신 취득 먼저
-    .map((x) => `${x.acquiredYear}년 ${x.name} 취득`);
-}
