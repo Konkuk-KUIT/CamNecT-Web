@@ -6,6 +6,8 @@ import { ActivityPage } from "../pages/activity/ActivityPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
+import { HomePage } from "../pages/home/HomePage";
+import { MyPage } from "../pages/my-page/MyPage";
 
 export const router = createBrowserRouter([
 
@@ -33,8 +35,8 @@ export const router = createBrowserRouter([
 
             {
                 // todo HomeUI 연결
-                // path: "home",
-                // element: <HomePage />
+                path: "home",
+                element: <HomePage />
             },
 
             {
@@ -54,8 +56,8 @@ export const router = createBrowserRouter([
 
             {
                 // todo MyPage 연결
-                // path: "me",
-                // element: <MyPage />
+                path: "me",
+                element: <MyPage />
             }
         ]
 
