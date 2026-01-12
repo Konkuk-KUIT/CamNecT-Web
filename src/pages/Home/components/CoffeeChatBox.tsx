@@ -18,7 +18,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
 
     return (
         <Card
-            width="325px"
+            width="100%"
             height="auto"
             className="flex flex-col"
             style={{ padding: '15px 17px', gap: '13px', minHeight: '60px' }}
@@ -50,7 +50,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
                 {requests.map((request) => (
                     <Card
                         key={`${request.name}-${request.studentId}`}
-                        width="295px"
+                        width="100%"
                         height="auto"
                         style={{
                             minHeight: '47px',
