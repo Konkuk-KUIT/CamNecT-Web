@@ -1,4 +1,5 @@
 import { type Portfolio } from "../../../types/portfolio/portfolioTypes";
+import Icon from "../../../components/Icon";
 import BaseSection from "./BaseSection";
 
 export default function PortfolioSection({
@@ -14,8 +15,11 @@ export default function PortfolioSection({
     <BaseSection
       title="포트폴리오"
       right={
-          <div className="text-R-12 text-gray-650" onClick={() => alert("포트폴리오 전체보기로 이동")}>
-            전체보기 &gt;</div>
+          <button onClick={() => alert("포트폴리오 페이지로 이동")}
+                            className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
+                                전체보기
+                                <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
+                            </button>
       }
     >
       <div
@@ -36,7 +40,7 @@ export default function PortfolioSection({
 
             return (
               <button
-                key={p.id}
+                key={p.portfolioId}
                 type="button"
                 className="shrink-0 flex flex-col justify-center items-start gap-[5px]"
                 onClick={() => alert(`포트폴리오 열기: ${p.id}`)}

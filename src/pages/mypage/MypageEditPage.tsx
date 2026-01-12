@@ -58,28 +58,23 @@ export default function ProfileEditPage() {
 
             {/* Profile Section */}
             <section className="w-full">
-                {/* Profile Image */}
-                <div className="flex justify-center mb-[20px]">
-                    <button
-                        onClick={() => setShowImageModal(true)}
-                        className="relative"
-                    >
+                <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
+                    <button className="relative h-[56px] w-[56px]"
+                    onClick={() => alert("사진 고르기")}>
                         <img
-                            src={user.profileImg}
-                            alt="프로필"
-                            className="h-[84px] w-[84px] rounded-full"
-                        />
-                        <div className="bg-black absolute bottom-0 right-0 w-[28px] h-[28px] rounded-full border border-gray-300 flex items-center justify-center">
-                            <Icon name="camera" className="w-[16px] h-[16px]" />
-                        </div>
+                        src={user.profileImg}
+                        alt="프로필"
+                        className="h-[56px] w-[56px] rounded-full"
+                    />
+                        <div className="absolute top-0 h-[56px] w-[56px] rounded-full bg-gray-900/60"></div>
+                        <Icon name="camera" className="absolute top-[16px] left-[16px] block shrink-0" />
                     </button>
-                </div>
-
-                {/* Name and Student Info */}
-                <div className="text-center mb-[20px]">
-                    <div className="text-B-18-hn text-gray-900 mb-[6px]">{user.name}</div>
-                    <div className="text-R-12-hn text-gray-750">
-                        {user.major} {user.gradeNumber}학번
+                    
+                    <div className="flex flex-col flex-1 gap-[6px]">
+                        <div className="text-B-18-hn text-gray-900">{user.name}</div>
+                        <div className="text-R-12-hn text-gray-750">
+                            {user.major} {user.gradeNumber}학번
+                        </div>
                     </div>
                 </div>
 
@@ -121,7 +116,7 @@ export default function ProfileEditPage() {
                 </div>
 
                 <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
-                    <span className="text-R-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
+                    <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
                     <button
                         onClick={() => setShowFollowPublic(!showFollowPublic)}
                         className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${

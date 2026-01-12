@@ -4,7 +4,7 @@ import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
 
-export default function MyPageHome() {
+export default function MyPage() {
     const meUid: string = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
     const profileUserId: string = "user_002";
@@ -47,7 +47,7 @@ export default function MyPageHome() {
         {/* Profile Card */}
             <section className="px-[25px] pt-[40px] pb-[33px] flex flex-col gap-[20px]">
                 <div className="flex flex-1 flex-col gap-[22px]">
-                    <div className="w-full flex flex items-start gap-[33px]">
+                    <div className="w-full flex items-start gap-[33px]">
                         <img
                             src={user.profileImg}
                             alt="프로필"
