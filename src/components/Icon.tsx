@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 
 type IconName =
   | 'search'
@@ -19,6 +19,7 @@ type IconName =
 type IconProps = {
   name: IconName;
   className?: string;
+  style?: CSSProperties;
 };
 
 type IconDefinition = {
@@ -208,13 +209,14 @@ const iconPaths: Record<IconName, IconDefinition> = {
   },
 };
 
-const Icon = ({ name, className = '' }: IconProps) => {
+const Icon = ({ name, className = '', style }: IconProps) => {
   const icon = iconPaths[name];
 
   return (
     <svg
       viewBox={icon.viewBox}
       className={`w-6 h-6 text-primary cursor-pointer ${className}`}
+      style={style}
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >

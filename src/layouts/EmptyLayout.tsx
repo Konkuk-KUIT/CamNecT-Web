@@ -7,11 +7,11 @@ type EmptyLayoutProps = {
 const EmptyLayout = ({ children }: EmptyLayoutProps) => {
   return (
     <div
-      className='min-h-screen flex justify-center bg-[#f5f6f7]'
+      className='min-h-screen flex justify-center bg-[#f5f6f7] [container-type:inline-size]'
       style={{ minHeight: '100dvh' }}
     >
-      <div className='flex min-h-[100dvh] w-[375px] flex-col items-center bg-white'>
-        <main className='w-[375px] flex-1 bg-white'>{children}</main>
+      <div className='flex min-h-[100dvh] w-[clamp(320px,100cqw,540px)] flex-col items-center bg-white'>
+        <main className='w-full flex-1 bg-white'>{children}</main>
       </div>
     </div>
   );

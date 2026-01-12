@@ -3,22 +3,22 @@ import HomeLayout from '../../layouts/HomeLayout';
 import Card from '../../components/Card';
 import CheckScheduleBox from './components/CheckScheduleBox';
 import PointBox from './components/PointBox';
-import ComunitiyBox from './components/ComunitiyBox';
-import RecommandBox from './components/RecommandBox';
+import ComunitiyBox from './components/CommunityBox';
+import RecommandBox from './components/RecommendBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
-import { coffeeChatRequests, contests, recommandList } from './homeData';
+import { coffeeChatRequests, contests, recommendList } from './homeData';
 
 const Home = () => {
     const [showAllRecommands, setShowAllRecommands] = useState(false);
-    const visibleRecommands = showAllRecommands ? recommandList : recommandList.slice(0, 2);
+    const visibleRecommands = showAllRecommands ? recommendList : recommendList.slice(0, 2);
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
         <HomeLayout>
-            <div className="w-[376px] mx-auto bg-white">
+            <div className="w-full mx-auto bg-white">
                 <section
-                    className="flex flex-col"
+                    className="flex w-full flex-col"
                     style={{ gap: '15px', paddingTop: '17px', paddingBottom: '30px', paddingLeft: '25px', paddingRight: '25px' }}
                 >
                     {/* 1-1: 사용자 인사 메시지 */}
@@ -33,9 +33,9 @@ const Home = () => {
 
                     <CoffeeChatBox requests={coffeeChatRequests} />
                     {/* 1-2: 일정 박스 + 포인트/커뮤니티 박스 */}
-                    <div className="flex flex-col" style={{ gap: '15px' }}>
+                    <div className="flex w-full flex-col" style={{ gap: '15px' }}>
                         <CheckScheduleBox />
-                        <div className="flex justify-between gap-[20px]">
+                        <div className="flex w-full justify-between gap-[20px]">
                             <PointBox />
                             <ComunitiyBox />
                         </div>
@@ -44,7 +44,7 @@ const Home = () => {
 
                 {/* 홈 2번 영역: 추천 동문 리스트 */}
                 <section
-                    className="flex flex-col"
+                    className="flex w-full flex-col"
                     style={{
                         gap: '10px',
                         padding: '30px 25px',
@@ -53,9 +53,9 @@ const Home = () => {
                 >
                     <p className="text-sb-20 text-black tracking-[-0.04em]">추천동문</p>
 
-                    <div className="flex flex-col" style={{ gap: '20px' }}>
-                        <div className="flex flex-col" style={{ gap: '15px' }}>
-                            <div className="flex flex-col" style={{ gap: '10px' }}>
+                    <div className="flex w-full flex-col" style={{ gap: '20px' }}>
+                        <div className="flex w-full flex-col" style={{ gap: '15px' }}>
+                            <div className="flex w-full flex-col" style={{ gap: '10px' }}>
                                 {visibleRecommands.map((recommand) => (
                                     <RecommandBox
                                         key={`${recommand.name}-${recommand.studentId}`}
@@ -70,7 +70,7 @@ const Home = () => {
                             </div>
 
                             <Card
-                                width="325px"
+                                width="100%"
                                 height="50px"
                                 className="flex items-center justify-center cursor-pointer"
                                 onClick={() => setShowAllRecommands((prev) => !prev)}
@@ -80,13 +80,13 @@ const Home = () => {
                                         <div className='flex items-center justify-center gap-[5px]'>
                                             접기
                                             <svg className='rotate-180' width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 3.5L8 8.5L13 3.5M3 7.5L8 12.5L13 7.5" stroke="#202023" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M3 3.5L8 8.5L13 3.5M3 7.5L8 12.5L13 7.5" stroke="#202023" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         </div>
                                         : <div className='flex items-center justify-center gap-[5px]'>
                                             더보기
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M3 3.5L8 8.5L13 3.5M3 7.5L8 12.5L13 7.5" stroke="#202023" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M3 3.5L8 8.5L13 3.5M3 7.5L8 12.5L13 7.5" stroke="#202023" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
 
                                         </div>}
@@ -97,7 +97,7 @@ const Home = () => {
                 </section>
 
                 {/* 홈 3번 영역: 주목받은 공모전 리스트 */}
-                <section className="flex flex-col bg-white" style={{ gap: '10px', padding: '25px' }}>
+                <section className="flex w-full flex-col bg-white" style={{ gap: '10px', padding: '25px' }}>
                     <ContestBox contests={contests} />
                 </section>
             </div>

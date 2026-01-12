@@ -1,13 +1,18 @@
-import type { RecommandBoxProps } from './components/RecommandBox';
+import type { RecommendBoxProps } from './components/RecommendBox';
 import type { CoffeeChatRequest } from './components/CoffeeChatBox';
 import type { Contest } from './components/ContestBox';
 
-type Recommand = RecommandBoxProps;
+type Recommend = RecommendBoxProps;
 
-export const recommandList: Recommand[] = [
+const avatarPlaceholder =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='54' height='54'><rect width='54' height='54' fill='%23D5D5D5'/></svg>";
+const posterPlaceholder =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='135' height='126'><rect width='135' height='126' fill='%23E5E7EB'/></svg>";
+
+export const recommendList: Recommend[] = [
     {
         name: '신다은',
-        profileImage: 'https://via.placeholder.com/54',
+        profileImage: avatarPlaceholder,
         major: '컴퓨터공학부',
         studentId: '22',
         intro: 'AI 스타트업에서 백엔드 엔지니어로 근무 중입니다. 커리어 상담과 프로젝트 멘토링 가능해요.',
@@ -15,7 +20,7 @@ export const recommandList: Recommand[] = [
     },
     {
         name: '박성윤',
-        profileImage: 'https://via.placeholder.com/54/00C56C/FFFFFF',
+        profileImage: avatarPlaceholder,
         major: '경영학부',
         studentId: '20',
         intro: 'VC 인턴 경험이 있어요. 투자 리서치/자소서 리뷰 해드립니다. 커피챗 환영합니다.',
@@ -23,7 +28,7 @@ export const recommandList: Recommand[] = [
     },
     {
         name: '이주하',
-        profileImage: 'https://via.placeholder.com/54/202023/FFFFFF',
+        profileImage: avatarPlaceholder,
         major: '디자인학부',
         studentId: '21',
         intro: 'UI/UX 디자이너입니다. 포트폴리오 피드백과 디자인 툴 사용 팁 공유해요.',
@@ -40,7 +45,7 @@ export const coffeeChatRequests: CoffeeChatRequest[] = [
 export const contests: Contest[] = [
     {
         title: '캠퍼스 친환경 아이디어 공모전',
-        posterImgUrl: 'https://via.placeholder.com/135x126/ECFFE1/202023',
+        posterImgUrl: posterPlaceholder,
         organizer: '총학생회',
         location: '서울캠퍼스',
         deadline: '마감 11.24 (일) 23:59',
@@ -51,7 +56,7 @@ export const contests: Contest[] = [
     },
     {
         title: 'AI 해커톤 with 스타트업',
-        posterImgUrl: 'https://via.placeholder.com/135x126/CCE5FF/202023',
+        posterImgUrl: posterPlaceholder,
         organizer: '컴공학부 X 산학협력단',
         location: 'IT관 B1',
         deadline: 'D-3 | 11.27(수) 자정',
@@ -62,7 +67,7 @@ export const contests: Contest[] = [
     },
     {
         title: '로컬 브랜드 디자인 챌린지',
-        posterImgUrl: 'https://via.placeholder.com/135x126/FFF4E6/202023',
+        posterImgUrl: posterPlaceholder,
         organizer: '디자인학부',
         location: '온라인',
         deadline: '12.05(목) 18:00',

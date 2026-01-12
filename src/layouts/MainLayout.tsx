@@ -11,12 +11,12 @@ type MainLayoutProps = {
 const MainLayout = ({ title, rightElement, onBack, children }: MainLayoutProps) => {
   return (
     <div
-      className='min-h-screen flex justify-center bg-[#f5f6f7]'
+      className='min-h-screen flex justify-center bg-[#f5f6f7] [container-type:inline-size]'
       style={{ minHeight: '100dvh' }}
     >
-      <div className='flex min-h-[100dvh] w-[375px] flex-col items-center bg-white'>
+      <div className='flex min-h-[100dvh] w-[clamp(320px,100cqw,540px)] flex-col items-center bg-white'>
         <header
-          className='sticky left-0 right-0 top-0 z-50 grid w-[375px] grid-cols-[24px_1fr_24px] items-center bg-white px-[25px] py-[10px]'
+          className='sticky left-0 right-0 top-0 z-50 grid w-full grid-cols-[24px_1fr_24px] items-center bg-white px-[25px] py-[10px]'
           style={{
             paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
             top: 'env(safe-area-inset-top, 0px)',
@@ -33,7 +33,7 @@ const MainLayout = ({ title, rightElement, onBack, children }: MainLayoutProps) 
           </div>
         </header>
 
-        <main className='w-[375px] flex-1 bg-white'>{children}</main>
+        <main className='w-full flex-1 bg-white'>{children}</main>
       </div>
     </div>
   );
