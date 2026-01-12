@@ -41,6 +41,7 @@ const Community = () => {
   };
 
   return (
+    //TODO: 각 탭별로 search 기능 구현 
     <MainLayout
       title='커뮤니티'
       rightElement={activeTab === 'all' ? undefined : <Icon name='search' />}

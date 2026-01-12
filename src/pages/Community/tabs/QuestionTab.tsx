@@ -30,13 +30,16 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
 
   return (
     <div className='flex flex-col bg-white' style={{ padding: '20px 25px', gap: '10px' }}>
+      {/* 필터 영역: 선택된 태그 표시 + 모달 호출 */}
       <FilterHeader
         activeFilters={activeFilters}
         onOpenFilter={openFilterModal}
         onRemoveFilter={handleRemoveFilter}
       />
 
+      {/* 질문글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
+        {/* TODO: 질문글 리스트 API 연결 */}
         {filteredPosts.map((post) => (
           <article
             key={post.id}
@@ -47,6 +50,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
               borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
             }}
           >
+            {/* TODO: 질문 상세 라우터 연결 (카드 클릭) */}
             <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
               {post.categories.map((category) => (
                 <Category key={category} label={category} height={20} className='px-[6px]' />
@@ -74,6 +78,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
         ))}
       </div>
 
+      {/* 필터 모달: 전공/관심사 선택 */}
       <FilterModal
         isOpen={isFilterOpen}
         activeTab={activeTab}
@@ -87,6 +92,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
         onApply={handleApply}
       />
 
+      {/* TODO: 글쓰기 라우터 연결 (버튼 클릭) */}
       <WriteButton />
     </div>
   );

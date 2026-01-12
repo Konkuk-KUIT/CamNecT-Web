@@ -13,8 +13,10 @@ type MainTabProps = {
 const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) => {
   return (
     <div>
+      {/* 상단 히어로 영역: 전공 해시태그 + 안내 문구 + 캐러셀 */}
       <div className='flex flex-col bg-white' style={{ padding: '30px 0', gap: '25px' }}>
         <section className='flex flex-col' style={{ padding: '0 25px', gap: '3px' }}>
+          {/* TODO: 사용자 전공 데이터 API 연동 후 실제 값 주입 */}
           <div className='text-b-20' style={{ color: 'var(--ColorMain, #00C56C)' }}>
             #{userMajor}
           </div>
@@ -24,6 +26,7 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
         </section>
 
         <section className='flex flex-col' style={{ gap: '12px' }}>
+          {/* TODO: 알럼나이 정보 리스트 API 연결 */}
           {alumniInfos.length > 0 && <MainBoxCarousel items={alumniInfos} />}
         </section>
       </div>
@@ -32,6 +35,7 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
         <path d="M0 0H375V10H0V0Z" fill="#ECECEC" />
       </svg>
 
+      {/* 답변 대기 질문 섹션 */}
       <section className='flex flex-col bg-white' style={{ padding: '30px 25px', gap: '20px' }}>
         <div className='flex items-center' style={{ gap: '5px' }}>
           <div className='text-sb-20' style={{ color: 'var(--ColorBlack, #202023)' }}>
@@ -47,6 +51,7 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           height="flex"
           className="flex flex-col"
         >
+          {/* TODO: 미답변 질문 리스트 API 연결 */}
           {unansweredQuestions.map((question, index) => {
             const isLast = index === unansweredQuestions.length - 1;
             return (
@@ -61,6 +66,7 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
                   : 'inset 0 -1px 0 var(--ColorGray1, #ECECEC)',
               }}
             >
+              {/* TODO: 질문 상세 라우터 연결 (카드 클릭) */}
               <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
                 {question.categories.map((category) => (
                   <Category key={category} label={category} height={20} className='px-[6px]' />

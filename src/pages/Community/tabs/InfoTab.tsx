@@ -33,13 +33,16 @@ const InfoTab = ({ posts }: InfoTabProps) => {
       className='flex flex-col bg-white'
       style={{ padding: '20px 25px', gap: '10px' }}
     >
+      {/* 필터 영역: 선택된 태그 표시 + 모달 호출 */}
       <FilterHeader
         activeFilters={activeFilters}
         onOpenFilter={openFilterModal}
         onRemoveFilter={handleRemoveFilter}
       />
 
+      {/* 정보글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
+        {/* TODO: 정보글 리스트 API 연결 */}
         {filteredPosts.map((post) => (
           <article
             key={post.id}
@@ -50,6 +53,7 @@ const InfoTab = ({ posts }: InfoTabProps) => {
               borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
             }}
           >
+            {/* TODO: 글 상세 라우터 연결 (카드 클릭) */}
             <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
               {post.categories.map((category) => (
                 <Category key={category} label={category} height={20} className='px-[6px]' />
@@ -90,6 +94,7 @@ const InfoTab = ({ posts }: InfoTabProps) => {
         ))}
       </div>
 
+      {/* 필터 모달: 전공/관심사 선택 */}
       <FilterModal
         isOpen={isFilterOpen}
         activeTab={activeTab}
@@ -103,6 +108,7 @@ const InfoTab = ({ posts }: InfoTabProps) => {
         onApply={handleApply}
       />
 
+      {/* TODO: 글쓰기 라우터 연결 (버튼 클릭 / 현재는 임시) */}
       <WriteButton />
     </div>
   );
