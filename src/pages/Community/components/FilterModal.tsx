@@ -37,7 +37,7 @@ const FilterModal = ({
       <div
         className='relative flex'
         style={{
-          width: '375px',
+          width: 'clamp(320px, 100vw, 540px)',
           height: '649px',
           padding: '38px 25px',
           borderRadius: '10px 10px 0 0',

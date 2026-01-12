@@ -27,21 +27,23 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           {alumniInfos.length > 0 && <MainBoxCarousel items={alumniInfos} />}
         </section>
       </div>
-      <svg width="375" height="10" viewBox="0 0 375 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      <svg width="100%" height="40" viewBox="0 0 375 10" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 0H375V10H0V0Z" fill="#ECECEC" />
       </svg>
+
       <section className='flex flex-col bg-white' style={{ padding: '30px 25px', gap: '20px' }}>
         <div className='flex items-center' style={{ gap: '5px' }}>
           <div className='text-sb-20' style={{ color: 'var(--ColorBlack, #202023)' }}>
             답변을 기다리는 질문들
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M8.25 4.5L15.75 12L8.25 19.5" stroke="#646464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M8.25 4.5L15.75 12L8.25 19.5" stroke="#646464" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
 
         <Card
-          width="325px"
+          width="100%"
           height="flex"
           className="flex flex-col"
         >
@@ -79,9 +81,6 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           })}
         </Card>
       </section>
-      <svg width="375" height="10" viewBox="0 0 375 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0H375V10H0V0Z" fill="#ECECEC" />
-      </svg>
     </div>
   );
 };

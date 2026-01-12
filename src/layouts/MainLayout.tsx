@@ -25,7 +25,10 @@ const MainLayout = ({ title, rightElement, onBack, children }: MainLayoutProps) 
           <button type='button' className='flex items-center justify-start' onClick={onBack}>
             <Icon name='back2' className='w-[28px] h-[28px]' />
           </button>
-          <div className='text-center text-[20px] font-semibold leading-[140%] tracking-[-0.02em] text-[#202023]'>
+          <div
+            className='text-center font-semibold leading-[140%] tracking-[-0.02em] text-[#202023]'
+            style={{ fontSize: 'clamp(16px, 4.2cqw, 20px)' }}
+          >
             {title}
           </div>
           <div className='flex items-center justify-end'>

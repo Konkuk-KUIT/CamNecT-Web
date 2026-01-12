@@ -215,6 +215,8 @@ const WritePage = () => {
                         }}
                     >
                         <input
+                            id='community-title'
+                            name='title'
                             type='text'
                             value={title}
                             onChange={(event) => setTitle(event.target.value)}
@@ -244,6 +246,8 @@ const WritePage = () => {
                     {/* 내용 입력 */}
                     <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 193px' }}>
                         <textarea
+                            id='community-content'
+                            name='content'
                             value={content}
                             onChange={(event) => setContent(event.target.value)}
                             placeholder='내용을 적어주세요'
@@ -261,12 +265,12 @@ const WritePage = () => {
 
             {/* 하단 사진 추가/미리보기 영역 */}
             <div
-                className='fixed left-1/2 z-40 w-[375px] -translate-x-1/2'
+                className='fixed left-1/2 z-40 w-[clamp(320px,100vw,540px)] -translate-x-1/2'
                 style={{
                     bottom: `calc(${photoButtonOffset}px + env(safe-area-inset-bottom, 0px))`,
                 }}
             >
-                <div className='flex w-full px-[25px] pb-[50px]'>
+                <div className='flex w-full px-[25px] pb-[25px]'>
                     <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
                         {/* 사진 미리보기 카드 */}
                         {photoPreviews.map((preview) => (
@@ -349,6 +353,8 @@ const WritePage = () => {
                         {/* 숨김 파일 input */}
                         <input
                             ref={fileInputRef}
+                            id='community-photos'
+                            name='photos'
                             type='file'
                             accept='image/*'
                             multiple
@@ -367,7 +373,7 @@ const WritePage = () => {
                     onClick={() => closeBoardSelector(true)}
                 >
                     <div
-                        className='flex w-[375px] flex-col'
+                        className='flex w-[clamp(320px,100vw,540px)] flex-col'
                         style={{
                             height: '235px',
                             padding: '10px 24px 56px',
@@ -421,7 +427,11 @@ const WritePage = () => {
                 >
                     <div
                         className='flex flex-col bg-white'
-                        style={{ width: '324px', height: '200px', borderRadius: '20px' }}
+                        style={{
+                            width: 'clamp(280px, 90vw, 360px)',
+                            height: '200px',
+                            borderRadius: '20px',
+                        }}
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div
@@ -452,7 +462,8 @@ const WritePage = () => {
                                 type='button'
                                 className='flex items-center justify-center text-sb-14'
                                 style={{
-                                    width: '137px',
+                                    flex: 1,
+                                    minWidth: '120px',
                                     height: '45px',
                                     borderRadius: '10px',
                                     background: 'var(--ColorSub2, #F2FCF8)',
@@ -466,7 +477,8 @@ const WritePage = () => {
                                 type='button'
                                 className='flex items-center justify-center text-b-14'
                                 style={{
-                                    width: '137px',
+                                    flex: 1,
+                                    minWidth: '120px',
                                     height: '45px',
                                     borderRadius: '10px',
                                     background: 'var(--ColorMain, #00C56C)',

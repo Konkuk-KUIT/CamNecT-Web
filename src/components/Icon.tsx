@@ -131,7 +131,11 @@ const iconPaths: Record<IconName, IconDefinition> = {
     viewBox: '0 0 28 28',
     content: (
       <path
-        d="M18.375 22.75L9.625 14L18.375 5.25" stroke="#202023" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        d='M18.375 22.75L9.625 14L18.375 5.25'
+        stroke='#202023'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
       />
     ),
   },
