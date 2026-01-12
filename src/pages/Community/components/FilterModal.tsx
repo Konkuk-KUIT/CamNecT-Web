@@ -38,8 +38,8 @@ const FilterModal = ({
         className='relative flex'
         style={{
           width: 'clamp(320px, 100vw, 540px)',
-          height: '649px',
-          padding: '38px 25px',
+          height: 'min(649px, 86dvh)',
+          padding: 'clamp(24px, 6cqw, 38px) clamp(18px, 6cqw, 25px)',
           borderRadius: '10px 10px 0 0',
           background: 'var(--Color_Gray_B, #FCFCFC)',
           boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
