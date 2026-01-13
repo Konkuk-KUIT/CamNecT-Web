@@ -196,7 +196,7 @@ const WritePage = () => {
                                     ? 'var(--ColorMain, #00C56C)'
                                     : 'var(--ColorGray2, #A1A1A1)',
                             }}
-                            onClick={isSubmitEnabled ? handleSubmit : undefined}
+                            onClick={handleSubmit}
                             disabled={!isSubmitEnabled}
                         >
                             완료
