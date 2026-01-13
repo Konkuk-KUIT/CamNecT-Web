@@ -62,9 +62,15 @@ export const BottomNav = () => {
     }
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 mx-auto 
-        w-full max-w-[430px] h-[56px] bg-white">
-            <ul className="flex justify-between items-center h-full">
+        <nav 
+            className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-[430px] bg-white border-t border-gray-100 z-50"
+            style={{
+                // env(safe-area) : 브라우저 화면 하단 여백 (브라우저의 하단 바가 가리는 영역)
+                height: 'calc(56px + env(safe-area-inset-bottom))',
+                paddingBottom: 'env(safe-area-inset-bottom)'
+            }}
+        >
+            <ul className="flex justify-between items-center h-[56px]">
                 {navList.map((nav) => {
 
                     // 현재 URL로 버튼 클릭여부 판단
