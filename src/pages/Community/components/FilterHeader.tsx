@@ -29,7 +29,7 @@ const FilterHeader = ({ activeFilters, onOpenFilter, onRemoveFilter }: FilterHea
               background: 'var(--ColorGray1, #ECECEC)',
             }}
           >
-            <span className='text-m-12 text-gray-900'>{filter}</span>
+            <span className='text-m-12 text-gray-750'>{filter}</span>
             <svg
               width='12'
               height='12'

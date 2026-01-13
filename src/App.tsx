@@ -1,8 +1,9 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import HomePage from './pages/Home/HomePage';
-import CommunityPage from './pages/Community/CommunityPage';
-import WritePage from './pages/Community/WritePage';
-import AlumniSearchPage from './pages/Alumni-Search/Alumni-search';
+import HomePage from './pages/home/HomePage';
+import CommunityPage from './pages/community/CommunityPage';
+import WritePage from './pages/community/WritePage';
+import AlumniSearchPage from './pages/alumni/AlumniPage';
+import AlumniProfilePage from './pages/alumni/ProfilePage';
 import './styles/global.css';
 
 const router = createBrowserRouter([
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
   {
     path: '/alumni-search',
     element: <AlumniSearchPage />,
+  },
+  {
+    path: '/alumni/:id',
+    element: <AlumniProfilePage />,
   },
 ]);
 

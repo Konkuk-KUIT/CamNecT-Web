@@ -1,56 +1,15 @@
 import { useDeferredValue, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import Category from '../../components/Category';
 import MainLayout from '../../layouts/MainLayout';
-import FilterHeader from '../Community/components/FilterHeader';
-import FilterModal from '../Community/components/FilterModal';
-import useCommunityFilters from '../Community/hooks/useCommunityFilters';
-
-type AlumniProfile = {
-  id: string;
-  author: {
-    name: string;
-    major: string;
-    studentId: string;
-  };
-  profileImage?: string;
-  categories: string[];
-  intro: string;
-};
-
-const profilePlaceholder =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60'><rect width='60' height='60' fill='%23D5D5D5'/></svg>";
-
-const alumniList: AlumniProfile[] = [
-  {
-    id: 'alumni-1',
-    author: { name: '김아린', major: '컴퓨터공학부', studentId: '18' },
-    profileImage: profilePlaceholder,
-    categories: ['백엔드', '커리어', '면접'],
-    intro: '대기업 백엔드 엔지니어로 근무 중입니다. 이력서/면접 준비와 커리어 방향 고민 상담 가능합니다.',
-  },
-  {
-    id: 'alumni-2',
-    author: { name: '박지훈', major: '경영학부', studentId: '16' },
-    categories: ['마케팅', '브랜딩', '포트폴리오'],
-    intro: '브랜드 마케팅 실무 경험을 바탕으로 포트폴리오 피드백과 프로젝트 기획 조언 드립니다.',
-  },
-  {
-    id: 'alumni-3',
-    author: { name: '이서연', major: '디자인학부', studentId: '17' },
-    profileImage: profilePlaceholder,
-    categories: ['UI/UX', '포트폴리오', '디자인'],
-    intro: '스타트업 UI/UX 디자이너입니다. 디자인 툴 팁과 포트폴리오 구조 피드백 가능해요.',
-  },
-  {
-    id: 'alumni-4',
-    author: { name: '정민호', major: '미디어디자인학부', studentId: '15' },
-    categories: ['영상', '콘텐츠', '기획'],
-    intro: '콘텐츠 기획 및 영상 제작 실무를 경험했습니다. 취업 준비와 포트폴리오 개선을 도와드릴게요.',
-  },
-];
+import { alumniList } from './data';
+import FilterHeader from '../community/components/FilterHeader';
+import FilterModal from '../community/components/FilterModal';
+import useCommunityFilters from '../community/hooks/useCommunityFilters';
 
 const AlumniSearchPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
   const {
@@ -187,11 +146,20 @@ const AlumniSearchPage = () => {
               key={alumni.id}
               width='100%'
               height='auto'
-              className='flex items-start'
+              className='flex items-start cursor-pointer'
               style={{
                 minHeight: '161px',
                 padding: 'clamp(12px, 4cqw, 15px)',
                 gap: 'clamp(14px, 5cqw, 20px)',
+              }}
+              role='button'
+              tabIndex={0}
+              onClick={() => navigate(`/alumni/${alumni.id}`)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  navigate(`/alumni/${alumni.id}`);
+                }
               }}
             >
               {alumni.profileImage ? (
