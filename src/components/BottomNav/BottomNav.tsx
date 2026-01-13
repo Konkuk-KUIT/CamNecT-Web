@@ -74,7 +74,8 @@ export const BottomNav = () => {
                 {navList.map((nav) => {
 
                     // 현재 URL로 버튼 클릭여부 판단
-                    const isActive = location.pathname.startsWith(nav.path);
+                    // "/homexxx" 주소는 false, "/home/xxx" 주소는 true
+                    const isActive = location.pathname === nav.path || location.pathname.startsWith(nav.path + '/');
                     
                     return (
                         <BottomNavButton key={nav.icon} icon={nav.icon} activeIcon={nav.activeIcon} label={nav.label} path={nav.path} hasBadge={nav.hasBadge} isActive={isActive} handleNavClick={() => handleNavClick(nav.path)}     />
