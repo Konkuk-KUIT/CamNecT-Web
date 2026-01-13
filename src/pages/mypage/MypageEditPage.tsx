@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR, CAREER_STATUS_KR } from "../../types/mypage/mypageTypes";
+import { type EducationItem, type CareerItem, type CertificateItem } from "../../types/mypage/mypageTypes";
 import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import Icon from "../../components/Icon";
@@ -7,7 +7,7 @@ import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
 
 
-export default function ProfileEditPage() {
+export default function MypageEditPage() {
     const meUid: string = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
 
@@ -34,33 +34,33 @@ export default function ProfileEditPage() {
 
     const handleSave = () => {
         // Save logic here
-        alert("프로필이 저장되었습니다!");
+        alert("프로필이 저장되었습니다!"); 
     };
 
     return (
-        <div className="h-dvh mx-auto w-full min-w-[360px] max-w-[450px] bg-white overflow-y-auto">
-            {/* Header */}
+        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white overflow-y-auto">
+            {/* 헤더 - TODO: layout 컴포넌트 형태로 변환 */}
             <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
                 <button
                     className="w-[24px] h-[24px]"
-                    onClick={() => window.history.back()}
+                    onClick={() => alert("마이페이지로 이동")} //TODO: router 설정
                 >
                     <Icon name='cancel' className="block shrink-0"/>
                 </button>
                 <span className="text-SB-20 text-gray-900">프로필 수정</span>
                 <button
                     className="text-B-16 text-gray-650"
-                    onClick={handleSave}
+                    onClick={handleSave} //TODO: router 설정
                 >
                     완료
                 </button>
             </header>
 
-            {/* Profile Section */}
+            {/* 프로필 사진 선택 */}
             <section className="w-full">
                 <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
                     <button className="relative h-[56px] w-[56px]"
-                    onClick={() => alert("사진 고르기")}>
+                    onClick={() => alert("사진 고르기")}> {/*TODO: router 설정*/}
                         <img
                         src={user.profileImg}
                         alt="프로필"
@@ -83,7 +83,7 @@ export default function ProfileEditPage() {
                     <div className="w-full flex flex-col gap-[7px]">
                         <div className="flex items-center justify-between">
                             <div className="text-SB-14 text-black">태그</div>
-                            <button onClick={() => alert("태그 수정 페이지로 이동")}
+                            <button onClick={() => alert("태그 수정 페이지로 이동")} //TODO: router 설정
                             className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                 수정하기
                                 <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
@@ -103,7 +103,7 @@ export default function ProfileEditPage() {
                     <div className="w-full flex flex-col gap-[7px]">
                         <div className="flex items-center justify-between">
                             <div className="text-SB-14 text-black">자기 소개</div>
-                            <button onClick={() => alert("자기소개 수정 페이지로 이동")}
+                            <button onClick={() => alert("자기소개 수정 페이지로 이동")} //TODO: router 설정
                             className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                 수정하기
                                 <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
@@ -161,205 +161,6 @@ export default function ProfileEditPage() {
                     isEdit={true}
                 />
             </div>
-            {/* Portfolio Section
-            <section className="px-[25px] py-[30px]">
-                <PortfolioEditSection
-                    portfolios={portfolios}
-                    onAdd={() => alert("포트폴리오 추가")}
-                    onEdit={(id) => alert(`포트폴리오 ${id} 수정`)}
-                />
-            </section>
-
-
-            <div className="w-full h-[10px] bg-gray-150"></div>
-
-
-            <section className="px-[25px] py-[30px]">
-                <button
-                    onClick={() => {
-                        setEditingEducation(null);
-                        setShowEducationModal(true);
-                    }}
-                    className="w-full flex items-center justify-between mb-[20px]"
-                >
-                    <span className="text-SB-16-hn text-gray-900">학력</span>
-                    <Icon name="chevron-right" className="w-[20px] h-[20px] text-gray-500" />
-                </button>
-                
-                {educations.length === 0 ? (
-                    <div className="text-R-14 text-gray-500">아직 학력 정보가 등록되지 않았어요!</div>
-                ) : (
-                    <div className="flex flex-col gap-[12px]">
-                        {educations
-                            .slice()
-                            .sort((a, b) => b.year - a.year)
-                            .map((edu, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        setEditingEducation(edu);
-                                        setShowEducationModal(true);
-                                    }}
-                                    className="text-left text-R-14 text-gray-750 hover:text-gray-900"
-                                >
-                                    {edu.year}년 {edu.school} {edu.status === 'enrolled' ? '재학' : edu.status === 'graduated' ? '졸업' : '졸업예정'}
-                                </button>
-                            ))}
-                    </div>
-                )}
-            </section>
-
-
-            <div className="w-full h-[10px] bg-gray-150"></div>
-
-
-            <section className="px-[25px] py-[30px]">
-                <button
-                    onClick={() => {
-                        setEditingCareer(null);
-                        setShowCareerModal(true);
-                    }}
-                    className="w-full flex items-center justify-between mb-[20px]"
-                >
-                    <span className="text-SB-16-hn text-gray-900">경력</span>
-                    <Icon name="chevron-right" className="w-[20px] h-[20px] text-gray-500" />
-                </button>
-                
-                {careers.length === 0 ? (
-                    <div className="text-R-14 text-gray-500">등록된 경력이 없습니다.</div>
-                ) : (
-                    <div className="flex flex-col gap-[12px]">
-                        {careers
-                            .slice()
-                            .sort((a, b) => b.year - a.year)
-                            .map((career, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        setEditingCareer(career);
-                                        setShowCareerModal(true);
-                                    }}
-                                    className="text-left text-R-14 text-gray-750 hover:text-gray-900"
-                                >
-                                    {career.year}년 {career.organization} {career.status === 'current' ? '재직' : '퇴사'}
-                                </button>
-                            ))}
-                    </div>
-                )}
-            </section>
-
-            {showImageModal && (
-                <ProfileImageModal
-                    onClose={() => setShowImageModal(false)}
-                    onSelect={(source) => {
-                        alert(`${source} 선택됨`);
-                        setShowImageModal(false);
-                    }}
-                    onDelete={() => {
-                        alert("프로필 사진 삭제");
-                        setShowImageModal(false);
-                    }}
-                />
-            )}
-
-            {showIntroModal && (
-                <IntroductionModal
-                    initialValue={user.introduction}
-                    onClose={() => setShowIntroModal(false)}
-                    onSave={(newIntro) => {
-                        setUser({ ...user, introduction: newIntro });
-                        setShowIntroModal(false);
-                    }}
-                />
-            )}
-
-            {showTagModal && (
-                <TagEditModal
-                    tags={user.userTags}
-                    onClose={() => setShowTagModal(false)}
-                    onSave={(newTags) => {
-                        setUser({ ...user, userTags: newTags });
-                        setShowTagModal(false);
-                    }}
-                />
-            )}
-
-            {showEducationModal && (
-                <EducationModal
-                    education={editingEducation}
-                    onClose={() => {
-                        setShowEducationModal(false);
-                        setEditingEducation(null);
-                    }}
-                    onSave={(newEducation) => {
-                        if (editingEducation) {
-                            setEducations(educations.map(e => 
-                                e === editingEducation ? newEducation : e
-                            ));
-                        } else {
-                            setEducations([...educations, newEducation]);
-                        }
-                        setShowEducationModal(false);
-                        setEditingEducation(null);
-                    }}
-                    onDelete={() => {
-                        if (editingEducation) {
-                            setEducations(educations.filter(e => e !== editingEducation));
-                        }
-                        setShowEducationModal(false);
-                        setEditingEducation(null);
-                    }}
-                />
-            )}
-
-            {showCareerModal && (
-                <CareerModal
-                    career={editingCareer}
-                    onClose={() => {
-                        setShowCareerModal(false);
-                        setEditingCareer(null);
-                    }}
-                    onSave={(newCareer) => {
-                        if (editingCareer) {
-                            setCareers(careers.map(c => 
-                                c === editingCareer ? newCareer : c
-                            ));
-                        } else {
-                            setCareers([...careers, newCareer]);
-                        }
-                        setShowCareerModal(false);
-                        setEditingCareer(null);
-                    }}
-                    onDelete={() => {
-                        if (editingCareer) {
-                            setCareers(careers.filter(c => c !== editingCareer));
-                        }
-                        setShowCareerModal(false);
-                        setEditingCareer(null);
-                    }}
-                />
-            )} */}
         </div> 
     );
-}
-
-function makeEducationLines(items: EducationItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => b.year - a.year) //최신순 정렬
-    .map((e) => `${e.year}년 ${e.school} ${EDUCATION_STATUS_KR[e.status]}`);
-}
-
-function makeCareerLines(items: CareerItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => a.year - b.year)
-    .map((c) => `${c.year}년 ${c.organization} ${CAREER_STATUS_KR[c.status]}`);
-}
-
-function makeCertificateLines(items: CertificateItem[]) {
-  return items
-    .slice()
-    .sort((a, b) => b.acquiredYear - a.acquiredYear) // 최신 취득 먼저
-    .map((x) => `${x.acquiredYear}년 ${x.name} 취득`);
 }

@@ -15,7 +15,7 @@ export default function PortfolioSection({
     <BaseSection
       title="포트폴리오"
       right={
-          <button onClick={() => alert("포트폴리오 페이지로 이동")}
+          <button onClick={() => alert("포트폴리오 페이지로 이동")} //TODO: router 설정
                             className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                 전체보기
                                 <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
@@ -43,7 +43,7 @@ export default function PortfolioSection({
                 key={p.portfolioId}
                 type="button"
                 className="shrink-0 flex flex-col justify-center items-start gap-[5px]"
-                onClick={() => alert(`포트폴리오 열기: ${p.id}`)}
+                onClick={() => alert(`포트폴리오 열기: ${p.id}`)} //TODO: router 설정
               >
                 <div className="w-[160px] h-[90px] overflow-hidden rounded-[12px]">
                   {thumbnail ? (

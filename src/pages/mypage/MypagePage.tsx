@@ -17,14 +17,14 @@ export default function MyPage() {
     const portfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[meUid] ?? [];
 
     return (
-        <div className="h-dvh mx-auto w-full min-w-[360px] max-w-[450px] bg-white">
-        {/* Header */}
+        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white">
+        {/* 헤더 - TODO: layout대로 설정 */}
         
             <header className="w-full relative h-[64px] border-b border-gray-150 flex items-center justify-center">
                 {!isProfileOwner &&
                     <button
                     className="absolute left-[25px] top-1/2 -translate-y-1/2"
-                    onClick={() => alert("이전 페이지로 이동")}
+                    onClick={() => alert("이전 페이지로 이동")} //TODO: router 설정
                     >
                         <Icon name='back2' />
                     </button>
@@ -37,14 +37,14 @@ export default function MyPage() {
                 {isProfileOwner &&
                     <button
                     className="absolute right-[19px] top-1/2 -translate-y-1/2"
-                    onClick={() => alert("설정으로 이동")}
+                    onClick={() => alert("설정으로 이동")}//TODO: router 설정
                     >
                         <Icon name='setting' />
                     </button>
                 }
             </header>
 
-        {/* Profile Card */}
+        {/* 프로필 */}
             <section className="px-[25px] pt-[40px] pb-[33px] flex flex-col gap-[20px]">
                 <div className="flex flex-1 flex-col gap-[22px]">
                     <div className="w-full flex items-start gap-[33px]">
@@ -63,7 +63,7 @@ export default function MyPage() {
                                 </div>
                                 {!isProfileOwner &&
                                 <button
-                                onClick={() => alert("팔로우")}
+                                onClick={() => alert("팔로우")}//TODO: router 설정
                                 >
                                     <div className="w-[62px] h-[25px] rounded-[6px] border border-primary flex justify-center items-center gap-[5px]">
                                         <Icon name="follow" className="block w-[12px] h-[12px] shrink-0"/>
@@ -98,7 +98,7 @@ export default function MyPage() {
                             </div>
                         </div>
 
-                        <p className="mt-[11px] h-[63px] leading-[1.5] whitespace-pre-line text-R-14 text-gray-750">
+                        <p className="mt-[11px] min-h-[63px] leading-[1.5] whitespace-pre-line text-R-14 text-gray-750">
                             {user.introduction}
                         </p>
                     </div>
@@ -106,14 +106,14 @@ export default function MyPage() {
                 {isProfileOwner ? 
                 <button
                 className="h-[40px] w-full rounded-[6px] flex justify-center items-center bg-primary"
-                onClick={() => alert("프로필 수정 페이지로 이동")}
+                onClick={() => alert("프로필 수정 페이지로 이동")} //TODO: router 설정
                 >
                     <span className="text-SB-14-hn text-white">프로필 수정하기</span>
                 </button>
                 :
                 <button
                 className="h-[40px] w-full rounded-[6px] flex justify-center items-center bg-primary"
-                onClick={() => alert("커피챗 요청 보내는 페이지로 이동")}
+                onClick={() => alert("커피챗 요청 보내는 페이지로 이동")} //TODO: router 설정
                 >
                     <span className="text-SB-14-hn text-white">커피챗 요청하기</span>
                 </button>
@@ -134,19 +134,19 @@ export default function MyPage() {
                 <InfoSection
                     type="education"
                     items={educations}
-                    isEdit={true}
+                    isEdit={false}
                 />
 
                 <InfoSection
                     type="career"
                     items={careers}
-                    isEdit={true}
+                    isEdit={false}
                 />
 
                 <InfoSection
                     type="certificate"
                     items={certificates}
-                    isEdit={true}
+                    isEdit={false}
                 />
             </div>
         </div>
