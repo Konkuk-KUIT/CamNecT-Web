@@ -52,12 +52,18 @@ export const BottomNav = () => {
     const location = useLocation(); 
 
     const handleNavClick = (path: string) => {
+
+        if (location.pathname === path) {
+            window.scrollTo({top: 0, behavior: "smooth"}); // 제일 위로 스크롤
+            return;
+        }
+
         navigate(path);        
     }
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 mx-auto 
-        w-full max-w-[430px] h-[56px]">
+        w-full max-w-[430px] h-[56px] bg-white">
             <ul className="flex justify-between items-center h-full">
                 {navList.map((nav) => {
 
