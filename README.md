@@ -182,7 +182,15 @@ src/
 ┃ ┣ activity/
 ┃ ┃ ┗ activityTypes.ts
 ┃ ┗ ...
+┣ layouts/ # 조립식 레이아웃 폴더
+┃ ┣ FullLayout.tsx # Header + BottomNav
+┃ ┣ HeaderLayout.tsx
+┃ ┗ components/
+┃   ┗ Header.tsx # Header 조립 부품
+┃
 ┣ router/ # 라우팅 설정
+┃ ┣ Router.tsx # 전체 라우트 정의
+┃ ┗ AuthGuard.tsx # 로그인 방어막 (PrivateRoute)
 ┣ styles/ # 전역 스타일
 ┣ App.tsx
 ┗ main.tsx
