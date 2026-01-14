@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { MOCK_SESSION } from "../../mock/mypages";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
@@ -18,7 +18,6 @@ export const MypageEditPage = () => {
 
     const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
-    const [uploading, setUploading] = useState(false);
 
     //외부 클릭 시 modal 닫기 
     useEffect(() => {
@@ -52,13 +51,10 @@ export const MypageEditPage = () => {
 
     const handleImageUpload = (file: File, source: 'album' | 'camera') => {
         console.log(`${source}에서 이미지 가져옴`)
-        setUploading(true);
         const imageUrl = URL.createObjectURL(file);
         setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
-        setUploading(false);
         closeModal();
     };
-    {uploading && <></>}//TODO:image loading용 div 작성
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
