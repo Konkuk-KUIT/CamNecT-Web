@@ -73,8 +73,11 @@ export default function MypageEditPage() {
                     </button>
                     <span className="text-SB-20 text-gray-900">프로필 수정</span>
                     <button
-                        className="text-B-16 text-gray-650"
+                        className={`text-b-16-hn transition-colors ${
+                            hasChanges ? 'text-primary' : 'text-gray-650'
+                        }`}
                         onClick={handleSave} //TODO: router 설정
+                        disabled={!hasChanges}
                     >
                         완료
                     </button>
