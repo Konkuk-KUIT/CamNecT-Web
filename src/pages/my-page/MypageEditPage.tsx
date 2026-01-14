@@ -17,7 +17,7 @@ export const MypageEditPage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
 
     const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
-    const { currentModal, editingItem, openModal, closeModal } = useProfileEditModals();
+    const { currentModal, openModal, closeModal } = useProfileEditModals();
     const [uploading, setUploading] = useState(false);
 
     //외부 클릭 시 modal 닫기 
@@ -58,7 +58,7 @@ export const MypageEditPage = () => {
         setUploading(false);
         closeModal();
     };
-    //TODO: {uploading && <></>} 같은 image loading용 div 작성
+    {uploading && <></>}//TODO:image loading용 div 작성
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
@@ -196,7 +196,6 @@ export const MypageEditPage = () => {
             {currentModal === 'image' && (
                 <ProfileImageModal
                     ref={modalRef}
-                    onClose={closeModal}
                     onSelect={handleImageUpload}
                     onDelete={() => {
                         setData({ ...data, user: { ...user, profileImg: '' } });

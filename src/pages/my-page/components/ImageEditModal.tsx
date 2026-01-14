@@ -2,13 +2,12 @@ import Icon from "../../../components/Icon";
 import { forwardRef, useRef } from "react";
 
 interface ProfileImageModalProps {
-    onClose: () => void;
     onSelect: (file: File, source: 'album' | 'camera') => void;
     onDelete: () => void;
 }
 
 export default forwardRef<HTMLDivElement, ProfileImageModalProps>(
-    function ProfileImageModal({ onClose, onSelect, onDelete }, ref) {
+    function ProfileImageModal({ onSelect, onDelete }, ref) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
