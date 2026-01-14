@@ -8,11 +8,13 @@ import PortfolioSection from "./components/PortfolioSection";
 import ProfileImageModal from "./components/ImageEditModal";
 import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
+import TagEditModal from "./components/TagsEditModal";
 
 
 export default function MypageEditPage() {
     const userId: string = MOCK_SESSION.meUid;
     const modalRef = useRef<HTMLDivElement>(null);
+    const pageRef = useRef<HTMLDivElement>(null);
 
     const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
     const { currentModal, editingItem, openModal, closeModal } = useProfileEditModals();
@@ -32,6 +34,22 @@ export default function MypageEditPage() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [currentModal, closeModal]);
 
+    //modal 열리면 스크롤 lock
+    useEffect(() => {
+    const el = pageRef.current;
+        if (!el) return;
+
+        if (!currentModal) return;
+
+        const prevOverflow = el.style.overflow;
+        el.style.overflow = "hidden";
+
+        return () => {
+            el.style.overflow = prevOverflow;
+        };
+    }, [currentModal]);
+
+
     const handleImageUpload = (file: File, source: 'album' | 'camera') => {
         const imageUrl = URL.createObjectURL(file);
         setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
@@ -43,128 +61,130 @@ export default function MypageEditPage() {
     const { user, educations, careers, certificates, portfolios, showFollowPublic } = data;
 
     return (
-        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white overflow-y-auto relative">
-            {/* 헤더 - TODO: layout 컴포넌트 형태로 변환 */}
-            <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
-                <button
-                    className="w-[24px] h-[24px]"
-                    onClick={() => alert("마이페이지로 이동")} //TODO: router 설정
-                >
-                    <Icon name='cancel' className="block shrink-0"/>
-                </button>
-                <span className="text-SB-20 text-gray-900">프로필 수정</span>
-                <button
-                    className="text-B-16 text-gray-650"
-                    onClick={handleSave} //TODO: router 설정
-                >
-                    완료
-                </button>
-            </header>
-
-            {/* 프로필 사진 선택 */}
-            <section className="w-full">
-                <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
-                    <button className="relative h-[56px] w-[56px]"
-                    onClick={() => openModal('image')}> {/*TODO: router 설정*/}
-                        <img
-                        src={user.profileImg}
-                        alt="프로필"
-                        className="h-[56px] w-[56px] rounded-full"
-                    />
-                        <div className="absolute top-0 h-[56px] w-[56px] rounded-full bg-gray-900/60"></div>
-                        <Icon name="cameraWhite" className="absolute top-[16px] left-[16px] block shrink-0" />
-                    </button>
-                    
-                    <div className="flex flex-col flex-1 gap-[6px]">
-                        <div className="text-B-18-hn text-gray-900">{user.name}</div>
-                        <div className="text-R-12-hn text-gray-750">
-                            {user.major} {user.gradeNumber}학번
-                        </div>
-                    </div>
-                </div>
-
-                {/* 태그 및 자기소개 */}
-                <div className="w-full flex flex-col border-b border-gray-150 px-[25px] pt-[18px] pb-[23px] gap-[23px]">
-                    <div className="w-full flex flex-col gap-[7px]">
-                        <div className="flex items-center justify-between">
-                            <div className="text-SB-14 text-black">태그</div>
-                            <button onClick={() => alert("태그 수정 페이지로 이동")} //TODO: router 설정
-                            className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
-                                수정하기
-                                <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
-                            </button>
-                        </div>
-                        <div className="w-full flex flex-wrap gap-[5px] pl-[4px]">
-                            {user.userTags.map((t) => (
-                                <span
-                                    key={t}
-                                    className="flex justify-center items-center rounded-[3px] border border-primary bg-green-50 px-[5px] py-[3px] text-R-12-hn text-primary"
-                                >
-                                    {t}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="w-full flex flex-col gap-[7px]">
-                        <div className="flex items-center justify-between">
-                            <div className="text-SB-14 text-black">자기 소개</div>
-                            <button onClick={() => alert("자기소개 수정 페이지로 이동")} //TODO: router 설정
-                            className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
-                                수정하기
-                                <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
-                            </button>
-                        </div>
-                        <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line">
-                            {user.introduction}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
-                    <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
+        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] relative">
+            <div ref={pageRef} className="w-full h-full bg-white overflow-y-auto overscroll-none">
+                {/* 헤더 - TODO: layout 컴포넌트 형태로 변환 */}
+                <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
                     <button
-                        onClick={() => setData({ ...data, showFollowPublic: !showFollowPublic })}
-                        className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
-                            showFollowPublic ? 'bg-gray-300' : 'bg-primary'
-                        }`}
+                        className="w-[24px] h-[24px]"
+                        onClick={() => alert("마이페이지로 이동")} //TODO: router 설정
                     >
-                        <div
-                            className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] rounded-full bg-white transition-transform duration-300 ease-in-out ${
-                                showFollowPublic ? "translate-x-0" : "translate-x-[26px]"
-                            }`}
-                        />
+                        <Icon name='cancel' className="block shrink-0"/>
                     </button>
+                    <span className="text-SB-20 text-gray-900">프로필 수정</span>
+                    <button
+                        className="text-B-16 text-gray-650"
+                        onClick={handleSave} //TODO: router 설정
+                    >
+                        완료
+                    </button>
+                </header>
+
+                {/* 프로필 사진 선택 */}
+                <section className="w-full">
+                    <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
+                        <button className="relative h-[56px] w-[56px]"
+                        onClick={() => openModal('image')}> {/*TODO: router 설정*/}
+                            <img
+                            src={user.profileImg}
+                            alt="프로필"
+                            className="h-[56px] w-[56px] rounded-full"
+                        />
+                            <div className="absolute top-0 h-[56px] w-[56px] rounded-full bg-gray-900/60"></div>
+                            <Icon name="cameraWhite" className="absolute top-[16px] left-[16px] block shrink-0" />
+                        </button>
+                        
+                        <div className="flex flex-col flex-1 gap-[6px]">
+                            <div className="text-B-18-hn text-gray-900">{user.name}</div>
+                            <div className="text-R-12-hn text-gray-750">
+                                {user.major} {user.gradeNumber}학번
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 태그 및 자기소개 */}
+                    <div className="w-full flex flex-col border-b border-gray-150 px-[25px] pt-[18px] pb-[23px] gap-[23px]">
+                        <div className="w-full flex flex-col gap-[7px]">
+                            <div className="flex items-center justify-between">
+                                <div className="text-SB-14 text-black">태그</div>
+                                <button onClick={() => openModal('tags')} //TODO: router 설정
+                                className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
+                                    수정하기
+                                    <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
+                                </button>
+                            </div>
+                            <div className="w-full flex flex-wrap gap-[5px] pl-[4px]">
+                                {user.userTags.map((t) => (
+                                    <span
+                                        key={t}
+                                        className="flex justify-center items-center rounded-[3px] border border-primary bg-green-50 px-[5px] py-[3px] text-R-12-hn text-primary"
+                                    >
+                                        {t}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="w-full flex flex-col gap-[7px]">
+                            <div className="flex items-center justify-between">
+                                <div className="text-SB-14 text-black">자기 소개</div>
+                                <button onClick={() => alert("자기소개 수정 페이지로 이동")} //TODO: router 설정
+                                className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
+                                    수정하기
+                                    <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
+                                </button>
+                            </div>
+                            <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line">
+                                {user.introduction}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
+                        <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
+                        <button
+                            onClick={() => setData({ ...data, showFollowPublic: !showFollowPublic })}
+                            className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
+                                showFollowPublic ? 'bg-gray-300' : 'bg-primary'
+                            }`}
+                        >
+                            <div
+                                className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] rounded-full bg-white transition-transform duration-300 ease-in-out ${
+                                    showFollowPublic ? "translate-x-0" : "translate-x-[26px]"
+                                }`}
+                            />
+                        </button>
+                    </div>
+                </section>
+
+                {/* Divider */}
+                <div className="w-full h-[10px] bg-gray-150"></div>
+
+                <div className="flex flex-col gap-[30px] py-[30px] px-[25px]">
+
+                    <PortfolioSection
+                        portfolios={portfolios}
+                        isEdit={true}
+                    />
+
+                    <InfoSection
+                        type="education"
+                        items={educations}
+                        isEdit={true}
+                    />
+
+                    <InfoSection
+                        type="career"
+                        items={careers}
+                        isEdit={true}
+                    />
+
+                    <InfoSection
+                        type="certificate"
+                        items={certificates}
+                        isEdit={true}
+                    />
                 </div>
-            </section>
-
-            {/* Divider */}
-            <div className="w-full h-[10px] bg-gray-150"></div>
-
-            <div className="flex flex-col gap-[30px] py-[30px] px-[25px]">
-
-                <PortfolioSection
-                    portfolios={portfolios}
-                    isEdit={true}
-                />
-
-                <InfoSection
-                    type="education"
-                    items={educations}
-                    isEdit={true}
-                />
-
-                <InfoSection
-                    type="career"
-                    items={careers}
-                    isEdit={true}
-                />
-
-                <InfoSection
-                    type="certificate"
-                    items={certificates}
-                    isEdit={true}
-                />
-            </div>
+            </div> 
 
             {currentModal === 'image' && (
                 <ProfileImageModal
@@ -177,6 +197,16 @@ export default function MypageEditPage() {
                     }}
                 />
             )}
-        </div> 
+                {currentModal === 'tags' && (
+                    <TagEditModal
+                        tags={user.userTags || []}
+                        onClose={closeModal}
+                        onSave={(newTags) => { 
+                            setData({ ...data, user: { ...user, userTags: newTags } }); 
+                            closeModal(); 
+                        }}
+                    />
+                )}
+        </div>
     );
 }

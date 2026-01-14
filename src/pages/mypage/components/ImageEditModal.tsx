@@ -51,7 +51,7 @@ export default forwardRef<HTMLDivElement, ProfileImageModalProps>(
                     </button>
 
                     <button
-                        onClick={onDelete}
+                        onClick={onDelete} //TODO: 이미지 삭제했을 시의 임시 사진 정하기
                         className="flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
                     >
                         <Icon name="delete" className="w-[20px] h-[20px] block shrink-0" />
@@ -60,7 +60,6 @@ export default forwardRef<HTMLDivElement, ProfileImageModalProps>(
                 </div>
 
                 <input
-
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"

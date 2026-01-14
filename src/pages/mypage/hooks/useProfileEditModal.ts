@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type EducationItem, type CareerItem, type CertificateItem } from "../../../types/mypage/mypageTypes";
 
-type ModalType = 'image' | 'intro' | 'tag' | 'education' | 'career' | 'certificate' | null;
+type ModalType = 'image' | 'intro' | 'tags' | 'education' | 'career' | 'certificate' | null;
 
 export function useProfileEditModals() {
     const [currentModal, setCurrentModal] = useState<ModalType>(null);
