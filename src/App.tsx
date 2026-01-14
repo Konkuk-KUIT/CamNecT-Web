@@ -5,7 +5,7 @@ import './styles/global.css';
 
 function App() {
   //return <TestPage />;
-  return <MyPage />;
+  return <ProfileEditPage />;
 }
 
 export default App;

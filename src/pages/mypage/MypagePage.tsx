@@ -127,8 +127,6 @@ export default function MyPage() {
 
                 <PortfolioSection
                     portfolios={portfolios}
-                    listTo="/mypage/portfolios"
-                    detailTo={(id) => `/portfolios/${id}`}
                 />
 
                 <InfoSection

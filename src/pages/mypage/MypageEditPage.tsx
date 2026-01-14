@@ -1,44 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type EducationItem, type CareerItem, type CertificateItem } from "../../types/mypage/mypageTypes";
 import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
+import ProfileImageModal from "./components/ImageEditModal";
+import { useProfileEdit } from "./hooks/useProfileEdit";
+import { useProfileEditModals } from "./hooks/useProfileEditModal";
 
 
 export default function MypageEditPage() {
-    const meUid: string = MOCK_SESSION.meUid;
-    const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
+    const userId: string = MOCK_SESSION.meUid;
+    const modalRef = useRef<HTMLDivElement>(null);
 
-    const [user, setUser] = useState(meDetail.user);
-    const [educations, setEducations] = useState<EducationItem[]>(meDetail.educations);
-    const [careers, setCareers] = useState<CareerItem[]>(meDetail.careers);
-    const [certificates, setCertificates] = useState<CertificateItem[]>(meDetail.certificates);
-    const [portfolios, setPortfolios] = useState(MOCK_PORTFOLIOS_BY_OWNER_ID[meUid] ?? []);
-    
-    const [showFollowPublic, setShowFollowPublic] = useState(true);
+    const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
+    const { currentModal, editingItem, openModal, closeModal } = useProfileEditModals();
+    const [uploading, setUploading] = useState(false);
 
-    // Modal states
-    const [showImageModal, setShowImageModal] = useState(false);
-    const [showIntroModal, setShowIntroModal] = useState(false);
-    const [showTagModal, setShowTagModal] = useState(false);
-    const [showEducationModal, setShowEducationModal] = useState(false);
-    const [showCareerModal, setShowCareerModal] = useState(false);
-    const [showCertificateModal, setShowCertificateModal] = useState(false);
-    const [editingEducation, setEditingEducation] = useState<EducationItem | null>(null);
-    const [editingCareer, setEditingCareer] = useState<CareerItem | null>(null);
-    const [editingCertificate, setCertificateItem] = useState<CertificateItem | null>(null);
+    //외부 클릭 시 modal 닫기 
+    useEffect(() => {
+        if (!currentModal) return;
+
+        const handleClickOutside = (event: MouseEvent) => {
+            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+                closeModal();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [currentModal, closeModal]);
+
+    const handleImageUpload = (file: File, source: 'album' | 'camera') => {
+        const imageUrl = URL.createObjectURL(file);
+        setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
+        closeModal();
+    };
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
-    const handleSave = () => {
-        // Save logic here
-        alert("프로필이 저장되었습니다!"); 
-    };
+    const { user, educations, careers, certificates, portfolios, showFollowPublic } = data;
 
     return (
-        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white overflow-y-auto">
+        <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white overflow-y-auto relative">
             {/* 헤더 - TODO: layout 컴포넌트 형태로 변환 */}
             <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
                 <button
@@ -60,14 +65,14 @@ export default function MypageEditPage() {
             <section className="w-full">
                 <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
                     <button className="relative h-[56px] w-[56px]"
-                    onClick={() => alert("사진 고르기")}> {/*TODO: router 설정*/}
+                    onClick={() => openModal('image')}> {/*TODO: router 설정*/}
                         <img
                         src={user.profileImg}
                         alt="프로필"
                         className="h-[56px] w-[56px] rounded-full"
                     />
                         <div className="absolute top-0 h-[56px] w-[56px] rounded-full bg-gray-900/60"></div>
-                        <Icon name="camera" className="absolute top-[16px] left-[16px] block shrink-0" />
+                        <Icon name="cameraWhite" className="absolute top-[16px] left-[16px] block shrink-0" />
                     </button>
                     
                     <div className="flex flex-col flex-1 gap-[6px]">
@@ -118,7 +123,7 @@ export default function MypageEditPage() {
                 <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
                     <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
                     <button
-                        onClick={() => setShowFollowPublic(!showFollowPublic)}
+                        onClick={() => setData({ ...data, showFollowPublic: !showFollowPublic })}
                         className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
                             showFollowPublic ? 'bg-gray-300' : 'bg-primary'
                         }`}
@@ -139,8 +144,7 @@ export default function MypageEditPage() {
 
                 <PortfolioSection
                     portfolios={portfolios}
-                    listTo="/mypage/portfolios"
-                    detailTo={(id) => `/portfolios/${id}`}
+                    isEdit={true}
                 />
 
                 <InfoSection
@@ -161,6 +165,18 @@ export default function MypageEditPage() {
                     isEdit={true}
                 />
             </div>
+
+            {currentModal === 'image' && (
+                <ProfileImageModal
+                    ref={modalRef}
+                    onClose={closeModal}
+                    onSelect={handleImageUpload}
+                    onDelete={() => {
+                        setData({ ...data, user: { ...user, profileImg: '' } });
+                        closeModal();
+                    }}
+                />
+            )}
         </div> 
     );
 }
