@@ -7,6 +7,7 @@ import ProfileImageModal from "./components/ImageEditModal";
 import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
 import TagEditModal from "./components/TagsEditModal";
+import IntroEditModal from "./components/IntroEditModal";
 import { useNavigate } from "react-router-dom";
 
 
@@ -130,7 +131,7 @@ export const MypageEditPage = () => {
                         <div className="w-full flex flex-col gap-[7px]">
                             <div className="flex items-center justify-between">
                                 <div className="text-SB-14 text-black">자기 소개</div>
-                                <button onClick={() => alert("자기소개 수정 페이지로 이동")} //TODO: router 설정
+                                <button onClick={() => openModal('intro')}
                                 className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                     수정하기
                                     <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
@@ -199,16 +200,26 @@ export const MypageEditPage = () => {
                     }}
                 />
             )}
-                {currentModal === 'tags' && (
-                    <TagEditModal
-                        tags={user.userTags || []}
-                        onClose={closeModal}
-                        onSave={(newTags) => { 
-                            setData({ ...data, user: { ...user, userTags: newTags } }); 
-                            closeModal(); 
-                        }}
-                    />
-                )}
+            {currentModal === 'tags' && (
+                <TagEditModal
+                    tags={user.userTags || []}
+                    onClose={closeModal}
+                    onSave={(newTags) => { 
+                        setData({ ...data, user: { ...user, userTags: newTags } }); 
+                        closeModal(); 
+                    }}
+                />
+            )}
+            {currentModal === 'intro' && (
+                <IntroEditModal
+                    initialStatement={user.introduction}
+                    onClose={closeModal}
+                    onSave={(newIntro) => { 
+                        setData({ ...data, user: { ...user, introduction: newIntro } }); 
+                        closeModal(); 
+                    }}
+                />
+            )}
         </div>
     );
 }
