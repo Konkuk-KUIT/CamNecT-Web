@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { type EducationItem, type CareerItem, type CertificateItem } from "../../types/mypage/mypageTypes";
-import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
-import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
+import { MOCK_SESSION } from "../../mock/mypages";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
@@ -9,9 +7,11 @@ import ProfileImageModal from "./components/ImageEditModal";
 import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
 import TagEditModal from "./components/TagsEditModal";
+import { useNavigate } from "react-router-dom";
 
 
-export default function MypageEditPage() {
+export const MypageEditPage = () => {
+    const navigate = useNavigate();
     const userId: string = MOCK_SESSION.meUid;
     const modalRef = useRef<HTMLDivElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
@@ -51,10 +51,14 @@ export default function MypageEditPage() {
 
 
     const handleImageUpload = (file: File, source: 'album' | 'camera') => {
+        console.log(`${source}에서 이미지 가져옴`)
+        setUploading(true);
         const imageUrl = URL.createObjectURL(file);
         setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
+        setUploading(false);
         closeModal();
     };
+    //TODO: {uploading && <></>} 같은 image loading용 div 작성
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
@@ -67,7 +71,7 @@ export default function MypageEditPage() {
                 <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
                     <button
                         className="w-[24px] h-[24px]"
-                        onClick={() => alert("마이페이지로 이동")} //TODO: router 설정
+                        onClick={() => navigate(-1)}
                     >
                         <Icon name='cancel' className="block shrink-0"/>
                     </button>
@@ -76,7 +80,7 @@ export default function MypageEditPage() {
                         className={`text-b-16-hn transition-colors ${
                             hasChanges ? 'text-primary' : 'text-gray-650'
                         }`}
-                        onClick={handleSave} //TODO: router 설정
+                        onClick={handleSave}
                         disabled={!hasChanges}
                     >
                         완료
@@ -87,7 +91,7 @@ export default function MypageEditPage() {
                 <section className="w-full">
                     <div className="w-full flex items-center gap-[15px] px-[25px] py-[15px] border-b border-gray-150">
                         <button className="relative h-[56px] w-[56px]"
-                        onClick={() => openModal('image')}> {/*TODO: router 설정*/}
+                        onClick={() => openModal('image')}>
                             <img
                             src={user.profileImg}
                             alt="프로필"
@@ -110,7 +114,7 @@ export default function MypageEditPage() {
                         <div className="w-full flex flex-col gap-[7px]">
                             <div className="flex items-center justify-between">
                                 <div className="text-SB-14 text-black">태그</div>
-                                <button onClick={() => openModal('tags')} //TODO: router 설정
+                                <button onClick={() => openModal('tags')}
                                 className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                     수정하기
                                     <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>

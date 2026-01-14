@@ -3,8 +3,10 @@ import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
+import { useNavigate } from "react-router-dom";
 
-export default function MyPage() {
+export const MypagePage = () => {
+    const navigate = useNavigate();
     const meUid: string = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
     const profileUserId: string = "user_002";
@@ -24,7 +26,7 @@ export default function MyPage() {
                 {!isProfileOwner &&
                     <button
                     className="absolute left-[25px] top-1/2 -translate-y-1/2"
-                    onClick={() => alert("이전 페이지로 이동")} //TODO: router 설정
+                    onClick={() => navigate(-1)}
                     >
                         <Icon name='back2' />
                     </button>
@@ -63,7 +65,7 @@ export default function MyPage() {
                                 </div>
                                 {!isProfileOwner &&
                                 <button
-                                onClick={() => alert("팔로우")}//TODO: router 설정
+                                onClick={() => alert("팔로우")}//TODO: 로직 설정
                                 >
                                     <div className="w-[62px] h-[25px] rounded-[6px] border border-primary flex justify-center items-center gap-[5px]">
                                         <Icon name="follow" className="block w-[12px] h-[12px] shrink-0"/>
@@ -106,7 +108,7 @@ export default function MyPage() {
                 {isProfileOwner ? 
                 <button
                 className="h-[40px] w-full rounded-[6px] flex justify-center items-center bg-primary"
-                onClick={() => alert("프로필 수정 페이지로 이동")} //TODO: router 설정
+                onClick={() => navigate("/me/edit")}
                 >
                     <span className="text-SB-14-hn text-white">프로필 수정하기</span>
                 </button>

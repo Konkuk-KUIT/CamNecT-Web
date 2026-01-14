@@ -193,6 +193,11 @@
         line-height: var(--text-B-18--line-height);
         font-weight: var(--text-B-18--font-weight);
     }
+    .text-b-18-hn {
+        font-size: var(--text-B-18-hn);
+        line-height: var(--text-B-18-hn--line-height);
+        font-weight: var(--text-B-18-hn--font-weight);
+    }
     .text-b-16-hn {
         font-size: var(--text-B-16-hn);
         line-height: var(--text-B-16-hn--line-height);
@@ -229,6 +234,11 @@
         font-size: var(--text-SB-14);
         line-height: var(--text-SB-14--line-height);
         font-weight: var(--text-SB-14--font-weight);
+    }
+    .text-sb-14-hn {
+        font-size: var(--text-SB-14-hn);
+        line-height: var(--text-SB-14-hn--line-height);
+        font-weight: var(--text-SB-14-hn--font-weight);
     }
 
     /* Medium (500) */
