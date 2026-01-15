@@ -1,6 +1,6 @@
 import { type User } from "../user/userTypes";
 
-export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED";
+export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" | "DROPOUT";
 export type CareerStatus = "EMPLOYED" | "RESIGNED";
 
 // // User 공통 인터페이스 
@@ -29,6 +29,7 @@ export interface EducationItem {
   school: string;
   status: EducationStatus;
   year: number;
+  endYear: number;
 }
 
 export interface CareerItem {
@@ -44,20 +45,28 @@ export interface CertificateItem {
   acquiredYear: number;
 }
 
+export interface ProfileVisibility {
+  portfolioVisibility: boolean;
+  educationVisibility: boolean;
+  careerVisibility: boolean;
+  certificateVisibility: boolean;
+}
+
 //프로필 상세(학력/경력/자격증 등)까지 포함
 export interface UserProfileDetail {
   user: UserProfile;
-  portfolioVisibility: boolean;
+  visibility: ProfileVisibility;
   educations: EducationItem[];
   careers: CareerItem[];
   certificates: CertificateItem[];
 }
 
 export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
-  ENROLLED: "입학",
+  ENROLLED: "재학",
   LEAVE: "휴학",
   EXCHANGED: "교환",
   GRADUATED: "졸업",
+  DROPOUT: "중퇴"
 };
 
 export const CAREER_STATUS_KR: Record<CareerStatus, string> = {

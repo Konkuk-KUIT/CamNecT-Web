@@ -9,6 +9,7 @@ export function useProfileEdit(userId: string) {
     
     const [originalData] = useState(() => ({
         user: meDetail.user,
+        visibility: meDetail.visibility,
         educations: meDetail.educations,
         careers: meDetail.careers,
         certificates: meDetail.certificates,
@@ -18,6 +19,7 @@ export function useProfileEdit(userId: string) {
     
     const [data, setData] = useState({
         user: meDetail.user,
+        visibility: meDetail.visibility,
         educations: meDetail.educations,
         careers: meDetail.careers,
         certificates: meDetail.certificates,
