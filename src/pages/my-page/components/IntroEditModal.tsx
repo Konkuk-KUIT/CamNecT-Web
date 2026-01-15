@@ -38,7 +38,7 @@ export default function TagEditModal({ initialStatement, onClose, onSave }: Intr
                 >
                     <Icon name='cancel' className="block shrink-0"/>
                 </button>
-                <span className="text-SB-20 text-gray-900">자기 소개</span>
+                <span className="text-sb-20 text-gray-900">자기 소개</span>
                 <button
                     className={`text-b-16-hn transition-colors ${
                         hasChanges ? 'text-primary' : 'text-gray-650'

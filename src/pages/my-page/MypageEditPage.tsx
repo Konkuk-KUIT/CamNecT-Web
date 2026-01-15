@@ -8,6 +8,7 @@ import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
 import TagEditModal from "./components/TagsEditModal";
 import IntroEditModal from "./components/IntroEditModal";
+import EducationEditModal from "./components/EducationEditModal";
 import { useNavigate } from "react-router-dom";
 
 
@@ -59,13 +60,13 @@ export const MypageEditPage = () => {
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
-    const { user, educations, careers, certificates, portfolios, showFollowPublic } = data;
+    const { user, visibility, educations, careers, certificates, portfolios, showFollowPublic } = data;
 
     return (
         <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] relative">
             <div ref={pageRef} className="w-full h-full bg-white overflow-y-auto overscroll-none">
                 {/* 헤더 - TODO: layout 컴포넌트 형태로 변환 */}
-                <header className="w-full py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
+                <header className="w-full z-20 py-[10px] px-[25px] sticky top-0 h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
                     <button
                         className="w-[24px] h-[24px]"
                         onClick={() => navigate(-1)}
@@ -174,12 +175,14 @@ export const MypageEditPage = () => {
                         type="education"
                         items={educations}
                         isEdit={true}
+                        onEditClick={() => openModal('education')}
                     />
 
                     <InfoSection
                         type="career"
                         items={careers}
                         isEdit={true}
+                        onEditClick={() => alert("여긴 동작함")}
                     />
 
                     <InfoSection
@@ -217,6 +220,24 @@ export const MypageEditPage = () => {
                     onSave={(newIntro) => { 
                         setData({ ...data, user: { ...user, introduction: newIntro } }); 
                         closeModal(); 
+                    }}
+                />
+            )}
+            {currentModal === 'education' && (
+                <EducationEditModal
+                    educations={data.educations}  // 전체 학력 배열
+                    initialShowPrivate={visibility.educationVisibility}
+                    onClose={closeModal}
+                    onSave={(updatedEducations, showPrivate) => {
+                        setData({ 
+                            ...data, 
+                            educations: updatedEducations,
+                            visibility: {
+                                ...data.visibility,
+                                educationVisibility: showPrivate
+                            }
+                        });
+                        closeModal();
                     }}
                 />
             )}

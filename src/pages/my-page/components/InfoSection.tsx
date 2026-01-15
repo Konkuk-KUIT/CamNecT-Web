@@ -9,10 +9,12 @@ export default function InfoSection({
   type,
   items,
   isEdit,
+  onEditClick
 }: {
   type: InfoType;
   items: InfoItem[];
   isEdit: boolean;
+  onEditClick?: () => void;
 }) {
     
 
@@ -26,7 +28,7 @@ export default function InfoSection({
         career: "아직 경력 정보가 등록되지 않았어요!",
         certificate: "아직 등록된 자격증 및 보유 기술이 없어요!"
     };
-    const editStatement = <button onClick={() => alert(`${type} 수정 페이지로 이동`)} //TODO: router 설정
+    const editStatement = <button onClick={onEditClick} //TODO: router 설정
                             className="text-R-12-hn text-gray-650 flex items-center gap-[2px]">
                                 수정하기
                                 <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
