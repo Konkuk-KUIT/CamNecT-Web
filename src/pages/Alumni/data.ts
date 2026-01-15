@@ -1,3 +1,4 @@
+// 동문 프로필 데이터 구조.
 export type AlumniProfile = {
   id: string;
   author: {
@@ -42,9 +43,11 @@ export type AlumniProfile = {
   followerCount: number;
 };
 
+// TODO: API 연동 시 서버에서 이미지/프로필 데이터를 받아오도록 대체.
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
 
+// TODO: API 연동 시 서버 데이터로 교체.
 export const alumniList: AlumniProfile[] = [
   {
     id: 'alumni-1',

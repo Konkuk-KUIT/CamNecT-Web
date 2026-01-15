@@ -1,4 +1,4 @@
-import FilterIcon from '../../../components/FilterIcon';
+import FilterIcon from './FilterIcon';
 
 type FilterHeaderProps = {
   activeFilters: string[];
@@ -17,17 +17,7 @@ const FilterHeader = ({ activeFilters, onOpenFilter, onRemoveFilter }: FilterHea
             key={filter}
             type='button'
             onClick={() => onRemoveFilter(filter)}
-            className='flex items-center gap-[5px]'
-            style={{
-              display: 'flex',
-              padding: '5px 10px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '5px',
-              borderRadius: '5px',
-              border: '1px solid var(--ColorGray2, #A1A1A1)',
-              background: 'var(--ColorGray1, #ECECEC)',
-            }}
+            className='flex items-center gap-[5px] rounded-[5px] border border-[var(--ColorGray2,#A1A1A1)] bg-[var(--ColorGray1,#ECECEC)] px-[10px] py-[5px]'
           >
             <span className='text-m-12 text-gray-750'>{filter}</span>
             <svg
@@ -36,6 +26,7 @@ const FilterHeader = ({ activeFilters, onOpenFilter, onRemoveFilter }: FilterHea
               viewBox='0 0 12 12'
               fill='none'
               xmlns='http://www.w3.org/2000/svg'
+              aria-hidden
             >
               <path
                 d='M3 9L9 3M3 3L9 9'

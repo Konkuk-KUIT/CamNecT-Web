@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Category from '../../components/Category';
+import CoffeeChatButton from './components/CoffeeChatButton';
+import CoffeeChatModal from './components/CoffeeChatModal';
 import MainLayout from '../../layouts/MainLayout';
 import { alumniList } from './data';
 
@@ -11,76 +13,67 @@ const portfolioPlaceholder =
 
 const AlumniProfilePage = () => {
   const { id } = useParams();
+  // URL 파라미터를 기준으로 프로필을 찾고, 없으면 첫 번째 데이터를 사용합니다.
   const profile = useMemo(
     () => alumniList.find((item) => item.id === id) ?? alumniList[0],
     [id],
   );
+  // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
+  const [followerCount, setFollowerCount] = useState(profile.followerCount);
+  const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(false);
 
   useEffect(() => {
     setIsFollowing(profile.isFollowing);
-  }, [profile.isFollowing]);
+    setFollowerCount(profile.followerCount);
+  }, [profile.isFollowing, profile.followerCount]);
 
+  // 팔로우/언팔로우 토글과 카운트 반영.
   const handleFollowToggle = () => {
-    setIsFollowing((prev) => !prev);
+    const next = !isFollowing;
+    setIsFollowing(next);
+    setFollowerCount((count) => Math.max(0, count + (next ? 1 : -1)));
+    // TODO: sync follow/unfollow state with API and refetch counts.
+  };
+
+  // 커피챗 요청 모달 제출 처리.
+  const handleCoffeeChatSubmit = (payload: { categories: string[]; message: string }) => {
+    // TODO: send selected categories and message to coffee chat request API.
+    void payload;
   };
 
   return (
     <MainLayout title='프로필'>
-      <div className='flex flex-col bg-white' style={{ gap: 'clamp(18px, 6cqw, 24px)' }}>
-        <section
-          className='flex flex-col'
-          style={{
-            padding: 'clamp(32px, 10cqw, 40px) clamp(18px, 7cqw, 25px) 0',
-            gap: 'clamp(18px, 6cqw, 24px)',
-          }}
-        >
+      <div className='flex flex-col bg-white [gap:clamp(18px,6cqw,24px)]'>
+        {/* 프로필 상단 영역 */}
+        <section className='flex flex-col [padding:clamp(32px,10cqw,40px)_clamp(18px,7cqw,25px)_0] [gap:clamp(18px,6cqw,24px)]'>
           <div
-            className='grid items-start'
-            style={{
-              gridTemplateColumns: 'auto minmax(0, 1fr)',
-              columnGap: 'clamp(24px, 6cqw, 32px)',
-              rowGap: 'clamp(14px, 4.5cqw, 20px)',
-            }}
+            className='grid items-start [grid-template-columns:auto_minmax(0,1fr)] [column-gap:clamp(24px,6cqw,32px)] [row-gap:clamp(14px,4.5cqw,20px)]'
           >
             {profile.profileImage ? (
               <img
                 src={profile.profileImage}
                 alt={`${profile.author.name} 프로필`}
-                className='shrink-0 rounded-full object-cover'
-                style={{
-                  width: 'clamp(64px, 22.4cqw, 84px)',
-                  height: 'clamp(64px, 22.4cqw, 84px)',
-                }}
+                className='h-[clamp(64px,22.4cqw,84px)] w-[clamp(64px,22.4cqw,84px)] shrink-0 rounded-full object-cover'
               />
             ) : (
               <div
-                className='shrink-0 rounded-full'
-                style={{
-                  width: 'clamp(64px, 22.4cqw, 84px)',
-                  height: 'clamp(64px, 22.4cqw, 84px)',
-                  background: `url("${profilePlaceholder}") center/cover`,
-                }}
+                className='h-[clamp(64px,22.4cqw,84px)] w-[clamp(64px,22.4cqw,84px)] shrink-0 rounded-full'
+                style={{ background: `url("${profilePlaceholder}") center/cover` }}
                 aria-hidden
               />
             )}
 
-            <div
-              className='flex min-w-0 flex-1 flex-col'
-              style={{ gap: 'clamp(10px, 3.5cqw, 14px)' }}
-            >
+            {/* 이름/학과/팔로우 버튼/카테고리 영역 */}
+            <div className='flex min-w-0 flex-1 flex-col [gap:clamp(10px,3.5cqw,14px)]'>
               <div
-                className='flex items-start justify-between'
-                style={{ gap: 'clamp(10px, 3.5cqw, 14px)' }}
+                className='flex items-start justify-between [gap:clamp(10px,3.5cqw,14px)]'
               >
                 <div className='flex flex-col'>
-                  <div
-                    className='text-sb-18'
-                    style={{ color: 'var(--ColorBlack, #202023)', letterSpacing: '-0.04em' }}
-                  >
+                  <div className='text-sb-18 tracking-[-0.04em] text-[color:var(--ColorBlack,#202023)]'>
                     {profile.author.name}
                   </div>
-                  <div className='text-r-12' style={{ color: 'var(--ColorGray3, #646464)' }}>
+                  <div className='text-r-12 text-[color:var(--ColorGray3,#646464)]'>
                     {profile.author.major} {profile.author.studentId}학번
                   </div>
                 </div>
@@ -88,16 +81,9 @@ const AlumniProfilePage = () => {
                 <button
                   type='button'
                   onClick={handleFollowToggle}
-                  className='flex items-center justify-center'
-                  style={{
-                    width: 'clamp(54px, 18cqw, 62px)',
-                    height: 'clamp(22px, 7cqw, 25px)',
-                    padding: 'clamp(2px, 1cqw, 3px) clamp(5px, 2cqw, 7px)',
-                    gap: 'clamp(3px, 1.5cqw, 5px)',
-                    borderRadius: 'clamp(4px, 1.6cqw, 6px)',
-                    border: '1px solid var(--ColorMain, #00C56C)',
-                    background: isFollowing ? 'var(--ColorMain, #00C56C)' : 'transparent',
-                  }}
+                  className={`flex items-center justify-center border border-[var(--ColorMain,#00C56C)] [width:clamp(54px,18cqw,62px)] [height:clamp(22px,7cqw,25px)] [padding:clamp(2px,1cqw,3px)_clamp(5px,2cqw,7px)] [gap:clamp(3px,1.5cqw,5px)] rounded-[clamp(4px,1.6cqw,6px)] ${
+                    isFollowing ? 'bg-[var(--ColorMain,#00C56C)]' : 'bg-transparent'
+                  }`}
                 >
                   {isFollowing ? (
                     <svg
@@ -134,81 +120,61 @@ const AlumniProfilePage = () => {
                     </svg>
                   )}
                   <span
-                    style={{
-                      color: isFollowing ? 'var(--ColorWhite, #FFF)' : 'var(--ColorMain, #00C56C)',
-                      fontSize: 'clamp(9px, 2.8cqw, 10px)',
-                      fontWeight: 400,
-                      lineHeight: 'normal',
-                    }}
+                    className={`font-normal leading-normal [font-size:clamp(9px,2.8cqw,10px)] ${
+                      isFollowing ? 'text-[color:var(--ColorWhite,#FFF)]' : 'text-[color:var(--ColorMain,#00C56C)]'
+                    }`}
                   >
                     {isFollowing ? '팔로잉' : '팔로우'}
                   </span>
                 </button>
               </div>
 
-              <div className='flex flex-wrap' style={{ gap: 'clamp(3px, 1.5cqw, 5px)' }}>
+              <div className='flex flex-wrap [gap:clamp(3px,1.5cqw,5px)]'>
                 {profile.categories.map((category) => (
                   <Category key={category} label={category} />
                 ))}
               </div>
             </div>
 
+            {/* 팔로우 통계가 공개인 경우에만 표시 */}
             {profile.privacy.showFollowStats && (
               <div
-                className='flex flex-col'
-                style={{
-                  gap: 'clamp(6px, 2.2cqw, 8px)',
-                  gridColumn: '1 / 2',
-                  gridRow: '2 / 3',
-                }}
+                className='flex flex-col [gap:clamp(6px,2.2cqw,8px)] [grid-column:1/2] [grid-row:2/3]'
               >
                 <div
-                  className='flex flex-col'
-                  style={{
-                    gap: 'clamp(2px, 2cqw, 4px)',
-                    padding: '11px clamp(2px, 1cqw, 3px)',
-                    paddingLeft: '3px',
-                  }}
+                  className='flex flex-col [gap:clamp(2px,2cqw,4px)] [padding:11px_clamp(2px,1cqw,3px)] pl-[3px]'
                 >
-                  <div className='flex items-center' style={{ gap: 'clamp(2px, 1cqw, 3px)' }}>
-                    <span className='text-r-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                  <div className='flex items-center [gap:clamp(2px,1cqw,3px)]'>
+                    <span className='text-r-14 text-[color:var(--ColorBlack,#202023)]'>
                       팔로잉
                     </span>
-                    <span className='text-sb-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                    <span className='text-sb-14 text-[color:var(--ColorBlack,#202023)]'>
                       {profile.followingCount}
                     </span>
                   </div>
-                  <div className='flex items-center' style={{ gap: 'clamp(2px, 1cqw, 3px)' }}>
-                    <span className='text-r-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                  <div className='flex items-center [gap:clamp(2px,1cqw,3px)]'>
+                    <span className='text-r-14 text-[color:var(--ColorBlack,#202023)]'>
                       팔로워
                     </span>
-                    <span className='text-sb-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                      {profile.followerCount}
+                    <span className='text-sb-14 text-[color:var(--ColorBlack,#202023)]'>
+                      {followerCount}
                     </span>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* 팔로우 통계 비공개일 때 레이아웃 유지용 빈 영역 */}
             {!profile.privacy.showFollowStats && (
               <div
                 aria-hidden
-                style={{
-                  gridColumn: '1 / 2',
-                  gridRow: '2 / 3',
-                  height: '100%',
-                }}
+                className='h-full [grid-column:1/2] [grid-row:2/3]'
               />
             )}
 
+            {/* 소개글 영역 */}
             <p
-              className='line-clamp-3 text-r-14'
-              style={{
-                color: 'var(--ColorGray2, #A1A1A1)',
-                paddingTop: 'clamp(8px, 3cqw, 11px)',
-                gridColumn: '2 / 3',
-                gridRow: '2 / 3',
-              }}
+              className='line-clamp-3 text-r-14 text-[color:var(--ColorGray2,#A1A1A1)] [padding-top:clamp(8px,3cqw,11px)] [grid-column:2/3] [grid-row:2/3]'
             >
               {profile.intro}
             </p>
@@ -216,156 +182,84 @@ const AlumniProfilePage = () => {
           </div>
         </section>
 
-        <section
-          className='flex'
-          style={{
-            padding: '0 clamp(18px, 7cqw, 25px) clamp(24px, 8cqw, 30px)',
-          }}
-        >
-          <button
-            type='button'
-            className='flex w-full items-center justify-center'
-            style={{
-              padding: 'clamp(12px, 4cqw, 14px)',
-              borderRadius: 'clamp(8px, 2.8cqw, 10px)',
-              background: 'var(--ColorMain, #00C56C)',
-            }}
-          >
-            <span className='text-sb-14' style={{ color: 'var(--ColorWhite, #FFF)' }}>
-              커피챗 요청하기
-            </span>
-          </button>
+        <section className='flex [padding:0_clamp(18px,7cqw,25px)_clamp(24px,8cqw,30px)]'>
+          <CoffeeChatButton onClick={() => setIsCoffeeChatOpen(true)} />
         </section>
 
+        {/* 구분선 */}
         <div
-          style={{
-            height: 'clamp(8px, 2.5cqw, 10px)',
-            background: 'var(--ColorGray1, #D5D5D5)',
-          }}
+          className='[height:clamp(8px,2.5cqw,10px)] bg-[var(--ColorGray1,#D5D5D5)]'
         />
 
-        <section
-          className='flex flex-col'
-          style={{
-            padding: 'clamp(24px, 8cqw, 30px) clamp(18px, 7cqw, 25px)',
-            gap: 'clamp(32px, 12cqw, 50px)',
-          }}
-        >
+        <section className='flex flex-col [padding:clamp(24px,8cqw,30px)_clamp(18px,7cqw,25px)] [gap:clamp(32px,12cqw,50px)]'>
+          {/* 포트폴리오 섹션 */}
           {profile.privacy.showPortfolio && (
-            <div className='flex flex-col' style={{ gap: 'clamp(8px, 2.6cqw, 10px)' }}>
-            <div className='flex items-center justify-between'>
-              <span className='text-sb-16-hn' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                포트폴리오
-              </span>
-              <button
-                type='button'
-                className='flex items-center'
-                style={{ gap: 'clamp(4px, 1.6cqw, 6px)' }}
-              >
-                <span className='text-r-12' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                  전체보기
-                </span>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  width='4'
-                  height='9'
-                  viewBox='0 0 4 9'
-                  fill='none'
-                  aria-hidden
+            <div className='flex flex-col [gap:clamp(8px,2.6cqw,10px)]'>
+              <div className='flex items-center justify-between'>
+                <span className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>포트폴리오</span>
+                <button
+                  type='button'
+                  className='flex items-center [gap:clamp(4px,1.6cqw,6px)]'
+                  onClick={() => {
+                    // TODO: 포트폴리오 전체보기 라우터 연결 필요.
+                  }}
                 >
-                  <path
-                    d='M0.75 0.75L3 4.5L0.75 8.25'
-                    stroke='var(--ColorGray2, #A1A1A1)'
-                    strokeWidth='1.2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div
-              className='flex flex-col'
-              style={{
-                paddingTop: 'clamp(16px, 5.5cqw, 20px)',
-                borderTop: '1px solid var(--ColorGray1, #ECECEC)',
-              }}
-            >
-              <div
-                className='flex'
-                style={{
-                  gap: 'clamp(4px, 1.4cqw, 5px)',
-                  overflowX: 'auto',
-                  paddingBottom: 'clamp(4px, 1.4cqw, 6px)',
-                  marginRight: 'calc(-1 * clamp(18px, 7cqw, 25px))',
-                }}
-              >
-                {profile.portfolioItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className='flex flex-col'
-                    style={{ gap: 'clamp(4px, 1.5cqw, 5px)', flex: '0 0 auto' }}
+                  <span className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>전체보기</span>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='4'
+                    height='9'
+                    viewBox='0 0 4 9'
+                    fill='none'
+                    aria-hidden
                   >
-                    <div
-                      style={{
-                        width: 'clamp(120px, 42cqw, 160px)',
-                        height: 'clamp(68px, 24cqw, 90px)',
-                        borderRadius: 'clamp(10px, 3.5cqw, 12px)',
-                        overflow: 'hidden',
-                        background: 'var(--ColorGray1, #D5D5D5)',
-                      }}
-                    >
-                      <img
-                        src={item.image ?? portfolioPlaceholder}
-                        alt={item.title}
-                        className='h-full w-full object-cover'
-                        onError={(event) => {
-                          event.currentTarget.onerror = null;
-                          event.currentTarget.src = portfolioPlaceholder;
-                        }}
-                      />
-                    </div>
-                    <div
-                      className='text-m-14'
-                      style={{
-                        color: 'var(--ColorGray3, #646464)',
-                        padding: 'clamp(4px, 1.6cqw, 5px) clamp(4px, 1.6cqw, 5px) 0',
-                      }}
-                    >
-                      {item.title}
-                    </div>
-                  </div>
-                ))}
+                    <path
+                      d='M0.75 0.75L3 4.5L0.75 8.25'
+                      stroke='var(--ColorGray2, #A1A1A1)'
+                      strokeWidth='1.2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
+                  </svg>
+                </button>
               </div>
-            </div>
+
+              <div className='flex flex-col [padding-top:clamp(16px,5.5cqw,20px)] border-t border-[var(--ColorGray1,#ECECEC)]'>
+                <div className='flex overflow-x-auto [gap:clamp(4px,1.4cqw,5px)] [padding-bottom:clamp(4px,1.4cqw,6px)] [margin-right:calc(-1*clamp(18px,7cqw,25px))]'>
+                  {profile.portfolioItems.map((item) => (
+                    <div key={item.id} className='flex flex-col [gap:clamp(4px,1.5cqw,5px)] flex-[0_0_auto]'>
+                      <div className='h-[clamp(68px,24cqw,90px)] w-[clamp(120px,42cqw,160px)] overflow-hidden rounded-[clamp(10px,3.5cqw,12px)] bg-[var(--ColorGray1,#D5D5D5)]'>
+                        <img
+                          src={item.image ?? portfolioPlaceholder}
+                          alt={item.title}
+                          className='h-full w-full object-cover'
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = portfolioPlaceholder;
+                          }}
+                        />
+                      </div>
+                      <div className='text-m-14 text-[color:var(--ColorGray3,#646464)] [padding:clamp(4px,1.6cqw,5px)_clamp(4px,1.6cqw,5px)_0]'>
+                        {item.title}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
+          {/* 학력 섹션 */}
           {profile.privacy.showEducation && (
-            <div className='flex flex-col' style={{ gap: 'clamp(5px, 2.3cqw, 7px)' }}>
-              <div className='text-sb-16-hn' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                학력
-              </div>
-              <div
-                className='flex flex-col'
-                style={{
-                  paddingTop: 'clamp(8px, 3.5cqw, 10px)',
-                  gap: 'clamp(8px, 3.5cqw, 10px)',
-                  borderTop: '1px solid var(--ColorGray1, #D5D5D5)',
-                }}
-              >
+            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
+              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>학력</div>
+              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
                 {profile.educationItems.map((item) => (
-                  <div key={item.id} className='flex flex-col' style={{ gap: 'clamp(4px, 2cqw, 6px)' }}>
-                    <div className='text-r-12' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                      {item.period}
-                    </div>
-                    <div className='flex flex-wrap items-baseline' style={{ gap: 'clamp(4px, 1.6cqw, 5px)' }}>
-                      <span className='text-m-16' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                        {item.school}
-                      </span>
-                      <span className='text-r-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                        {item.status}
-                      </span>
+                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
+                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.period}</div>
+                    <div className='flex flex-wrap items-baseline [gap:clamp(4px,1.6cqw,5px)]'>
+                      <span className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.school}</span>
+                      <span className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.status}</span>
                     </div>
                   </div>
                 ))}
@@ -373,45 +267,22 @@ const AlumniProfilePage = () => {
             </div>
           )}
 
+          {/* 경력 섹션 */}
           {profile.privacy.showCareer && (
-            <div className='flex flex-col' style={{ gap: 'clamp(5px, 2.3cqw, 7px)' }}>
-              <div className='text-sb-16-hn' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                경력
-              </div>
-              <div
-                className='flex flex-col'
-                style={{
-                  paddingTop: 'clamp(8px, 3.5cqw, 10px)',
-                  gap: 'clamp(8px, 3.5cqw, 10px)',
-                  borderTop: '1px solid var(--ColorGray1, #D5D5D5)',
-                }}
-              >
+            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
+              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>경력</div>
+              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
                 {profile.careerItems.map((item) => (
-                  <div key={item.id} className='flex flex-col' style={{ gap: 'clamp(4px, 2cqw, 6px)' }}>
-                    <div className='text-r-12' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                      {item.period}
-                    </div>
-                    <div
-                      className='grid items-start'
-                      style={{
-                        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-                        columnGap: 'clamp(8px, 3cqw, 12px)',
-                        rowGap: 'clamp(6px, 2.2cqw, 8px)',
-                      }}
-                    >
-                      <span className='text-m-16' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                        {item.company}
-                      </span>
-                      <div
-                        className='flex flex-col'
-                        style={{
-                          gap: 'clamp(2px, 1.6cqw, 4px)',
-                          alignItems: 'flex-start',
-                          textAlign: 'left',
-                        }}
-                      >
+                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
+                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.period}</div>
+                    <div className='grid items-start [grid-template-columns:minmax(0,1fr)_minmax(0,1fr)] [column-gap:clamp(8px,3cqw,12px)] [row-gap:clamp(6px,2.2cqw,8px)]'>
+                      <span className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.company}</span>
+                      <div className='flex flex-col items-start text-left [gap:clamp(2px,1.6cqw,4px)]'>
                         {item.tasks.map((task, index) => (
-                          <span key={`${item.id}-${index}`} className='text-r-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+                          <span
+                            key={`${item.id}-${index}`}
+                            className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'
+                          >
                             - {task}
                           </span>
                         ))}
@@ -423,27 +294,15 @@ const AlumniProfilePage = () => {
             </div>
           )}
 
+          {/* 자격증 섹션 */}
           {profile.privacy.showCertificates && (
-            <div className='flex flex-col' style={{ gap: 'clamp(5px, 2.3cqw, 7px)' }}>
-              <div className='text-sb-16-hn' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                자격증
-              </div>
-              <div
-                className='flex flex-col'
-                style={{
-                  paddingTop: 'clamp(8px, 3.5cqw, 10px)',
-                  gap: 'clamp(8px, 3.5cqw, 10px)',
-                  borderTop: '1px solid var(--ColorGray1, #D5D5D5)',
-                }}
-              >
+            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
+              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>자격증</div>
+              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
                 {profile.certificateItems.map((item) => (
-                  <div key={item.id} className='flex flex-col' style={{ gap: 'clamp(4px, 2cqw, 6px)' }}>
-                    <div className='text-r-12' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                      {item.date}
-                    </div>
-                    <div className='text-m-16' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                      {item.name}
-                    </div>
+                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
+                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.date}</div>
+                    <div className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.name}</div>
                   </div>
                 ))}
               </div>
@@ -451,6 +310,13 @@ const AlumniProfilePage = () => {
           )}
         </section>
       </div>
+
+      <CoffeeChatModal
+        isOpen={isCoffeeChatOpen}
+        onClose={() => setIsCoffeeChatOpen(false)}
+        categories={profile.categories}
+        onSubmit={handleCoffeeChatSubmit}
+      />
     </MainLayout>
   );
 };

@@ -5,7 +5,8 @@ import MainLayout from '../../layouts/MainLayout';
 import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
-import { infoPosts, loggedInUserMajor, questionPosts } from './data';
+import { loggedInUser } from '../../store/user';
+import { infoPosts, questionPosts } from './data';
 
 const tabItems: TabItem[] = [
   { id: 'all', label: '전체' },
@@ -31,9 +32,9 @@ const Community = () => {
   const renderTab = () => {
     if (activeTab === 'info') return <InfoTab posts={infoPosts} />;
     if (activeTab === 'question') return <QuestionTab posts={questionPosts} />;
-    return (
+      return (
       <MainTab
-        userMajor={loggedInUserMajor}
+        userMajor={loggedInUser.major}
         alumniInfos={alumniInfos}
         unansweredQuestions={unansweredQuestions}
       />

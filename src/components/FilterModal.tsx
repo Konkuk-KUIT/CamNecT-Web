@@ -1,6 +1,6 @@
-import CategoryIcon from '../../../components/CategoryIcon';
-import Icon from '../../../components/Icon';
-import { interestOptions, majorOptions } from '../../../store/filterOptions';
+import CategoryIcon from './CategoryIcon';
+import Icon from './Icon';
+import { interestOptions, majorOptions } from '../pages/filterOptions';
 
 type FilterModalProps = {
   isOpen: boolean;
@@ -30,20 +30,9 @@ const FilterModal = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className='fixed inset-0 z-50 flex items-end justify-center'
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-    >
+    <div className='fixed inset-0 z-50 flex items-end justify-center bg-black/25'>
       <div
-        className='relative flex'
-        style={{
-          width: 'clamp(320px, 100vw, 540px)',
-          height: 'min(649px, 86dvh)',
-          padding: 'clamp(24px, 6cqw, 38px) clamp(18px, 6cqw, 25px)',
-          borderRadius: '10px 10px 0 0',
-          background: 'var(--Color_Gray_B, #FCFCFC)',
-          boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
-        }}
+        className='relative flex h-[min(649px,86dvh)] w-[clamp(320px,100vw,540px)] rounded-t-[10px] bg-[var(--Color_Gray_B,#FCFCFC)] shadow-[0_-1px_9.6px_0_rgba(32,32,35,0.10)] [padding:clamp(24px,6cqw,38px)_clamp(18px,6cqw,25px)]'
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -66,15 +55,8 @@ const FilterModal = ({
           </button>
         )}
 
-        <div className='flex w-full' style={{ gap: '24px' }}>
-          <div
-            className='flex flex-col'
-            style={{
-              gap: '32px',
-              paddingRight: '18px',
-              borderRight: '1px solid var(--ColorGray2, #A1A1A1)',
-            }}
-          >
+        <div className='flex w-full gap-[24px]'>
+          <div className='flex flex-col border-r border-[var(--ColorGray2,#A1A1A1)] pr-[18px] [gap:32px]'>
             {[
               { key: 'major', label: '전공' },
               { key: 'interest', label: '관심사' },
@@ -85,10 +67,9 @@ const FilterModal = ({
                   key={tab.key}
                   type='button'
                   onClick={() => onTabChange(tab.key as 'major' | 'interest')}
-                  className='text-left text-b-16-hn'
-                  style={{
-                    color: isActive ? 'var(--ColorBlack, #202023)' : 'var(--ColorGray2, #A1A1A1)',
-                  }}
+                  className={`text-left text-b-16-hn ${
+                    isActive ? 'text-[color:var(--ColorBlack,#202023)]' : 'text-[color:var(--ColorGray2,#A1A1A1)]'
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -96,24 +77,12 @@ const FilterModal = ({
             })}
           </div>
 
-          <div className='flex-1 overflow-y-auto' style={{ paddingTop: '4px' }}>
+          <div className='flex-1 overflow-y-auto pt-[4px]'>
             {activeTab === 'major' &&
               majorOptions.map((group) => (
-                <div
-                  key={group.college}
-                  className='flex flex-col'
-                  style={{ gap: '12px', marginBottom: '20px' }}
-                >
-                  <div
-                    className='text-b-18'
-                    style={{
-                      color: '#000',
-                      letterSpacing: '-0.72px',
-                    }}
-                  >
-                    {group.college}
-                  </div>
-                  <div className='flex flex-wrap' style={{ gap: '10px' }}>
+                <div key={group.college} className='mb-[20px] flex flex-col gap-[12px]'>
+                  <div className='text-b-18 tracking-[-0.72px] text-black'>{group.college}</div>
+                  <div className='flex flex-wrap gap-[10px]'>
                     {group.departments.map((department) => (
                       <CategoryIcon
                         key={department}
@@ -128,21 +97,9 @@ const FilterModal = ({
 
             {activeTab === 'interest' &&
               interestOptions.map((interest) => (
-                <div
-                  key={interest.category}
-                  className='flex flex-col'
-                  style={{ gap: '12px', marginBottom: '20px' }}
-                >
-                  <div
-                    className='text-b-18'
-                    style={{
-                      color: '#000',
-                      letterSpacing: '-0.72px',
-                    }}
-                  >
-                    {interest.category}
-                  </div>
-                  <div className='flex flex-wrap' style={{ gap: '10px' }}>
+                <div key={interest.category} className='mb-[20px] flex flex-col gap-[12px]'>
+                  <div className='text-b-18 tracking-[-0.72px] text-black'>{interest.category}</div>
+                  <div className='flex flex-wrap gap-[10px]'>
                     {interest.items.map((item) => (
                       <CategoryIcon
                         key={item}
