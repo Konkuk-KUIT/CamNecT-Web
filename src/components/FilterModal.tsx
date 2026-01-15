@@ -1,6 +1,6 @@
 import CategoryIcon from './CategoryIcon';
 import Icon from './Icon';
-import { interestOptions, majorOptions } from '../pages/filterOptions';
+import { interestOptions, majorOptions } from '../mock/filterOptions';
 
 type FilterModalProps = {
   isOpen: boolean;

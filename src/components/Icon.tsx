@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 
 type IconName =
   | 'search'
@@ -7,7 +7,10 @@ type IconName =
   | 'more'
   | 'alarm'
   | 'setting'
+// 위에꺼는 초반 로그인페이지에서만 쓰이는 아이콘, 아래가 메인 뒤로가기
   | 'back'
+  | 'mainBack'
+
   | 'correction'
   | 'option'
   | 'transmit'
@@ -18,6 +21,8 @@ type IconName =
   | 'chat'
   | 'activity'
   | 'me'
+  | 'mypageOption'
+
   | 'homeActive'
   | 'alumniActive'
   | 'chatActive'
@@ -27,6 +32,7 @@ type IconName =
 type IconProps = {
   name: IconName;
   className?: string;
+  style?: CSSProperties;
 };
 
 type IconDefinition = {
@@ -123,7 +129,7 @@ const iconPaths: Record<IconName, IconDefinition> = {
     ),
   },
   back: {
-    viewBox: '0 0 24 24',
+    viewBox: '0 0 28 28',
     content: (
       <path
         d='M10.5 19.5L3 12M3 12L10.5 4.5M3 12H21'
@@ -132,6 +138,12 @@ const iconPaths: Record<IconName, IconDefinition> = {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
+    ),
+  },
+  mainBack: {
+    viewBox: '0 0 28 28',
+    content: (
+      <path d="M18.375 22.75L9.625 14L18.375 5.25" stroke="#202023" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     ),
   },
   correction: {
@@ -156,6 +168,12 @@ const iconPaths: Record<IconName, IconDefinition> = {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
+    ),
+  },
+  mypageOption: {
+    viewBox: '0 0 24 24',
+    content: (
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 7.875C3.5 7.64294 3.59219 7.42038 3.75628 7.25628C3.92038 7.09219 4.14294 7 4.375 7H23.625C23.8571 7 24.0796 7.09219 24.2437 7.25628C24.4078 7.42038 24.5 7.64294 24.5 7.875C24.5 8.10706 24.4078 8.32962 24.2437 8.49372C24.0796 8.65781 23.8571 8.75 23.625 8.75H4.375C4.14294 8.75 3.92038 8.65781 3.75628 8.49372C3.59219 8.32962 3.5 8.10706 3.5 7.875ZM3.5 14C3.5 13.7679 3.59219 13.5454 3.75628 13.3813C3.92038 13.2172 4.14294 13.125 4.375 13.125H23.625C23.8571 13.125 24.0796 13.2172 24.2437 13.3813C24.4078 13.5454 24.5 13.7679 24.5 14C24.5 14.2321 24.4078 14.4546 24.2437 14.6187C24.0796 14.7828 23.8571 14.875 23.625 14.875H4.375C4.14294 14.875 3.92038 14.7828 3.75628 14.6187C3.59219 14.4546 3.5 14.2321 3.5 14ZM3.5 20.125C3.5 19.8929 3.59219 19.6704 3.75628 19.5063C3.92038 19.3422 4.14294 19.25 4.375 19.25H23.625C23.8571 19.25 24.0796 19.3422 24.2437 19.5063C24.4078 19.6704 24.5 19.8929 24.5 20.125C24.5 20.3571 24.4078 20.5796 24.2437 20.7437C24.0796 20.9078 23.8571 21 23.625 21H4.375C4.14294 21 3.92038 20.9078 3.75628 20.7437C3.59219 20.5796 3.5 20.3571 3.5 20.125Z" fill="black"/>
     ),
   },
   transmit: {
@@ -185,13 +203,7 @@ const iconPaths: Record<IconName, IconDefinition> = {
   cancel: {
     viewBox: '0 0 24 24',
     content: (
-      <path
-        d='M6 18L18 6M6 6L18 18'
-        stroke='black'
-        strokeWidth='1.5'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
+      <path d="M7 21L21 7M7 7L21 21" stroke="#202023" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     ),
   },
   home: {
@@ -287,13 +299,18 @@ const iconPaths: Record<IconName, IconDefinition> = {
   },
 };
 
-const Icon = ({ name, className = '' }: IconProps) => {
+const Icon = ({ name, className = '', style }: IconProps) => {
   const icon = iconPaths[name];
+
+  if (!icon) {
+    return null;
+  }
 
   return (
     <svg
       viewBox={icon.viewBox}
       className={`w-6 h-6 text-primary cursor-pointer ${className}`}
+      style={style}
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >

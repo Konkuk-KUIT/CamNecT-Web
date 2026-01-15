@@ -8,9 +8,6 @@ import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
 import { MyPage } from "../pages/my-page/MyPage";
-import { EmptyLayout } from "../layouts/EmptyLayout";
-import { HeaderLayout } from "../layouts/HeaderLayout";
-import { FullLayout } from "../layouts/FullLayout";
 import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
@@ -23,60 +20,19 @@ export const router = createBrowserRouter([
         // App의 Outlet 태그에 넣을 contents
         children: [
         
-            {
-                element: <EmptyLayout />,
-                children: [
-                    { index: true, element: <OnboardingPage /> },
-                    { path: "login", element: <LoginPage /> },
-                ]
-            },
-
-            {
-                element: <HeaderLayout headerType="main"/>,
-                children: [
-                    { path: "signup", element: <SignUpPage /> },
-                ]
-            },
+            { index: true, element: <OnboardingPage /> },
+            { path: "login", element: <LoginPage /> },
+            { path: "signup", element: <SignUpPage /> },
 
             // 로그인 필수 페이지들 
             {
                 element: <AuthGuard/>,
                 children: [
-                    {
-                        element: <FullLayout headerType="home"/>,
-                        children: [
-                            {
-                                // todo HomeUI 연결
-                                path: "home", element: <HomePage />
-                            },
-                        ]
-                    },
-
-                    {
-                         element: <FullLayout headerType="main"/>,
-                         children: [
-                             {
-                                 path: "alumni",
-                                 element: <AlumniPage />
-                             },
-
-                             {
-                                 path: "chat",
-                                 element: <CoffeeChatPage />
-                             },
-
-                             {
-                                 path: "activity",
-                                 element: <ActivityPage />
-                             },
-                             
-                             {
-                                 // todo MyPage 연결
-                                 path: "me",
-                                 element: <MyPage />
-                             }
-                        ]
-                    },
+                    { path: "home", element: <HomePage /> },
+                    { path: "alumni", element: <AlumniPage /> },
+                    { path: "chat", element: <CoffeeChatPage /> },
+                    { path: "activity", element: <ActivityPage /> },
+                    { path: "me", element: <MyPage /> },
                 ]
             },
         ]
