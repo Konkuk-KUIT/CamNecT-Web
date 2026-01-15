@@ -16,6 +16,7 @@ type IconName =
   | 'transmit'
   | 'edit'
   | 'cancel'
+  | 'check'
   | 'home'
   | 'alumni'
   | 'chat'
@@ -105,6 +106,12 @@ const iconPaths: Record<IconName, IconDefinition> = {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
+    ),
+  },
+  check: {
+    viewBox: '0 0 24 24',
+    content: (
+      <path d="M0.75 7.97222L6.75 13.75L15.75 0.75" stroke="#A1A1A1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     ),
   },
   setting: {
