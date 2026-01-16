@@ -25,7 +25,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
     const [formData, setFormData] = useState<Partial<EducationItem>>({
         school: '',
         status: 'ENROLLED',
-        year: new Date().getFullYear(),
+        startYear: new Date().getFullYear(),
         endYear: undefined,
     });
 
@@ -35,6 +35,28 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
+
+    const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
+
+    // 학교 추천 목록 (임시 데이터)
+    const allSchools = [
+        '건국대학교',
+        '건욱대학교',
+        '세종대학교',
+        '서울대학교',
+        '카이스트',
+        '이화여자대학교',
+        '동경미술대학'
+    ];
+    //검색 필터링
+    const filteredSchools = useMemo(() => {
+        if (!formData.school || formData.school.trim() === '') {
+            return [];
+        }
+        return allSchools.filter(s => 
+            s.toLowerCase().includes(formData.school!.toLowerCase())
+        );
+    }, [formData.school]);
 
     //변경사항 추적 (리스트 전체 추적)
     const hasChanges: boolean = useMemo(() => {
@@ -49,14 +71,14 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
             return false;
         }
         if (currentView === 'add') {
-            return !!(formData.school.trim() || formData.status !== 'ENROLLED' || formData.year !== currentYear);
+            return !!(formData.school.trim() || formData.status !== 'ENROLLED' || formData.startYear !== currentYear);
         }
         if (currentView === 'edit' && editingIndex !== null) {
             const original = listEducations[editingIndex];
             return (
                 formData.school !== original.school ||
                 formData.status !== original.status ||
-                formData.year !== original.year ||
+                formData.startYear !== original.startYear ||
                 formData.endYear !== original.endYear
             );
         }
@@ -75,7 +97,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
         setFormData({
             school: '',
             status: 'ENROLLED',
-            year: currentYear,
+            startYear: currentYear,
             endYear: undefined,
         });
         setCurrentView('add');
@@ -167,7 +189,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                         {listEducations.map((edu, index) => (
                             <div
                                 key={index}
-                                className="w-full flex justify-between items-center px-[20px] py-[25px] border-b border-gray-150"
+                                className="w-full flex justify-between items-center px-[25px] py-[20px] border-b border-gray-150"
                             >
                                 <div className="flex items-center gap-[20px]">
                                     <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px] block shrink-0">
@@ -180,7 +202,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                     </svg>
                                     <div className="flex flex-col justify-center gap-[7px]">
                                         <span className="text-r-12-hn text-gray-650">
-                                            {edu.year}{edu.endYear ? `~${edu.endYear}` : '~현재'}
+                                            {edu.startYear}{edu.endYear ? `~${edu.endYear}` : '~현재'}
                                         </span>
                                         <div className="flex gap-[10px] items-end">
                                             <span className="text-m-16 text-gray-900">{edu.school}</span>
@@ -233,7 +255,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                 </span>
                 <button
                     className={`text-b-16-hn transition-colors ${
-                        hasFormChanges ? 'text-primary' : 'text-gray-400'
+                        hasFormChanges ? 'text-primary' : 'text-gray-650'
                     }`}
                     onClick={handleSaveForm}
                     disabled={!hasFormChanges}
@@ -244,17 +266,38 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
             {/* 수정/삭제 */}
             <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px]">
-                <div className="flex flex-col gap-[17px]">
+                <div className="flex flex-col gap-[15px]">
                     {/* 학교 이름 */}
-                    <div className="flex flex-col gap-[10px]">
+                    <div className="flex flex-col gap-[10px] relative">
                         <span className="text-sb-16-hn text-gray-900">학교 이름</span>
                         <input
                             type="text"
                             value={formData.school || ''}
-                            onChange={(e) => setFormData({ ...formData, school: e.target.value })}
+                            onChange={(e) => {
+                                setFormData({ ...formData, school: e.target.value });
+                                setShowSchoolSuggestions(e.target.value.length > 0);
+                            }}
+                            onFocus={() => setShowSchoolSuggestions((formData.school?.length || 0) > 0)}
                             placeholder="학교 이름을 입력해 주세요"
                             className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none"
                         />
+
+                        {showSchoolSuggestions && filteredSchools.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10">
+                                {filteredSchools.map((suggestion, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            setFormData({ ...formData, school: suggestion });
+                                            setShowSchoolSuggestions(false);
+                                        }}
+                                        className="w-full flex p-[15px] text-r-16-hn text-gray-650 border-b border-gray-150 last:border-b-0"
+                                    >
+                                        {suggestion}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div> {/* TODO: 대학 데이터 내에서 선택할 수 있게 설정 */}
                     
 
@@ -300,7 +343,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                     onClick={() => setShowStartYearDropdown(!showStartYearDropdown)}
                                     className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
                                 >
-                                    <span className="text-r-16-hn text-gray-750">{formData.year}년</span>
+                                    <span className="text-r-16-hn text-gray-750">{formData.startYear}년</span>
                                     
                                     <Icon name="toggleDown" 
                                     className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showStartYearDropdown ? 'rotate-180' : ''}`}/>
@@ -312,11 +355,11 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                             <button
                                                 key={year}
                                                 onClick={() => {
-                                                    setFormData({ ...formData, year });
+                                                    setFormData({ ...formData, startYear: year });
                                                     setShowStartYearDropdown(false);
                                                 }}
                                                 className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
-                                                    formData.year === year ? 'text-primary' : 'text-gray-650'
+                                                    formData.startYear === year ? 'text-primary' : 'text-gray-650'
                                                 }`}
                                             >
                                                 {year}년

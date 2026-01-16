@@ -26,7 +26,7 @@ export interface EducationItem {
   id: string;
   school: string;
   status: EducationStatus;
-  year: number;
+  startYear: number;
   endYear: number;
 }
 
