@@ -20,19 +20,43 @@ export const router = createBrowserRouter([
         // App의 Outlet 태그에 넣을 contents
         children: [
         
-            { index: true, element: <OnboardingPage /> },
-            { path: "login", element: <LoginPage /> },
-            { path: "signup", element: <SignUpPage /> },
+            {
+                index: true,
+                element: <OnboardingPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "signup",
+                element: <SignUpPage />,
+            },
 
             // 로그인 필수 페이지들 
             {
                 element: <AuthGuard/>,
                 children: [
-                    { path: "home", element: <HomePage /> },
-                    { path: "alumni", element: <AlumniPage /> },
-                    { path: "chat", element: <CoffeeChatPage /> },
-                    { path: "activity", element: <ActivityPage /> },
-                    { path: "me", element: <MyPage /> },
+                    {
+                        path: "home",
+                        element: <HomePage />,
+                    },
+                    {
+                        path: "alumni",
+                        element: <AlumniPage />,
+                    },
+                    {
+                        path: "chat",
+                        element: <CoffeeChatPage />,
+                    },
+                    {
+                        path: "activity",
+                        element: <ActivityPage />,
+                    },
+                    {
+                        path: "me",
+                        element: <MyPage />,
+                    },
                 ]
             },
         ]

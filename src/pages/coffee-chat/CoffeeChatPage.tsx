@@ -1,5 +1,5 @@
 import { FullLayout } from '../../layouts/FullLayout';
-import { MainHeader } from '../../layouts/components/MainHeader';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 
 export const CoffeeChatPage = () => {
   return (

@@ -17,11 +17,13 @@ const BottomSheetModal = ({
 
     return (
         <div
+            // 오버레이: 시트 바깥 클릭 시 닫힘.
             className='fixed inset-0 z-50 flex items-end justify-center'
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
             onClick={onClose}
         >
             <div
+                // 시트 컨테이너: 내부 클릭이 닫힘으로 전파되지 않도록 차단.
                 className='flex w-[clamp(320px,100vw,540px)] flex-col'
                 style={{
                     height: height,
@@ -32,6 +34,7 @@ const BottomSheetModal = ({
                 }}
                 onClick={(event) => event.stopPropagation()}
             >
+                {/* 드래그 핸들 시각적 표시 */}
                 <div className='flex justify-center pt-[17px]'>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'

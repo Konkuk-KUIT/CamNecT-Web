@@ -1,5 +1,5 @@
 import { FullLayout } from '../../layouts/FullLayout';
-import { HomeHeader } from '../../layouts/components/HomeHeader';
+import { HomeHeader } from '../../layouts/headers/HomeHeader';
 
 export const HomePage = () => {
   return (
