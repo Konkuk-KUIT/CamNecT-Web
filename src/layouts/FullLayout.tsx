@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BottomNav } from "../layouts/BottomNav/BottomNav";
+import { BottomNav } from './BottomNav/BottomNav';
 import { Outlet } from 'react-router-dom';
 
 // Header (O) BottomNav (O) 레이아웃
