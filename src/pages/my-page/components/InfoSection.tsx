@@ -52,8 +52,8 @@ function makeLines(type: InfoType, items: InfoItem[]): string[] {
   if (type === "education") {
     return (items as EducationItem[])
       .slice()
-      .sort((a, b) => b.year - a.year)
-      .map((e) => `${e.year}년 ${e.school} ${EDUCATION_STATUS_KR[e.status]}`);
+      .sort((a, b) => b.startYear - a.startYear)
+      .map((e) => `${e.startYear}년 ${e.school} ${EDUCATION_STATUS_KR[e.status]}`);
   }
 
   if (type === "career") {
