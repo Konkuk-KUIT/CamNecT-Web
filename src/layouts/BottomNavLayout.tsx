@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { BottomNav } from "../components/BottomNav/BottomNav";
+import { BottomNav } from "../layouts/BottomNav/BottomNav";
 
 // Header (X) BottomNav (O) 레이아웃
 export const BottomNavLayout = () => {

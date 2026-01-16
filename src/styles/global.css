@@ -282,5 +282,13 @@
         line-height: var(--text-R-10-hn--line-height);
         font-weight: var(--text-R-10-hn--font-weight);
     }
-}
 
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+    }
+}
