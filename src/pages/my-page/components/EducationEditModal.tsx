@@ -266,14 +266,8 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                             className="w-full p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
                         >
                             <span className="text-r-16-hn text-gray-750">{getStatusLabel(formData.status)}</span>
-                            <svg viewBox="0 0 24 24" fill="none" className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`}>
-                                <path 
-                                    d="M19.5 8.25L12 15.75L4.5 8.25" 
-                                    stroke="#646464" 
-                                    strokeWidth="1.5" 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round"/>
-                            </svg>
+                            <Icon name="toggleDown" 
+                                    className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`}/>
                         </button>
 
                         {showStatusDropdown && (
@@ -307,14 +301,9 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                     className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
                                 >
                                     <span className="text-r-16-hn text-gray-750">{formData.year}년</span>
-                                    <svg viewBox="0 0 24 24" fill="none" className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showStartYearDropdown ? 'rotate-180' : ''}`}>
-                                        <path 
-                                            d="M19.5 8.25L12 15.75L4.5 8.25" 
-                                            stroke="#646464" 
-                                            strokeWidth="1.5" 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round"/>
-                                    </svg>
+                                    
+                                    <Icon name="toggleDown" 
+                                    className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showStartYearDropdown ? 'rotate-180' : ''}`}/>
                                 </button>
 
                                 {showStartYearDropdown && (
@@ -346,14 +335,8 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                     className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
                                 >
                                     <span className="text-r-16-hn text-gray-750">{formData.endYear ? `${formData.endYear}년` : '현재'}</span>
-                                    <svg viewBox="0 0 24 24" fill="none" className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showEndYearDropdown ? 'rotate-180' : ''}`}>
-                                        <path 
-                                            d="M19.5 8.25L12 15.75L4.5 8.25" 
-                                            stroke="#646464" 
-                                            strokeWidth="1.5" 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round"/>
-                                    </svg>
+                                    <Icon name="toggleDown" 
+                                    className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showEndYearDropdown ? 'rotate-180' : ''}`}/>
                                 </button>
 
                                 {showEndYearDropdown && (
