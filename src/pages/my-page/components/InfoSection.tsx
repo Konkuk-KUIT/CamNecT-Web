@@ -1,4 +1,4 @@
-import { type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR, CAREER_STATUS_KR } from "../../../types/mypage/mypageTypes";
+import { type EducationItem, type CareerItem, type CertificateItem, EDUCATION_STATUS_KR } from "../../../types/mypage/mypageTypes";
 import BaseSection from "./BaseSection";
 import Icon from "../../../components/Icon";
 
@@ -59,8 +59,8 @@ function makeLines(type: InfoType, items: InfoItem[]): string[] {
   if (type === "career") {
     return (items as CareerItem[])
       .slice()
-      .sort((a, b) => b.year - a.year)
-      .map((c) => `${c.year}년 ${c.organization} ${CAREER_STATUS_KR[c.status]}`);
+      .sort((a, b) => b.startYear - a.startYear)
+      .map((c) => `${c.startYear}년 ${c.organization}`); //TODO: 디자인 수정된 버전 반영하기
   }
 
   return (items as CertificateItem[])
