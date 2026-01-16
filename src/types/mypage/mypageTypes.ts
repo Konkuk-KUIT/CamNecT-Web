@@ -44,6 +44,7 @@ export interface CertificateItem {
   id: string;
   name: string;
   acquiredYear: number;
+  acquiredMonth: number;
 }
 
 export interface ProfileVisibility {

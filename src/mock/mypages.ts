@@ -50,7 +50,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
     },
     educations: [{ id: "edu_001_1", school: "가나다대학교", status: "ENROLLED", startYear: 2024, endYear: 2026 }],
     careers: [],
-    certificates: [{ id: "cert_001_1", name: "정보처리기사", acquiredYear: 2025 }],
+    certificates: [{ id: "cert_001_1", name: "정보처리기사", acquiredYear: 2025, acquiredMonth: 11 }],
   },
 
   user_002: {
@@ -109,7 +109,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       { id: "edu_002_3", school: "이화여자대학교", status: "GRADUATED", startYear: 2024 , endYear: 2025},
     ],
     careers: [{ id: "car_002_1", organization: "아모레퍼시픽", positions: ["디자인 총괄"], startYear: 2015, startMonth: 1, endYear: 2020, endMonth: 4 }],
-    certificates: [{ id: "cert_002_1", name: "전기기사", acquiredYear: 2025 }],
+    certificates: [{ id: "cert_002_1", name: "전기기사", acquiredYear: 2025, acquiredMonth: 2 }],
   },
 
   user_003: {
@@ -148,6 +148,6 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
     },
     educations: [{ id: "edu_003_1", school: "건국대학교", status: "ENROLLED", startYear: 2020, endYear: 2022 }],
     careers: [],
-    certificates: [{ id: "cert_003_1", name: "컴활 1급", acquiredYear: 2021 }],
+    certificates: [{ id: "cert_003_1", name: "컴활 1급", acquiredYear: 2021, acquiredMonth: 6 }],
   },
 };
