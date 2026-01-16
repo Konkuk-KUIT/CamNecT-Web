@@ -185,8 +185,10 @@ src/
 ┣ layouts/ # 조립식 레이아웃 폴더
 ┃ ┣ FullLayout.tsx # Header + BottomNav
 ┃ ┣ HeaderLayout.tsx
-┃ ┗ components/
+┃ ┗ headers/
 ┃   ┗ Header.tsx # Header 조립 부품
+┃ ┗ BottomNav/
+┃   ┗ BottomNav.tsx # BottomNav 조립 부품
 ┃
 ┣ router/ # 라우팅 설정
 ┃ ┣ Router.tsx # 전체 라우트 정의
