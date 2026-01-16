@@ -1,3 +1,4 @@
+import Badge from '../../components/Badge';
 import Icon from '../../components/Icon';
 
 const Logo = () => (
@@ -48,7 +49,11 @@ const Logo = () => (
   </svg>
 );
 
-export const HomeHeader = () => {
+type HomeHeaderProps = {
+  showBadge?: boolean;
+};
+
+export const HomeHeader = ({ showBadge }: HomeHeaderProps) => {
   return (
     <header
       className='sticky left-0 right-0 top-0 z-50 flex w-full items-center justify-between bg-white px-[25px] py-[15px]'
@@ -62,8 +67,9 @@ export const HomeHeader = () => {
       <span role='img' aria-label='캠넥트 로고'>
         <Logo />
       </span>
-      <span role='img' aria-label='알림'>
+      <span role='img' aria-label='알림' className='relative inline-flex'>
         <Icon name='alarm' />
+        {showBadge ? <Badge /> : null}
       </span>
     </header>
   );

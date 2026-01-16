@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Badge from '../../components/Badge';
 import Icon, { type IconName } from '../../components/Icon';
 
 type HeaderAction = {
@@ -22,9 +23,18 @@ type MainHeaderProps = {
   leftAction?: LeftAction;
   leftIcon?: 'empty';
   leftAriaLabel?: string;
+  // 뱃지 관련 속성 추가
+  showBadge?: boolean;
 };
 
-export const MainHeader = ({ title, rightActions, leftAction, leftIcon, leftAriaLabel }: MainHeaderProps) => {
+export const MainHeader = ({
+  title,
+  rightActions,
+  leftAction,
+  leftIcon,
+  leftAriaLabel,
+  showBadge,
+}: MainHeaderProps) => {
   const navigate = useNavigate();
   const normalizedRightActions = rightActions ?? [];
   // 왼쪽 아이콘 기본 동작: 별도 전달이 없으면 mainBack + 뒤로가기(-1)
@@ -69,7 +79,7 @@ export const MainHeader = ({ title, rightActions, leftAction, leftIcon, leftAria
       <div className='flex min-w-[28px] flex-1 items-center justify-end gap-[15px] z-10'>
         {/* 오른쪽 액션 아이콘들: 없으면 아무 것도 렌더하지 않음 */}
         {normalizedRightActions.length > 0
-          ? normalizedRightActions.map((action) => (
+          ? normalizedRightActions.map((action, index) => (
               <button
                 key={action.icon}
                 type='button'
@@ -77,15 +87,19 @@ export const MainHeader = ({ title, rightActions, leftAction, leftIcon, leftAria
                 onClick={action.onClick}
                 aria-label={action.ariaLabel ?? action.icon}
               >
-                <Icon
-                  name={action.icon}
-                  style={{
-                    width: 'clamp(24px, 7.467cqw, 28px)',
-                    height: 'clamp(24px, 7.467cqw, 28px)',
-                    // 개별 아이콘별 스타일 커스터마이징
-                    ...action.style,
-                  }}
-                />
+                <span className='relative inline-flex'>
+                  <Icon
+                    name={action.icon}
+                    style={{
+                      width: 'clamp(24px, 7.467cqw, 28px)',
+                      height: 'clamp(24px, 7.467cqw, 28px)',
+                      // 개별 아이콘별 스타일 커스터마이징
+                      ...action.style,
+                    }}
+                  />
+                  {/* 뱃지 조건부 렌더링 */}
+                  {showBadge && index === 0 ? <Badge /> : null}
+                </span>
               </button>
             ))
           : null}
