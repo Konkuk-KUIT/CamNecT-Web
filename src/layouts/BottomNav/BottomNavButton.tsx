@@ -1,4 +1,4 @@
-import Icon from "../Icon";
+import Icon from "../../components/Icon";
 import type { BottomNavProps } from "./BottomNav";
 
 interface BottomNavButtonProps extends BottomNavProps {

@@ -1,5 +1,5 @@
 // 하단 네비게이션 바
-import type { IconName } from "../Icon";
+import type { IconName } from "../../components/Icon";
 import {BottomNavButton} from "./BottomNavButton";
 import { useLocation, useNavigate } from "react-router-dom";
 export interface BottomNavProps {
