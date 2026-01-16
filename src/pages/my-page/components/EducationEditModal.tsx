@@ -16,6 +16,17 @@ const STATUS_OPTIONS = Object.entries(EDUCATION_STATUS_KR).map(([value, label]) 
     label
 }));
 
+// 학교 추천 목록 (임시 데이터)
+const allSchools = [
+    '건국대학교',
+    '건욱대학교',
+    '세종대학교',
+    '서울대학교',
+    '카이스트',
+    '이화여자대학교',
+    '동경미술대학'
+];
+
 export default function EducationModal({ educations, initialShowPrivate, onClose, onSave }: EducationModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listEducations, setListEducations] = useState<EducationItem[]>(educations);
@@ -38,16 +49,6 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
     const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
 
-    // 학교 추천 목록 (임시 데이터)
-    const allSchools = [
-        '건국대학교',
-        '건욱대학교',
-        '세종대학교',
-        '서울대학교',
-        '카이스트',
-        '이화여자대학교',
-        '동경미술대학'
-    ];
     //검색 필터링
     const filteredSchools = useMemo(() => {
         if (!formData.school || formData.school.trim() === '') {
