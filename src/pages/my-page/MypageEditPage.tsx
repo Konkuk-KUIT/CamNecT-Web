@@ -9,6 +9,7 @@ import { useProfileEditModals } from "./hooks/useProfileEditModal";
 import TagEditModal from "./components/TagsEditModal";
 import IntroEditModal from "./components/IntroEditModal";
 import EducationEditModal from "./components/EducationEditModal";
+import CareerEditModal from "./components/CareerEditModal";
 import { useNavigate } from "react-router-dom";
 
 
@@ -182,7 +183,7 @@ export const MypageEditPage = () => {
                         type="career"
                         items={careers}
                         isEdit={true}
-                        onEditClick={() => alert("여긴 동작함")}
+                        onEditClick={() => openModal('career')}
                     />
 
                     <InfoSection
@@ -225,7 +226,7 @@ export const MypageEditPage = () => {
             )}
             {currentModal === 'education' && (
                 <EducationEditModal
-                    educations={data.educations}  // 전체 학력 배열
+                    educations={data.educations}
                     initialShowPrivate={visibility.educationVisibility}
                     onClose={closeModal}
                     onSave={(updatedEducations, showPrivate) => {
@@ -235,6 +236,24 @@ export const MypageEditPage = () => {
                             visibility: {
                                 ...data.visibility,
                                 educationVisibility: showPrivate
+                            }
+                        });
+                        closeModal();
+                    }}
+                />
+            )}
+            {currentModal === 'career' && (
+                <CareerEditModal
+                    careers={data.careers}
+                    initialShowPrivate={visibility.careerVisibility}
+                    onClose={closeModal}
+                    onSave={(updatedCareers, showPrivate) => {
+                        setData({ 
+                            ...data, 
+                            careers: updatedCareers,
+                            visibility: {
+                                ...data.visibility,
+                                careerVisibility: showPrivate
                             }
                         });
                         closeModal();
