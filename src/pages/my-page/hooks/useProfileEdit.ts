@@ -1,0 +1,49 @@
+import { useState, useMemo } from "react";
+import { MOCK_PROFILE_DETAIL_BY_UID } from "../../../mock/mypages";
+import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../../mock/portfolio";
+import { useNavigate } from "react-router-dom";
+
+export function useProfileEdit(userId: string) {
+    const navigate = useNavigate();
+    const meDetail = MOCK_PROFILE_DETAIL_BY_UID[userId];
+    
+    const [originalData] = useState(() => ({
+        user: meDetail.user,
+        visibility: meDetail.visibility,
+        educations: meDetail.educations,
+        careers: meDetail.careers,
+        certificates: meDetail.certificates,
+        portfolios: MOCK_PORTFOLIOS_BY_OWNER_ID[userId] ?? [],
+        showFollowPublic: true
+    }));
+    
+    const [data, setData] = useState({
+        user: meDetail.user,
+        visibility: meDetail.visibility,
+        educations: meDetail.educations,
+        careers: meDetail.careers,
+        certificates: meDetail.certificates,
+        portfolios: MOCK_PORTFOLIOS_BY_OWNER_ID[userId] ?? [],
+        showFollowPublic: true
+    });
+
+    const hasChanges = useMemo(() => 
+        JSON.stringify(data) !== JSON.stringify(originalData),
+        [data, originalData]
+    );
+
+    const handleSave = () => {
+        if (!hasChanges) return;
+        console.log('Profile saved:', data);
+        alert("프로필이 저장되었습니다!"); //TODO: 확인용도. 나중에 삭제
+        navigate(-1);
+    };
+
+    return { 
+        data, 
+        setData, 
+        hasChanges, 
+        handleSave,
+        meDetail
+    };
+}

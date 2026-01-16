@@ -1,7 +1,7 @@
 import type { UserProfileDetail } from "../types/mypage/mypageTypes";
 
 export const MOCK_SESSION = {
-  meUid: "user_001" as string, //현재 로그인되어 있는 유저id
+  meUid: "user_002" as string, //현재 로그인되어 있는 유저id
 };
 
 export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
@@ -42,8 +42,13 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
 
       point: 200,
     },
-    portfolioVisibility: true,
-    educations: [{ id: "edu_001_1", school: "가나다대학교", status: "ENROLLED", year: 2024 }],
+    visibility: {
+      portfolioVisibility: true,
+      educationVisibility: true,
+      careerVisibility: true,
+      certificateVisibility: true,
+    },
+    educations: [{ id: "edu_001_1", school: "가나다대학교", status: "ENROLLED", startYear: 2024, endYear: 2026 }],
     careers: [],
     certificates: [{ id: "cert_001_1", name: "정보처리기사", acquiredYear: 2025 }],
   },
@@ -58,7 +63,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       gradeNumber: "19",
       introduction: "현재 UX&UI 분야에서 일하고있습니다!\n관심있으신분들은 커피챗 주세요!",
 
-      userTags: ["UX&UI", "취업", "포트폴리오", "피그마"],
+      userTags: ["UX/UI", "취업", "포트폴리오", "피그마", "프로젝트"],
 
       follower: [
         {
@@ -92,13 +97,18 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       isFollowCountPublic: true,
       point: 1230,
     },
-    portfolioVisibility: true,
+    visibility: {
+      portfolioVisibility: true,
+      educationVisibility: true,
+      careerVisibility: true,
+      certificateVisibility: true,
+    },
     educations: [
-      { id: "edu_002_1", school: "이화여자대학교", status: "ENROLLED", year: 2019 },
-      { id: "edu_002_2", school: "동경미술대학", status: "EXCHANGED", year: 2020 },
-      { id: "edu_002_3", school: "이화여자대학교", status: "GRADUATED", year: 2024 },
+      { id: "edu_002_1", school: "이화여자대학교", status: "ENROLLED", startYear: 2019, endYear: 2020},
+      { id: "edu_002_2", school: "동경미술대학", status: "EXCHANGED", startYear: 2020, endYear: 2021 },
+      { id: "edu_002_3", school: "이화여자대학교", status: "GRADUATED", startYear: 2024 , endYear: 2025},
     ],
-    careers: [{ id: "car_002_1", organization: "아모레퍼시픽", status: "EMPLOYED", year: 2025 }],
+    careers: [{ id: "car_002_1", organization: "아모레퍼시픽", positions: ["디자인 총괄"], startYear: 2015, startMonth: 1, endYear: 2020, endMonth: 4 }],
     certificates: [{ id: "cert_002_1", name: "전기기사", acquiredYear: 2025 }],
   },
 
@@ -130,9 +140,14 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       
       point: 530,
     },
-    portfolioVisibility: false,
-    educations: [{ id: "edu_003_1", school: "건국대학교", status: "ENROLLED", year: 2020 }],
-    careers: [{ id: "car_003_1", organization: "디자인 스튜디오 A", status: "RESIGNED", year: 2023 }],
+    visibility: {
+      portfolioVisibility: true,
+      educationVisibility: true,
+      careerVisibility: true,
+      certificateVisibility: true,
+    },
+    educations: [{ id: "edu_003_1", school: "건국대학교", status: "ENROLLED", startYear: 2020, endYear: 2022 }],
+    careers: [],
     certificates: [{ id: "cert_003_1", name: "컴활 1급", acquiredYear: 2021 }],
   },
 };
