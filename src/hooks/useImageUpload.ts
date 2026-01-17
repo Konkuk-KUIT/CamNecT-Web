@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-// 이미지 업로드 Hook
+// 이미지 업로드 처리를 위한 훅 (유효성 검사, 미리보기, FormData 변환)
 export const useImageUpload = () => {
-    // 버튼 상태 제어용 (로딩 중에, 버튼 disabled or 버튼 텍스트를 '변환중'으로 변경)
     const [isLoading, setIsLoading] = useState(false);
+    
+    // 미리보기 생성된 URL들 
+    const previewUrls = useRef<string[]>([]);
+
+    // 컴포넌트 언마운트 시 생성했던 URL들 정리((메모리 누수 방지))
+    useEffect(() => {
+       
+        const urls = previewUrls.current;
+        return () => {
+            urls.forEach(url => URL.revokeObjectURL(url)); 
+        };
+    }, []);
 
     const prepareImage = (image: File) => {
-        if (!image) return;
+        if (!image) return null;
 
         setIsLoading(true);
 
@@ -17,24 +28,26 @@ export const useImageUpload = () => {
                 return null;
             }
 
-            // 2. 미리보기 URL 생성 (UI 표시용, blob:http://...)
+            // 2. 미리보기 URL 생성 (blob:http://...)
             const previewUrl = URL.createObjectURL(image);
-
+            // 생성된 URL을 추적 목록에 등록 
+            previewUrls.current.push(previewUrl);
+            
             // 3. FormData 생성 (서버 전송용)
             const formData = new FormData();
-            formData.append("image", image); // 원본 파일 그대로
+            formData.append("image", image);
 
-            // { 원본파일, 미리보기URL, FormData } 반환
+            // 성공 시 결과 반환
             return { file: image, previewUrl, formData };
             
         } catch (error) {
             console.error("이미지 처리 중 오류 발생:", error);
-            alert("이미지 업로드 처리에 실패했습니다"); // todo 해당 팝업 디자이너분께 요청 후 컴포넌트 return
+            alert("이미지 업로드 처리에 실패했습니다.");
             return null;
         } finally {
             setIsLoading(false);
         }
     }
 
-    return {prepareImage, isLoading};
+    return { prepareImage, isLoading };
 }
