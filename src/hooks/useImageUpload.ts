@@ -5,7 +5,7 @@ export const useImageUpload = () => {
     // 버튼 상태 제어용 (로딩 중에, 버튼 disabled or 버튼 텍스트를 '변환중'으로 변경)
     const [isLoading, setIsLoading] = useState(false);
 
-    const prepareImage = async (image: File) => {
+    const prepareImage = (image: File) => {
         if (!image) return;
 
         setIsLoading(true);
