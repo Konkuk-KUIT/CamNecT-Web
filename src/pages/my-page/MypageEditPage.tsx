@@ -165,7 +165,7 @@ export const MypageEditPage = () => {
                 {/* Divider */}
                 <div className="w-full h-[10px] bg-gray-150"></div>
 
-                <div className="flex flex-col gap-[30px] py-[30px] px-[25px]">
+                <div className="flex flex-col gap-[40px] py-[30px] px-[25px]">
 
                     <PortfolioSection
                         portfolios={portfolios}

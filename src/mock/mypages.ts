@@ -98,17 +98,20 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       point: 1230,
     },
     visibility: {
-      portfolioVisibility: true,
-      educationVisibility: true,
-      careerVisibility: true,
-      certificateVisibility: true,
+        portfolioVisibility: true,
+        educationVisibility: true,
+        careerVisibility: true,
+        certificateVisibility: true,
     },
     educations: [
-      { id: "edu_002_1", school: "이화여자대학교", status: "ENROLLED", startYear: 2019, endYear: 2020},
-      { id: "edu_002_2", school: "동경미술대학", status: "EXCHANGED", startYear: 2020, endYear: 2021 },
-      { id: "edu_002_3", school: "이화여자대학교", status: "GRADUATED", startYear: 2024 , endYear: 2025},
+        { id: "edu_002_1", school: "이화여자대학교", status: "ENROLLED", startYear: 2019, endYear: 2020},
+        { id: "edu_002_2", school: "동경미술대학", status: "EXCHANGED", startYear: 2020, endYear: 2021 },
+        { id: "edu_002_3", school: "이화여자대학교", status: "GRADUATED", startYear: 2024 , endYear: 2025},
     ],
-    careers: [{ id: "car_002_1", organization: "아모레퍼시픽", positions: ["디자인 총괄"], startYear: 2015, startMonth: 1, endYear: 2020, endMonth: 4 }],
+    careers: [
+        { id: "car_002_1", organization: "아모레퍼시픽", positions: ["디자인 총괄", "OO 프로젝트 참여"], startYear: 2015, startMonth: 1, endYear: 2020, endMonth: 4 },
+        { id: "car_002_2", organization: "어플라이드 머티리얼즈 코리아", positions: ["컨텐츠 디렉터"], startYear: 2017, startMonth: 3, endYear: undefined, endMonth: undefined }
+    ],
     certificates: [{ id: "cert_002_1", name: "전기기사", acquiredYear: 2025, acquiredMonth: 2 }],
   },
 
