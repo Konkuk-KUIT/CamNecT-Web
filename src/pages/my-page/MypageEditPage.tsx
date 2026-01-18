@@ -18,6 +18,7 @@ export const MypageEditPage = () => {
     const userId: string = MOCK_SESSION.meUid;
     const modalRef = useRef<HTMLDivElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
+    const imageUrlRef = useRef<string | null>(null); //TODO: 이미지 업로드 커스텀 훅 반영
 
     const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
@@ -54,10 +55,21 @@ export const MypageEditPage = () => {
 
     const handleImageUpload = (file: File, source: 'album' | 'camera') => {
         console.log(`${source}에서 이미지 가져옴`)
+        if (imageUrlRef.current) {
+            URL.revokeObjectURL(imageUrlRef.current);
+        }
         const imageUrl = URL.createObjectURL(file);
         setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
         closeModal();
     };
+
+    useEffect(() => {
+        return () => {
+            if (imageUrlRef.current) {
+                URL.revokeObjectURL(imageUrlRef.current);
+            }
+        };
+    }, []);
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 

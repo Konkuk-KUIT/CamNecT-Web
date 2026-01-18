@@ -71,6 +71,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
 
     const handleAddCareer = () => {
         setFormData({
+            id: crypto.randomUUID(),
             organization: '',
             positions: [],
             startYear: currentYear,
@@ -211,8 +212,8 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                         </span>
                                         <span className="text-m-16 text-gray-900 pb-[3px]">{career.organization}</span>
                                         <div className="flex flex-col gap-[2px]">
-                                        {career.positions.map((p) => (
-                                            <span className="text-r-14 text-gray-750">
+                                        {career.positions.map((p, posIndex) => (
+                                            <span key={`${index}-${posIndex}`}className="text-r-14 text-gray-750">
                                                 - {p}
                                             </span>
                                         ))}

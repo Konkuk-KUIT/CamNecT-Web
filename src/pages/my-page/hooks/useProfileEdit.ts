@@ -14,7 +14,7 @@ export function useProfileEdit(userId: string) {
         careers: meDetail.careers,
         certificates: meDetail.certificates,
         portfolios: MOCK_PORTFOLIOS_BY_OWNER_ID[userId] ?? [],
-        showFollowPublic: true
+        showFollowPublic: meDetail.user.isFollowCountPublic
     }));
     
     const [data, setData] = useState({
@@ -24,7 +24,7 @@ export function useProfileEdit(userId: string) {
         careers: meDetail.careers,
         certificates: meDetail.certificates,
         portfolios: MOCK_PORTFOLIOS_BY_OWNER_ID[userId] ?? [],
-        showFollowPublic: true
+        showFollowPublic: meDetail.user.isFollowCountPublic
     });
 
     const hasChanges = useMemo(() => 

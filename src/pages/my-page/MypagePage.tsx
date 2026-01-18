@@ -8,15 +8,15 @@ import { useNavigate } from "react-router-dom";
 export const MypagePage = () => {
     const navigate = useNavigate();
     const meUid: string = MOCK_SESSION.meUid;
-    const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
     const profileUserId: string = "user_002";
-    const isProfileOwner = meUid === profileUserId ? true : false;
+    const meDetail = MOCK_PROFILE_DETAIL_BY_UID[profileUserId];
+    const isProfileOwner = meUid === profileUserId;
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
     const { user, educations, careers, certificates } = meDetail;
 
-    const portfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[meUid] ?? [];
+    const portfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[profileUserId] ?? [];
 
     return (
         <div className="h-dvh mx-auto w-full min-w-[320px] max-w-[450px] bg-white">

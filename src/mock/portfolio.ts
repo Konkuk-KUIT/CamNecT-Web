@@ -59,10 +59,10 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], Portfolio[]> = {
         "브랜딩 프로젝트 소개\n" +
         "- 로고 컨셉\n- 컬러 시스템\n- 응용 디자인\n" +
         "케이스 스터디를 정리했습니다.",
-      thumbnailUrl: "https://picsum.photos/seed/pf_002_2/600/400",
-      images: [{ portfolioImgId: "img_002_2_1", url: "https://picsum.photos/seed/pf_002_2_img1/900/700" }],
-      createdAt: "2025.10.28",
-      updatedAt: "2025.10.30",
+      thumbnailUrl: "https://picsum.photos/seed/pf_002_4/600/400",
+      images: [{ portfolioImgId: "img_002_3_1", url: "https://picsum.photos/seed/pf_002_3_img1/900/700" }],
+      createdAt: "2025.01.28",
+      updatedAt: "2025.01.30",
       viewCount: 9,
       portfolioVisibility: false,
     },

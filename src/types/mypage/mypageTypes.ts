@@ -1,6 +1,6 @@
 import { type User } from "../user/userTypes";
 
-export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" | "DROPOUT" | "TRANSFERED";
+export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" | "DROPOUT" | "TRANSFERRED";
 // // User 공통 인터페이스 
 // export interface User {
 //   id: string; 
@@ -69,5 +69,5 @@ export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
   EXCHANGED: "교환",
   GRADUATED: "졸업",
   DROPOUT: "중퇴",
-  TRANSFERED: "편입"
+  TRANSFERRED: "편입"
 };
