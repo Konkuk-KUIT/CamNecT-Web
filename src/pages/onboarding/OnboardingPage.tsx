@@ -1,7 +1,9 @@
+import { EmptyLayout } from '../../layouts/EmptyLayout';
+
+
 export const OnboardingPage = () => {
-    return (
-        <div>
-            
-        </div>
-    );
-}
+  return (
+    <EmptyLayout>
+    </EmptyLayout>
+  );
+};

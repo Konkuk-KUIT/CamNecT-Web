@@ -9,8 +9,6 @@ import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
-import { EmptyLayout } from "../layouts/EmptyLayout";
-import { HeaderLayout } from "../layouts/HeaderLayout";
 import { FullLayout } from "../layouts/FullLayout";
 import { AuthGuard } from "./AuthGuard";
 
@@ -25,18 +23,16 @@ export const router = createBrowserRouter([
         children: [
         
             {
-                element: <EmptyLayout />,
-                children: [
-                    { index: true, element: <OnboardingPage /> },
-                    { path: "login", element: <LoginPage /> },
-                ]
+                index: true,
+                element: <OnboardingPage />,
             },
-
             {
-                element: <HeaderLayout headerType="main"/>,
-                children: [
-                    { path: "signup", element: <SignUpPage /> },
-                ]
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "signup",
+                element: <SignUpPage />,
             },
 
             // 로그인 필수 페이지들 
@@ -44,42 +40,30 @@ export const router = createBrowserRouter([
                 element: <AuthGuard/>,
                 children: [
                     {
-                        element: <FullLayout headerType="home"/>,
-                        children: [
-                            {
-                                // todo HomeUI 연결
-                                path: "home", element: <HomePage />
-                            },
-                        ]
+                        path: "home",
+                        element: <HomePage />,
                     },
-
                     {
-                         element: <FullLayout headerType="main"/>,
-                         children: [
-                             {
-                                 path: "alumni",
-                                 element: <AlumniPage />
-                             },
 
-                             {
-                                 path: "chat",
-                                 element: <CoffeeChatPage />
-                             },
+                        path: "alumni",
+                        element: <AlumniPage />,
+                    },
+                    {
+                        path: "chat",
+                        element: <CoffeeChatPage />,
+                    },
+                    {
+                        path: "activity",
+                        element: <ActivityPage />,
+                    },
+                    {
+                        path: "me",
+                        element: <MypagePage />,
 
-                             {
-                                 path: "activity",
-                                 element: <ActivityPage />
-                             },
-                             
-                             {
-                                 path: "me",
-                                 element: <MypagePage />
-                             },
-                             {
-                                 path: "me/edit",
-                                 element: <MypageEditPage />
-                             },
-                        ]
+                    },
+                    {
+                        path: "me/edit",
+                        element: <MypageEditPage />
                     },
                 ]
             },
