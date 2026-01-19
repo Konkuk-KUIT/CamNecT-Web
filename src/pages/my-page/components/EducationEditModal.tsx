@@ -6,7 +6,7 @@ interface EducationModalProps {
     educations: EducationItem[];
     initialShowPrivate: boolean;
     onClose: () => void;
-    onSave: (educations: EducationItem[], showPrivate: boolean) => void; //TODO: mock data에 학력 비공개 boolean 추가하기
+    onSave: (educations: EducationItem[], showPrivate: boolean) => void;
 }
 
 type View = 'list' | 'add' | 'edit';
@@ -30,7 +30,7 @@ const allSchools = [
 export default function EducationModal({ educations, initialShowPrivate, onClose, onSave }: EducationModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listEducations, setListEducations] = useState<EducationItem[]>(educations);
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
     
     const [formData, setFormData] = useState<Partial<EducationItem>>({
@@ -74,8 +74,9 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
         if (currentView === 'add') {
             return !!(formData.school.trim() || formData.status !== 'ENROLLED' || formData.startYear !== currentYear);
         }
-        if (currentView === 'edit' && editingIndex !== null) {
-            const original = listEducations[editingIndex];
+        if (currentView === 'edit' && editingId !== null) {
+            const original = listEducations.find(e => e.id === editingId);
+            if (!original) return false;
             return (
                 formData.school !== original.school ||
                 formData.status !== original.status ||
@@ -84,7 +85,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
             );
         }
         return false;
-    }, [formData, currentView, editingIndex, listEducations, currentYear]);
+    }, [formData, currentView, editingId, listEducations, currentYear]);
 
     const handleComplete = () => {
         if (!hasChanges) {
@@ -104,10 +105,13 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
         setCurrentView('add');
     };
 
-    const handleEditEducation = (index: number) => {
-        setEditingIndex(index);
-        setFormData(listEducations[index]);
-        setCurrentView('edit');
+    const handleEditEducation = (id: string) => {
+        setEditingId(id);
+        const edu = listEducations.find(e => e.id === id);
+        if (edu) {
+            setFormData(edu);
+            setCurrentView('edit');
+        }
     };
 
     const handleSaveForm = () => {
@@ -122,18 +126,22 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
         }
 
         if (currentView === 'add') {
-            setListEducations([...listEducations, formData as EducationItem]);
-        } else if (currentView === 'edit' && editingIndex !== null) {
-            const updated = [...listEducations];
-            updated[editingIndex] = formData as EducationItem;
-            setListEducations(updated);
+            const newEdu: EducationItem = {
+                id: crypto.randomUUID(),
+                ...formData as Omit<EducationItem, 'id'>
+            };
+            setListEducations([...listEducations, newEdu]);
+        } else if (currentView === 'edit' && editingId !== null) {
+            setListEducations(listEducations.map(e => 
+                e.id === editingId ? { ...e, ...formData } : e
+            ));
         }
         setCurrentView('list');
     };
 
     const handleDeleteEducation = () => {
-        if (editingIndex !== null) {
-            setListEducations(listEducations.filter((_, i) => i !== editingIndex));
+        if (editingId !== null) {
+            setListEducations(listEducations.filter(e => e.id !== editingId));
             setCurrentView('list');
         }
     };
@@ -187,9 +195,21 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
                     {/* 학력 리스트 */}
                     <div className="w-full flex flex-col">
-                        {listEducations.map((edu, index) => (
+                        {listEducations
+                            .slice()
+                            .sort((a, b) => {
+                                // 시작 연도 비교
+                                if (b.startYear !== a.startYear) {
+                                    return b.startYear - a.startYear;
+                                }
+                                // 종료 연도 비교 (현재 재학중이면 undefined)
+                                const aEnd = a.endYear || 9999;
+                                const bEnd = b.endYear || 9999;
+                                return bEnd - aEnd;
+                            })
+                            .map((edu) => (
                             <div
-                                key={index}
+                                key={edu.id}
                                 className="w-full flex justify-between items-center px-[25px] py-[20px] border-b border-gray-150"
                             >
                                 <div className="flex items-center gap-[20px]">
@@ -213,7 +233,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                 </div>
                                 
                                 <button className="text-sb-14-hn text-gray-650"
-                                    onClick={() => handleEditEducation(index)}>
+                                    onClick={() => handleEditEducation(edu.id)}>
                                     수정
                                 </button>
                             </div>
@@ -352,7 +372,14 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
                                 {showStartYearDropdown && (
                                     <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                        {years.map((year) => (
+                                        {years
+                                            .filter(year => {
+                                                if (formData.endYear) {
+                                                    return year <= formData.endYear; // 종료 연도 이하만
+                                                }
+                                                return true;
+                                            })
+                                            .map((year) => (
                                             <button
                                                 key={year}
                                                 onClick={() => {
@@ -396,7 +423,14 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                         >
                                             현재
                                         </button>
-                                        {years.map((year) => (
+                                        {years
+                                            .filter(year => {
+                                                if (formData.startYear !== undefined) {
+                                                    return year >= formData.startYear; // 시작 연도 이상만
+                                                }
+                                                return true;
+                                            })
+                                            .map((year) => (
                                             <button
                                                 key={year}
                                                 onClick={() => {

@@ -16,7 +16,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 export default function CareerModal({ careers, initialShowPrivate, onClose, onSave }: CareerModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listCareers, setListCareers] = useState<CareerItem[]>(careers);
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
     
     const [formData, setFormData] = useState<Partial<CareerItem>>({
@@ -54,12 +54,13 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
         if (currentView === 'add') {
             return !!(formData.organization.trim());
         }
-        if (currentView === 'edit' && editingIndex !== null) {
-            const original = listCareers[editingIndex];
+        if (currentView === 'edit' && editingId !== null) {
+            const original = listCareers.find(c => c.id === editingId);
+            if (!original) return false;
             return JSON.stringify(formData) !== JSON.stringify(original);
         }
         return false;
-    }, [formData, currentView, editingIndex, listCareers]);
+    }, [formData, currentView, editingId, listCareers]);
 
     const handleComplete = () => {
         if (!hasChanges) {
@@ -71,7 +72,6 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
 
     const handleAddCareer = () => {
         setFormData({
-            id: crypto.randomUUID(),
             organization: '',
             positions: [],
             startYear: currentYear,
@@ -83,11 +83,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
         setCurrentView('add');
     };
 
-    const handleEditCareer = (index: number) => {
-        setEditingIndex(index);
-        setFormData(listCareers[index]);
-        setNewPosition('');
-        setCurrentView('edit');
+    const handleEditCareer = (id: string) => {
+        setEditingId(id);
+        const career = listCareers.find(c => c.id === id);
+        if (career) {
+            setFormData(career);
+            setNewPosition('');
+            setCurrentView('edit');
+        }
     };
 
     const handleSaveForm = () => {
@@ -102,18 +105,22 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
         }
 
         if (currentView === 'add') {
-            setListCareers([...listCareers, formData as CareerItem]);
-        } else if (currentView === 'edit' && editingIndex !== null) {
-            const updated = [...listCareers];
-            updated[editingIndex] = formData as CareerItem;
-            setListCareers(updated);
+            const newCareer: CareerItem = {
+                id: crypto.randomUUID(),
+                ...formData as Omit<CareerItem, 'id'>
+            };
+            setListCareers([...listCareers, newCareer]);
+        } else if (currentView === 'edit' && editingId !== null) {
+            setListCareers(listCareers.map(c => 
+                c.id === editingId ? { ...c, ...formData } : c
+            ));
         }
         setCurrentView('list');
     };
 
     const handleDeleteCareer = () => {
-        if (editingIndex !== null) {
-            setListCareers(listCareers.filter((_, i) => i !== editingIndex));
+        if (editingId !== null) {
+            setListCareers(listCareers.filter(c => c.id !== editingId));
             setCurrentView('list');
         }
     };
@@ -189,9 +196,31 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
 
                     {/* 경력 리스트 */}
                     <div className="w-full flex flex-col">
-                        {listCareers.map((career, index) => (
+                        {listCareers
+                            .slice()
+                            .sort((a, b) => {
+                                // 시작 연도 비교
+                                if (b.startYear !== a.startYear) {
+                                    return b.startYear - a.startYear;
+                                }
+                                // 시작 월 비교
+                                if (b.startMonth !== a.startMonth) {
+                                    return b.startMonth - a.startMonth;
+                                }
+                                // 종료 연도 비교 (현재 근무중이면 9999로 취급)
+                                const aEndYear = a.endYear || 9999;
+                                const bEndYear = b.endYear || 9999;
+                                if (bEndYear !== aEndYear) {
+                                    return bEndYear - aEndYear;
+                                }
+                                // 종료 월 비교
+                                const aEndMonth = a.endMonth || 12;
+                                const bEndMonth = b.endMonth || 12;
+                                return bEndMonth - aEndMonth;
+                            })
+                            .map((career) => (
                             <div
-                                key={index}
+                                key={career.id}
                                 className="w-full flex justify-between items-center gap-[30px] px-[25px] py-[15px] border-b border-gray-150"
                             >
                                 <div className="flex items-center gap-[20px]">
@@ -213,7 +242,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                         <span className="text-m-16 text-gray-900 pb-[3px]">{career.organization}</span>
                                         <div className="flex flex-col gap-[2px]">
                                         {career.positions.map((p, posIndex) => (
-                                            <span key={`${index}-${posIndex}`}className="text-r-14 text-gray-750">
+                                            <span key={posIndex} className="text-r-14 text-gray-750">
                                                 - {p}
                                             </span>
                                         ))}
@@ -222,7 +251,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                 </div>
                                 
                                 <button className="min-w-[25px] text-sb-14-hn text-gray-650"
-                                    onClick={() => handleEditCareer(index)}>
+                                    onClick={() => handleEditCareer(career.id)}>
                                     수정
                                 </button>
                             </div>
@@ -308,7 +337,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                 </button>
                                 {showStartYearDropdown && (
                                     <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                        {years.map((year) => (
+                                        {years
+                                            .filter(year => {
+                                                if (formData.endYear) {
+                                                    return year <= formData.endYear; // 종료 연도 이하만
+                                                }
+                                                return true;
+                                            })
+                                            .map((year) => (
                                             <button
                                                 key={year}
                                                 onClick={() => {
@@ -337,7 +373,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                 </button>
                                 {showStartMonthDropdown && (
                                     <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                        {MONTHS.map((month) => (
+                                        {MONTHS
+                                            .filter(month => {
+                                                if (formData.endYear === formData.startYear && formData.endMonth) {
+                                                    return month <= formData.endMonth; // 종료 월 이하만
+                                                }
+                                                return true;
+                                            })
+                                            .map((month) => (
                                             <button
                                                 key={month}
                                                 onClick={() => {
@@ -384,7 +427,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                         >
                                             현재
                                         </button>
-                                        {years.map((year) => (
+                                        {years
+                                            .filter(year => {
+                                                if (formData.startYear !== undefined) {
+                                                    return year >= formData.startYear; // 시작 연도 이상만
+                                                }
+                                                return true;
+                                            })
+                                            .map((year) => (
                                             <button
                                                 key={year}
                                                 onClick={() => {
@@ -414,7 +464,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                     </button>
                                     {showEndMonthDropdown && (
                                         <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                            {MONTHS.map((month) => (
+                                            {MONTHS
+                                                .filter(month => {
+                                                    if (formData.endYear === formData.startYear && formData.startMonth !== undefined) {
+                                                        return month >= formData.startMonth; // 시작 월 이상만
+                                                    }
+                                                    return true;
+                                                })
+                                                .map((month) => (
                                                 <button
                                                     key={month}
                                                     onClick={() => {
