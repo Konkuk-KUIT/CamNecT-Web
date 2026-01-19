@@ -1,9 +1,9 @@
 import Category from '../../../components/Category';
-import FilterHeader from '../components/FilterHeader';
-import FilterModal from '../components/FilterModal';
+import FilterHeader from '../../../components/FilterHeader';
+import FilterModal from '../../../components/FilterModal';
 import WriteButton from '../components/WriteButton';
 import type { QuestionPost } from '../data';
-import useCommunityFilters from '../hooks/useCommunityFilters';
+import useCommunityFilters from '../../../hooks/useCommunityFilters';
 import { formatTimeAgo } from '../time';
 
 type QuestionTabProps = {

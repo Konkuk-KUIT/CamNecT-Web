@@ -8,6 +8,10 @@ import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
 import { MyPage } from "../pages/my-page/MyPage";
+import { CommunityPage } from "../pages/community/CommunityPage";
+import { WritePage } from "../pages/community/WritePage";
+import CommunityPostPage from "../pages/community/CommunityPostPage";
+
 import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
@@ -56,6 +60,19 @@ export const router = createBrowserRouter([
                     {
                         path: "me",
                         element: <MyPage />,
+                    },
+                    {
+                        path: "community",
+                        element: <CommunityPage />,
+                        
+                    },
+                    {
+                        path: "community/write",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
                     },
                 ]
             },

@@ -13,7 +13,7 @@ const tabItems: TabItem[] = [
   { id: 'question', label: '질문' },
 ];
 
-const CommunityPage = () => {
+export const CommunityPage = () => {
   const [activeTab, setActiveTab] = useState<string>(tabItems[0].id);
 
   // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈
@@ -49,10 +49,7 @@ const CommunityPage = () => {
       <div className='bg-white'>
         <Tabs tabs={tabItems} activeId={activeTab} onChange={setActiveTab} />
       </div>
-
       <div>{renderTab()}</div>
     </MainLayout>
   );
 };
-
-export default CommunityPage;

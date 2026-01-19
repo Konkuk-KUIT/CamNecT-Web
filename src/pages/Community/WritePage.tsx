@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import {EmptyLayout} from '../../layouts/EmptyLayout';
 import BoardTypeToggle from './components/BoardTypeToggle';
-import FilterHeader from './components/FilterHeader';
-import FilterModal from './components/FilterModal';
+import FilterHeader from '../../components/FilterHeader';
+import FilterModal from '../../components/FilterModal';
 import useCommunityFilters from '../../hooks/useCommunityFilters';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
 type BoardType = (typeof boardTypes)[number];
 
-const WritePage = () => {
+export const WritePage = () => {
     const navigate = useNavigate();
     // 게시판 선택 모달 상태
     const [isBoardOpen, setIsBoardOpen] = useState(false);
@@ -510,4 +510,3 @@ const WritePage = () => {
     );
 };
 
-export default WritePage;
