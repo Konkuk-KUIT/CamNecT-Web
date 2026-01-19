@@ -35,6 +35,16 @@ export const router = createBrowserRouter([
             {
                 path: "signup",
                 element: <SignUpPage />,
+                index: true,
+                element: <OnboardingPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "signup",
+                element: <SignUpPage />,
             },
 
             // 로그인 필수 페이지들 
@@ -79,3 +89,4 @@ export const router = createBrowserRouter([
         ]
     }
 ]);
+
