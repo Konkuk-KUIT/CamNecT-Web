@@ -15,7 +15,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       gradeNumber: "23",
       introduction: "프론트엔드로 UI 구현 중입니다.",
 
-      userTags: ["React", "TypeScript", "UI"],
+      userTags: ["공모전", "정보처리기사", "컴퓨터공학"],
 
       follower: [
         {
@@ -63,7 +63,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       gradeNumber: "19",
       introduction: "현재 UX&UI 분야에서 일하고있습니다!\n관심있으신분들은 커피챗 주세요!",
 
-      userTags: ["UX/UI", "취업", "포트폴리오", "피그마", "프로젝트"],
+      userTags: ["디자인", "브랜딩", "멘토링", "공모전"],
 
       follower: [
         {
@@ -125,7 +125,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       gradeNumber: "20",
       introduction: "브랜딩과 서비스 디자인에 관심이 많아요.",
 
-      userTags: ["브랜딩", "서비스디자인", "리서치"],
+      userTags: ["브랜딩", "교환학생", "토익"],
 
       follower: [],
       following: [

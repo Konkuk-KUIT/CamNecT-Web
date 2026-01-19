@@ -11,15 +11,14 @@ interface TagEditModalProps {
 export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProps) {
     const [selectedTags, setSelectedTags] = useState<string[]>(tags);
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState<'전체' | '분야' | '관심사'>('전체');
 
-    // 변경사항 추적
+    //변경사항 추적
     const hasChanges = useMemo(() => {
         if (selectedTags.length !== tags.length) return true;
         return !selectedTags.every(tag => tags.includes(tag));
     }, [selectedTags, tags]);
 
-    // 태그 선택/해제
+    //태그 선택/해제
     const toggleTag = (tagName: string) => {
         if (selectedTags.includes(tagName)) {
             setSelectedTags(selectedTags.filter(t => t !== tagName));
@@ -32,60 +31,29 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
         }
     };
 
-    // 선택된 태그 제거
     const removeSelectedTag = (tagName: string) => {
         setSelectedTags(selectedTags.filter(t => t !== tagName));
     };
 
-    // 탭에 따른 태그 필터링
-    const getFilteredTagsByTab = () => {
-        // 검색어가 있을 때
+    //검색 필터링
+    const getFilteredCategories = () => {
         if (searchQuery) {
+            //검색어가 있을 때 검색 결과를 카테고리별로 그룹화
             const filtered = MOCK_ALL_TAGS.filter(tag => 
                 tag.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
             
-            // 검색 결과를 카테고리별로 그룹화
-            if (activeTab === '전체') {
-                const grouped = TAG_CATEGORIES.map(cat => ({
-                    ...cat,
-                    tags: filtered.filter(tag => tag.category === cat.id)
-                })).filter(cat => cat.tags.length > 0);
-                return grouped;
-            } else if (activeTab === '분야') {
-                const grouped = TAG_CATEGORIES
-                    .filter(cat => cat.id === 'major')
-                    .map(cat => ({
-                        ...cat,
-                        tags: filtered.filter(tag => tag.category === cat.id)
-                    }))
-                    .filter(cat => cat.tags.length > 0);
-                return grouped;
-            } else {
-                const grouped = TAG_CATEGORIES
-                    .filter(cat => cat.id === 'interest' || cat.id === 'career' || cat.id === 'etc')
-                    .map(cat => ({
-                        ...cat,
-                        tags: filtered.filter(tag => tag.category === cat.id)
-                    }))
-                    .filter(cat => cat.tags.length > 0);
-                return grouped;
-            }
+            const grouped = TAG_CATEGORIES.map(cat => ({
+                ...cat,
+                tags: filtered.filter(tag => tag.category === cat.id)
+            })).filter(cat => cat.tags.length > 0);
+            
+            return grouped;
         }
-
-        // 검색어가 없을 때
-        if (activeTab === '전체') {
-            return TAG_CATEGORIES;
-        } else if (activeTab === '분야') {
-            return TAG_CATEGORIES.filter(cat => cat.id === 'major');
-        } else {
-            return TAG_CATEGORIES.filter(cat => 
-                cat.id === 'interest' || cat.id === 'career' || cat.id === 'etc'
-            );
-        }
+        
+        return TAG_CATEGORIES;
     };
 
-    // 완료 버튼
     const handleComplete = () => {
         if (!hasChanges) {
             onClose();
@@ -94,7 +62,7 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
         onSave(selectedTags);
     };
 
-    const filteredCategories = getFilteredTagsByTab();
+    const filteredCategories = getFilteredCategories();
 
     return (
         <div className="absolute inset-0 z-50 bg-white flex flex-col">
@@ -172,34 +140,12 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                     </div>
                 </section>
 
-                {/*탭 부분*/}
-                <section className="w-full border-b border-gray-150">
-                    <div className="flex justify-around">
-                        {['전체', '분야', '관심사'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab as '전체' | '분야' | '관심사')}
-                                className={`relative w-[60px] py-[10px] text-sb-14 text-align ${
-                                    activeTab === tab 
-                                        ? 'text-gray-900' 
-                                        : 'text-gray-500'
-                                }`}
-                            >
-                                {tab}
-                                { activeTab === tab && (
-                                    <div className="w-full h-0 border-[2px] border-primary rounded-full absolute bottom-0"/>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
                 {/*태그 리스트*/}
                 <section className="flex-1 min-h-0 overflow-y-auto pt-[5px] pb-[40px]">
                     {searchQuery ? (
-                        // 검색 결과
+                        //검색 결과
                         <div className="flex flex-wrap gap-[7px] py-[15px] pl-[3px]">
-                            {(filteredCategories as typeof TAG_CATEGORIES).map(category =>
+                            {filteredCategories.flatMap(category =>
                             category.tags.map(tag => (
                                 <button
                                     key={tag.id}
@@ -215,12 +161,12 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                             )))}
                         </div>
                     ) : (
-                        // 전체 태그
+                        //전체 태그
                         <div className="w-full flex flex-col">
-                            {(filteredCategories as typeof TAG_CATEGORIES).map(category => (
+                            {filteredCategories.map(category => (
                                 <div key={category.id} className="w-full flex flex-col gap-[15px] pt-[20px] pb-[15px] border-b border-gray-250 last:border-none">
-                                    <h3 className="text-sb-16-hn text-gray-900 pl-[3px]">{category.name}</h3>
-                                    <div className="flex flex-wrap gap-[7px] pl-[3px]">
+                                    <span className="text-sb-16-hn text-gray-900">{category.name}</span>
+                                    <div className="flex flex-wrap gap-[7px]">
                                         {category.tags.map(tag => (
                                             <button
                                                 key={tag.id}
