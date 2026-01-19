@@ -5,6 +5,18 @@ export type AuthorProfile = {
   isAlumni?: boolean;
 };
 
+export type CommentAuthor = AuthorProfile & {
+  profileImageUrl?: string;
+};
+
+export type CommentItem = {
+  id: string;
+  author: CommentAuthor;
+  content: string;
+  createdAt: string;
+  replies?: CommentItem[];
+};
+
 export type InfoPost = {
   id: string;
   author: AuthorProfile;
@@ -30,6 +42,18 @@ export type QuestionPost = {
   createdAt: string;
 };
 
+export type CommunityPostDetail = {
+  id: string;
+  boardType: string;
+  title: string;
+  likes: number;
+  comments: number;
+  createdAt: string;
+  author: CommentAuthor;
+  content: string;
+  categories: string[];
+  postImages?: string[];
+};
 
 export const loggedInUserMajor = '컴퓨터공학부';
 
@@ -38,6 +62,60 @@ const sampleProfileImage =
 
 const samplePostImage =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDE2MCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxMjAiIHJ4PSIxMiIgZmlsbD0iI0U5RjdGMSIvPjxyZWN0IHg9IjEyIiB5PSIxMiIgd2lkdGg9IjEzNiIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiNDOUU5RDgiLz48Y2lyY2xlIGN4PSI0MCIgY3k9Ijg4IiByPSIxMCIgZmlsbD0iIzg2RDVCMCIvPjxyZWN0IHg9IjU2IiB5PSI4MCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0iI0E1RTFDNCIvPjwvc3ZnPg==';
+
+export const communityPostData: CommunityPostDetail = {
+  id: 'post-1',
+  boardType: '정보',
+  title: '진로 고민하는 후배들에게 공유하고 싶은 내용',
+  likes: 24,
+  comments: 6,
+  createdAt: '25.01.31 04:01',
+  author: {
+    name: '박원빈',
+    major: '컴퓨터공학부',
+    studentId: '20',
+    profileImageUrl: '',
+  },
+  content:
+    '요즘 어떤 분야로 진로를 잡을지 고민이 많아서, 제가 정리했던 자료와 멘토링에서 들었던 이야기를 나눠보려고 합니다. 도움이 되길 바랍니다.',
+  categories: ['취업', '진로', '멘토링'],
+  postImages: [samplePostImage, samplePostImage, samplePostImage, samplePostImage],
+};
+
+export const communityCommentList: CommentItem[] = [
+  {
+    id: 'comment-1',
+    author: {
+      name: '김은지',
+      major: '경영학부',
+      studentId: '22',
+    },
+    content: '정리해주신 자료가 깔끔해서 이해가 쉬웠어요. 감사합니다!',
+    createdAt: '25.01.31 06:12',
+    replies: [
+      {
+        id: 'comment-1-1',
+        author: {
+          name: '박원빈',
+          major: '컴퓨터공학부',
+          studentId: '20',
+        },
+        content: '도움이 되었다니 다행이에요. 추가 질문 있으면 남겨주세요!',
+        createdAt: '25.01.31 07:05',
+      },
+    ],
+  },
+  {
+    id: 'comment-2',
+    author: {
+      name: '정가을',
+      major: '디자인컨버전스학부',
+      studentId: '20',
+    },
+    content: '이런 경험 공유가 더 많아졌으면 좋겠어요.',
+    createdAt: '25.01.31 09:41',
+  },
+];
 
 export const infoPosts: InfoPost[] = [
   {

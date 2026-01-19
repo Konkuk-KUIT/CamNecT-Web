@@ -1,5 +1,5 @@
 import { type PointerEvent, useEffect, useRef, useState } from 'react';
-import MainBox, { type MainBoxPost } from '../components/MainBox';
+import MainBox, { type MainBoxPost } from './MainBox';
 
 type MainBoxCarouselProps = {
   items: MainBoxPost[];

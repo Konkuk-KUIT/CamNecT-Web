@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import MainBoxCarousel from '../components/MainBoxCarousel';
@@ -55,34 +56,37 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           {unansweredQuestions.map((question, index) => {
             const isLast = index === unansweredQuestions.length - 1;
             return (
-            <div
-              key={question.id}
-              className='flex flex-col'
-              style={{
-                padding: '15px 20px',
-                gap: '7px',
-                boxShadow: isLast
-                  ? undefined
-                  : 'inset 0 -1px 0 var(--ColorGray1, #ECECEC)',
-              }}
-            >
-              {/* TODO: 질문 상세 라우터 연결 (카드 클릭) */}
-              <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
-                {question.categories.map((category) => (
-                  <Category key={category} label={category} height={20} className='px-[6px]' />
-                ))}
-              </div>
+              <Link key={question.id} to={`/community/post/${question.id}`} className='block'>
+                <div
+                  className='flex flex-col'
+                  style={{
+                    padding: '15px 20px',
+                    gap: '7px',
+                    boxShadow: isLast
+                      ? undefined
+                      : 'inset 0 -1px 0 var(--ColorGray1, #ECECEC)',
+                  }}
+                >
+                  <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
+                    {question.categories.map((category) => (
+                      <Category key={category} label={category} height={20} className='px-[6px]' />
+                    ))}
+                  </div>
 
-              <div className='flex flex-col' style={{ gap: '3px' }}>
-                <div className='text-m-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                  {question.title}
+                  <div className='flex flex-col' style={{ gap: '3px' }}>
+                    <div className='text-m-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                      {question.title}
+                    </div>
+                    <div
+                      className='flex items-center justify-between text-r-12'
+                      style={{ color: 'var(--ColorGray3, #646464)' }}
+                    >
+                      <span>답변 {question.answers}</span>
+                      <span>{formatTimeAgo(question.createdAt)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className='flex items-center justify-between text-r-12' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                  <span>답변 {question.answers}</span>
-                  <span>{formatTimeAgo(question.createdAt)}</span>
-                </div>
-              </div>
-            </div>
+              </Link>
             );
           })}
         </Card>

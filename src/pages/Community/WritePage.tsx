@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
+import PopUp from '../../components/Pop-up';
 import {EmptyLayout} from '../../layouts/EmptyLayout';
 import BoardTypeToggle from './components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
@@ -25,6 +26,8 @@ export const WritePage = () => {
     const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
     // 완료 확인 모달 상태
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    // 작성 취소 경고 팝업 상태
+    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
     // 사진 미리보기 목록과 object URL 정리용 ref
     const [photoPreviews, setPhotoPreviews] = useState<{ id: string; url: string }[]>([]);
     const photoPreviewsRef = useRef<{ id: string; url: string }[]>([]);
@@ -69,6 +72,12 @@ export const WritePage = () => {
         Boolean(boardType) &&
         title.trim().length > 0 &&
         content.trim().length > 0 &&
+        activeFilters.length > 0;
+    const hasDraftContent =
+        title.trim().length > 0 ||
+        content.trim().length > 0 ||
+        photoPreviews.length > 0 ||
+        Boolean(boardType) ||
         activeFilters.length > 0;
 
     // 모바일 키보드 높이에 맞춰 하단 사진 영역 위치 업데이트
@@ -144,6 +153,23 @@ export const WritePage = () => {
         navigate('/community');
     };
 
+    const handleCancelClick = () => {
+        if (hasDraftContent) {
+            setIsCancelWarningOpen(true);
+            return;
+        }
+        navigate(-1);
+    };
+
+    const handleCancelConfirm = () => {
+        setIsCancelWarningOpen(false);
+        navigate(-1);
+    };
+
+    const handleCancelDismiss = () => {
+        setIsCancelWarningOpen(false);
+    };
+
     return (
         <EmptyLayout>
             <div className='flex min-h-screen w-full flex-col bg-white'>
@@ -158,7 +184,7 @@ export const WritePage = () => {
                     <button
                         type='button'
                         aria-label='작성 취소'
-                        onClick={() => navigate(-1)}
+                        onClick={handleCancelClick}
                         className='flex items-center'
                     >
                         <Icon name='cancel' />
@@ -493,6 +519,15 @@ export const WritePage = () => {
                 </div>
             )}
 
+            <PopUp
+                isOpen={isCancelWarningOpen}
+                type='warning'
+                title={'작성된 내용이 있습니다.\n삭제하시겠습니까?'}
+                content='삭제된 내용은 복구 불가능 합니다.'
+                onLeftClick={handleCancelConfirm}
+                onRightClick={handleCancelDismiss}
+            />
+
             {/* 필터 모달 */}
             <FilterModal
                 isOpen={isFilterOpen}
@@ -509,4 +544,3 @@ export const WritePage = () => {
         </EmptyLayout>
     );
 };
-

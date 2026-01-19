@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
-import MainLayout from '../../layouts/MainLayout';
+import { HeaderLayout } from '../../layouts/HeaderLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
@@ -41,15 +41,23 @@ export const CommunityPage = () => {
   };
 
   return (
-    //TODO: 각 탭별로 search 기능 구현 
-    <MainLayout
-      title='커뮤니티'
-      rightElement={activeTab === 'all' ? undefined : <Icon name='search' />}
+    //TODO: 각 탭별로 search 기능 구현
+    <HeaderLayout
+      headerSlot={
+        <MainHeader
+          title='커뮤니티'
+          rightActions={
+            activeTab === 'all'
+              ? []
+              : [{ icon: 'search', onClick: () => console.log('search') }]
+          }
+        />
+      }
     >
       <div className='bg-white'>
         <Tabs tabs={tabItems} activeId={activeTab} onChange={setActiveTab} />
       </div>
       <div>{renderTab()}</div>
-    </MainLayout>
+    </HeaderLayout>
   );
 };
