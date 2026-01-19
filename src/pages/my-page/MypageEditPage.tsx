@@ -10,6 +10,7 @@ import TagEditModal from "./components/TagsEditModal";
 import IntroEditModal from "./components/IntroEditModal";
 import EducationEditModal from "./components/EducationEditModal";
 import CareerEditModal from "./components/CareerEditModal";
+import CertificateEditModal from "./components/CertificateEditModal";
 import { useNavigate } from "react-router-dom";
 
 
@@ -202,6 +203,7 @@ export const MypageEditPage = () => {
                         type="certificate"
                         items={certificates}
                         isEdit={true}
+                        onEditClick={() => openModal('certificate')}
                     />
                 </div>
             </div> 
@@ -266,6 +268,24 @@ export const MypageEditPage = () => {
                             visibility: {
                                 ...data.visibility,
                                 careerVisibility: showPrivate
+                            }
+                        });
+                        closeModal();
+                    }}
+                />
+            )}
+            {currentModal === 'certificate' && (
+                <CertificateEditModal
+                    certificates={data.certificates}
+                    initialShowPrivate={visibility.certificateVisibility}
+                    onClose={closeModal}
+                    onSave={(updatedCertificates, showPrivate) => {
+                        setData({ 
+                            ...data, 
+                            certificates: updatedCertificates,
+                            visibility: {
+                                ...data.visibility,
+                                certificateVisibility: showPrivate
                             }
                         });
                         closeModal();
