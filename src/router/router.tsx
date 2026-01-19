@@ -9,7 +9,6 @@ import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
-import { FullLayout } from "../layouts/FullLayout";
 import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
@@ -44,6 +43,7 @@ export const router = createBrowserRouter([
                         element: <HomePage />,
                     },
                     {
+
 
                         path: "alumni",
                         element: <AlumniPage />,
