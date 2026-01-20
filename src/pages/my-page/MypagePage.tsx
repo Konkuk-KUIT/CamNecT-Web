@@ -29,7 +29,7 @@ export const MypagePage = () => {
                 />
             }   
         >
-            <div className="w-full bg-white">
+            <div className="w-full bg-white  border-t border-gray-150">
             {/* 프로필 */}
                 <section className="px-[25px] pt-[40px] pb-[33px] flex flex-col gap-[20px]">
                     <div className="flex flex-1 flex-col gap-[22px]">

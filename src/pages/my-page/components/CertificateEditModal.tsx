@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import Icon from "../../../components/Icon";
 import { type CertificateItem } from "../../../types/mypage/mypageTypes";
+import { HeaderLayout } from "../../../layouts/HeaderLayout";
+import { EditHeader } from "../../../layouts/headers/EditHeader";
 
 interface CertificateModalProps {
     certificates: CertificateItem[];
@@ -119,97 +121,99 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
     // 자격증 리스트 화면
     if (currentView === 'list') {
         return (
-            <div className="absolute inset-0 z-50 bg-white flex flex-col">
-                {/* 헤더 */}
-                <header className="w-full py-[10px] px-[25px] h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
-                    <button 
-                        className="w-[24px] h-[24px]" 
-                        onClick={onClose}
-                    >
-                        <Icon name='cancel' className="block shrink-0"/>
-                    </button>
-                    <span className="text-sb-20 text-gray-900">자격증</span>
-                    <button
-                        className={`text-b-16-hn transition-colors ${
-                            hasChanges ? 'text-primary' : 'text-gray-650'
-                        }`}
-                        onClick={handleComplete}
-                        disabled={!hasChanges}
-                    >
-                        완료
-                    </button>
-                </header>
-
-                <div className="flex-1 overflow-y-auto">
-                    {/* 자격증 비공개 토글 */}
-                    <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
-                        <span className="text-sb-14-hn text-gray-900">자격증 비공개</span>
-                        <button
-                            onClick={() => setShowPrivate(!showPrivate)}
-                            className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                showPrivate ? 'bg-gray-300' : 'bg-primary'
-                            }`}
-                        >
-                            <div
-                                className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                    showPrivate ? 'translate-x-[2px]' : 'translate-x-[28px]'
-                                }`}
-                            />
-                        </button>
-                    </div>
-
-                    {/* 자격증 리스트 */}
-                    <div className="w-full flex flex-col">
-                        {listCertificates
-                            .slice()
-                            .sort((a, b) => {
-                                // 연도 비교
-                                if (b.acquiredYear !== a.acquiredYear) {
-                                    return b.acquiredYear - a.acquiredYear;
+            <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
+                <div className="w-full max-w-[430px] h-full bg-white flex flex-col"> 
+                    <HeaderLayout
+                        headerSlot = {
+                            <EditHeader
+                                title="자격증"
+                                leftAction = {{onClick: onClose}}
+                                rightElement = {
+                                    <button
+                                        className={`text-b-16-hn transition-colors ${
+                                            hasChanges ? 'text-primary' : 'text-gray-650'
+                                        }`}
+                                        onClick={handleComplete}
+                                        disabled={!hasChanges}
+                                    >
+                                        완료
+                                    </button>
                                 }
-                                // 같은 연도면 월 비교
-                                return b.acquiredMonth - a.acquiredMonth;
-                            })
-                            .map((cert, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150 last:border-b-0"
-                            >
-                                <div className="flex items-center gap-[20px]">
-                                    <span className="text-m-16 text-gray-650 min-w-[24px] text-center">{index + 1}</span>
-                                    <div className="flex flex-col gap-[7px]">
-                                        <span className="text-r-12-hn text-gray-650">
-                                            {cert.acquiredYear}.{String(cert.acquiredMonth).padStart(2, '0')}
-                                        </span>
-                                        <span className="text-m-16 text-gray-900">{cert.name}</span>
-                                    </div>
-                                </div>
-                                
-                                <button 
-                                    className="text-sb-14-hn text-gray-650"
-                                    onClick={() => handleEditCertificate(cert.id)}
+                            />
+                        }
+                    >
+                        <div className="flex flex-col flex-1 overflow-y-auto border-t border-gray-150">
+                            {/* 자격증 비공개 토글 */}
+                            <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
+                                <span className="text-sb-14-hn text-gray-900">자격증 비공개</span>
+                                <button
+                                    onClick={() => setShowPrivate(!showPrivate)}
+                                    className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
+                                        showPrivate ? 'bg-gray-300' : 'bg-primary'
+                                    }`}
                                 >
-                                    수정
+                                    <div
+                                        className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
+                                            showPrivate ? 'translate-x-[2px]' : 'translate-x-[28px]'
+                                        }`}
+                                    />
                                 </button>
                             </div>
-                        ))}
 
-                        {/* 자격증 추가 버튼 */}
-                        <button
-                            onClick={handleAddCertificate}
-                            className="flex items-center px-[25px] py-[15px] gap-[5px]"
-                        >
-                            <svg viewBox="0 0 20 20" fill="none" className="w-[20px] h-[20px] block shrink-0">
-                                <path 
-                                    d="M10 3.75V16.25M16.25 10H3.75" 
-                                    stroke="#00C56C" 
-                                    strokeWidth="1.5" 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round"/>
-                            </svg>
-                            <span className="text-m-14 text-primary">자격증 추가</span>
-                        </button>
-                    </div>
+                            {/* 자격증 리스트 */}
+                            <div className="w-full flex flex-col">
+                                {listCertificates
+                                    .slice()
+                                    .sort((a, b) => {
+                                        // 연도 비교
+                                        if (b.acquiredYear !== a.acquiredYear) {
+                                            return b.acquiredYear - a.acquiredYear;
+                                        }
+                                        // 같은 연도면 월 비교
+                                        return b.acquiredMonth - a.acquiredMonth;
+                                    })
+                                    .map((cert, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150 last:border-b-0"
+                                    >
+                                        <div className="flex items-center gap-[20px]">
+                                            <span className="text-m-16 text-gray-650 min-w-[24px] text-center">{index + 1}</span>
+                                            <div className="flex flex-col gap-[7px]">
+                                                <span className="text-r-12-hn text-gray-650">
+                                                    {cert.acquiredYear}.{String(cert.acquiredMonth).padStart(2, '0')}
+                                                </span>
+                                                <span className="text-m-16 text-gray-900">{cert.name}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <button 
+                                            className="text-sb-14-hn text-gray-650"
+                                            onClick={() => handleEditCertificate(cert.id)}
+                                        >
+                                            수정
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {/* 자격증 추가 버튼 */}
+                                <button
+                                    onClick={handleAddCertificate}
+                                    className="flex items-center px-[25px] py-[15px] gap-[5px]"
+                                >
+                                    <svg viewBox="0 0 20 20" fill="none" className="w-[20px] h-[20px] block shrink-0">
+                                        <path 
+                                            d="M10 3.75V16.25M16.25 10H3.75" 
+                                            stroke="#00C56C" 
+                                            strokeWidth="1.5" 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round"/>
+                                    </svg>
+                                    <span className="text-m-14 text-primary">자격증 추가</span>
+                                </button>
+                            </div>
+                        </div>
+                    </HeaderLayout>
                 </div>
             </div>
         );
@@ -217,120 +221,120 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
 
     // 추가/수정 화면
     return (
-        <div className="absolute inset-0 z-50 bg-white flex flex-col">
-            {/* 헤더 */}
-            <header className="w-full py-[10px] px-[25px] h-[48px] border-b border-gray-150 flex items-center justify-between bg-white">
-                <button 
-                    className="w-[24px] h-[24px]" 
-                    onClick={() => setCurrentView('list')}
-                >
-                    <Icon name='cancel' className="block shrink-0"/>
-                </button>
-                <span className="text-sb-20 text-gray-900">
-                    {currentView === 'add' ? '자격증 추가' : '자격증 수정'}
-                </span>
-                <button
-                    className={`text-b-16-hn transition-colors ${
-                        hasFormChanges ? 'text-primary' : 'text-gray-400'
-                    }`}
-                    onClick={handleSaveForm}
-                    disabled={!hasFormChanges}
-                >
-                    완료
-                </button>
-            </header>
-
-            {/* 수정/삭제 */}
-            <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px]">
-                <div className="flex flex-col gap-[17px]">
-                    {/* 자격증 */}
-                    <div className="flex flex-col gap-[10px]">
-                        <span className="text-sb-16-hn text-gray-900">자격증</span>
-                        <input
-                            type="text"
-                            value={formData.name || ''}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="자격증 이름을 입력해 주세요"
-                            className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none"
+        <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
+            <div className="w-full max-w-[430px] h-full bg-white flex flex-col">    
+                <HeaderLayout
+                    headerSlot = {
+                        <EditHeader
+                            title= {currentView === 'add' ? '자격증 추가' : '자격증 수정'}
+                            leftAction = {{onClick: () => setCurrentView('list')}}
+                            rightElement = {
+                                <button
+                                    className={`text-b-16-hn transition-colors ${
+                                        hasFormChanges ? 'text-primary' : 'text-gray-650'
+                                    }`}
+                                    onClick={handleSaveForm}
+                                    disabled={!hasFormChanges}
+                                >
+                                    완료
+                                </button>
+                            }
                         />
-                    </div>
-
-                    {/* 취득 일자 */}
-                    <div className="w-full flex flex-col gap-[10px]">
-                        <span className="text-sb-16-hn text-gray-900">취득 일자</span>
-                        <div className="flex gap-[7px] items-center">
-                            {/* 연도 */}
-                            <div className="flex-1 relative">
-                                <button
-                                    onClick={() => setShowYearDropdown(!showYearDropdown)}
-                                    className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
-                                >
-                                    <span className="text-r-16-hn text-gray-750">{formData.acquiredYear}년</span>
-                                    <Icon name="toggleDown" 
-                                        className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`}/>
-                                </button>
-                                {showYearDropdown && (
-                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                        {years.map((year) => (
-                                            <button
-                                                key={year}
-                                                onClick={() => {
-                                                    setFormData({ ...formData, acquiredYear: year });
-                                                    setShowYearDropdown(false);
-                                                }}
-                                                className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
-                                                    formData.acquiredYear === year ? 'text-primary' : 'text-gray-650'
-                                                }`}
-                                            >
-                                                {year}년
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                    }
+                >
+                    {/* 수정/삭제 */}
+                    <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
+                        <div className="flex flex-col gap-[17px]">
+                            {/* 자격증 */}
+                            <div className="flex flex-col gap-[10px]">
+                                <span className="text-sb-16-hn text-gray-900">자격증</span>
+                                <input
+                                    type="text"
+                                    value={formData.name || ''}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    placeholder="자격증 이름을 입력해 주세요"
+                                    className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none"
+                                />
                             </div>
 
-                            {/* 월 */}
-                            <div className="flex-1 relative">
-                                <button
-                                    onClick={() => setShowMonthDropdown(!showMonthDropdown)}
-                                    className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
-                                >
-                                    <span className="text-r-16-hn text-gray-750">{formData.acquiredMonth}월</span>
-                                    <Icon name="toggleDown" 
-                                        className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showMonthDropdown ? 'rotate-180' : ''}`}/>
-                                </button>
-                                {showMonthDropdown && (
-                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
-                                        {MONTHS.map((month) => (
-                                            <button
-                                                key={month}
-                                                onClick={() => {
-                                                    setFormData({ ...formData, acquiredMonth: month });
-                                                    setShowMonthDropdown(false);
-                                                }}
-                                                className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
-                                                    formData.acquiredMonth === month ? 'text-primary' : 'text-gray-650'
-                                                }`}
-                                            >
-                                                {month}월
-                                            </button>
-                                        ))}
+                            {/* 취득 일자 */}
+                            <div className="w-full flex flex-col gap-[10px]">
+                                <span className="text-sb-16-hn text-gray-900">취득 일자</span>
+                                <div className="flex gap-[7px] items-center">
+                                    {/* 연도 */}
+                                    <div className="flex-1 relative">
+                                        <button
+                                            onClick={() => setShowYearDropdown(!showYearDropdown)}
+                                            className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
+                                        >
+                                            <span className="text-r-16-hn text-gray-750">{formData.acquiredYear}년</span>
+                                            <Icon name="toggleDown" 
+                                                className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showYearDropdown ? 'rotate-180' : ''}`}/>
+                                        </button>
+                                        {showYearDropdown && (
+                                            <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
+                                                {years.map((year) => (
+                                                    <button
+                                                        key={year}
+                                                        onClick={() => {
+                                                            setFormData({ ...formData, acquiredYear: year });
+                                                            setShowYearDropdown(false);
+                                                        }}
+                                                        className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
+                                                            formData.acquiredYear === year ? 'text-primary' : 'text-gray-650'
+                                                        }`}
+                                                    >
+                                                        {year}년
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+
+                                    {/* 월 */}
+                                    <div className="flex-1 relative">
+                                        <button
+                                            onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+                                            className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
+                                        >
+                                            <span className="text-r-16-hn text-gray-750">{formData.acquiredMonth}월</span>
+                                            <Icon name="toggleDown" 
+                                                className={`w-[24px] h-[24px] block shrink-0 transition-transform ${showMonthDropdown ? 'rotate-180' : ''}`}/>
+                                        </button>
+                                        {showMonthDropdown && (
+                                            <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
+                                                {MONTHS.map((month) => (
+                                                    <button
+                                                        key={month}
+                                                        onClick={() => {
+                                                            setFormData({ ...formData, acquiredMonth: month });
+                                                            setShowMonthDropdown(false);
+                                                        }}
+                                                        className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
+                                                            formData.acquiredMonth === month ? 'text-primary' : 'text-gray-650'
+                                                        }`}
+                                                    >
+                                                        {month}월
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* 삭제 버튼 (수정 모드일 때만) */}
+                            {currentView === 'edit' && (
+                                <button
+                                    onClick={handleDeleteCertificate}
+                                    className="flex text-m-14 text-red mt-[20px]"
+                                >
+                                    자격증 삭제
+                                </button>
+                            )}
                         </div>
                     </div>
-
-                    {/* 삭제 버튼 (수정 모드일 때만) */}
-                    {currentView === 'edit' && (
-                        <button
-                            onClick={handleDeleteCertificate}
-                            className="flex text-m-14 text-red mt-[20px]"
-                        >
-                            자격증 삭제
-                        </button>
-                    )}
-                </div>
+                </HeaderLayout>
             </div>
         </div>
     );

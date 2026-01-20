@@ -1,12 +1,24 @@
-import type { ReactNode } from 'react';
-import Icon from '../../components/Icon';
+import type { CSSProperties, ReactNode } from 'react';
+import Icon, {type IconName} from '../../components/Icon';
+import { useNavigate } from 'react-router-dom';
+
+type LeftAction = {
+  icon?: IconName;
+  onClick?: () => void;
+  ariaLabel?: string;
+  style?: CSSProperties;
+};
 
 type EditHeaderProps = {
   title: string;
   rightElement?: ReactNode;
+  leftAction?: LeftAction;
 };
 
-export const EditHeader = ({ title, rightElement }: EditHeaderProps) => {
+export const EditHeader = ({ title, rightElement, leftAction }: EditHeaderProps) => {
+  const navigate = useNavigate();
+  const handleLeftClick =  leftAction?.onClick ?? (() => navigate(-1));
+  const leftLabel = leftAction?.ariaLabel ?? "취소";
   return (
     <header
       //고정 헤더.
@@ -19,7 +31,21 @@ export const EditHeader = ({ title, rightElement }: EditHeaderProps) => {
     >
       {/* 왼쪽 슬롯: 취소 아이콘 */}
       <div className='flex w-[28px] items-center justify-start z-10'>
-        <Icon name='cancel' style={{ width: 'clamp(24px, 7.467cqw, 28px)', height: 'clamp(24px, 7.467cqw, 28px)' }} />
+        <button
+          type="button"
+          onClick={handleLeftClick}
+          className="flex items-center justify-center"
+          aria-label={leftLabel}
+        >
+          <Icon
+            name="cancel"
+            style={{
+              width: "clamp(24px, 7.467cqw, 28px)",
+              height: "clamp(24px, 7.467cqw, 28px)",
+              ...leftAction?.style,
+            }}
+          />
+        </button>
       </div>
       {/* 중앙 타이틀: 좌우 요소와 무관하게 정중앙 유지 */}
       <div
