@@ -8,12 +8,8 @@ const CheckScheduleBox = () => {
     <Card
       width="100%"
       height="84px"
-      className="flex items-center justify-between overflow-hidden cursor-pointer"
+      className="flex items-center justify-between overflow-hidden cursor-pointer rounded-[12px] border border-[var(--color-gray-150)] pl-[20px] pr-[90px]"
       style={{
-        paddingLeft: '20px',
-        paddingRight: '90px',
-        borderRadius: '12px',
-        border: '1px solid var(--color-gray-150)',
         background: 'linear-gradient(102deg, rgba(236, 255, 225, 0.00) 10%, #ECFFE1 500%), #FFF',
       }}
     >
@@ -23,12 +19,7 @@ const CheckScheduleBox = () => {
 
       <div
         aria-hidden
-        style={{
-          width: '81.691px',
-          height: '85.417px',
-          transform: 'rotate(2.302deg)',
-          filter: 'drop-shadow(0 0 6.7px rgba(0, 197, 108, 0.20))',
-        }}
+        className="h-[85.417px] w-[81.691px] rotate-[2.302deg] drop-shadow-[0_0_6.7px_rgba(0,197,108,0.20)]"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="183" height="84" viewBox="0 0 183 84" fill="none">
           <g filter="url(#filter0_d_1741_8183)">

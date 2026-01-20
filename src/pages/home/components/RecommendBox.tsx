@@ -18,8 +18,7 @@ function RecommendBox({ name, profileImage, major, studentId, intro, categories 
         <Card
             width='100%'
             height='auto'
-            style={{ minHeight: '147px' }}
-            className='flex items-start justify-between px-4 py-[15px] [container-type:inline-size]'
+            className='flex min-h-[147px] items-start justify-between px-4 py-[15px] [container-type:inline-size]'
         >
             {/* 그룹 1: 프로필 + 정보 */}
             <div className='flex min-w-0 flex-1 items-start gap-[15px]'>
@@ -32,11 +31,10 @@ function RecommendBox({ name, profileImage, major, studentId, intro, categories 
                     />
                 ) : (
                     <div
-                        className='shrink-0 rounded-full'
+                        className='shrink-0 rounded-full bg-[#D5D5D5]'
                         style={{
                             width: 'clamp(44px, 12cqw, 54px)',
                             height: 'clamp(44px, 12cqw, 54px)',
-                            background: '#D5D5D5',
                         }}
                         aria-hidden
                     />
@@ -72,8 +70,7 @@ function RecommendBox({ name, profileImage, major, studentId, intro, categories 
             <div className='flex shrink-0 flex-col items-end'>
                 <Icon
                     name='transmit'
-                    className='shrink-0'
-                    style={{ width: 'clamp(14px, 3.8cqw, 18px)', height: 'clamp(14px, 3.8cqw, 18px)' }}
+                    style={{ width: 'clamp(18px, 3.8cqw, 24px)', height: 'clamp(18px, 3.8cqw, 24px)' }}
                 />
             </div>
         </Card>

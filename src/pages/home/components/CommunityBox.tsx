@@ -1,22 +1,18 @@
 import Card from '../../../components/Card';
+import { useNavigate } from 'react-router-dom';
 
 
 // 홈 1/2-2: 커뮤니티 박스 UI
 const CommunityBox = () => {
+    const navigate = useNavigate();
 
     return (
         //TODO: 카드 클릭 시 Community 라우터 연결
         <Card
             width="100%"
             height="135px"
-            className="relative cursor-pointer overflow-hidden"
-            style={{
-                flex: '124 124 0',
-                padding: '13px 0 0 15px',
-                background: 'var(--color-primary)',
-                border: 'none',
-                overflow: 'hidden',
-            }}
+            className="relative cursor-pointer overflow-hidden border-none !bg-primary pt-[13px] pl-[15px] flex-[124_124_0]"
+            onClick={() => navigate('/home/community')}
         >
             <div className="relative z-10 flex flex-col gap-[6px]">
                 <span className="text-sb-18 text-white tracking-[-0.04em]">
@@ -27,7 +23,7 @@ const CommunityBox = () => {
                 </span>
             </div>
 
-            <div className="pointer-events-none absolute -right-[28px] -bottom-[25px]" style={{ width: '150px', height: '160px' }} aria-hidden>
+            <div className="pointer-events-none absolute -right-[28px] -bottom-[25px] h-[160px] w-[150px]" aria-hidden>
                 <svg xmlns="http://www.w3.org/2000/svg" width="124" height="135" viewBox="0 0 124 135" fill="none">
                 <mask id="mask0_1718_6802"
                 style={{ maskType: 'alpha' }}

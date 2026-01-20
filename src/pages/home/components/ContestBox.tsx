@@ -20,10 +20,9 @@ type ContestBoxProps = {
 
 const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
     return (
-        <div className="flex flex-col" style={{ gap: '10px' }}>
+        <div className="flex flex-col gap-[10px]">
             <div
-                className="flex items-center cursor-pointer"
-                style={{ gap: '5px' }}
+                className="flex items-center gap-[5px]"
                 onClick={onTitleClick}
                 role="button"
                 tabIndex={0}
@@ -44,76 +43,43 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                 </svg>
             </div>
 
-            <div className="flex overflow-x-auto" style={{ gap: '10px', paddingBottom: '4px' }}>
+            <div className="flex overflow-x-auto gap-[10px] pb-[4px]">
                 {/*TODO: 공모전 카드 클릭 시 공모전 상세페이지 라우터 연결*/}
                 {contests.map((contest) => (
                     <Card
                         key={`${contest.title}-${contest.organizer}`}
                         width="fit-content"
                         height="265px"
-                        className="flex-shrink-0"
-                        style={{
-                            minWidth: '155px',
-                            padding: '15px 10px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '10px',
-                        }}
+                        className="flex-shrink-0 min-w-[155px] flex flex-col gap-[10px] px-[10px] pt-[10px] pb-[15px]"
                     >
                         <div className="relative w-full flex justify-center">
                             {contest.posterImgUrl ? (
                                 <img
                                     src={contest.posterImgUrl}
                                     alt={`${contest.title} 포스터`}
-                                    className="object-cover"
-                                    style={{ width: '135px', height: '126px', borderRadius: '6px' }}
+                                    className="object-cover w-full h-[126px] rounded-[6px]"
                                 />
                             ) : (
                                 <div
-                                    className="shrink-0"
-                                    style={{
-                                        width: '135px',
-                                        height: '126px',
-                                        borderRadius: '6px',
-                                        background: '#D5D5D5',
-                                    }}
+                                    className="shrink-0 w-full h-[126px] rounded-[6px] bg-gray-300"
                                     aria-hidden
                                 />
                             )}
 
                             {(contest.isClosingSoon || contest.isHot) && (
                                 <div
-                                    className="absolute flex"
-                                    style={{ top: '5px', left: '5px', gap: '5px', padding: '0 5px' }}
+                                    className="absolute left-[5px] top-[5px] flex gap-[5px] px-[5px]"
                                 >
                                     {contest.isClosingSoon && (
                                         <span
-                                            style={{
-                                                display: 'inline-flex',
-                                                padding: '0 5px',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                borderRadius: '3px',
-                                                background: 'var(--ColorHightlight1, #9362FF)',
-                                            }}
-                                            className="text-r-12 text-white tracking-[-0.02em]"
+                                            className="inline-flex items-center justify-center gap-[8px] rounded-[3px] bg-[#9362FF] px-[5px] text-r-12 text-white tracking-[-0.02em]"
                                         >
                                             마감임박
                                         </span>
                                     )}
                                     {contest.isHot && (
                                         <span
-                                            style={{
-                                                display: 'inline-flex',
-                                                padding: '0 5px',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                borderRadius: '3px',
-                                                background: 'var(--ColorHightlight1, #FF8C44)',
-                                            }}
-                                            className="text-r-12 text-white tracking-[-0.02em]"
+                                            className="inline-flex items-center justify-center gap-[8px] rounded-[3px] bg-[#FF8C44] px-[5px] text-r-12 text-white tracking-[-0.02em]"
                                         >
                                             HOT
                                         </span>
@@ -122,7 +88,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                             )}
                         </div>
 
-                        <div className="flex flex-col" style={{ gap: '5px' }}>
+                        <div className="flex flex-col gap-[5px]">
                             <p className="text-sb-14 text-gray-900 tracking-[-0.04em] whitespace-nowrap">
                                 {contest.title}
                             </p>
@@ -137,7 +103,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                             </p>
                         </div>
 
-                        <div className="flex items-center" style={{ gap: '5px' }}>
+                        <div className="flex items-center gap-[5px]">
                             <span className="text-r-12 text-gray-750 tracking-[-0.02em]">
                                 조회수 {contest.views.toLocaleString()}
                             </span>

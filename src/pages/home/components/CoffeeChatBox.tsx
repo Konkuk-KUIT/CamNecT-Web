@@ -20,8 +20,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
         <Card
             width="100%"
             height="auto"
-            className="flex flex-col"
-            style={{ padding: '15px 17px', gap: '13px', minHeight: '60px' }}
+            className="flex min-h-[60px] flex-col gap-[13px] px-[17px] py-[15px]"
         >
             <div className="flex items-center justify-between">
                 <span className="text-sb-16-hn text-gray-900 tracking-[-0.04em]">
@@ -30,8 +29,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
                 </span>
 
                 <div
-                    className="flex items-center cursor-pointer"
-                    style={{ gap: '3px' }}
+                    className="flex items-center cursor-pointer gap-[3px]"
                     onClick={onViewAll}
                     role="button"
                     tabIndex={0}
@@ -46,19 +44,13 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
                 </div>
             </div>
 
-            <div className="flex flex-col" style={{ gap: '8px' }}>
+            <div className="flex flex-col gap-[8px]">
                 {requests.map((request) => (
                     <Card
                         key={`${request.name}-${request.studentId}`}
                         width="100%"
                         height="auto"
-                        style={{
-                            minHeight: '47px',
-                            padding: '15px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
+                        className="flex min-h-[47px] items-center justify-between p-[15px]"
                     >
                         <span className="text-m-12 text-gray-750 tracking-[-0.04em]">
                             {request.name} ( {request.major} {request.studentId}학번 )

@@ -10,21 +10,14 @@ const PointBox = () => {
         <Card
             width="100%"
             height="135px"
-            className="relative flex flex-col justify-between cursor-pointer [container-type:inline-size]"
-            style={{
-                flex: '180 180 0',
-                padding: '13px 16px',
-                background: 'var(--color-gray-900)',
-                border: 'none',
-                overflow: 'hidden',
-            }}
+            className="relative flex flex-col justify-between cursor-pointer border-none !bg-gray-900 px-[16px] py-[13px] overflow-hidden [container-type:inline-size] flex-[180_180_0]"
         >
             {/* 포인트/CTA 텍스트 */}
             <div className="flex flex-col gap-[8px]">
                 <span className="text-sb-18 text-primary tracking-[-0.04em]">
                     {formattedPoints} P
                 </span>
-                <span className="text-m-14 tracking-[-0.04em]" style={{ color: 'var(--color-gray-150)' }}>
+                <span className="text-m-14 tracking-[-0.04em] text-[var(--color-gray-150)]">
                     쿠폰 교환하기
                 </span>
             </div>
@@ -32,15 +25,7 @@ const PointBox = () => {
             {/* 카드 배경 장식 */}
             <div
                 aria-hidden
-                style={{
-                    position: 'absolute',
-                    top: '27px',
-                    right: 'clamp(8px, 8cqw, 28px)',
-                    width: '123.244px',
-                    height: '90.951px',
-                    opacity: 0.7,
-                    filter: 'drop-shadow(0 0 25.2px rgba(236, 255, 225, 0.30))',
-                }}
+                className="absolute top-[27px] right-[clamp(8px,8cqw,28px)] h-[90.951px] w-[123.244px] opacity-70 drop-shadow-[0_0_25.2px_rgba(236,255,225,0.30)]"
             >
                 <svg width="143" height="121" viewBox="0 0 143 121" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g opacity="0.7" filter="url(#filter0_d_1718_6773)">

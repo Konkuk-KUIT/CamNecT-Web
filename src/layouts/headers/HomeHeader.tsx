@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
-import Icon from '../components/Icon';
+import Badge from '../../components/Badge';
+import Icon from '../../components/Icon';
+import { useNavigate } from 'react-router-dom';
 
 const Logo = () => (
   <svg
@@ -49,38 +50,35 @@ const Logo = () => (
   </svg>
 );
 
-type HomeLayoutProps = {
-  children?: ReactNode;
+type HomeHeaderProps = {
+  showBadge?: boolean;
 };
 
-const HomeLayout = ({ children }: HomeLayoutProps) => {
-  return (
-    <div
-      className='min-h-screen flex justify-center bg-[#f5f6f7] [container-type:inline-size]'
-      style={{ minHeight: '100dvh' }}
-    >
-      <div className='flex min-h-[100dvh] w-[clamp(320px,100cqw,540px)] flex-col items-center bg-white'>
-        <header
-          className='sticky left-0 right-0 top-0 z-50 flex w-full items-center justify-between bg-white px-[25px] py-[15px]'
-          style={{
-            paddingTop: 'calc(15px + env(safe-area-inset-top, 0px))',
-            top: 'env(safe-area-inset-top, 0px)',
-          }}
-          role='banner'
-          aria-label='홈 헤더'
-        >
-          <span role='img' aria-label='캠넥트 로고'>
-            <Logo />
-          </span>
-          <span role='img' aria-label='알림'>
-            <Icon name='alarm' />
-          </span>
-        </header>
+export const HomeHeader = ({ showBadge }: HomeHeaderProps) => {
+  const navigate = useNavigate();
 
-        <main className='w-full flex-1 bg-white'>{children}</main>
-      </div>
-    </div>
+  return (
+    <header
+      className='sticky left-0 right-0 top-0 z-50 flex w-full items-center justify-between bg-white px-[25px] py-[15px]'
+      style={{
+        paddingTop: 'calc(15px + env(safe-area-inset-top, 0px))',
+        top: 'env(safe-area-inset-top, 0px)',
+      }}
+      role='banner'
+      aria-label='홈 헤더'
+    >
+      <span role='img' aria-label='캠넥트 로고'>
+        <Logo />
+      </span>
+      <button
+        type='button'
+        aria-label='알림'
+        className='relative inline-flex'
+        onClick={() => navigate('/home/notices')}
+      >
+        <Icon name='alarm' />
+        {showBadge ? <Badge /> : null}
+      </button>
+    </header>
   );
 };
-
-export default HomeLayout;

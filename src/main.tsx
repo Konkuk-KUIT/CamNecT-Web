@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// todo 라우터 구조 import문 들어올 예정
-import App from './App.tsx'
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router/router';
 import './styles/global.css'
 
 const queryClient = new QueryClient(); // 서버 데이터 저장소 -> 저장 / 캐싱 / 관리
@@ -10,7 +10,7 @@ const queryClient = new QueryClient(); // 서버 데이터 저장소 -> 저장 /
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <StrictMode>
-      <App />
+      <RouterProvider router={router} />
     </StrictMode>
   </QueryClientProvider>
 )
