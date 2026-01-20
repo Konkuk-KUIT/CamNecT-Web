@@ -25,9 +25,16 @@ export const HomePage = () => {
         buttonText='로그인 후 계속 읽기'
       />
       <Popup
+        type="error"
+        title='일시적 오류로 인해\n접근이 지연되고 있습니다.'
+        titleSecondary='잠시 후 다시 시도해주세요'
+        isOpen={true}
+        rightButtonText='확인'
+      />
+      <Popup
         type="warning"
         title='작성된 내용이 있습니다.\n삭제하시겠습니까?'
-        isOpen={true}
+        isOpen={false}
         content="삭제된 내용은 복구 불가능합니다."
         
       />

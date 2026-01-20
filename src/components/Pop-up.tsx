@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react';
 
 // 팝업 유형: 안내/경고/확인/로딩
-type PopUpType = 'info' | 'warning' | 'confirm' | 'loading';
+type PopUpType = 'info' | 'warning' | 'confirm' | 'loading' | 'error';
 
 // 공통 팝업 props (유형별로 필요한 값만 사용)
 type PopUpProps = {
   isOpen: boolean;
   type: PopUpType;
   title?: string;
+  titleSecondary?: string;
   content?: string;
   leftButtonText?: string;
   rightButtonText?: string;
@@ -21,6 +22,7 @@ const PopUp = ({
   isOpen,
   type,
   title,
+  titleSecondary,
   content,
   leftButtonText,
   rightButtonText,
@@ -39,6 +41,9 @@ const PopUp = ({
     // 문자열 기반 줄바꿈(\n) 처리
     const processedTitle = title ? title.replace(/\\n/g, '\n') : undefined;
     const processedContent = content?.replace(/\\n/g, '\n');
+    const processedSecondaryTitle = titleSecondary
+      ? titleSecondary.replace(/\\n/g, '\n')
+      : undefined;
 
     const formattedContent =
       type === 'warning'
@@ -75,7 +80,20 @@ const PopUp = ({
 
     return (
       <div className={`flex flex-col justify-center h-[clamp(85px,10vw,100px)] gap-[15px] px-[15px] pt-[10px] ${contentAlign}`}>
-        <div className='text-b-18 whitespace-pre-wrap text-[var(--ColorBlack,#202023)]'>{processedTitle}</div>
+        {type === 'error' ? (
+          <div className='flex flex-col gap-[10px]'>
+            <div className='text-b-18 whitespace-pre-wrap text-[var(--ColorBlack,#202023)]'>
+              {processedTitle}
+            </div>
+            {processedSecondaryTitle && (
+              <div className='text-b-18 whitespace-pre-wrap text-[var(--ColorBlack,#202023)]'>
+                {processedSecondaryTitle}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className='text-b-18 whitespace-pre-wrap text-[var(--ColorBlack,#202023)]'>{processedTitle}</div>
+        )}
         {formattedContent && (
           <div className='text-r-14 whitespace-pre-wrap text-[var(--ColorGray3,#646464)]'>{formattedContent}</div>
         )}
