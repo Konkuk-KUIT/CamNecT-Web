@@ -1,8 +1,10 @@
-import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
 
-export const LoginHeader = () => {
-  const navigate = useNavigate();
+interface LoginHeaderProps {
+  onBack: () => void;
+}
+
+export const LoginHeader = ({ onBack }: LoginHeaderProps) => {
 
   return (
     <header
@@ -17,7 +19,7 @@ export const LoginHeader = () => {
         <button
           type='button'
           className='flex items-center justify-center'
-          onClick={() => navigate(-1)}
+          onClick={onBack}
           aria-label='뒤로 가기'
         >
           <Icon name='back' style={{ width: 'clamp(24px, 7.467cqw, 28px)', height: 'clamp(24px, 7.467cqw, 28px)' }} />
