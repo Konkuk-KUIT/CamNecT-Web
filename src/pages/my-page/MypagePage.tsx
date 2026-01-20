@@ -23,13 +23,10 @@ export const MypagePage = () => {
                 <MainHeader
                     title="마이페이지"
                     leftAction={{icon: 'mypageOption', onClick: () => alert("사이드바 열림")}}
-                    rightActions={[
-                        {icon: 'setting', onClick: () => alert("설정 페이지")},
-                    ]}
                 />
             }   
         >
-            <div className="w-full bg-white  border-t border-gray-150">
+            <div className="w-full bg-white border-t border-gray-150">
             {/* 프로필 */}
                 <section className="px-[25px] pt-[40px] pb-[33px] flex flex-col gap-[20px]">
                     <div className="flex flex-1 flex-col gap-[22px]">
@@ -63,7 +60,8 @@ export const MypagePage = () => {
                         </div>
 
                         <div className="flex flex-1">
-                            <div className="flex flex-col justify-center items-start gap-[7px] pl-[3px] pt-[3px] min-w-[51px]">
+                            <div className="flex flex-col justify-center items-start gap-[7px] pl-[3px] pt-[3px] min-w-[51px]"
+                            onClick={() => navigate("/me/follower")}>
                                 <div className="flex justify-start items-align gap-[3px]">
                                     <span className="text-R-14-hn text-gray-900">팔로잉</span>
                                     <span className="text-SB-14-hn text-gray-900">{user.following.length}</span>

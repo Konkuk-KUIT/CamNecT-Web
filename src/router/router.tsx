@@ -9,6 +9,7 @@ import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
+import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
@@ -64,6 +65,10 @@ export const router = createBrowserRouter([
                     {
                         path: "me/edit",
                         element: <MypageEditPage />
+                    },
+                    {
+                        path: "me/follower",
+                        element: <FollowerPage />
                     },
                 ]
             },
