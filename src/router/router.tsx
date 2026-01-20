@@ -12,6 +12,7 @@ import { MyPage } from "../pages/my-page/MyPage";
 import { AuthGuard } from "./AuthGuard";
 import { CommunityPage } from "../pages/community/CommunityPage";
 import { NotificationPage } from "../pages/home/NotificationPage";
+import { Schedule } from "../pages/schedule/Schedule";
 
 export const router = createBrowserRouter([
 
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
                     {
                         path: "activity",
                         element: <ActivityPage />,
+                    },
+                    {
+                        path: "schedule",
+                        element: <Schedule />,
                     },
                     {
                         path: "me",

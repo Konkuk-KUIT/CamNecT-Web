@@ -10,14 +10,16 @@ import RecommandBox from './components/RecommendBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
 import { coffeeChatRequests, contests, recommendList } from './homeData';
+import { notificationList } from './notificationData';
 
 const Home = () => {
     const navigate = useNavigate();
     const visibleRecommands = recommendList.slice(0, 2);
+    const hasUnreadNotifications = notificationList.some((notice) => !notice.isRead);
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
-        <FullLayout headerSlot={<HomeHeader />} >
+        <FullLayout headerSlot={<HomeHeader showBadge={hasUnreadNotifications} />} >
             <div className="w-full mx-auto bg-white">
                 <section
                     className="flex w-full flex-col gap-[15px] px-[25px] pt-[17px] pb-[30px]"

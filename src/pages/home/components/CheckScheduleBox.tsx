@@ -1,8 +1,11 @@
 import Card from '../../../components/Card';
+import { useNavigate } from 'react-router-dom';
 
 
 // 홈 1/2-1: 일정 확인 카드 UI
 const CheckScheduleBox = () => {
+  const navigate = useNavigate();
+
   return (
     // TODO: 일정확인 page Router 연결 필요.
     <Card
@@ -12,6 +15,7 @@ const CheckScheduleBox = () => {
       style={{
         background: 'linear-gradient(102deg, rgba(236, 255, 225, 0.00) 10%, #ECFFE1 500%), #FFF',
       }}
+      onClick={() => navigate('/schedule')}
     >
       <p className="text-sb-16-hn text-gray-900 tracking-[-0.04em]">
         일정 확인하기
