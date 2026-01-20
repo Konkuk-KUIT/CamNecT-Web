@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-import Icon from "../../components/Icon";
 
 type TabType = "follower" | "following";
 
 export const FollowerPage = () => {
-    const navigate = useNavigate();
     const { userId } = useParams<{ userId: string }>();
     const targetUserId = userId || MOCK_SESSION.meUid;
     
