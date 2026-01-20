@@ -107,7 +107,7 @@ const PopUp = ({
     }
 
     // 확인 팝업: 단일 버튼
-    if (type === 'confirm') {
+    if (type === 'confirm' || type === 'error') {
       return (
         <button
           type='button'
