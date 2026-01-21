@@ -288,7 +288,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                     }
                 >
                     {/* 수정/삭제 */}
-                    <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
+                    <div className="w-full flex-1 overflow-y-auto px-[25px] pt-[20px] pb-[220px] border-t border-gray-150">
                         <div className="flex flex-col gap-[15px]">
                             {/* 학교 이름 */}
                             <div className="flex flex-col gap-[10px] relative">
@@ -361,7 +361,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                 <span className="text-sb-16-hn text-gray-900">재학 기간</span>
                                 <div className="flex gap-[7px] justify-center items-center">
                                     {/* 시작 연도 */}
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 relative min-w-[110px]">
                                         <button
                                             onClick={() => setShowStartYearDropdown(!showStartYearDropdown)}
                                             className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
@@ -402,7 +402,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                     <div className="w-[15px] h-0 border-[2px] rounded-full border-gray-750"/>
 
                                     {/* 종료 연도 */}
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 relative min-w-[110px]">
                                         <button
                                             onClick={() => setShowEndYearDropdown(!showEndYearDropdown)}
                                             className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"

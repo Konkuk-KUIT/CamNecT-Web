@@ -220,21 +220,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                         const bEndMonth = b.endMonth || 12;
                                         return bEndMonth - aEndMonth;
                                     })
-                                    .map((career) => (
+                                    .map((career, index) => (
                                     <div
                                         key={career.id}
-                                        className="w-full flex justify-between items-center gap-[30px] px-[25px] py-[15px] border-b border-gray-150"
+                                        className="w-full flex justify-between items-center px-[25px] py-[15px] border-b border-gray-150"
                                     >
                                         <div className="flex items-center gap-[20px]">
-                                            <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px] block shrink-0">
-                                                <path 
-                                                    d="M3.75 9H20.25M3.75 15.75H20.25" 
-                                                    stroke="#A1A1A1" 
-                                                    strokeWidth="1.5" 
-                                                    strokeLinecap="round" 
-                                                    strokeLinejoin="round"/>
-                                            </svg>
-                                            <div className="flex flex-col justify-center gap-[7px]">
+                                            <span className="text-m-16 text-gray-650 min-w-[24px] text-center">{index + 1}</span>
+                                            <div className="flex flex-col justify-center gap-[7px] max-w-[200px]">
                                                 <span className="text-r-12-hn text-gray-650">
                                                     {career.startYear}.{String(career.startMonth).padStart(2, '0')}
                                                     {career.endYear && career.endMonth 
@@ -243,11 +236,11 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                                 </span>
                                                 <span className="text-m-16 text-gray-900 pb-[3px]">{career.organization}</span>
                                                 <div className="flex flex-col gap-[2px]">
-                                                {career.positions.map((p, posIndex) => (
-                                                    <span key={posIndex} className="text-r-14 text-gray-750">
-                                                        - {p}
-                                                    </span>
-                                                ))}
+                                                    {career.positions.map((p, posIndex) => (
+                                                        <span key={posIndex} className="text-r-14 text-gray-750">
+                                                            - {p}
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>

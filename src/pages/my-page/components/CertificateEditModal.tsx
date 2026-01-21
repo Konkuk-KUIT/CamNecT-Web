@@ -174,8 +174,8 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
                                     })
                                     .map((cert, index) => (
                                     <div
-                                        key={index}
-                                        className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150 last:border-b-0"
+                                        key={cert.id}
+                                        className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150"
                                     >
                                         <div className="flex items-center gap-[20px]">
                                             <span className="text-m-16 text-gray-650 min-w-[24px] text-center">{index + 1}</span>
@@ -243,7 +243,7 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
                     }
                 >
                     {/* 수정/삭제 */}
-                    <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
+                    <div className="w-full flex-1 overflow-y-auto px-[25px] pt-[20px] pb-[240px] border-t border-gray-150">
                         <div className="flex flex-col gap-[17px]">
                             {/* 자격증 */}
                             <div className="flex flex-col gap-[10px]">
@@ -262,7 +262,7 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
                                 <span className="text-sb-16-hn text-gray-900">취득 일자</span>
                                 <div className="flex gap-[7px] items-center">
                                     {/* 연도 */}
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 relative min-w-[110px]">
                                         <button
                                             onClick={() => setShowYearDropdown(!showYearDropdown)}
                                             className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
@@ -292,7 +292,7 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
                                     </div>
 
                                     {/* 월 */}
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 relative min-w-[82px]">
                                         <button
                                             onClick={() => setShowMonthDropdown(!showMonthDropdown)}
                                             className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none"
