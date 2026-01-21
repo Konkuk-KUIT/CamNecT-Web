@@ -239,15 +239,15 @@ export const MypageEditPage = () => {
             {currentModal === 'education' && (
                 <EducationEditModal
                     educations={data.educations}
-                    initialShowPrivate={visibility.educationVisibility}
+                    initialShowPublic={visibility.educationVisibility}
                     onClose={closeModal}
-                    onSave={(updatedEducations, showPrivate) => {
+                    onSave={(updatedEducations, showPublic) => {
                         setData({ 
                             ...data, 
                             educations: updatedEducations,
                             visibility: {
                                 ...data.visibility,
-                                educationVisibility: showPrivate
+                                educationVisibility: showPublic
                             }
                         });
                         closeModal();
@@ -257,15 +257,15 @@ export const MypageEditPage = () => {
             {currentModal === 'career' && (
                 <CareerEditModal
                     careers={data.careers}
-                    initialShowPrivate={visibility.careerVisibility}
+                    initialShowPublic={visibility.careerVisibility}
                     onClose={closeModal}
-                    onSave={(updatedCareers, showPrivate) => {
+                    onSave={(updatedCareers, showPublic) => {
                         setData({ 
                             ...data, 
                             careers: updatedCareers,
                             visibility: {
                                 ...data.visibility,
-                                careerVisibility: showPrivate
+                                careerVisibility: showPublic
                             }
                         });
                         closeModal();
@@ -275,15 +275,15 @@ export const MypageEditPage = () => {
             {currentModal === 'certificate' && (
                 <CertificateEditModal
                     certificates={data.certificates}
-                    initialShowPrivate={visibility.certificateVisibility}
+                    initialShowPublic={visibility.certificateVisibility}
                     onClose={closeModal}
-                    onSave={(updatedCertificates, showPrivate) => {
+                    onSave={(updatedCertificates, showPublic) => {
                         setData({ 
                             ...data, 
                             certificates: updatedCertificates,
                             visibility: {
                                 ...data.visibility,
-                                certificateVisibility: showPrivate
+                                certificateVisibility: showPublic
                             }
                         });
                         closeModal();

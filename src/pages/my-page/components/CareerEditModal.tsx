@@ -8,20 +8,20 @@ import PopUp from "../../../components/Pop-up";
 
 interface CareerModalProps {
     careers: CareerItem[];
-    initialShowPrivate: boolean;
+    initialShowPublic: boolean;
     onClose: () => void;
-    onSave: (careers: CareerItem[], showPrivate: boolean) => void;
+    onSave: (careers: CareerItem[], showPublic: boolean) => void;
 }
 
 type View = 'list' | 'add' | 'edit';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-export default function CareerModal({ careers, initialShowPrivate, onClose, onSave }: CareerModalProps) {
+export default function CareerModal({ careers, initialShowPublic, onClose, onSave }: CareerModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listCareers, setListCareers] = useState<CareerItem[]>(careers);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
+    const [showPublic, setShowPublic] = useState(initialShowPublic);
     const [showWarning, setShowWarning] = useState(false);
     
     const [formData, setFormData] = useState<Partial<CareerItem>>({
@@ -50,9 +50,9 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
     // 변경사항 추적 (리스트 전체 추적)
     const hasListChanges: boolean = useMemo(() => {
         const careersChanged = JSON.stringify(listCareers) !== JSON.stringify(careers);
-        const showPrivateChanged = showPrivate !== initialShowPrivate;
-        return careersChanged || showPrivateChanged;
-    }, [listCareers, careers, showPrivate, initialShowPrivate]);
+        const showPublicChanged = showPublic !== initialShowPublic;
+        return careersChanged || showPublicChanged;
+    }, [listCareers, careers, showPublic, initialShowPublic]);
 
     // 수정/추가 각각의 변경사항 추적
     const hasFormChanges: boolean = useMemo(() => {
@@ -75,7 +75,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
             onClose();
             return;
         }
-        onSave(listCareers, showPrivate);
+        onSave(listCareers, showPublic);
     };
 
     const handleAddCareer = () => {
@@ -214,14 +214,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                             <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
                                 <span className="text-sb-14-hn text-gray-900">경력 비공개</span>
                                 <button
-                                    onClick={() => setShowPrivate(!showPrivate)}
+                                    onClick={() => setShowPublic(!showPublic)}
                                     className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                        showPrivate ? 'bg-gray-300' : 'bg-primary'
+                                        showPublic ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                            showPrivate ? 'translate-x-[2px]' : 'translate-x-[28px]'
+                                            showPublic ? 'translate-x-[2px]' : 'translate-x-[28px]'
                                         }`}
                                     />
                                 </button>

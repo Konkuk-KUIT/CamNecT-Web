@@ -8,9 +8,9 @@ import PopUp from "../../../components/Pop-up";
 
 interface EducationModalProps {
     educations: EducationItem[];
-    initialShowPrivate: boolean;
+    initialShowPublic: boolean;
     onClose: () => void;
-    onSave: (educations: EducationItem[], showPrivate: boolean) => void;
+    onSave: (educations: EducationItem[], showPublic: boolean) => void;
 }
 
 type View = 'list' | 'add' | 'edit';
@@ -32,11 +32,11 @@ const allSchools = [
     '동경미술대학'
 ];
 
-export default function EducationModal({ educations, initialShowPrivate, onClose, onSave }: EducationModalProps) {
+export default function EducationModal({ educations, initialShowPublic, onClose, onSave }: EducationModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listEducations, setListEducations] = useState<EducationItem[]>(educations);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
+    const [showPublic, setShowPublic] = useState(initialShowPublic);
     const [showWarning, setShowWarning] = useState(false);
 
     const [formData, setFormData] = useState<Partial<EducationItem>>({
@@ -72,9 +72,9 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
     //변경사항 추적 (리스트 전체 추적)
     const hasListChanges: boolean = useMemo(() => {
         const educationsChanged = JSON.stringify(listEducations) !== JSON.stringify(educations);
-        const showPrivateChanged = showPrivate !== initialShowPrivate;
-        return educationsChanged || showPrivateChanged;
-    }, [listEducations, educations, showPrivate, initialShowPrivate]);
+        const showPublicChanged = showPublic !== initialShowPublic;
+        return educationsChanged || showPublicChanged;
+    }, [listEducations, educations, showPublic, initialShowPublic]);
 
     //수정/추가 각각의 변경사항 추적
     const hasFormChanges: boolean = useMemo(() => {
@@ -102,7 +102,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
             onClose();
             return;
         }
-        onSave(listEducations, showPrivate);
+        onSave(listEducations, showPublic);
     };
 
     const handleAddEducation = () => {
@@ -214,14 +214,14 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                             <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
                                 <span className="text-sb-14-hn text-gray-900">학력 비공개</span>
                                 <button
-                                    onClick={() => setShowPrivate(!showPrivate)}
+                                    onClick={() => setShowPublic(!showPublic)}
                                     className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                        showPrivate ? 'bg-gray-300' : 'bg-primary'
+                                        showPublic ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                            showPrivate ? 'translate-x-[2px]' : 'translate-x-[28px]'
+                                            showPublic ? 'translate-x-[2px]' : 'translate-x-[28px]'
                                         }`}
                                     />
                                 </button>

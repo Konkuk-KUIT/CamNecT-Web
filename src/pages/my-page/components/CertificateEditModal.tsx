@@ -8,20 +8,20 @@ import PopUp from "../../../components/Pop-up";
 
 interface CertificateModalProps {
     certificates: CertificateItem[];
-    initialShowPrivate: boolean;
+    initialShowPublic: boolean;
     onClose: () => void;
-    onSave: (certificates: CertificateItem[], showPrivate: boolean) => void;
+    onSave: (certificates: CertificateItem[], showPublic: boolean) => void;
 }
 
 type View = 'list' | 'add' | 'edit';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
-export default function CertificateModal({ certificates, initialShowPrivate, onClose, onSave }: CertificateModalProps) {
+export default function CertificateModal({ certificates, initialShowPublic, onClose, onSave }: CertificateModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listCertificates, setListCertificates] = useState<CertificateItem[]>(certificates);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
+    const [showPublic, setShowPublic] = useState(initialShowPublic);
     const [showWarning, setShowWarning] = useState(false);
     
     const [formData, setFormData] = useState<Partial<CertificateItem>>({
@@ -43,9 +43,9 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
     // 변경사항 추적 (리스트 전체 추적)
     const hasListChanges: boolean = useMemo(() => {
         const certificatesChanged = JSON.stringify(listCertificates) !== JSON.stringify(certificates);
-        const showPrivateChanged = showPrivate !== initialShowPrivate;
-        return certificatesChanged || showPrivateChanged;
-    }, [listCertificates, certificates, showPrivate, initialShowPrivate]);
+        const showPublicChanged = showPublic !== initialShowPublic;
+        return certificatesChanged || showPublicChanged;
+    }, [listCertificates, certificates, showPublic, initialShowPublic]);
 
     // 수정/추가 각각의 변경사항 추적
     const hasFormChanges: boolean = useMemo(() => {
@@ -72,7 +72,7 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
             onClose();
             return;
         }
-        onSave(listCertificates, showPrivate);
+        onSave(listCertificates, showPublic);
     };
 
     const handleAddCertificate = () => {
@@ -179,14 +179,14 @@ export default function CertificateModal({ certificates, initialShowPrivate, onC
                             <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
                                 <span className="text-sb-14-hn text-gray-900">자격증 비공개</span>
                                 <button
-                                    onClick={() => setShowPrivate(!showPrivate)}
+                                    onClick={() => setShowPublic(!showPublic)}
                                     className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                        showPrivate ? 'bg-gray-300' : 'bg-primary'
+                                        showPublic ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                            showPrivate ? 'translate-x-[2px]' : 'translate-x-[28px]'
+                                            showPublic ? 'translate-x-[2px]' : 'translate-x-[28px]'
                                         }`}
                                     />
                                 </button>
