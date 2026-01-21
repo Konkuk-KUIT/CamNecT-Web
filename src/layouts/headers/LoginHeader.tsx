@@ -15,7 +15,7 @@ export const LoginHeader = ({ onBack }: LoginHeaderProps) => {
       }}
       role='banner'
     >
-      <div className='flex w-[28px] items-center justify-start z-10'>
+      <div className='flex w-[28px] absolute top-[68px] items-center justify-start z-10'>
         <button
           type='button'
           className='flex items-center justify-center'

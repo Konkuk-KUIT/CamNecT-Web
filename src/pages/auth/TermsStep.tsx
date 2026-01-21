@@ -43,7 +43,7 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
     return (
         <div className="absolute inset-0 bg-white px-[25px] flex flex-col overflow-hidden">
             {/* 헤더 섹션 - 디자인 시안 pt-[116px] 반영 */}
-            <h1 className="pt-[116px] text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-gray-900 flex-none relative z-10">
+            <h1 className="pt-[86px] text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-gray-900 flex-none relative z-10">
                 <p>서비스 이용을 위해</p>
                 <p>약관에 동의해주세요</p>
             </h1>
