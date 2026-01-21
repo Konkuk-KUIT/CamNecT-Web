@@ -120,7 +120,7 @@ export const FollowerPage = () => {
                             {filteredList.map((user) => (
                                 <div 
                                     key={user.id} 
-                                    className="w-full flex items-center justify-between py-[15px] px-[25px] border-b border-gray-150"
+                                    className="w-full flex items-center justify-between gap-[15px] py-[15px] px-[25px] border-b border-gray-150"
                                 >
                                     <div className="flex items-center gap-[15px]">
                                         {/* 프로필 이미지 */}
@@ -141,7 +141,7 @@ export const FollowerPage = () => {
                                             className="flex-1 flex flex-col gap-[3px] items-start"
                                         >
                                             <span className="text-b-18-hn text-gray-900">{user.name}</span>
-                                            <span className="text-r-14-hn text-gray-650">
+                                            <span className="text-r-14-hn text-gray-650 break-keep text-left">
                                                 {user.major} {user.gradeNumber}학번
                                             </span>
                                         </button>
@@ -149,7 +149,7 @@ export const FollowerPage = () => {
                                     {/* 커피챗 버튼 */}
                                     <button
                                         onClick={() => handleCoffeeChat(user.id)}
-                                        className="w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
+                                        className="min-w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
                                     >
                                         커피챗 보내기
                                     </button>

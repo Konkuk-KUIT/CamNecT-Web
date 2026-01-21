@@ -3,6 +3,8 @@ import Icon from "../../../components/Icon";
 import { type CareerItem } from "../../../types/mypage/mypageTypes";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
+import { useModalHistory } from "../hooks/useModalHistory";
+import PopUp from "../../../components/Pop-up";
 
 interface CareerModalProps {
     careers: CareerItem[];
@@ -20,6 +22,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
     const [listCareers, setListCareers] = useState<CareerItem[]>(careers);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
+    const [showWarning, setShowWarning] = useState(false);
     
     const [formData, setFormData] = useState<Partial<CareerItem>>({
         organization: '',
@@ -40,9 +43,12 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     // 변경사항 추적 (리스트 전체 추적)
-    const hasChanges: boolean = useMemo(() => {
+    const hasListChanges: boolean = useMemo(() => {
         const careersChanged = JSON.stringify(listCareers) !== JSON.stringify(careers);
         const showPrivateChanged = showPrivate !== initialShowPrivate;
         return careersChanged || showPrivateChanged;
@@ -65,7 +71,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
     }, [formData, currentView, editingId, listCareers]);
 
     const handleComplete = () => {
-        if (!hasChanges) {
+        if (!hasListChanges) {
             onClose();
             return;
         }
@@ -156,6 +162,20 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
 
     //경력 리스트 화면
     if (currentView === 'list') {
+        useModalHistory(
+            onClose,
+            hasListChanges,
+            () => setShowWarning(true)
+        );
+
+        // X 버튼 클릭 핸들러
+        const handleListClose = () => {
+            if (hasListChanges) {
+                setShowWarning(true);
+            } else {
+                onClose();
+            }
+        };
         return (
             <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
                 <div className="w-full max-w-[430px] h-full bg-white flex flex-col"> 
@@ -163,14 +183,14 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                         headerSlot = {
                             <EditHeader
                                 title="경력"
-                                leftAction = {{onClick: onClose}}
+                                leftAction = {{onClick: handleListClose}}
                                 rightElement = {
                                     <button
                                         className={`text-b-16-hn transition-colors ${
-                                            hasChanges ? 'text-primary' : 'text-gray-650'
+                                            hasListChanges ? 'text-primary' : 'text-gray-650'
                                         }`}
                                         onClick={handleComplete}
-                                        disabled={!hasChanges}
+                                        disabled={!hasListChanges}
                                     >
                                         완료
                                     </button>
@@ -271,10 +291,35 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                         </div>
                     </HeaderLayout>
                 </div>
+                <PopUp
+                    isOpen={showWarning}
+                    type="warning"
+                    title="변경사항이 있습니다.\n나가시겠습니까?"
+                    content="저장하지 않을 시 변경사항이 삭제됩니다."
+                    leftButtonText="나가기"
+                    onLeftClick={() => {
+                        setShowWarning(false);
+                        onClose();
+                    }}
+                    onRightClick={() => setShowWarning(false)}
+                />
             </div>
         );
     }
 
+    useModalHistory(
+        () => setCurrentView('list'),
+        hasFormChanges,
+        () => setShowWarning(true)
+    )
+
+    const handleFormClose = () => {
+        if (hasFormChanges) {
+            setShowWarning(true);
+        } else {
+            setCurrentView('list');
+        }
+    };
     // 추가/수정 화면
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
@@ -283,7 +328,7 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                     headerSlot = {
                         <EditHeader
                             title= {currentView === 'add' ? '경력 추가' : '경력 수정'}
-                            leftAction = {{onClick: () => setCurrentView('list')}}
+                            leftAction = {{onClick: handleFormClose}}
                             rightElement = {
                                 <button
                                     className={`text-b-16-hn transition-colors ${
@@ -520,16 +565,8 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                                 {formData.positions && formData.positions.length > 0 && (
                                     <div className="flex flex-col">
                                         {formData.positions.map((position, idx) => (
-                                            <div key={idx} className="flex items-center gap-[15px] py-[10px] border-b border-gray-150">
-                                                    <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px] block shrink-0">
-                                                        <path 
-                                                            d="M3.75 9H20.25M3.75 15.75H20.25" 
-                                                            stroke="#A1A1A1" 
-                                                            strokeWidth="1.5" 
-                                                            strokeLinecap="round" 
-                                                            strokeLinejoin="round"/>
-                                                    </svg>
-                                                    <span className="flex-1 text-r-16-hn text-gray-750">{position}</span>
+                                            <div key={idx} className="flex items-center justify-between px-[15px] py-[10px] border-b border-gray-150">
+                                                <span className="flex-1 text-r-16-hn text-gray-750">{position}</span>
                                                 <button
                                                     onClick={() => handleRemovePosition(idx)}
                                                     className="text-red text-sb-14-hn"
@@ -555,6 +592,18 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
                     </div>
                 </HeaderLayout>
             </div>
+            <PopUp
+                isOpen={showWarning}
+                type="warning"
+                title="변경사항이 있습니다.\n나가시겠습니까?"
+                content="저장하지 않을 시 변경사항이 삭제됩니다."
+                leftButtonText="나가기"
+                onLeftClick={() => {
+                    setShowWarning(false);
+                    setCurrentView('list');
+                }}
+                onRightClick={() => setShowWarning(false)}
+            />
         </div>
     );
 }

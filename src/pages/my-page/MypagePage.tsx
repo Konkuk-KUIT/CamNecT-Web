@@ -40,7 +40,7 @@ export const MypagePage = () => {
                                 <div className="flex gap-[10px]">
                                     <div className="w-full flex flex-col gap-[6px]">
                                         <div className="text-B-18-hn text-gray-900">{user.name}</div>
-                                        <div className="text-R-12-hn text-gray-750">
+                                        <div className="text-R-12-hn text-gray-750 break-keep">
                                             {user.major} {user.gradeNumber}학번
                                         </div>
                                     </div>
@@ -72,7 +72,7 @@ export const MypagePage = () => {
                                 </div>
                             </div>
 
-                            <p className="mt-[11px] min-h-[63px] leading-[1.5] whitespace-pre-line text-R-14 text-gray-750">
+                            <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750">
                                 {user.introduction}
                             </p>
                         </div>

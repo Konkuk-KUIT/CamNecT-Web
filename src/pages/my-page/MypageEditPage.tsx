@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MOCK_SESSION } from "../../mock/mypages";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
@@ -14,31 +14,30 @@ import CertificateEditModal from "./components/CertificateEditModal";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
 import defaultProfileImg from "../../assets/image/defaultProfileImg.jpg"
+import PopUp from "../../components/Pop-up";
+import { useNavigate } from "react-router-dom";
+import { useImageUpload } from "../../hooks/useImageUpload";
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 export const MypageEditPage = () => {
+    const navigate = useNavigate();
     const userId: string = MOCK_SESSION.meUid;
-    const modalRef = useRef<HTMLDivElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
-    const imageUrlRef = useRef<string | null>(null); //TODO: 이미지 업로드 커스텀 훅 반영
+    const imageFileRef = useRef<File | null>(null); //TODO: 이미지 업로드 커스텀 훅 반영
 
     const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
 
-    //외부 클릭 시 modal 닫기 
-    useEffect(() => {
-        if (!currentModal) return;
+    const [leaveOpen, setLeaveOpen] = useState(false);
 
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-                closeModal();
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [currentModal, closeModal]);
+    const handleClose = () => { 
+        if (hasChanges) {
+            setLeaveOpen(true);
+            return;
+        }
+        navigate(-1);
+    };
 
     //modal 열리면 스크롤 lock
     useEffect(() => {
@@ -53,24 +52,21 @@ export const MypageEditPage = () => {
         };
     }, [currentModal]);
 
+    const {prepareImage} = useImageUpload();
 
     const handleImageUpload = (file: File, source: 'album' | 'camera') => {
-        console.log(`${source}에서 이미지 가져옴`)
-        if (imageUrlRef.current) {
-            URL.revokeObjectURL(imageUrlRef.current);
-        }
-        const imageUrl = URL.createObjectURL(file);
-        setData({ ...data, user: { ...data.user, profileImg: imageUrl } });
-        closeModal();
-    };
+        console.log(`${source}에서 이미지 가져옴`); //TODO: 나중에 지우기
+        const result = prepareImage(file);
+        if (!result) return;
+        setData((prev) => ({
+            ...prev,
+            user: { ...prev.user, profileImg: result.previewUrl },
+        }));
+        //서버 전송용 원본 파일 보관
+        imageFileRef.current = result.file;
 
-    useEffect(() => {
-        return () => {
-            if (imageUrlRef.current) {
-                URL.revokeObjectURL(imageUrlRef.current);
-            }
+        closeModal();
         };
-    }, []);
 
     if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
 
@@ -82,6 +78,7 @@ export const MypageEditPage = () => {
                 headerSlot = {
                     <EditHeader
                         title="프로필 수정"
+                        leftAction={{onClick: handleClose}}
                         rightElement={
                             <button
                                 className={`text-b-16-hn transition-colors ${
@@ -115,7 +112,7 @@ export const MypageEditPage = () => {
                                 
                                 <div className="flex flex-col flex-1 gap-[6px]">
                                     <div className="text-B-18-hn text-gray-900">{user.name}</div>
-                                    <div className="text-R-12-hn text-gray-750">
+                                    <div className="text-R-12-hn text-gray-750 break-keep">
                                         {user.major} {user.gradeNumber}학번
                                     </div>
                                 </div>
@@ -152,7 +149,7 @@ export const MypageEditPage = () => {
                                             <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
                                         </button>
                                     </div>
-                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line">
+                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep">
                                         {user.introduction}
                                     </div>
                                 </div>
@@ -293,6 +290,18 @@ export const MypageEditPage = () => {
                     }}
                 />
             )}
+            <PopUp
+                isOpen={leaveOpen}
+                type="warning"
+                title={"변경사항이 있습니다.\n나가시겠습니까?"}
+                content="저장하지 않을 시 변경사항이 삭제됩니다."
+                leftButtonText="나가기"
+                onLeftClick={() => {
+                setLeaveOpen(false);
+                navigate(-1);
+                }}
+                onRightClick={() => setLeaveOpen(false)}
+            />
         </div>
     );
 }

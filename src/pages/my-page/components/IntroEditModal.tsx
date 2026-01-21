@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
+import { useModalHistory } from "../hooks/useModalHistory";
+import PopUp from "../../../components/Pop-up";
 
 interface IntroEditModalProps {
     initialStatement: string;
@@ -18,7 +20,20 @@ export default function TagEditModal({ initialStatement, onClose, onSave }: Intr
     const hasChanges = useMemo(() => statement !== initialStatement
     , [statement, initialStatement])
 
-    
+    const [showWarning, setShowWarning] = useState(false);
+    useModalHistory(onClose, hasChanges, () => setShowWarning(true));
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const handleClose = () => {
+        if (hasChanges) {
+            setShowWarning(true);
+        } else {
+            onClose();
+        }
+    }
 
     // 완료 버튼
     const handleComplete = () => {
@@ -36,7 +51,7 @@ export default function TagEditModal({ initialStatement, onClose, onSave }: Intr
                     headerSlot = {
                         <EditHeader
                             title="태그"
-                            leftAction = {{onClick: onClose}}
+                            leftAction = {{onClick: handleClose}}
                             rightElement = {
                                 <button
                                     className={`text-b-16-hn transition-colors ${
@@ -68,6 +83,18 @@ export default function TagEditModal({ initialStatement, onClose, onSave }: Intr
                     </section>
                 </HeaderLayout>
             </div>
+            <PopUp
+                isOpen={showWarning}
+                type="warning"
+                title="변경사항이 있습니다.\n나가시겠습니까?"
+                content="저장하지 않을 시 변경사항이 삭제됩니다."
+                leftButtonText="나가기"
+                onLeftClick={() => {
+                    setShowWarning(false);
+                    onClose();
+                }}
+                onRightClick={() => setShowWarning(false)}
+            />
         </div>
     );
 }

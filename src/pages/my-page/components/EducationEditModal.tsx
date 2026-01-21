@@ -1,8 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Icon from "../../../components/Icon";
 import { EDUCATION_STATUS_KR, type EducationStatus, type EducationItem } from "../../../types/mypage/mypageTypes";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
+import { useModalHistory } from "../hooks/useModalHistory";
+import PopUp from "../../../components/Pop-up";
 
 interface EducationModalProps {
     educations: EducationItem[];
@@ -35,7 +37,8 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
     const [listEducations, setListEducations] = useState<EducationItem[]>(educations);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showPrivate, setShowPrivate] = useState(initialShowPrivate);
-    
+    const [showWarning, setShowWarning] = useState(false);
+
     const [formData, setFormData] = useState<Partial<EducationItem>>({
         school: '',
         status: 'ENROLLED',
@@ -52,6 +55,10 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
     const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     //검색 필터링
     const filteredSchools = useMemo(() => {
         if (!formData.school || formData.school.trim() === '') {
@@ -63,7 +70,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
     }, [formData.school]);
 
     //변경사항 추적 (리스트 전체 추적)
-    const hasChanges: boolean = useMemo(() => {
+    const hasListChanges: boolean = useMemo(() => {
         const educationsChanged = JSON.stringify(listEducations) !== JSON.stringify(educations);
         const showPrivateChanged = showPrivate !== initialShowPrivate;
         return educationsChanged || showPrivateChanged;
@@ -91,7 +98,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
     }, [formData, currentView, editingId, listEducations, currentYear]);
 
     const handleComplete = () => {
-        if (!hasChanges) {
+        if (!hasListChanges) {
             onClose();
             return;
         }
@@ -155,6 +162,21 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
 
     //학력 리스트 화면
     if (currentView === 'list') {
+        useModalHistory(
+            onClose,
+            hasListChanges,
+            () => setShowWarning(true)
+        );
+
+        // X 버튼 클릭 핸들러
+        const handleListClose = () => {
+            if (hasListChanges) {
+                setShowWarning(true);
+            } else {
+                onClose();
+            }
+        };
+
         return (
             <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
                 <div className="w-full max-w-[430px] h-full bg-white flex flex-col"> 
@@ -162,14 +184,14 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                         headerSlot = {
                             <EditHeader
                                 title="학력"
-                                leftAction = {{onClick: onClose}}
+                                leftAction = {{onClick: handleListClose}}
                                 rightElement = {
                                     <button
                                         className={`text-b-16-hn transition-colors ${
-                                            hasChanges ? 'text-primary' : 'text-gray-650'
+                                            hasListChanges ? 'text-primary' : 'text-gray-650'
                                         }`}
                                         onClick={handleComplete}
-                                        disabled={!hasChanges}
+                                        disabled={!hasListChanges}
                                     >
                                         완료
                                     </button>
@@ -209,20 +231,13 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                                         const bEnd = b.endYear || 9999;
                                         return bEnd - aEnd;
                                     })
-                                    .map((edu) => (
+                                    .map((edu, index) => (
                                     <div
                                         key={edu.id}
                                         className="w-full flex justify-between items-center px-[25px] py-[20px] border-b border-gray-150"
                                     >
                                         <div className="flex items-center gap-[20px]">
-                                            <svg viewBox="0 0 24 24" fill="none" className="w-[24px] h-[24px] block shrink-0">
-                                                <path 
-                                                    d="M3.75 9H20.25M3.75 15.75H20.25" 
-                                                    stroke="#A1A1A1" 
-                                                    strokeWidth="1.5" 
-                                                    strokeLinecap="round" 
-                                                    strokeLinejoin="round"/>
-                                            </svg>
+                                            <span className="text-m-16 text-gray-650 min-w-[24px] text-center">{index + 1}</span>
                                             <div className="flex flex-col justify-center gap-[7px]">
                                                 <span className="text-r-12-hn text-gray-650">
                                                     {edu.startYear}{edu.endYear ? `~${edu.endYear}` : '~현재'}
@@ -260,10 +275,35 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                         </div>
                     </HeaderLayout>
                 </div>
+                <PopUp
+                    isOpen={showWarning}
+                    type="warning"
+                    title="변경사항이 있습니다.\n나가시겠습니까?"
+                    content="저장하지 않을 시 변경사항이 삭제됩니다."
+                    leftButtonText="나가기"
+                    onLeftClick={() => {
+                        setShowWarning(false);
+                        onClose();
+                    }}
+                    onRightClick={() => setShowWarning(false)}
+                />
             </div>
         );
     }
 
+    useModalHistory(
+        () => setCurrentView('list'),
+        hasFormChanges,
+        () => setShowWarning(true)
+    )
+
+    const handleFormClose = () => {
+        if (hasFormChanges) {
+            setShowWarning(true);
+        } else {
+            setCurrentView('list');
+        }
+    };
     // 추가/수정 화면
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
@@ -272,7 +312,7 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                     headerSlot = {
                         <EditHeader
                             title= {currentView === 'add' ? '학력 추가' : '학력 수정'}
-                            leftAction = {{onClick: () => setCurrentView('list')}}
+                            leftAction = {{onClick: handleFormClose}}
                             rightElement = {
                                 <button
                                     className={`text-b-16-hn transition-colors ${
@@ -465,6 +505,18 @@ export default function EducationModal({ educations, initialShowPrivate, onClose
                     </div>
                 </HeaderLayout>
             </div>
+            <PopUp
+                isOpen={showWarning}
+                type="warning"
+                title="변경사항이 있습니다.\n나가시겠습니까?"
+                content="저장하지 않을 시 변경사항이 삭제됩니다."
+                leftButtonText="나가기"
+                onLeftClick={() => {
+                    setShowWarning(false);
+                    setCurrentView('list');
+                }}
+                onRightClick={() => setShowWarning(false)}
+            />
         </div>
     );
 }

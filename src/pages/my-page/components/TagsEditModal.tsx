@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../../mock/tags";
+import { useModalHistory } from "../hooks/useModalHistory";
+import PopUp from "../../../components/Pop-up";
 
 interface TagEditModalProps {
     tags: string[];
@@ -18,6 +20,13 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
         if (selectedTags.length !== tags.length) return true;
         return !selectedTags.every(tag => tags.includes(tag));
     }, [selectedTags, tags]);
+
+    const [showWarning, setShowWarning] = useState(false);
+    useModalHistory(onClose, hasChanges, () => setShowWarning(true));
+
+    useEffect(() => {
+            window.scrollTo(0, 0);
+        }, []);
 
     //태그 선택/해제
     const toggleTag = (tagName: string) => {
@@ -54,6 +63,14 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
         return TAG_CATEGORIES;
     };
 
+    const handleClose = () => {
+        if (hasChanges) {
+            setShowWarning(true);
+        } else {
+            onClose();
+        }
+    }
+
     const handleComplete = () => {
         if (!hasChanges) {
             onClose();
@@ -71,7 +88,7 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                     headerSlot = {
                         <EditHeader
                             title="태그"
-                            leftAction = {{onClick: onClose}}
+                            leftAction = {{onClick: handleClose}}
                             rightElement = {
                                 <button
                                     className={`text-b-16-hn transition-colors ${
@@ -172,6 +189,18 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                     </div>
                 </HeaderLayout>
             </div>
+            <PopUp
+                isOpen={showWarning}
+                type="warning"
+                title="변경사항이 있습니다.\n나가시겠습니까?"
+                content="저장하지 않을 시 변경사항이 삭제됩니다."
+                leftButtonText="나가기"
+                onLeftClick={() => {
+                    setShowWarning(false);
+                    onClose();
+                }}
+                onRightClick={() => setShowWarning(false)}
+            />
         </div>
     );
 }
