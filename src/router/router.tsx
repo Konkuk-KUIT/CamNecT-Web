@@ -79,6 +79,10 @@ export const router = createBrowserRouter([
                         element: <WritePage />,
                     },
                     {
+                        path: "community/edit/:postId",
+                        element: <WritePage />,
+                    },
+                    {
                         path: "community/post/:postId",
                         element: <CommunityPostPage />,
                     },
@@ -87,4 +91,3 @@ export const router = createBrowserRouter([
         ]
     }
 ]);
-

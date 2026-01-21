@@ -106,7 +106,7 @@ const PopUp = ({
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-[20px] py-[20px]'>
-      <div className='flex w-[clamp(260px,85vw,324px)] min-h-[200px] flex-col px-[20px] py-[20px] rounded-[20px] bg-[var(--ColorWhite,#FFF)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]'>
+      <div className='flex w-[clamp(260px,85vw,324px)] h-auto flex-col px-[20px] py-[20px] rounded-[20px] bg-[var(--ColorWhite,#FFF)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]'>
         {renderContent()}
         <div className='mt-[25px]'>{renderButtons()}</div>
       </div>

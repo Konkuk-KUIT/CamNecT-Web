@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
@@ -9,6 +10,7 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 import { communityCommentList, communityPostData, type CommentItem } from './data';
 
 const CommunityPostPage = () => {
+  const navigate = useNavigate();
   const currentUserName = '박원빈';
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
@@ -18,6 +20,7 @@ const CommunityPostPage = () => {
   const [isAdoptPopupOpen, setIsAdoptPopupOpen] = useState(false);
   const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
   const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
 
   const isQuestionPost = communityPostData.boardType === '질문';
   const isPostMine = communityPostData.author.name === currentUserName;
@@ -86,6 +89,18 @@ const CommunityPostPage = () => {
       selectedCommentId === communityPostData.adoptedCommentId
     ) {
       setIsAdoptedCommentPopupOpen(true);
+      setIsOptionOpen(false);
+      return;
+    }
+
+    if (target === 'post' && item.label.includes('수정') && selectedIsMine) {
+      navigate(`/community/edit/${communityPostData.id}`);
+      setIsOptionOpen(false);
+      return;
+    }
+
+    if (target === 'post' && item.label.includes('삭제') && selectedIsMine) {
+      setIsDeletePopupOpen(true);
       setIsOptionOpen(false);
       return;
     }
@@ -335,6 +350,17 @@ const CommunityPostPage = () => {
           '채택이 완료된 댓글의\n수정 및 삭제을 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
         }
         onRightClick={() => setIsAdoptedCommentPopupOpen(false)}
+      />
+      <PopUp
+        isOpen={isDeletePopupOpen}
+        type='warning'
+        title='정말 삭제하시겠습니까?'
+        content='삭제된 내용은 복구 불가능합니다.'
+        onLeftClick={() => {
+          // TODO: 삭제 API 요청 연결 예정
+          setIsDeletePopupOpen(false);
+        }}
+        onRightClick={() => setIsDeletePopupOpen(false)}
       />
     </HeaderLayout>
   );

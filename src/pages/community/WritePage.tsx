@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
-import {EmptyLayout} from '../../layouts/EmptyLayout';
+import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from './components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import FilterModal from '../../components/FilterModal';
 import useCommunityFilters from '../../hooks/useCommunityFilters';
+import { communityPostData } from './data';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -14,6 +15,8 @@ type BoardType = (typeof boardTypes)[number];
 
 export const WritePage = () => {
     const navigate = useNavigate();
+    const { postId } = useParams();
+    const isEditMode = Boolean(postId);
     // 게시판 선택 모달 상태
     const [isBoardOpen, setIsBoardOpen] = useState(false);
     // 게시판 타입: 확정/임시 선택
@@ -50,6 +53,7 @@ export const WritePage = () => {
         toggleDraftMajor,
         toggleDraftInterest,
         hasDraftSelection,
+        setFilters,
     } = useCommunityFilters<{ author: { major: string }; categories: string[] }>(filterSource);
 
     const openBoardSelector = () => {
@@ -117,6 +121,23 @@ export const WritePage = () => {
         };
     }, []);
 
+    useEffect(() => {
+        if (!isEditMode || !postId || postId !== communityPostData.id) return;
+        setBoardType(communityPostData.boardType as BoardType);
+        setDraftBoardType(communityPostData.boardType as BoardType);
+        setTitle(communityPostData.title);
+        setContent(communityPostData.content);
+        setFilters(null, communityPostData.categories);
+        if (communityPostData.postImages && communityPostData.postImages.length > 0) {
+            setPhotoPreviews(
+                communityPostData.postImages.map((url, index) => ({
+                    id: `edit-${communityPostData.id}-${index}`,
+                    url,
+                })),
+            );
+        }
+    }, [isEditMode, postId, setFilters]);
+
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
     const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -150,6 +171,11 @@ export const WritePage = () => {
     // 확인 모달에서 "네" 클릭 시 메인으로 이동
     const handleConfirm = () => {
         // TODO: api 전송(게시판 종류, 제목, 필터 배열, 내용, 사진), 글쓰기 완료 팝업 추가
+        // TODO: 수정 모드인 경우 변경된 데이터만 전송
+        if (isEditMode && postId) {
+            navigate(`/community/post/${postId}`);
+            return;
+        }
         navigate('/community');
     };
 
@@ -445,79 +471,14 @@ export const WritePage = () => {
             )}
 
             {/* 완료 확인 모달 */}
-            {isConfirmOpen && (
-                <div
-                    className='fixed inset-0 z-50 flex items-center justify-center'
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-                    onClick={() => setIsConfirmOpen(false)}
-                >
-                    <div
-                        className='flex flex-col bg-white'
-                        style={{
-                            width: 'clamp(280px, 90vw, 360px)',
-                            height: '200px',
-                            borderRadius: '20px',
-                        }}
-                        onClick={(event) => event.stopPropagation()}
-                    >
-                        <div
-                            className='flex flex-col'
-                            style={{ padding: '30px 35px 0', gap: '15px' }}
-                        >
-                            <span className='text-b-18' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                                게시글을 등록하시겠습니까?
-                            </span>
-                            <span className='text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                                답변 채택 후 게시물의
-                                <br />
-                                <span className='text-sb-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                                    수정 및 삭제
-                                </span>{' '}
-                                <span className='text-sb-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                                    불가능
-                                </span>
-                                합니다
-                            </span>
-                        </div>
-
-                        <div
-                            className='mt-auto flex'
-                            style={{ padding: '25px 20px 20px', gap: '10px' }}
-                        >
-                            <button
-                                type='button'
-                                className='flex items-center justify-center text-sb-14'
-                                style={{
-                                    flex: 1,
-                                    minWidth: '120px',
-                                    height: '45px',
-                                    borderRadius: '10px',
-                                    background: 'var(--ColorSub2, #F2FCF8)',
-                                    color: 'var(--ColorMain, #00C56C)',
-                                }}
-                                onClick={() => setIsConfirmOpen(false)}
-                            >
-                                아니요
-                            </button>
-                            <button
-                                type='button'
-                                className='flex items-center justify-center text-b-14'
-                                style={{
-                                    flex: 1,
-                                    minWidth: '120px',
-                                    height: '45px',
-                                    borderRadius: '10px',
-                                    background: 'var(--ColorMain, #00C56C)',
-                                    color: 'var(--ColorWhite, #FFF)',
-                                }}
-                                onClick={handleConfirm}
-                            >
-                                네, 확인했습니다
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <PopUp
+                isOpen={isConfirmOpen}
+                type='info'
+                title={isEditMode ? '질문을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?'}
+                content={'답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.'}
+                onLeftClick={() => setIsConfirmOpen(false)}
+                onRightClick={handleConfirm}
+            />
 
             <PopUp
                 isOpen={isCancelWarningOpen}

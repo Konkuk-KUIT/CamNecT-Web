@@ -60,7 +60,14 @@ const BottomSheetModalPost = ({
               onClick={() => onItemClick?.(item, target)}
             >
               <Icon name={item.icon} />
-              <span className='text-[16px] font-medium text-[var(--ColorGray3,#646464)]'>
+              <span
+                className='text-[16px] font-medium'
+                style={{
+                  color: item.label.includes('삭제')
+                    ? 'var(--Color_Red, #FF3838)'
+                    : 'var(--ColorGray3,#646464)',
+                }}
+              >
                 {item.label}
               </span>
             </button>

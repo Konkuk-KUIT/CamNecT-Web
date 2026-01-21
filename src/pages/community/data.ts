@@ -27,6 +27,7 @@ export type InfoPost = {
   authorProfileImageUrl?: string;
   postImageUrl?: string;
   likes: number;
+  saveCount: number;
   comments: number;
   createdAt: string;
 };
@@ -38,6 +39,8 @@ export type QuestionPost = {
   title: string;
   content: string;
   imageUrl?: string;
+  likes: number;
+  saveCount: number;
   answers: number;
   isAdopted: boolean;
   createdAt: string;
@@ -75,8 +78,8 @@ export const communityPostData: CommunityPostDetail = {
   likes: 24,
   comments: 6,
   saveCount: 12,
-  isAdopted: true,
-  adoptedCommentId: 'comment-2',
+  isAdopted: false,
+  adoptedCommentId: undefined,
   createdAt: '25.01.31 04:01',
   author: {
     name: '박원빈',
@@ -199,6 +202,7 @@ export const infoPosts: InfoPost[] = [
     authorProfileImageUrl: sampleProfileImage,
     postImageUrl: samplePostImage,
     likes: 24,
+    saveCount: 18,
     comments: 6,
     createdAt: new Date(Date.now() - 9 * 60 * 60 * 1000).toISOString(),
   },
@@ -209,6 +213,7 @@ export const infoPosts: InfoPost[] = [
     title: '글로벌 인턴십 Q&A 세션 자료 공유',
     content: '해외 인턴 준비 과정에서 정리한 자료와 발표 슬라이드를 업로드합니다.',
     likes: 12,
+    saveCount: 6,
     comments: 3,
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -221,6 +226,7 @@ export const infoPosts: InfoPost[] = [
     authorProfileImageUrl: sampleProfileImage,
     postImageUrl: samplePostImage,
     likes: 18,
+    saveCount: 10,
     comments: 4,
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
@@ -232,6 +238,7 @@ export const infoPosts: InfoPost[] = [
     content: '기획 의도와 핵심 기능을 전달하기 위한 슬라이드 구조를 공유합니다.',
     authorProfileImageUrl: sampleProfileImage,
     likes: 27,
+    saveCount: 13,
     comments: 9,
     createdAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
   },
@@ -244,6 +251,7 @@ export const infoPosts: InfoPost[] = [
     authorProfileImageUrl: sampleProfileImage,
     postImageUrl: samplePostImage,
     likes: 22,
+    saveCount: 8,
     comments: 5,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -255,6 +263,7 @@ export const infoPosts: InfoPost[] = [
     content: '최근 제출했던 포폴 페이지 구성과 리뷰받은 피드백을 정리했습니다.',
     authorProfileImageUrl: sampleProfileImage,
     likes: 31,
+    saveCount: 25,
     comments: 11,
     createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
   },
@@ -267,6 +276,8 @@ export const questionPosts: QuestionPost[] = [
     categories: ['코딩테스트', '취업'],
     title: 'PS 기초 다질 때 추천하는 문제집이 있을까요?',
     content: '1학년인데 어느 사이트 문제부터 풀면 좋을지 고민입니다.',
+    likes: 8,
+    saveCount: 5,
     answers: 0,
     isAdopted: false,
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
@@ -277,6 +288,8 @@ export const questionPosts: QuestionPost[] = [
     categories: ['교환학생', '어학'],
     title: '교환학생 서류 준비 일정 공유 부탁드립니다.',
     content: '가을학기 지원 일정과 필요한 어학 점수 컷이 궁금합니다.',
+    likes: 21,
+    saveCount: 14,
     answers: 3,
     isAdopted: true,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -287,6 +300,8 @@ export const questionPosts: QuestionPost[] = [
     categories: ['포트폴리오', '피드백'],
     title: '졸업전시 포트폴리오 피드백 받을 수 있을까요?',
     content: '레이아웃과 서체 선택 관련 의견을 듣고 싶습니다.',
+    likes: 4,
+    saveCount: 2,
     answers: 0,
     isAdopted: false,
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),

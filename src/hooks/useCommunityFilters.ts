@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 type FilterablePost = {
   author: {
@@ -70,6 +70,13 @@ const useCommunityFilters = <T extends FilterablePost>(posts: T[]) => {
 
   const hasDraftSelection = Boolean(draftMajor) || draftInterests.length > 0;
 
+  const setFilters = useCallback((major: string | null, interests: string[]) => {
+    setAppliedMajor(major);
+    setAppliedInterests(interests);
+    setDraftMajor(major);
+    setDraftInterests(interests);
+  }, []);
+
   return {
     isFilterOpen,
     activeTab,
@@ -85,6 +92,7 @@ const useCommunityFilters = <T extends FilterablePost>(posts: T[]) => {
     toggleDraftMajor,
     toggleDraftInterest,
     hasDraftSelection,
+    setFilters,
   };
 };
 
