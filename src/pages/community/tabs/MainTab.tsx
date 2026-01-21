@@ -28,7 +28,21 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
 
         <section className='flex flex-col' style={{ gap: '12px' }}>
           {/* TODO: 알럼나이 정보 리스트 API 연결 */}
-          {alumniInfos.length > 0 && <MainBoxCarousel items={alumniInfos} />}
+          {alumniInfos.length > 0 ? (
+            <MainBoxCarousel items={alumniInfos} />
+          ) : (
+            <div
+              className='flex flex-col items-center justify-center text-center'
+              style={{ gap: '30px', height: 'clamp(165px, 35vw, 180px)' }}
+            >
+              <div className='text-sb-18' style={{ color: 'var(--ColorGray2, #A1A1A1)', whiteSpace: 'pre-line' }}>
+                {'반가운 동문들과 나눌\n첫 소식을 기다리고 있어요.'}
+              </div>
+              <div className='text-m-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+                지금 바로 정보를 공유해 보세요!
+              </div>
+            </div>
+          )}
         </section>
       </div>
 
@@ -53,42 +67,56 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           className="flex flex-col"
         >
           {/* TODO: 미답변 질문 리스트 API 연결 */}
-          {unansweredQuestions.map((question, index) => {
-            const isLast = index === unansweredQuestions.length - 1;
-            return (
-              <Link key={question.id} to={`/community/post/${question.id}`} className='block'>
-                <div
-                  className='flex flex-col'
-                  style={{
-                    padding: '15px 20px',
-                    gap: '7px',
-                    boxShadow: isLast
-                      ? undefined
-                      : 'inset 0 -1px 0 var(--ColorGray1, #ECECEC)',
-                  }}
-                >
-                  <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
-                    {question.categories.map((category) => (
-                      <Category key={category} label={category} height={20} className='px-[6px]' />
-                    ))}
-                  </div>
+          {unansweredQuestions.length > 0 ? (
+            unansweredQuestions.map((question, index) => {
+              const isLast = index === unansweredQuestions.length - 1;
+              return (
+                <Link key={question.id} to={`/community/post/${question.id}`} className='block'>
+                  <div
+                    className='flex flex-col'
+                    style={{
+                      padding: '15px 20px',
+                      gap: '7px',
+                      boxShadow: isLast
+                        ? undefined
+                        : 'inset 0 -1px 0 var(--ColorGray1, #ECECEC)',
+                    }}
+                  >
+                    <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
+                      {question.categories.map((category) => (
+                        <Category key={category} label={category} className='px-[6px]' />
+                      ))}
+                    </div>
 
-                  <div className='flex flex-col' style={{ gap: '3px' }}>
-                    <div className='text-m-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
-                      {question.title}
-                    </div>
-                    <div
-                      className='flex items-center justify-between text-r-12'
-                      style={{ color: 'var(--ColorGray3, #646464)' }}
-                    >
-                      <span>답변 {question.answers}</span>
-                      <span>{formatTimeAgo(question.createdAt)}</span>
+                    <div className='flex flex-col' style={{ gap: '3px' }}>
+                      <div className='text-m-14' style={{ color: 'var(--ColorBlack, #202023)' }}>
+                        {question.title}
+                      </div>
+                      <div
+                        className='flex items-center justify-between text-r-12'
+                        style={{ color: 'var(--ColorGray3, #646464)' }}
+                      >
+                        <span>답변 {question.answers}</span>
+                        <span>{formatTimeAgo(question.createdAt)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
+                </Link>
+              );
+            })
+          ) : (
+            <div
+              className='flex flex-col items-center justify-center text-center'
+              style={{ gap: '30px', height: 'clamp(120px, 25vw, 165px)' }}
+            >
+              <div className='text-sb-18' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+                모든 질문의 궁금증이 풀렸어요
+              </div>
+              <div className='text-m-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+                동문들의 지혜가 필요한 새로운 질문을 등록해 보세요
+              </div>
+            </div>
+          )}
         </Card>
       </section>
     </div>

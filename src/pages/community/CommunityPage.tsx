@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
@@ -15,11 +16,18 @@ const tabItems: TabItem[] = [
 
 export const CommunityPage = () => {
   const [activeTab, setActiveTab] = useState<string>(tabItems[0].id);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈
   const alumniInfos = useMemo(
-    () => infoPosts.filter((post) => post.author.isAlumni),
-    [],
+    () =>
+      infoPosts.filter(
+        (post) => post.author.isAlumni && post.author.major === loggedInUserMajor,
+      ),
+    [loggedInUserMajor],
   );
 
   const unansweredQuestions = useMemo(
@@ -27,10 +35,42 @@ export const CommunityPage = () => {
     [],
   );
 
+  const filteredInfoPosts = useMemo(() => {
+    if (!normalizedQuery) return infoPosts;
+    return infoPosts.filter((post) => {
+      const title = post.title.toLowerCase();
+      const content = post.content.toLowerCase();
+      const categories = post.categories.some((category) =>
+        category.toLowerCase().includes(normalizedQuery),
+      );
+      return (
+        title.includes(normalizedQuery) ||
+        content.includes(normalizedQuery) ||
+        categories
+      );
+    });
+  }, [normalizedQuery]);
+
+  const filteredQuestionPosts = useMemo(() => {
+    if (!normalizedQuery) return questionPosts;
+    return questionPosts.filter((post) => {
+      const title = post.title.toLowerCase();
+      const content = post.content.toLowerCase();
+      const categories = post.categories.some((category) =>
+        category.toLowerCase().includes(normalizedQuery),
+      );
+      return (
+        title.includes(normalizedQuery) ||
+        content.includes(normalizedQuery) ||
+        categories
+      );
+    });
+  }, [normalizedQuery]);
+
   // 현재 탭에 맞는 화면 반환
   const renderTab = () => {
-    if (activeTab === 'info') return <InfoTab posts={infoPosts} />;
-    if (activeTab === 'question') return <QuestionTab posts={questionPosts} />;
+    if (activeTab === 'info') return <InfoTab posts={filteredInfoPosts} />;
+    if (activeTab === 'question') return <QuestionTab posts={filteredQuestionPosts} />;
     return (
       <MainTab
         userMajor={loggedInUserMajor}
@@ -41,17 +81,48 @@ export const CommunityPage = () => {
   };
 
   return (
-    //TODO: 각 탭별로 search 기능 구현
     <HeaderLayout
       headerSlot={
-        <MainHeader
-          title='커뮤니티'
-          rightActions={
-            activeTab === 'all'
-              ? []
-              : [{ icon: 'search', onClick: () => console.log('search') }]
-          }
-        />
+        isSearchOpen && activeTab !== 'all' ? (
+          <div className='bg-white'>
+            <div className='px-[25px]'>
+              <div className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] py-[10px]'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsSearchOpen(false);
+                  }}
+                  aria-label='검색 닫기'
+                >
+                  <Icon name='search' className='h-[28px] w-[28px]' />
+                </button>
+                <input
+                  type='text'
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder='제목, 내용, 태그, 검색'
+                  className='flex-1 bg-transparent text-r-16 text-[var(--ColorBlack,#202023)] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none'
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <MainHeader
+            title='커뮤니티'
+            rightActions={
+              activeTab === 'all'
+                ? []
+                : [
+                  {
+                    icon: 'search',
+                    onClick: () => setIsSearchOpen(true),
+                    ariaLabel: '검색 열기',
+                  },
+                ]
+            }
+          />
+        )
       }
     >
       <div className='bg-white'>

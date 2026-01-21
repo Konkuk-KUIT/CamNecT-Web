@@ -8,6 +8,7 @@ type BottomSheetModalPostProps = {
   onClose: () => void;
   target: ContentTarget;
   isMine: boolean;
+  onItemClick?: (item: ActionItem, target: ContentTarget) => void;
 };
 
 type ActionItem = {
@@ -43,6 +44,7 @@ const BottomSheetModalPost = ({
   onClose,
   target,
   isMine,
+  onItemClick,
 }: BottomSheetModalPostProps) => {
   const items = optionsMap[target][isMine ? 'mine' : 'other'];
 
@@ -51,12 +53,17 @@ const BottomSheetModalPost = ({
       <div className='flex min-h-[200px] flex-col px-[clamp(16px,6vw,25px)] pt-[30px]'>
         <div className='flex flex-col divide-y divide-[var(--ColorGray1,#ECECEC)]'>
           {items.map((item) => (
-            <div key={`${target}-${item.icon}`} className='flex items-center gap-[15px] py-[15px]'>
+            <button
+              key={`${target}-${item.icon}`}
+              type='button'
+              className='flex items-center gap-[15px] py-[15px] text-left'
+              onClick={() => onItemClick?.(item, target)}
+            >
               <Icon name={item.icon} />
               <span className='text-[16px] font-medium text-[var(--ColorGray3,#646464)]'>
                 {item.label}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </div>

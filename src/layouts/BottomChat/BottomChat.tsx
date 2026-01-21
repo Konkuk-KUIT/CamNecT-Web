@@ -49,7 +49,7 @@ export const BottomChat = ({
         <input
           type='text'
           placeholder={placeholder}
-          className='flex-1 rounded-[30px] border border-[var(--ColorGray1,#ECECEC)] bg-[var(--Color_Gray_B,#FCFCFC)] px-[clamp(12px,3.5vw,15px)] py-[10px] text-[16px] text-[var(--ColorBlack,#202023)] placeholder:text-[16px] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:border-[var(--ColorGray3,#646464)] focus:outline-none focus:ring-0'
+          className='flex-1 rounded-[30px] border border-[var(--ColorGray1,#ECECEC)] bg-[var(--Color_Gray_B,#FCFCFC)] px-[clamp(12px,3.5vw,15px)] py-[10px] text-[16px] text-[var(--ColorBlack,#202023)] placeholder:text-[16px] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none focus:ring-0'
         />
         <div className='flex items-center gap-[clamp(8px,3vw,13px)]'>
           <div className='flex items-center gap-[clamp(4px,1.5vw,5px)]'>

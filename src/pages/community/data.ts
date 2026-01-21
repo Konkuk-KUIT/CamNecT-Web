@@ -39,6 +39,7 @@ export type QuestionPost = {
   content: string;
   imageUrl?: string;
   answers: number;
+  isAdopted: boolean;
   createdAt: string;
 };
 
@@ -48,6 +49,9 @@ export type CommunityPostDetail = {
   title: string;
   likes: number;
   comments: number;
+  saveCount: number;
+  isAdopted: boolean;
+  adoptedCommentId?: string;
   createdAt: string;
   author: CommentAuthor;
   content: string;
@@ -56,6 +60,7 @@ export type CommunityPostDetail = {
 };
 
 export const loggedInUserMajor = '컴퓨터공학부';
+//TODO: 나중에 랜덤 태그로 변경
 
 const sampleProfileImage =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI0OCIgY3k9IjQ4IiByPSI0OCIgZmlsbD0iI0UwRThFNSIvPjxwYXRoIGQ9Ik00OCAyNEM1Ni4yODQgMjQgNjMgMzAuNzE2IDYzIDM5QzYzIDQ3LjI4NCA1Ni4yODQgNTQgNDggNTRDMzkuNzE2IDU0IDMzIDQ3LjI4NCAzMyAzOUMzMyAzMC43MTYgMzkuNzE2IDI0IDQ4IDI0WiIgZmlsbD0iI0I0QkJCRiIvPjxwYXRoIGQ9Ik0yOCA3NEMzMiA2NS4zMzMgNDEuMzMzIDYwIDQ4IDYwQzU0LjY2NyA2MCA2NCA2NS4zMzMgNjggNzRIMjhaIiBmaWxsPSIjQjRCQkJGIi8+PC9zdmc+';
@@ -65,10 +70,13 @@ const samplePostImage =
 
 export const communityPostData: CommunityPostDetail = {
   id: 'post-1',
-  boardType: '정보',
+  boardType: '질문',
   title: '진로 고민하는 후배들에게 공유하고 싶은 내용',
   likes: 24,
   comments: 6,
+  saveCount: 12,
+  isAdopted: true,
+  adoptedCommentId: 'comment-2',
   createdAt: '25.01.31 04:01',
   author: {
     name: '박원빈',
@@ -81,6 +89,69 @@ export const communityPostData: CommunityPostDetail = {
   categories: ['취업', '진로', '멘토링'],
   postImages: [samplePostImage, samplePostImage, samplePostImage, samplePostImage],
 };
+
+export const communityPostSamples: CommunityPostDetail[] = [
+  {
+    id: 'info-1',
+    boardType: '정보',
+    title: '대기업 면접 준비 체크리스트 공유',
+    likes: 38,
+    comments: 9,
+    saveCount: 21,
+    isAdopted: false,
+    createdAt: '25.02.03 10:20',
+    author: {
+      name: '서지윤',
+      major: '컴퓨터공학부',
+      studentId: '17',
+      profileImageUrl: '',
+    },
+    content:
+      '면접 준비하면서 도움이 되었던 질문 리스트와 답변 구조를 정리했습니다. 실전 대비 팁도 포함했어요.',
+    categories: ['면접', '취업'],
+    postImages: [samplePostImage],
+  },
+  {
+    id: 'question-mine-1',
+    boardType: '질문',
+    title: '백엔드 직무 프로젝트 포트폴리오 피드백 부탁드립니다.',
+    likes: 5,
+    comments: 3,
+    saveCount: 9,
+    isAdopted: false,
+    adoptedCommentId: undefined,
+    createdAt: '25.02.05 13:05',
+    author: {
+      name: '박원빈',
+      major: '컴퓨터공학부',
+      studentId: '20',
+      profileImageUrl: '',
+    },
+    content:
+      'API 설계와 성능 개선 사례를 강조하려고 하는데, 어떤 부분을 더 보완하면 좋을까요?',
+    categories: ['포트폴리오', '백엔드'],
+  },
+  {
+    id: 'question-others-1',
+    boardType: '질문',
+    title: '교환학생 준비 시 어학 점수 기준이 궁금합니다.',
+    likes: 2,
+    comments: 1,
+    saveCount: 4,
+    isAdopted: false,
+    adoptedCommentId: undefined,
+    createdAt: '25.02.06 09:40',
+    author: {
+      name: '김은지',
+      major: '경영학부',
+      studentId: '22',
+      profileImageUrl: '',
+    },
+    content:
+      '지원 가능한 어학 점수 기준과 추천 준비 일정이 있다면 공유 부탁드립니다.',
+    categories: ['교환학생', '어학'],
+  },
+];
 
 export const communityCommentList: CommentItem[] = [
   {
@@ -197,6 +268,7 @@ export const questionPosts: QuestionPost[] = [
     title: 'PS 기초 다질 때 추천하는 문제집이 있을까요?',
     content: '1학년인데 어느 사이트 문제부터 풀면 좋을지 고민입니다.',
     answers: 0,
+    isAdopted: false,
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
   },
   {
@@ -206,6 +278,7 @@ export const questionPosts: QuestionPost[] = [
     title: '교환학생 서류 준비 일정 공유 부탁드립니다.',
     content: '가을학기 지원 일정과 필요한 어학 점수 컷이 궁금합니다.',
     answers: 3,
+    isAdopted: true,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -215,6 +288,7 @@ export const questionPosts: QuestionPost[] = [
     title: '졸업전시 포트폴리오 피드백 받을 수 있을까요?',
     content: '레이아웃과 서체 선택 관련 의견을 듣고 싶습니다.',
     answers: 0,
+    isAdopted: false,
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
   },
 ];

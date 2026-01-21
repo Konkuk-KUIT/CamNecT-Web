@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
+import PopUp from '../../components/Pop-up';
 import BottomSheetModalPost from '../../components/BottomSheetModal/BottomSheetModal-post';
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
@@ -12,7 +13,28 @@ const CommunityPostPage = () => {
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<'post' | 'comment'>('comment');
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [isAdoptPopupOpen, setIsAdoptPopupOpen] = useState(false);
+  const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
+  const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
+
+  const isQuestionPost = communityPostData.boardType === '질문';
+  const isPostMine = communityPostData.author.name === currentUserName;
+  const isAdopted = communityPostData.isAdopted;
+  const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
+
+  const sortedComments =
+    isQuestionPost && isAdopted && communityPostData.adoptedCommentId
+      ? [
+          ...communityCommentList.filter(
+            (comment) => comment.id === communityPostData.adoptedCommentId,
+          ),
+          ...communityCommentList.filter(
+            (comment) => comment.id !== communityPostData.adoptedCommentId,
+          ),
+        ]
+      : communityCommentList;
 
   const commentCount = communityCommentList.reduce(
     (count, comment) => count + 1 + (comment.replies?.length ?? 0),
@@ -22,21 +44,68 @@ const CommunityPostPage = () => {
   const handleOpenCommentOptions = (comment: CommentItem) => {
     setSelectedIsMine(comment.author.name === currentUserName);
     setSelectedTarget('comment');
+    setSelectedCommentId(comment.id);
     setIsOptionOpen(true);
   };
 
   const handleOpenPostOptions = () => {
     setSelectedIsMine(communityPostData.author.name === currentUserName);
     setSelectedTarget('post');
+    setSelectedCommentId(null);
     setIsOptionOpen(true);
   };
 
+  const handleOpenAdoptPopup = () => setIsAdoptPopupOpen(true);
+  const handleCloseAdoptPopup = () => setIsAdoptPopupOpen(false);
+  const handleConfirmAdopt = () => {
+    // TODO: 채택 이후 라우터 연결 예정
+    setIsAdoptPopupOpen(false);
+  };
+
+  const handleOptionItemClick = (
+    item: { label: string },
+    target: 'post' | 'comment',
+  ) => {
+    const isEditOrDelete = item.label.includes('수정') || item.label.includes('삭제');
+    if (!isEditOrDelete) {
+      setIsOptionOpen(false);
+      return;
+    }
+
+    if (target === 'post' && isQuestionPost && isAdopted && isPostMine) {
+      setIsAdoptedPostPopupOpen(true);
+      setIsOptionOpen(false);
+      return;
+    }
+
+    if (
+      target === 'comment' &&
+      isQuestionPost &&
+      isAdopted &&
+      selectedIsMine &&
+      selectedCommentId === communityPostData.adoptedCommentId
+    ) {
+      setIsAdoptedCommentPopupOpen(true);
+      setIsOptionOpen(false);
+      return;
+    }
+
+    setIsOptionOpen(false);
+  };
+
   const renderComment = (comment: CommentItem, isReply = false) => {
+    if (isQuestionPost && isReply) return null;
+    const isAdoptedComment =
+      isQuestionPost && isAdopted && communityPostData.adoptedCommentId === comment.id;
     return (
       <Fragment key={comment.id}>
         <div
           className={`flex flex-col border-b border-[var(--ColorGray1,#ECECEC)] ${
-            isReply ? 'bg-[var(--Color_Gray_B,#FCFCFC)]' : ''
+            isReply
+              ? 'bg-[var(--Color_Gray_B,#FCFCFC)]'
+              : isAdoptedComment
+                ? 'bg-[var(--ColorSub2,#F2FCF8)]'
+                : ''
           }`}
         >
           <div
@@ -72,13 +141,30 @@ const CommunityPostPage = () => {
               </div>
 
               <div className='mt-[15px] flex items-center justify-between text-[12px] font-medium text-[var(--ColorGray2,#A1A1A1)]'>
-                <button type='button'>답글 쓰기</button>
+                <div className='flex items-center gap-[10px]'>
+                  {showAdoptButton ? (
+                    <button
+                      type='button'
+                      className='inline-flex items-center justify-center gap-[7px] rounded-[5px] border border-[var(--ColorMain,#00C56C)] px-[8px] py-[4px] text-m-14 text-[var(--ColorMain,#00C56C)]'
+                      onClick={handleOpenAdoptPopup}
+                    >
+                      <Icon name='checkCircle' className='h-5 w-5' />
+                      채택하기
+                    </button>
+                  ) : null}
+                  {isAdoptedComment ? (
+                    <span className='inline-flex items-center gap-[7px] rounded-[5px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[4px] text-r-12 text-[var(--ColorMain,#00C56C)]'>
+                      <Icon name='checkCircle' className='h-[16px] w-[16px]' />
+                      채택된 댓글
+                    </span>
+                  ) : null}
+                </div>
                 <span>{comment.createdAt}</span>
               </div>
             </div>
           </div>
         </div>
-        {comment.replies && comment.replies.length > 0
+        {!isQuestionPost && comment.replies && comment.replies.length > 0
           ? comment.replies.map((reply) => renderComment(reply, true))
           : null}
       </Fragment>
@@ -99,10 +185,22 @@ const CommunityPostPage = () => {
       <main className='flex w-full justify-center bg-white'>
         <div className='flex w-full max-w-[720px] flex-col sm:px-[25px]'>
           <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
-            <div className='flex flex-col gap-[20px]'>
-              <div className='text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'>
-                {communityPostData.boardType} 게시판 &gt;
-              </div>
+            <div className='flex flex-col items-start gap-[20px]'>
+              {isQuestionPost ? (
+                <div
+                  className={`inline-flex min-w-[68px] items-center justify-center rounded-[30px] border px-[12px] py-[4px] text-r-16 ${
+                    isAdopted
+                      ? 'border-[var(--ColorGray2,#A1A1A1)] text-[var(--ColorGray2,#A1A1A1)]'
+                      : 'border-[var(--ColorMain,#00C56C)] text-[var(--ColorMain,#00C56C)]'
+                  }`}
+                >
+                  {isAdopted ? '채택 완료' : '채택 전'}
+                </div>
+              ) : (
+                <div className='text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'>
+                  {communityPostData.boardType} 게시판 &gt;
+                </div>
+              )}
               <div className='flex flex-col gap-[13px]'>
                 <div className='text-[24px] font-bold leading-[130%] text-black'>
                   {communityPostData.title}
@@ -199,7 +297,7 @@ const CommunityPostPage = () => {
               댓글 ({commentCount})
             </div>
             <div className='flex flex-col'>
-              {communityCommentList.map((comment) => renderComment(comment))}
+              {sortedComments.map((comment) => renderComment(comment))}
             </div>
           </section>
         </div>
@@ -210,6 +308,33 @@ const CommunityPostPage = () => {
         onClose={() => setIsOptionOpen(false)}
         target={selectedTarget}
         isMine={selectedIsMine}
+        onItemClick={handleOptionItemClick}
+      />
+      <PopUp
+        isOpen={isAdoptPopupOpen}
+        type='info'
+        title='정말 채택하시겠습니까?'
+        content={'답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.'}
+        onLeftClick={handleCloseAdoptPopup}
+        onRightClick={handleConfirmAdopt}
+      />
+      <PopUp
+        isOpen={isAdoptedPostPopupOpen}
+        type='confirm'
+        title='이미 채택된 게시물입니다.'
+        content={
+          '채택이 완료된 게시물의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
+        }
+        onRightClick={() => setIsAdoptedPostPopupOpen(false)}
+      />
+      <PopUp
+        isOpen={isAdoptedCommentPopupOpen}
+        type='confirm'
+        title='이미 채택된 댓글입니다.'
+        content={
+          '채택이 완료된 댓글의\n수정 및 삭제을 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
+        }
+        onRightClick={() => setIsAdoptedCommentPopupOpen(false)}
       />
     </HeaderLayout>
   );
