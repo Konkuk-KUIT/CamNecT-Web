@@ -12,7 +12,7 @@ interface IntroEditModalProps {
 
 const MAX_LENGTH = 100;
 
-export default function TagEditModal({ initialStatement, onClose, onSave }: IntroEditModalProps) {
+export default function IntroEditModal({ initialStatement, onClose, onSave }: IntroEditModalProps) {
     const [statement, setStatement] = useState<string>(initialStatement);
 
 

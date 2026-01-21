@@ -60,7 +60,7 @@ export const MypagePage = () => {
                         </div>
 
                         <div className="flex flex-1">
-                            <div className="flex flex-col justify-center items-start gap-[7px] pl-[3px] pt-[3px] min-w-[51px]"
+                            <button className="flex flex-col justify-center items-start gap-[7px] pl-[3px] pt-[3px] min-w-[51px]"
                             onClick={() => navigate("/me/follower")}>
                                 <div className="flex justify-start items-align gap-[3px]">
                                     <span className="text-R-14-hn text-gray-900">팔로잉</span>
@@ -70,7 +70,7 @@ export const MypagePage = () => {
                                     <span className="text-R-14-hn text-gray-900">팔로워</span>
                                     <span className="text-SB-14-hn text-gray-900">{user.follower.length}</span>
                                 </div>
-                            </div>
+                            </button>
 
                             <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750">
                                 {user.introduction}

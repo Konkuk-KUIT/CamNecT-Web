@@ -38,7 +38,7 @@ export const EditHeader = ({ title, rightElement, leftAction }: EditHeaderProps)
           aria-label={leftLabel}
         >
           <Icon
-            name="cancel"
+            name={leftAction?.icon ?? "cancel"}
             style={{
               width: "clamp(24px, 7.467cqw, 28px)",
               height: "clamp(24px, 7.467cqw, 28px)",
