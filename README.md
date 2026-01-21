@@ -156,6 +156,7 @@ src/
 ┃
 ┣ mocks/ # API 개발 전 임시 데이터
 ┃ ┣ activities.ts
+┃ ┗ ...
 ┃
 ┣ components/ # 공통 UI 컴포넌트
 ┃ ┣ Button.tsx
@@ -173,6 +174,11 @@ src/
 ┃ ┣ community/ # 커뮤니티
 ┃ ┣ alumni/ # 동문찾기 / 동문프로필
 ┃ ┣ mypage/ # 마이페이지
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ hooks/ # 페이지 내부 훅 폴더
+┃ ┃ ┣ MypagePage.tsx # 마이페이지 메인 화면
+┃ ┃ ┣ MypageEditPlage.tsx # 마이페이지 수정 화면
+┃ ┃ ┣ MypageFollowerPage.tsx # 팔로워 / 팔로잉 화면
 ┃ ┣ portfolio/ # 포트폴리오 편집
 ┃ ┗ activity/ # 대외활동 / 팀원모집
 ┃
