@@ -42,7 +42,6 @@ export const SignUpPage = () => {
         <LoginHeader onBack={goBack} />
       }
     >
-      <div>
         {step === 1 && <TermsStep onNext = {() => goToStep(2)} />}
         {step === 2 && <UserInfoStep onNext = {() => goToStep(3)} />}
         {step === 3 && <EmailVerificationStep onNext = {() => goToStep(4)} />}
@@ -51,8 +50,6 @@ export const SignUpPage = () => {
         {step === 6 && <InterestsStep onNext = {() => goToStep(7)} />}
         {step === 7 && <SchoolStandByStep onNext = {() => goToStep(8)} />}
         {step === 8 && <SchoolCompletion/>}
-
-      </div>
     
     </HeaderLayout>
   );
