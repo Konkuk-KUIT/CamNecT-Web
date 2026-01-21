@@ -5,6 +5,7 @@ interface SingleInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   helperText?: string;
+  successMessage?: string;
 }
 
 /**
@@ -14,7 +15,7 @@ interface SingleInputProps extends InputHTMLAttributes<HTMLInputElement> {
  * - forwardRef : props로 받은 ref를 실제 input태그에 주입
  */
 const SingleInput = forwardRef<HTMLInputElement, SingleInputProps>(
-  ({ label, error, helperText, className = '', type = 'text', ...props }, ref) => {
+  ({ label, error, helperText, successMessage, className = '', type = 'text', ...props }, ref) => {
     return (
       <div className={`w-full flex flex-col gap-[8px] ${className}`}>
         {/* 라벨 (optional) */}
@@ -42,10 +43,14 @@ const SingleInput = forwardRef<HTMLInputElement, SingleInputProps>(
           />
         </div>
 
-        {/* 에러 또는 도움말 메시지 */}
+        {/* 에러 > 성공 메시지 > 도움말 메시지 */}
         {error ? (
           <p className="text-r-12 text-red-500 tracking-[-0.24px] font-normal pl-[2px]">
             *{error}
+          </p>
+        ) : successMessage ? (
+          <p className="text-r-12 text-green-500 tracking-[-0.24px] font-normal pl-[2px]">
+            *{successMessage}
           </p>
         ) : helperText ? (
           <p className="text-r-12 text-gray-600 tracking-[-0.24px] font-normal pl-[2px]">
