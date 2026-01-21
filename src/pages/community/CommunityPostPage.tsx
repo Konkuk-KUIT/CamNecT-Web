@@ -1,15 +1,25 @@
-import { Fragment, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
+import Toast from '../../components/Toast';
 import BottomSheetModalPost from '../../components/BottomSheetModal/BottomSheetModal-post';
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { communityCommentList, communityPostData, type CommentItem } from './data';
+import {
+  communityCommentList,
+  communityPostData,
+  communityPostSamples,
+  infoPosts,
+  questionPosts,
+  type CommentItem,
+  type CommunityPostDetail,
+} from './data';
 
 const CommunityPostPage = () => {
+  const { postId } = useParams();
   const navigate = useNavigate();
   const currentUserName = '박원빈';
   const [isOptionOpen, setIsOptionOpen] = useState(false);
@@ -21,20 +31,76 @@ const CommunityPostPage = () => {
   const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
   const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [isToastFading, setIsToastFading] = useState(false);
 
-  const isQuestionPost = communityPostData.boardType === '질문';
-  const isPostMine = communityPostData.author.name === currentUserName;
-  const isAdopted = communityPostData.isAdopted;
+  const selectedPost = useMemo<CommunityPostDetail>(() => {
+    if (!postId) return communityPostData;
+    if (communityPostData.id === postId) return communityPostData;
+
+    const infoMatch = infoPosts.find((post) => post.id === postId);
+    if (infoMatch) {
+      const post = {
+        id: infoMatch.id,
+        boardType: '정보',
+        title: infoMatch.title,
+        likes: infoMatch.likes,
+        comments: infoMatch.comments,
+        saveCount: infoMatch.saveCount,
+        isAdopted: false,
+        createdAt: infoMatch.createdAt,
+        author: infoMatch.author,
+        content: infoMatch.content,
+        categories: infoMatch.categories,
+        postImages: infoMatch.postImageUrl ? [infoMatch.postImageUrl] : undefined,
+      };
+      return post;
+    }
+
+    const questionMatch = questionPosts.find((post) => post.id === postId);
+    if (questionMatch) {
+      const post = {
+        id: questionMatch.id,
+        boardType: '질문',
+        title: questionMatch.title,
+        likes: questionMatch.likes,
+        comments: questionMatch.answers,
+        saveCount: questionMatch.saveCount,
+        isAdopted: questionMatch.isAdopted,
+        adoptedCommentId: questionMatch.isAdopted ? communityCommentList[0]?.id : undefined,
+        createdAt: questionMatch.createdAt,
+        author: questionMatch.author,
+        content: questionMatch.content,
+        categories: questionMatch.categories,
+      };
+      return post;
+    }
+
+    const sampleMatch = communityPostSamples.find((post) => post.id === postId);
+    if (sampleMatch) {
+      return {
+        ...sampleMatch,
+        adoptedCommentId:
+          sampleMatch.isAdopted ? sampleMatch.adoptedCommentId ?? communityCommentList[0]?.id : undefined,
+      };
+    }
+
+    return communityPostData;
+  }, [postId]);
+
+  const isQuestionPost = selectedPost.boardType === '질문';
+  const isPostMine = selectedPost.author.name === currentUserName;
+  const isAdopted = selectedPost.isAdopted;
   const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
 
   const sortedComments =
-    isQuestionPost && isAdopted && communityPostData.adoptedCommentId
+    isQuestionPost && isAdopted && selectedPost.adoptedCommentId
       ? [
           ...communityCommentList.filter(
-            (comment) => comment.id === communityPostData.adoptedCommentId,
+            (comment) => comment.id === selectedPost.adoptedCommentId,
           ),
           ...communityCommentList.filter(
-            (comment) => comment.id !== communityPostData.adoptedCommentId,
+            (comment) => comment.id !== selectedPost.adoptedCommentId,
           ),
         ]
       : communityCommentList;
@@ -52,7 +118,7 @@ const CommunityPostPage = () => {
   };
 
   const handleOpenPostOptions = () => {
-    setSelectedIsMine(communityPostData.author.name === currentUserName);
+    setSelectedIsMine(selectedPost.author.name === currentUserName);
     setSelectedTarget('post');
     setSelectedCommentId(null);
     setIsOptionOpen(true);
@@ -65,12 +131,49 @@ const CommunityPostPage = () => {
     setIsAdoptPopupOpen(false);
   };
 
-  const handleOptionItemClick = (
+  useEffect(() => {
+    if (!isToastOpen) return;
+    const fadeTimer = window.setTimeout(() => setIsToastFading(true), 1500);
+    const closeTimer = window.setTimeout(() => {
+      setIsToastFading(false);
+      setIsToastOpen(false);
+    }, 3500);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(closeTimer);
+    };
+  }, [isToastOpen]);
+
+  const copyPostUrl = async () => {
+    const postUrl = `${window.location.origin}/community/post/${selectedPost.id}`;
+    try {
+      await navigator.clipboard.writeText(postUrl);
+      setIsToastFading(false);
+      setIsToastOpen(true);
+      return;
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = postUrl;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setIsToastFading(false);
+      setIsToastOpen(true);
+    }
+  };
+
+  const handleOptionItemClick = async (
     item: { label: string },
     target: 'post' | 'comment',
   ) => {
     const isEditOrDelete = item.label.includes('수정') || item.label.includes('삭제');
     if (!isEditOrDelete) {
+      if (item.label.includes('URL')) {
+        await copyPostUrl();
+      }
       setIsOptionOpen(false);
       return;
     }
@@ -86,7 +189,7 @@ const CommunityPostPage = () => {
       isQuestionPost &&
       isAdopted &&
       selectedIsMine &&
-      selectedCommentId === communityPostData.adoptedCommentId
+      selectedCommentId === selectedPost.adoptedCommentId
     ) {
       setIsAdoptedCommentPopupOpen(true);
       setIsOptionOpen(false);
@@ -94,7 +197,7 @@ const CommunityPostPage = () => {
     }
 
     if (target === 'post' && item.label.includes('수정') && selectedIsMine) {
-      navigate(`/community/edit/${communityPostData.id}`);
+      navigate(`/community/edit/${selectedPost.id}`);
       setIsOptionOpen(false);
       return;
     }
@@ -111,7 +214,7 @@ const CommunityPostPage = () => {
   const renderComment = (comment: CommentItem, isReply = false) => {
     if (isQuestionPost && isReply) return null;
     const isAdoptedComment =
-      isQuestionPost && isAdopted && communityPostData.adoptedCommentId === comment.id;
+      isQuestionPost && isAdopted && selectedPost.adoptedCommentId === comment.id;
     return (
       <Fragment key={comment.id}>
         <div
@@ -213,26 +316,26 @@ const CommunityPostPage = () => {
                 </div>
               ) : (
                 <div className='text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'>
-                  {communityPostData.boardType} 게시판 &gt;
+                  {selectedPost.boardType} 게시판 &gt;
                 </div>
               )}
               <div className='flex flex-col gap-[13px]'>
                 <div className='text-[24px] font-bold leading-[130%] text-black'>
-                  {communityPostData.title}
+                  {selectedPost.title}
                 </div>
                 <div className='flex flex-wrap items-center gap-[10px] text-[12px] text-[var(--ColorGray3,#646464)]'>
                   <div className='flex items-center gap-[5px]'>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='like' className='h-[14px] w-[14px]' />
-                      <span>{communityPostData.likes}</span>
+                      <span>{selectedPost.likes}</span>
                     </div>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='comment' className='h-[14px] w-[14px]' />
-                      <span>{communityPostData.comments}</span>
+                      <span>{selectedPost.comments}</span>
                     </div>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>
-                    {communityPostData.createdAt}
+                    {selectedPost.createdAt}
                   </span>
                 </div>
               </div>
@@ -240,10 +343,10 @@ const CommunityPostPage = () => {
 
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
               <div className='flex items-center gap-[10px]'>
-                {communityPostData.author.profileImageUrl ? (
+                {selectedPost.author.profileImageUrl ? (
                   <img
-                    src={communityPostData.author.profileImageUrl}
-                    alt={`${communityPostData.author.name} 프로필`}
+                    src={selectedPost.author.profileImageUrl}
+                    alt={`${selectedPost.author.name} 프로필`}
                     className='h-[32px] w-[32px] rounded-full object-cover'
                   />
                 ) : (
@@ -251,10 +354,10 @@ const CommunityPostPage = () => {
                 )}
                 <div className='flex flex-col gap-[4px]'>
                   <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
-                    {communityPostData.author.name}
+                    {selectedPost.author.name}
                   </div>
                   <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {communityPostData.author.major} {communityPostData.author.studentId}학번
+                    {selectedPost.author.major} {selectedPost.author.studentId}학번
                   </div>
                 </div>
               </div>
@@ -268,13 +371,13 @@ const CommunityPostPage = () => {
 
             <div className='flex flex-col gap-[20px]'>
               <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
-                {communityPostData.content}
+                {selectedPost.content}
               </div>
-              {communityPostData.postImages && communityPostData.postImages.length > 0 ? (
+              {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
                 <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
                   <div className='flex w-max gap-[5px] pr-[20px]'>
-                    {communityPostData.postImages.map((imageUrl, index) => {
-                      const imageKey = `${communityPostData.id}-image-${index + 1}`;
+                    {selectedPost.postImages.map((imageUrl, index) => {
+                      const imageKey = `${selectedPost.id}-image-${index + 1}`;
                       if (failedImages[imageKey]) {
                         return (
                           <div
@@ -288,7 +391,7 @@ const CommunityPostPage = () => {
                         <img
                           key={imageKey}
                           src={imageUrl}
-                          alt={`${communityPostData.title} 이미지 ${index + 1}`}
+                          alt={`${selectedPost.title} 이미지 ${index + 1}`}
                           className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
                           onError={() =>
                             setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
@@ -300,7 +403,7 @@ const CommunityPostPage = () => {
                 </div>
               ) : null}
               <div className='flex flex-wrap gap-[5px]'>
-                {communityPostData.categories.map((category) => (
+                {selectedPost.categories.map((category) => (
                   <Category key={category} label={category} />
                 ))}
               </div>
@@ -317,7 +420,7 @@ const CommunityPostPage = () => {
           </section>
         </div>
       </main>
-      <BottomChat likeCount={communityPostData.likes} />
+      <BottomChat likeCount={selectedPost.likes} />
       <BottomSheetModalPost
         isOpen={isOptionOpen}
         onClose={() => setIsOptionOpen(false)}
@@ -361,6 +464,11 @@ const CommunityPostPage = () => {
           setIsDeletePopupOpen(false);
         }}
         onRightClick={() => setIsDeletePopupOpen(false)}
+      />
+      <Toast
+        isOpen={isToastOpen}
+        isFading={isToastFading}
+        message='URL 복사가 완료되었습니다'
       />
     </HeaderLayout>
   );

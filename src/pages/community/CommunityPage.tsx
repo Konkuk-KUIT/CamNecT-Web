@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
@@ -15,7 +15,10 @@ const tabItems: TabItem[] = [
 ];
 
 export const CommunityPage = () => {
-  const [activeTab, setActiveTab] = useState<string>(tabItems[0].id);
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const stored = sessionStorage.getItem('communityActiveTab');
+    return stored ?? tabItems[0].id;
+  });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -66,6 +69,10 @@ export const CommunityPage = () => {
       );
     });
   }, [normalizedQuery]);
+
+  useEffect(() => {
+    sessionStorage.setItem('communityActiveTab', activeTab);
+  }, [activeTab]);
 
   // 현재 탭에 맞는 화면 반환
   const renderTab = () => {

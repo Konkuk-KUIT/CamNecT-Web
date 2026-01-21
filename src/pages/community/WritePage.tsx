@@ -7,7 +7,13 @@ import BoardTypeToggle from './components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import FilterModal from '../../components/FilterModal';
 import useCommunityFilters from '../../hooks/useCommunityFilters';
-import { communityPostData } from './data';
+import {
+    communityPostData,
+    communityPostSamples,
+    infoPosts,
+    questionPosts,
+    type CommunityPostDetail,
+} from './data';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -84,6 +90,51 @@ export const WritePage = () => {
         Boolean(boardType) ||
         activeFilters.length > 0;
 
+    const editPost = useMemo<CommunityPostDetail | null>(() => {
+        if (!postId) return null;
+        if (communityPostData.id === postId) return communityPostData;
+
+        const sampleMatch = communityPostSamples.find((post) => post.id === postId);
+        if (sampleMatch) return sampleMatch;
+
+        const infoMatch = infoPosts.find((post) => post.id === postId);
+        if (infoMatch) {
+            return {
+                id: infoMatch.id,
+                boardType: '정보',
+                title: infoMatch.title,
+                likes: infoMatch.likes,
+                comments: infoMatch.comments,
+                saveCount: infoMatch.saveCount,
+                isAdopted: false,
+                createdAt: infoMatch.createdAt,
+                author: infoMatch.author,
+                content: infoMatch.content,
+                categories: infoMatch.categories,
+                postImages: infoMatch.postImageUrl ? [infoMatch.postImageUrl] : undefined,
+            };
+        }
+
+        const questionMatch = questionPosts.find((post) => post.id === postId);
+        if (questionMatch) {
+            return {
+                id: questionMatch.id,
+                boardType: '질문',
+                title: questionMatch.title,
+                likes: questionMatch.likes,
+                comments: questionMatch.answers,
+                saveCount: questionMatch.saveCount,
+                isAdopted: questionMatch.isAdopted,
+                createdAt: questionMatch.createdAt,
+                author: questionMatch.author,
+                content: questionMatch.content,
+                categories: questionMatch.categories,
+            };
+        }
+
+        return null;
+    }, [postId]);
+
     // 모바일 키보드 높이에 맞춰 하단 사진 영역 위치 업데이트
     useEffect(() => {
         const viewport = window.visualViewport;
@@ -122,21 +173,23 @@ export const WritePage = () => {
     }, []);
 
     useEffect(() => {
-        if (!isEditMode || !postId || postId !== communityPostData.id) return;
-        setBoardType(communityPostData.boardType as BoardType);
-        setDraftBoardType(communityPostData.boardType as BoardType);
-        setTitle(communityPostData.title);
-        setContent(communityPostData.content);
-        setFilters(null, communityPostData.categories);
-        if (communityPostData.postImages && communityPostData.postImages.length > 0) {
+        if (!isEditMode || !editPost) return;
+        setBoardType(editPost.boardType as BoardType);
+        setDraftBoardType(editPost.boardType as BoardType);
+        setTitle(editPost.title);
+        setContent(editPost.content);
+        setFilters(null, editPost.categories);
+        if (editPost.postImages && editPost.postImages.length > 0) {
             setPhotoPreviews(
-                communityPostData.postImages.map((url, index) => ({
-                    id: `edit-${communityPostData.id}-${index}`,
+                editPost.postImages.map((url, index) => ({
+                    id: `edit-${editPost.id}-${index}`,
                     url,
                 })),
             );
+            return;
         }
-    }, [isEditMode, postId, setFilters]);
+        setPhotoPreviews([]);
+    }, [isEditMode, editPost, setFilters]);
 
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
     const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {

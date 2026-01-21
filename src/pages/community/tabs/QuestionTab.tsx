@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import BottomSheetModal from '../../../components/BottomSheetModal/BottomSheetModal';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
@@ -89,50 +90,50 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 질문글 리스트 API 연결 */}
         {sortedPosts.map((post) => (
-          <article
-            key={post.id}
-            className='flex flex-col'
-            style={{
-              gap: '10px',
-              paddingBottom: '10px',
-              borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
-            }}
-          >
-            {/* TODO: 질문 상세 라우터 연결 (카드 클릭) */}
-            <div className='flex flex-wrap items-center gap-[5px]'>
-              <span
-                className={`inline-flex h-[22px] items-center justify-center rounded-[5px] border px-[10px] text-r-12 ${
-                  post.isAdopted
-                    ? 'border-[var(--ColorGray2,#A1A1A1)] text-[var(--ColorGray2,#A1A1A1)]'
-                    : 'border-[var(--ColorMain,#00C56C)] text-[var(--ColorMain,#00C56C)]'
-                }`}
-              >
-                {post.isAdopted ? '채택 완료' : '채택 전'}
-              </span>
-              {post.categories.map((category) => (
-                <Category key={category} label={category} className='px-[6px]' />
-              ))}
-            </div>
-
-            <div className='flex flex-col' style={{ gap: '7px' }}>
-              <div className='flex items-center gap-[6px]'>
-                <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
-                <span className='text-r-12 text-gray-750'>
-                  · {post.author.major} {post.author.studentId}학번
+          <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
+            <article
+              className='flex flex-col'
+              style={{
+                gap: '10px',
+                paddingBottom: '10px',
+                borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
+              }}
+            >
+              <div className='flex flex-wrap items-center gap-[5px]'>
+                <span
+                  className={`inline-flex h-[22px] items-center justify-center rounded-[5px] border px-[10px] text-r-12 ${
+                    post.isAdopted
+                      ? 'border-[var(--ColorGray2,#A1A1A1)] text-[var(--ColorGray2,#A1A1A1)]'
+                      : 'border-[var(--ColorMain,#00C56C)] text-[var(--ColorMain,#00C56C)]'
+                  }`}
+                >
+                  {post.isAdopted ? '채택 완료' : '채택 전'}
                 </span>
+                {post.categories.map((category) => (
+                  <Category key={category} label={category} className='px-[6px]' />
+                ))}
               </div>
 
-              <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
+              <div className='flex flex-col' style={{ gap: '7px' }}>
+                <div className='flex items-center gap-[6px]'>
+                  <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
+                  <span className='text-r-12 text-gray-750'>
+                    · {post.author.major} {post.author.studentId}학번
+                  </span>
+                </div>
 
-              <div className='line-clamp-2 text-r-16 text-gray-750'>{post.content}</div>
+                <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-              <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
-                <span>답변 {post.answers}</span>
-                <span className='h-[14px] w-0 border-l border-[var(--ColorGray2,#A1A1A1)]' aria-hidden />
-                <span>{formatTimeAgo(post.createdAt)}</span>
+                <div className='line-clamp-2 text-r-16 text-gray-750'>{post.content}</div>
+
+                <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
+                  <span>답변 {post.answers}</span>
+                  <span className='h-[14px] w-0 border-l border-[var(--ColorGray2,#A1A1A1)]' aria-hidden />
+                  <span>{formatTimeAgo(post.createdAt)}</span>
+                </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </Link>
         ))}
       </div>
 
