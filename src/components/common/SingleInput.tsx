@@ -11,7 +11,7 @@ interface SingleInputProps extends InputHTMLAttributes<HTMLInputElement> {
  * SingleInput: 한 줄 입력을 위한 공통 컴포넌트
  * - 디자인 일관성 유지 (Border, Radius, Padding 등)
  * - 에러 메시지 자동 표시
- * - react-hook-form과 호환되도록 forwardRef 사용
+ * - forwardRef : props로 받은 ref를 실제 input태그에 주입
  */
 const SingleInput = forwardRef<HTMLInputElement, SingleInputProps>(
   ({ label, error, helperText, className = '', type = 'text', ...props }, ref) => {
