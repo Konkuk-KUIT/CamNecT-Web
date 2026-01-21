@@ -160,22 +160,33 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
         }
     }, [newPosition]);
 
+    const handleModalClose = currentView === 'list' ? onClose : () => setCurrentView('list');
+    const currentHasChanges = currentView === 'list' ? hasListChanges : hasFormChanges;
+
+    useModalHistory(
+        handleModalClose,
+        currentHasChanges,
+        () => setShowWarning(true)
+    )
+
+    const handleFormClose = () => {
+        if (hasFormChanges) {
+            setShowWarning(true);
+        } else {
+            setCurrentView('list');
+        }
+    };
+    
+    const handleListClose = () => {
+        if (hasListChanges) {
+            setShowWarning(true);
+        } else {
+            onClose();
+        }
+    };
+
     //경력 리스트 화면
     if (currentView === 'list') {
-        useModalHistory(
-            onClose,
-            hasListChanges,
-            () => setShowWarning(true)
-        );
-
-        // X 버튼 클릭 핸들러
-        const handleListClose = () => {
-            if (hasListChanges) {
-                setShowWarning(true);
-            } else {
-                onClose();
-            }
-        };
         return (
             <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
                 <div className="w-full max-w-[430px] h-full bg-white flex flex-col"> 
@@ -307,19 +318,6 @@ export default function CareerModal({ careers, initialShowPrivate, onClose, onSa
         );
     }
 
-    useModalHistory(
-        () => setCurrentView('list'),
-        hasFormChanges,
-        () => setShowWarning(true)
-    )
-
-    const handleFormClose = () => {
-        if (hasFormChanges) {
-            setShowWarning(true);
-        } else {
-            setCurrentView('list');
-        }
-    };
     // 추가/수정 화면
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
