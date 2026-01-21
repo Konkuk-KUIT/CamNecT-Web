@@ -1,20 +1,16 @@
-import { useState } from 'react';
 import type { ChangeEvent, InputHTMLAttributes } from 'react';
+import { useState } from 'react';
 
-type Size = number | string;
+// 약관 동의 페이지에서의 체크박스 토글 사이즈 
+type Size = 24 | 30;
 
 type CheckBoxProps = {
-  width?: Size;
-  height?: Size;
+  size?: Size;
   className?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>;
 
-const toCssSize = (value?: Size) =>
-  value === undefined ? undefined : typeof value === 'number' ? `${value}px` : value;
-
 const CheckBoxToggle = ({
-  width = 24,
-  height = 24,
+  size = 24,
   className = '',
   style,
   checked,
@@ -32,8 +28,8 @@ const CheckBoxToggle = ({
   };
 
   const dimensionStyle = {
-    width: toCssSize(width),
-    height: toCssSize(height),
+    width: `${size}px`,
+    height: `${size}px`,
   };
 
   return (
@@ -49,16 +45,26 @@ const CheckBoxToggle = ({
         onChange={handleChange}
         {...props}
       />
-      {isOn ? (
-        <svg width="17" height="15" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0.75 8.25L6.75 14.25L15.75 0.75" stroke="#00C56C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-
+      {size === 30 ? (
+        isOn ? (
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.625 15.9375L13.125 23.4375L24.375 6.5625" stroke="#00C56C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ) : (
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.625 15.9375L13.125 23.4375L24.375 6.5625" stroke="#A1A1A1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )
       ) : (
-        <svg width="17" height="15" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0.75 7.97222L6.75 13.75L15.75 0.75" stroke="#A1A1A1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-
+        isOn ? (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.5 12.75L10.5 18.75L19.5 5.25" stroke="#00C56C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.5 12.75L10.5 18.75L19.5 5.25" stroke="#A1A1A1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )
       )}
     </label>
   );
