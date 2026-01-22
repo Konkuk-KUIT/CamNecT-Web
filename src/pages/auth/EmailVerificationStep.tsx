@@ -74,7 +74,6 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     });
 
     const onSubmit = (data : EmailFormData) => {
-        console.log("입력된 데이터 : ", data);
         setEmail(data.email);
     };
     

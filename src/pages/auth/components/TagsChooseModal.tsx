@@ -45,6 +45,7 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                                 {selectedTags.length !== 0 && (
                                     selectedTags.map(tag => (
                                         <button
+                                            type="button"
                                             key={tag}
                                             onClick={() => onToggle(tag)}
                                             className="h-[30px] flex justify-center items-center gap-[3px] px-[15px] py-[5px] rounded-[5px] border border-primary bg-green-50 text-primary text-m-14-hn"
@@ -100,6 +101,7 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                                                     <div className="flex flex-wrap gap-[7px]">
                                                         {category.tags.map(tag => (
                                                             <button
+                                                                type="button"
                                                                 key={tag.id}
                                                                 onClick={() => onToggle(tag.name)}
                                                                 className={`h-[30px] px-[15px] py-[5px] rounded-[5px] border ${
