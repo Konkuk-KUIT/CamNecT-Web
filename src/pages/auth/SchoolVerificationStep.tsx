@@ -60,7 +60,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 학교를 인증해주세요!
             </h1>
 
-            <h2 className="pt-[10px] text-m-14 text-gray-600 tracking-[-0.56px] leading-[140%]">
+            <h2 className="pt-[10px] text-m-14 text-gray-750 tracking-[-0.56px] leading-[140%]">
                 학생증, 재학증명서 또는 등록금 납부서를 첨부해주세요<br/>
                 인증에 사용되며 인증완료후에 폐기됩니다
             </h2>

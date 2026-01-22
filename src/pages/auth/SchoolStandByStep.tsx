@@ -1,6 +1,8 @@
+import ButtonWhite from "../../components/ButtonWhite";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
 
+// todo 앱 설치 시 PWA 설치 동작
 export const SchoolStandByStep = () => {
     const navigate = useNavigate();
 
@@ -12,12 +14,17 @@ export const SchoolStandByStep = () => {
             
             <h2 className="mt-[15px] text-m-16 text-gray-650 tracking-[-0.56px] leading-[140%]">
                 인증 진행까지 영업일 기준 3~5일 정도<br/>
-                소요될 수 있습니다
+                소요될 수 있습니다<br />
+            </h2>
+
+            <h2 className="mt-[10px] text-m-16 text-gray-650 tracking-[-0.56px] leading-[140%]">
+                완료 알림은 인증한 이메일로 발송됩니다
             </h2>
             
                 <div className="flex-1" />
                 
-                <div className="absolute bottom-[60px] flex-none relative z-10 w-full flex justify-center">
+                <div className="absolute bottom-[60px] flex-none relative z-10 w-full flex flex-col items-center gap-[10px]">
+                    <ButtonWhite label = "앱 설치"/>
                     <Button 
                         label="확인" 
                         type="button"

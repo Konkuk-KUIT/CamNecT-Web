@@ -35,23 +35,27 @@ export const SignUpPage = () => {
     }
   }
 
-
   // todo 주소창에 한번에 쳐서 갔을때 못가도록 방어
+  // todo 인증 거부 화면은 추후에 생각 
   return (
-    <HeaderLayout
-      headerSlot={
-        <LoginHeader onBack={goBack} />
-      }
-    >
-        {step === 1 && <TermsStep onNext = {() => goToStep(2)} />}
-        {step === 2 && <UserInfoStep onNext = {() => goToStep(3)} />}
-        {step === 3 && <EmailVerificationStep onNext = {() => goToStep(4)} />}
-        {step === 4 && <SchoolVerificationStep onNext = {() => goToStep(5)} />}
-        {step === 5 && <ProfileStep onNext = {() => goToStep(6)} />}
-        {step === 6 && <InterestsStep onNext = {() => goToStep(7)} />}
-        {step === 7 && <SchoolStandByStep/>}
-        {step === 8 && <SchoolCompletion/>}
-    
-    </HeaderLayout>
+    <>
+      {step < 8 ? (
+        <HeaderLayout
+          headerSlot={
+            <LoginHeader onBack={goBack} />
+          }
+        >
+            {step === 1 && <TermsStep onNext = {() => goToStep(2)} />}
+            {step === 2 && <UserInfoStep onNext = {() => goToStep(3)} />}
+            {step === 3 && <EmailVerificationStep onNext = {() => goToStep(4)} />}
+            {step === 4 && <SchoolVerificationStep onNext = {() => goToStep(5)} />}
+            {step === 5 && <ProfileStep onNext = {() => goToStep(6)} />}
+            {step === 6 && <InterestsStep onNext = {() => goToStep(7)} />}
+            {step === 7 && <SchoolStandByStep/>}
+        </HeaderLayout>
+      ) : (
+        <SchoolCompletion />
+      )}
+    </>
   );
 };
