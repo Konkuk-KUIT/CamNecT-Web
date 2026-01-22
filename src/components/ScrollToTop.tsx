@@ -4,11 +4,15 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export function ScrollToTop() {
-    const { pathname } = useLocation();
+    const location = useLocation();
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [pathname]);
+        const timeoutId = setTimeout(() => {
+            window.scrollTo(0,0);
+        }, 0)
+
+        return () => clearTimeout(timeoutId)
+    }, [location.pathname, location.key]);
 
     return null;
 }
