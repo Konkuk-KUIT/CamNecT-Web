@@ -11,16 +11,27 @@ interface ProfileStepProps {
 }
 
 export const ProfileStep = ({ onNext }: ProfileStepProps) => {
-  const [introduction, setIntroduction] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
-
-  const { setProfileImage, setSelfIntroduction } = useSignupStore(
+  const { storedIntroduction, storedProfileImage, setProfileImage, setSelfIntroduction } = useSignupStore(
     useShallow((state) => ({
+      storedIntroduction: state.selfIntroduction,
+      storedProfileImage: state.profileImage,
       setProfileImage: state.setProfileImage,
       setSelfIntroduction: state.setSelfIntroduction,
     }))
   );
+
+  const [introduction, setIntroduction] = useState(storedIntroduction);
+  const [selectedFile, setSelectedFile] = useState<File | null>(storedProfileImage);
+  const [showPreview, setShowPreview] = useState(!!storedProfileImage);
+
+  // 상태 변경 시 전역 스토어 동기화
+  useEffect(() => {
+    setSelfIntroduction(introduction);
+  }, [introduction, setSelfIntroduction]);
+
+  useEffect(() => {
+    setProfileImage(selectedFile);
+  }, [selectedFile, setProfileImage]);
 
   // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
   const previewUrl = useMemo(() => {
@@ -49,9 +60,6 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
 
   // 다음 버튼 클릭
   const handleNext = () => {
-    // zustand store에 저장
-    setSelfIntroduction(introduction);
-    setProfileImage(selectedFile);
     onNext();
   };
 
