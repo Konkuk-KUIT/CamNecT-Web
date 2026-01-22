@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Button from "../../components/Button";
-import Icon from "../../components/Icon";
 import ButtonWhite from "../../components/ButtonWhite";
+import Icon from "../../components/Icon";
 
 interface SchoolVerificationStepProps {
     onNext: () => void;
@@ -10,18 +10,31 @@ interface SchoolVerificationStepProps {
 // 학교 인증 자료 제출 화면
 export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // selectedFile 변경 시 previewUrl 생성 
+    // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
+    const previewUrl = useMemo(() => {
+        return selectedFile ? URL.createObjectURL(selectedFile) : null;
+    }, [selectedFile]);
+
+    // URL cleanup (메모리 누수 방지)
+    useEffect(() => {
+
+        // cleanup : 언마운트 or 의존성 변경 시 실행
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
 
     // 파일 첨부
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-
         if (file) {
             setSelectedFile(file);
-            // 모든 파일 타입에 대해 URL 생성 (이미지 + PDF)
-            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
@@ -32,8 +45,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
 
     // 첨부파일 삭제
     const handleRemoveFile = () => {
-        setSelectedFile(null);
-        setPreviewUrl(null);
+        setSelectedFile(null);  // previewUrl은 자동으로 null
         setShowPreview(false);
     };
 

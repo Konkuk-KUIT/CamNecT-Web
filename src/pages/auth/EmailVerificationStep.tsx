@@ -108,6 +108,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                         <SmallButton 
                             onClick={() => {
                                 // TODO: 이메일 인증 API 연동 + 성공 시 완료 팝업
+                                // TODO: 불일치 시 다시 인증버튼 활성화
                                 setIsEmailVerificated(true); // 인증번호 일치하면 설정
                             }}
                             label="인증하기" 
