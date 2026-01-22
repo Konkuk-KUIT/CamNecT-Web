@@ -102,7 +102,7 @@ export const LoginPage = () => {
         <Divider/>
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">비밀번호 찾기</button>
         <Divider/>
-        <button className="text-gray-650 text-r-12 tracking-[-0.24px]">회원가입</button>
+        <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
       {/* todo 추후 소셜 로그인 구현 */}
