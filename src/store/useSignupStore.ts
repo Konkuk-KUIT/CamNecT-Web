@@ -34,6 +34,7 @@ interface SignupStore {
     setEmailVerified: (emailVerified: boolean) => void;
     setSelfIntroduction: (selfIntroduction: string) => void;
     setProfileImage: (profileImage: File | null) => void;
+    setTags: (tags: string[]) => void;
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
@@ -76,6 +77,7 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),
     setSelfIntroduction: (selfIntroduction: string) => set({ selfIntroduction }),
     setProfileImage: (profileImage: File | null) => set({ profileImage }),
+    setTags: (tags: string[]) => set({ tags }),
 
     // API 요청 시 필요한 필드만 추출
     getSignupData: (): SignupRequestBody => {
