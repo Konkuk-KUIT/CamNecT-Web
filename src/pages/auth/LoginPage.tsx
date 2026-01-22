@@ -76,18 +76,18 @@ export const LoginPage = () => {
       <Logo className="mt-[194.54px]" />
 
       <div className="flex flex-col gap-[20px] mt-[41.39px]">
-        <input type="text" placeholder="아이디를 입력해주세요"
+        <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
           className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
           placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"/>
 
         {/* 비밀번호 입력 */}
         <div className="relative w-[335px] h-[48px]">
-          <input type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해주세요"
+          <input type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해주세요" aria-label="비밀번호"
             className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
             placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"/>
           
           <button type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword(!showPassword)} aria-label="비밀번호 표시/숨김" aria-pressed={showPassword}
               className="absolute left-[295px] top-[12px] right-[16px] bottom-[10px]"
             >
               {showPassword ? <EyeOpenIcon /> : <EyeCloedIcon />} 
