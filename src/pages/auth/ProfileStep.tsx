@@ -70,59 +70,56 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
         <p>프로필을 설정해볼까요?</p>
       </h1>
 
-      {/* 프로필 사진 업로드 */}
-      {showPreview && previewUrl ? (
-        <div className="mt-[55px] mx-auto relative w-[100px] h-[100px]">
-          <img
-            src={previewUrl}
-            alt="프로필 미리보기"
-            className="w-[100px] h-[100px] rounded-full object-cover"
-          />
-          <label
-            htmlFor="profileImage"
-            className="absolute inset-0 cursor-pointer rounded-full"
-          >
-            <span className="sr-only">프로필 사진 변경</span>
-          </label>
-          {/* 회색 원형 배경 */}
-          <input
-            type="file"
-            id="profileImage"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </div>
-      ) : (
-        <div className="mt-[55px] mx-auto relative w-[100px] h-[100px] bg-primary rounded-full">
-          <label
-            htmlFor="profileImage"
-            className="absolute inset-0 cursor-pointer"
-          >
-            <span className="sr-only">프로필 사진 업로드</span>
-          </label>
-
-          {/* 회색 원형 배경 */}
-          <div className="absolute bottom-0 right-0 w-[32px] h-[32px] bg-[#646464] rounded-full border-2 border-white flex items-center justify-center z-10">
-            {/* 카메라 아이콘 */}
-            <Icon
-              name="camera"
-              className="w-[20px] h-[20px] text-white"
+      {/* 프로필 사진 업로드 + 자기소개 영역 (나머지 공간 차지) */}
+      <div className="flex-1 overflow-y-auto w-full pt-[55px] flex flex-col items-center">
+        {showPreview && previewUrl ? (
+          <div className="mx-auto relative w-[100px] h-[100px] flex-none">
+            <img
+              src={previewUrl}
+              alt="프로필 미리보기"
+              className="w-[100px] h-[100px] rounded-full object-cover"
+            />
+            <label
+              htmlFor="profileImage"
+              className="absolute inset-0 cursor-pointer rounded-full"
+            >
+              <span className="sr-only">프로필 사진 변경</span>
+            </label>
+            <input
+              type="file"
+              id="profileImage"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
             />
           </div>
+        ) : (
+          <div className="mx-auto relative w-[100px] h-[100px] bg-primary rounded-full flex-none">
+            <label
+              htmlFor="profileImage"
+              className="absolute inset-0 cursor-pointer"
+            >
+              <span className="sr-only">프로필 사진 업로드</span>
+            </label>
 
-          <input
-            type="file"
-            id="profileImage"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </div>
-      )}
+            <div className="absolute bottom-0 right-0 w-[32px] h-[32px] bg-[#646464] rounded-full border-2 border-white flex items-center justify-center z-10">
+              <Icon
+                name="camera"
+                className="w-[20px] h-[20px] text-white"
+              />
+            </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center w-full">
-        <div className="mt-[30px] flex flex-col w-full max-w-[325px]">
+            <input
+              type="file"
+              id="profileImage"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+        )}
+
+        <div className="mt-[30px] flex flex-col w-full max-w-[325px] flex-none">
           <label className="text-m-16 tracking-[-0.4px] text-gray-750 mb-1 block">
             자기소개
           </label>
@@ -140,24 +137,23 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
             {introduction.length}/100
           </div>
         </div>
+      </div>
 
-        <div className="max-h-[140px] h-full flex-none" />
+      {/* 하단 버튼 영역 (바닥에서 60px 유지) */}
+      <div className="flex-none pt-[20px] pb-[60px] w-full flex justify-center">
+        <div className="flex items-center gap-[10px] w-full max-w-[325px]">
+          <ButtonWhite
+            label="건너뛰기"
+            onClick={onNext}
+            className="flex-1 !h-[50px] !rounded-[10px]"
+          />
 
-        <div className="flex-none pb-[60px] w-full flex justify-center">
-          <div className="flex items-center gap-[10px] w-full max-w-[325px]">
-            <ButtonWhite
-              label="건너뛰기"
-              onClick={onNext}
-              className="flex-1 !h-[50px] !rounded-[10px]"
-            />
-
-            <Button
-              disabled={!(introduction && selectedFile)}
-              label="다음"
-              onClick={handleNext}
-              className="flex-1 !h-[50px] !rounded-[10px]"
-            />
-          </div>
+          <Button
+            disabled={!(introduction && selectedFile)}
+            label="다음"
+            onClick={handleNext}
+            className="flex-1 !h-[50px] !rounded-[10px]"
+          />
         </div>
       </div>
     </div>
