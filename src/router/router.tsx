@@ -7,7 +7,9 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
 import { HomePage } from "../pages/home/HomePage";
-import { MyPage } from "../pages/my-page/MyPage";
+import { MypagePage } from "../pages/my-page/MypagePage";
+import { MypageEditPage } from "../pages/my-page/MypageEditPage";
+import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
@@ -42,6 +44,8 @@ export const router = createBrowserRouter([
                         element: <HomePage />,
                     },
                     {
+
+
                         path: "alumni",
                         element: <AlumniPage />,
                     },
@@ -55,7 +59,16 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "me",
-                        element: <MyPage />,
+                        element: <MypagePage />,
+
+                    },
+                    {
+                        path: "me/edit",
+                        element: <MypageEditPage />
+                    },
+                    {
+                        path: "me/follower",
+                        element: <FollowerPage />
                     },
                 ]
             },

@@ -60,8 +60,8 @@ const SaveToggle = ({
                         d="M16.093 3.32352C17.193 3.45152 18 4.40052 18 5.50852V21.0015L10.5 17.2515L3 21.0015V5.50852C3 4.40052 3.806 3.45152 4.907 3.32352C8.62319 2.89216 12.3768 2.89216 16.093 3.32352Z"
                         fill="none"
                         stroke="#00C56C"
-                        stroke-width="2"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
                     />
                 </svg>
             )}
