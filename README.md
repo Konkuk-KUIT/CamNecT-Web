@@ -182,6 +182,7 @@ src/
 ┃ ┣ portfolio/ # 포트폴리오 편집
 ┃ ┗ activity/ # 대외활동 / 팀원모집
 ┃
+┣ utils/ # custom utils
 ┣ hooks/ # custom hooks
 ┣ store/ # 전역 상태 (auth 등)
 ┣ types/ # TS interface 정의

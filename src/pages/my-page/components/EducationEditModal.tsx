@@ -5,6 +5,7 @@ import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from "../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
+import { generateId } from "../../../utils/uuid";
 
 interface EducationModalProps {
     educations: EducationItem[];
@@ -126,7 +127,6 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
 
     const handleSaveForm = () => {
         if (!formData.school || !formData.school.trim()) {
-            alert('학교 이름을 입력해주세요.');
             return;
         }
         
@@ -137,7 +137,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
 
         if (currentView === 'add') {
             const newEdu: EducationItem = {
-                id: crypto.randomUUID(),
+                id: generateId(),
                 ...formData as Omit<EducationItem, 'id'>
             };
             setListEducations([...listEducations, newEdu]);

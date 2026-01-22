@@ -5,6 +5,7 @@ import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from "../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
+import { generateId } from "../../../utils/uuid";
 
 interface CertificateModalProps {
     certificates: CertificateItem[];
@@ -95,7 +96,6 @@ export default function CertificateModal({ certificates, initialShowPublic, onCl
 
     const handleSaveForm = () => {
         if (!formData.name || !formData.name.trim()) {
-            alert('자격증 이름을 입력해주세요.');
             return;
         }
         
@@ -106,7 +106,7 @@ export default function CertificateModal({ certificates, initialShowPublic, onCl
 
         if (currentView === 'add') {
             const newCert: CertificateItem = {
-                id: crypto.randomUUID(),
+                id: generateId(),
                 ...formData as Omit<CertificateItem, 'id'>
             };
             setListCertificates([...listCertificates, newCert]);

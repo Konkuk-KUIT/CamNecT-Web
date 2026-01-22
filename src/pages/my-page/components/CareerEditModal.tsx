@@ -5,6 +5,7 @@ import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from "../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
+import { generateId } from "../../../utils/uuid";
 
 interface CareerModalProps {
     careers: CareerItem[];
@@ -103,7 +104,6 @@ export default function CareerModal({ careers, initialShowPublic, onClose, onSav
 
     const handleSaveForm = () => {
         if (!formData.organization || !formData.organization.trim()) {
-            alert('근무처를 입력해주세요.');
             return;
         }
         
@@ -114,7 +114,7 @@ export default function CareerModal({ careers, initialShowPublic, onClose, onSav
 
         if (currentView === 'add') {
             const newCareer: CareerItem = {
-                id: crypto.randomUUID(),
+                id: generateId(),
                 ...formData as Omit<CareerItem, 'id'>
             };
             setListCareers([...listCareers, newCareer]);
