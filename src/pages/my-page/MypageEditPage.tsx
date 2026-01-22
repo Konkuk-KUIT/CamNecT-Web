@@ -26,10 +26,17 @@ export const MypageEditPage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
     const imageFileRef = useRef<File | null>(null); //TODO: 이미지 업로드 커스텀 훅 반영
 
-    const { data, setData, hasChanges, handleSave, meDetail } = useProfileEdit(userId);
+    const { data, setData, hasChanges, meDetail } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
 
+    const [confirm, setConfirm] = useState(false);
     const [leaveOpen, setLeaveOpen] = useState(false);
+
+    const handleSave = () => {
+        if (!hasChanges) return;
+        console.log('Profile saved:', data);
+        setConfirm(true);
+    };
 
     const handleClose = () => { 
         if (hasChanges) {
@@ -68,7 +75,17 @@ export const MypageEditPage = () => {
         closeModal();
         };
 
-    if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
+    if (!meDetail) 
+        return (
+        <PopUp
+            type="error"
+            title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
+            titleSecondary='잠시 후 다시 시도해주세요'
+            isOpen={true}
+            rightButtonText='확인'
+        />
+    )
+    
 
     const { user, visibility, educations, careers, certificates, portfolios, showFollowPublic } = data;
 
@@ -94,7 +111,7 @@ export const MypageEditPage = () => {
                 }
             >
                 <div className="w-full bg-white relative border-t border-gray-150">
-                    <div ref={pageRef} className="w-full h-full bg-white overflow-y-auto overscroll-none">
+                    <div ref={pageRef} className="w-full h-full bg-white overflow-y-auto">
 
                         {/* 프로필 사진 선택 */}
                         <section className="w-full">
@@ -301,6 +318,16 @@ export const MypageEditPage = () => {
                 navigate(-1);
                 }}
                 onRightClick={() => setLeaveOpen(false)}
+            />
+            <PopUp
+                isOpen={confirm}
+                type="confirm"
+                title="프로필이 저장되었습니다!"
+                buttonText="확인"
+                onClick={() => {
+                    setConfirm(false);
+                    navigate(-1);
+                }}
             />
         </div>
     );
