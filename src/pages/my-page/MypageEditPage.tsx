@@ -24,7 +24,7 @@ export const MypageEditPage = () => {
     const navigate = useNavigate();
     const userId: string = MOCK_SESSION.meUid;
     const pageRef = useRef<HTMLDivElement>(null);
-    const imageFileRef = useRef<File | null>(null); //TODO: 이미지 업로드 커스텀 훅 반영
+    const imageFileRef = useRef<File | null>(null);
 
     const { data, setData, hasChanges, meDetail } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
@@ -34,7 +34,7 @@ export const MypageEditPage = () => {
 
     const handleSave = () => {
         if (!hasChanges) return;
-        console.log('Profile saved:', data);
+        console.log('Profile saved:', data); //TODO: 추후 삭제
         setConfirm(true);
     };
 
@@ -61,8 +61,7 @@ export const MypageEditPage = () => {
 
     const {prepareImage} = useImageUpload();
 
-    const handleImageUpload = (file: File, source: 'album' | 'camera') => {
-        console.log(`${source}에서 이미지 가져옴`); //TODO: 나중에 지우기
+    const handleImageUpload = (file: File) => {
         const result = prepareImage(file);
         if (!result) return;
         setData((prev) => ({

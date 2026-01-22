@@ -27,7 +27,7 @@ export interface EducationItem {
   school: string;
   status: EducationStatus;
   startYear: number;
-  endYear: number;
+  endYear?: number;
 }
 
 export interface CareerItem {
