@@ -49,7 +49,7 @@ export const SignUpPage = () => {
         {step === 4 && <SchoolVerificationStep onNext = {() => goToStep(5)} />}
         {step === 5 && <ProfileStep onNext = {() => goToStep(6)} />}
         {step === 6 && <InterestsStep onNext = {() => goToStep(7)} />}
-        {step === 7 && <SchoolStandByStep onNext = {() => goToStep(8)} />}
+        {step === 7 && <SchoolStandByStep/>}
         {step === 8 && <SchoolCompletion/>}
     
     </HeaderLayout>
