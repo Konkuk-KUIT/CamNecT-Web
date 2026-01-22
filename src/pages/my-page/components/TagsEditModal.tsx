@@ -36,7 +36,7 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
             if (selectedTags.length >= 5) {
                 return;
             }
-            setSelectedTags([...selectedTags, tagName]);
+            setSelectedTags([tagName, ...selectedTags]);
         }
     };
 
