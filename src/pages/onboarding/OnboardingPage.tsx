@@ -18,9 +18,13 @@ export const OnboardingPage = () => {
   }
 
   return (
-    <div className="absolute bottom-[120px] left-1/2 -translate-x-1/2 flex flex-col items-center gap-[10px]">
-      <Button label="로그인" />
-      <ButtonWhite label="회원가입" />
+    <div className="absolute bottom-[120px] left-0 right-0 px-6 flex flex-col items-center gap-[10px]">
+      <Button
+        className="!h-[50px]"
+        label="로그인" />
+      <ButtonWhite
+        className="!h-[50px]"
+        label="회원가입" />
     </div>
   );
 };

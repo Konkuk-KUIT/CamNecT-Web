@@ -36,6 +36,7 @@ export const SignUpPage = () => {
   }
 
 
+  // todo 주소창에 한번에 쳐서 갔을때 못가도록 방어
   return (
     <HeaderLayout
       headerSlot={

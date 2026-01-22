@@ -1,10 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import { useSignupStore } from "../../store/useSignupStore";
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
 
 interface UserInfoStepProps {
     onNext: () => void;
@@ -133,11 +133,11 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                 </div>
 
                 {/* 3. 하단 버튼 구역 (고정) */}
-                <div className="h-[40px] flex-none"></div>
-                <div className="flex-none pb-[60px] relative z-10">
+                <div className="h-[40px] flex-none" />
+                
+                <div className="flex-none pb-[60px] relative z-10 w-full flex justify-center">
                     <Button 
                         disabled={!isValid}
-                        className="w-[325px] h-[50px] mx-auto block" 
                         label="다음" 
                         type = "submit"
                     />

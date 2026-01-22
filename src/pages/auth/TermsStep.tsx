@@ -49,7 +49,7 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
             </h1>
             
             {/* 유동적 간격 (디자인 시안의 대략적인 비율 mt-[222px] 반영), 최소 20px간격은 확보 */}
-            <div className="flex-[222] min-h-[20px]"></div>
+            <div className="flex-[222] min-h-[20px]"/>
 
             {/* 약관 동의 섹션 */}
             <div className="flex-none relative z-10 w-full">
@@ -101,12 +101,11 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
             </div>
 
             {/* 하단 버튼과의 유동적 간격 */}
-            <div className="flex-[60] min-h-[40px]"></div>
+            <div className="flex-[60] min-h-[40px]"/>
 
             {/* 버튼 섹션 (하단 고정 효과) */}
-            <div className="flex-none pb-[60px] relative z-10">
+            <div className="flex-none pb-[60px] relative z-10 w-full flex justify-center">
                 <Button 
-                    className="w-[325px] h-[50px] mx-auto block" 
                     label="동의 후 계속하기" 
                     onClick={handleNextStep}
                     disabled={!allChecked}

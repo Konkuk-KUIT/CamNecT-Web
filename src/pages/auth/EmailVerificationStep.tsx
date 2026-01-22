@@ -121,10 +121,9 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
 
                 <div className="h-[40px] flex-none" />
                 
-                <div className="flex-none pb-[60px] relative z-10">
+                <div className="flex-none pb-[60px] relative z-10 w-full flex justify-center">
                         <Button 
                             disabled={!isEmailVerificated}
-                            className="w-[325px] h-[50px] mx-auto block" 
                             label="다음" 
                             onClick={onNext}
                         />

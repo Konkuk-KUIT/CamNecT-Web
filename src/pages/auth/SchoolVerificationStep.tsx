@@ -79,7 +79,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                         >
                             <Icon name="folder" />
                             <span className="text-r-16 text-gray-650">
-                                인증 파일을 첨부해 주세요(png, jpg, pdf ...)
+                                인증 파일 첨부 (png, jpg, pdf)
                             </span>
                         </label>
                         {/* hidden : input태그 가리고 label태그만 화면에 보이게 */}
