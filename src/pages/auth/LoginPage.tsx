@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../components/Button";
+import { LastSplashPage } from "../onboarding/LastSplashPage";
+import { useNavigate } from "react-router-dom";
 
 const Logo = ({ className }: { className?: string }) => {
     return (
@@ -42,10 +44,32 @@ const Divider = () => {
 
 // todo 로그인 버튼 API 연동 
 export const LoginPage = () => {
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   // const [id, setId] = useState("");
   // const [password, setPassword] = useState("");
+
+  const [showSplash, setShowSplash] = useState(false);
+
+  const handleLogin = () => {
+    setShowSplash(true);
+  }
+
+  useEffect(() => {
+
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        navigate("/home");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash, navigate]);
+
+  if (showSplash) {
+    return <LastSplashPage />;
+  }
 
   return (
     <div className="flex flex-col items-center">
@@ -71,7 +95,7 @@ export const LoginPage = () => {
         </div>
       </div>  
 
-      <Button label="로그인" className = "mt-[40px]" onClick={() => {}} />
+      <Button label="로그인" className = "mt-[40px]" onClick={handleLogin} />
       
       <div className="w-[201px] h-[17px] flex justify-between items-center mt-[18px]">
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">아이디 찾기</button>

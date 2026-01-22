@@ -8,9 +8,12 @@ export const OnboardingPage = () => {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2000);
+    
+    // 메모리 누수 방지
+    return () => clearTimeout(timer);
   }, []);
 
   if (showSplash) {
