@@ -68,7 +68,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             <p className="pt-[29px] text-m-16 text-gray-750 tracking-[-0.56px] leading-[140%]">파일첨부</p>
             
             {/* 파일 업로드 영역 */}
-            <div className="flex-1 pt-[10px]">
+            <div className="pt-[10px]">
                 {!selectedFile ? (
                     // 파일 선택 전: 업로드 영역
                     <>
@@ -94,23 +94,23 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 ) : (
                     // 파일 선택 후: 파일 정보 + 미리보기/삭제 버튼
                     <div className="p-[16px] bg-gray-50 rounded-[10px] flex items-center gap-[12px]">
-                        <Icon name="folder" />
-                        <div className="flex-1">
-                            <p className="text-r-14 text-gray-900">{selectedFile.name}</p>
+                        <Icon name="folder" className="flex-none"/>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-r-14 text-gray-900 break-all">{selectedFile.name}</p>
                             <p className="text-r-12 text-gray-500 mt-[4px]">
                                 {(selectedFile.size / 1024).toFixed(1)} KB
                             </p>
                         </div>
                         <button
                             onClick={handlePreviewClick}
-                            className="px-[12px] py-[6px] bg-primary text-white text-r-12 rounded-[5px]"
+                            className="w-[72px] flex-none px-[12px] py-[6px] bg-primary text-white text-r-12 rounded-[5px]"
                         >
                             미리보기
                         </button>
                         <button
                             onClick={handleRemoveFile}
                             disabled={isSubmitting}
-                            className="px-[12px] py-[6px] bg-gray-200 text-gray-700 text-r-12 rounded-[5px] "
+                            className="w-[48px] flex-none px-[12px] py-[6px] bg-gray-200 text-gray-700 text-r-12 rounded-[5px] "
                         >
                             삭제
                         </button>
@@ -118,8 +118,9 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 )}
             </div>
             
+            <div className="flex-1" />
+
             {/* 인증요청 / 다음 버튼 */}
-            <div className="h-[40px] flex-none" />
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
                     <ButtonWhite label = "인증 요청" onClick={handleRequestVerification} disabled={!selectedFile}/>
