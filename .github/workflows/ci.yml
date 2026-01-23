@@ -1,0 +1,41 @@
+name: FE CI Check
+
+on:
+  # 1. develop이나 main 브랜치로 PR을 날렸을 때 무조건 검사
+  pull_request:
+    branches: ["develop", "main"]
+  # 2. develop 브랜치에 코드가 push(merge)되었을 때도 검사
+  push:
+    branches: ["develop"]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 내려받기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Node.js 세팅 (버전 20으로 고정, 캐시 사용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # 3. 패키지 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. 타입스크립트 에러 검사
+      - name: Type Check
+        run: npx tsc --noEmit
+
+      # 5. 린트(문법) 검사 (ex. 사용 안 하는 변수)
+      - name: Lint Check
+        run: npm run lint
+
+      # 6. 빌드 테스트 (실제로 빌드가 되는지 확인)
+      - name: Build Test
+        run: npm run build
