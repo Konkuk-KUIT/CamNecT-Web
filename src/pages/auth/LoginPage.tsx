@@ -43,7 +43,6 @@ const Divider = () => {
 }
 
 // todo 로그인 버튼 API 연동 
-// todo width 반응형 구현 / 비밀번호 일치 X 구현 
 export const LoginPage = () => {
   const navigate = useNavigate();
 
@@ -73,10 +72,13 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center overflow-hidden">
-      <Logo className="mt-[194.54px] max-w-[300px] w-full" />
+    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center pb-[145px] overflow-hidden">
+      {/* 상단 로고 */}
+      <Logo className="mt-[194.54px] max-w-[300px] w-full flex-none" />
 
-      <div className="flex flex-col max-w-[335px] w-full gap-[20px] mt-[41.39px]">
+      <div className="flex-1" />
+
+      <div className="flex flex-col max-w-[335px] w-full gap-[20px] mb-[40px] flex-none">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
           className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
           placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"/>
@@ -94,11 +96,11 @@ export const LoginPage = () => {
               {showPassword ? <EyeOpenIcon /> : <EyeCloedIcon />} 
           </button>
         </div>
-      </div>  
+      </div>
 
-      <Button label="로그인" className = "mt-[40px]" onClick={handleLogin} />
+      <Button label="로그인" className="w-full mb-[60px] flex-none" onClick={handleLogin} />
       
-      <div className="max-w-[201px] w-full h-[17px] flex justify-between items-center mt-[18px]">
+      <div className="max-w-[201px] w-full h-[17px] flex justify-between items-center flex-none">
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">아이디 찾기</button>
         <Divider/>
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">비밀번호 찾기</button>
