@@ -155,7 +155,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                                 className="max-w-[90vw] max-h-[90dvh] rounded-[10px]"
                             />
                         ) : (
-                            // ifame : 웹 페이지 내부의 웹 페이지
+                            // iframe : 웹 페이지 내부의 웹 페이지
                             <iframe 
                                 src={previewUrl} 
                                 className="w-[90vw] h-[90dvh] max-w-[800px] max-h-[600px] rounded-[10px] bg-white"
