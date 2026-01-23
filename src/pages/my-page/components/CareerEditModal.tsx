@@ -343,7 +343,7 @@ export default function CareerModal({ careers, initialShowPublic, onClose, onSav
                 >
 
                     {/* 수정/삭제 */}
-                    <div className="w-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
+                    <div className="w-full h-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
                         <div className="flex flex-col gap-[15px]">
                             {/* 근무처 */}
                             <div className="flex flex-col gap-[10px]">

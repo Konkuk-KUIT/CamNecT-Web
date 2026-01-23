@@ -325,7 +325,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                     }
                 >
                     {/* 수정/삭제 */}
-                    <div className="w-full flex-1 overflow-y-auto px-[25px] pt-[20px] pb-[220px] border-t border-gray-150">
+                    <div className="w-full h-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
                         <div className="flex flex-col gap-[15px]">
                             {/* 학교 이름 */}
                             <div className="flex flex-col gap-[10px] relative">
