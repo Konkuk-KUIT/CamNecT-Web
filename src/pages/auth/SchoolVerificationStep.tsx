@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
+import { useSignupStore } from "../../store/useSignupStore";
 
 interface SchoolVerificationStepProps {
     onNext: () => void;
@@ -10,16 +12,26 @@ interface SchoolVerificationStepProps {
 
 // 학교 인증 자료 제출 화면
 export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [showPreview, setShowPreview] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPopUp, setShowPopUp] = useState(false);
+    const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
+
+    const { verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
+        useShallow((state) => {
+            return {
+                verificationFile: state.verificationFile,
+                setVerificationFile: state.setVerificationFile,
+                isVerificationSubmitted: state.isVerificationSubmitted,
+                setIsVerificationSubmitted: state.setIsVerificationSubmitted
+            }
+        } )
+    );
 
     // selectedFile 변경 시 previewUrl 생성 
     // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
     const previewUrl = useMemo(() => {
-        return selectedFile ? URL.createObjectURL(selectedFile) : null;
-    }, [selectedFile]);
+        return verificationFile ? URL.createObjectURL(verificationFile) : null;
+    }, [verificationFile]);
 
     // URL cleanup (메모리 누수 방지)
     useEffect(() => {
@@ -36,7 +48,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setSelectedFile(file);
+            setVerificationFile(file);
         }
     };
 
@@ -47,7 +59,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
 
     // 첨부파일 삭제
     const handleRemoveFile = () => {
-        setSelectedFile(null);  // previewUrl은 자동으로 null
+        setVerificationFile(null);
         setShowPreview(false);
     };
 
@@ -59,10 +71,15 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         setShowPopUp(false);
     };
 
+    const handleConfirmPopUpClose = () => {
+        setShowConfirmPopUp(false);
+    };
+
     const handleVerificationSubmit = () => {
         // TODO: 인증 요청 API 연동
         setShowPopUp(false);
-        setIsSubmitting(true);
+        setShowConfirmPopUp(true);
+        setIsVerificationSubmitted(true);
     };
 
     return (
@@ -80,7 +97,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             
             {/* 파일 업로드 영역 */}
             <div className="pt-[10px]">
-                {!selectedFile ? (
+                {!verificationFile ? (
                     // 파일 선택 전: 업로드 영역
                     <>
                         {/* htmlFor : file-upload값의 태그와 연결 */}
@@ -107,9 +124,9 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     <div className="p-[16px] bg-gray-50 rounded-[10px] flex items-center gap-[12px]">
                         <Icon name="folder" className="flex-none"/>
                         <div className="flex-1 min-w-0">
-                            <p className="text-r-14 text-gray-900 break-all">{selectedFile.name}</p>
+                            <p className="text-r-14 text-gray-900 break-all">{verificationFile.name}</p>
                             <p className="text-r-12 text-gray-500 mt-[4px]">
-                                {(selectedFile.size / 1024).toFixed(1)} KB
+                                {(verificationFile.size / 1024).toFixed(1)} KB
                             </p>
                         </div>
                         <button
@@ -120,7 +137,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                         </button>
                         <button
                             onClick={handleRemoveFile}
-                            disabled={isSubmitting}
+                            disabled={isVerificationSubmitted}
                             className="w-[48px] flex-none px-[12px] py-[6px] bg-gray-200 text-gray-700 text-r-12 rounded-[5px] "
                         >
                             삭제
@@ -134,15 +151,14 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             {/* 인증요청 / 다음 버튼 */}
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
-                    <ButtonWhite label = "인증 요청" onClick={handleShowPopup} disabled={(!selectedFile) || isSubmitting}/>
+                    <ButtonWhite label = "인증 요청" onClick={handleShowPopup} disabled={(!verificationFile) || isVerificationSubmitted}/>
                     <Button 
-                        disabled={!isSubmitting}
+                        disabled={!isVerificationSubmitted}
                         label="다음"
                         onClick={onNext}
                         className="mx-auto"
                     />
                 </div>
-                
             </div>
 
             {/* 인증요청 확인 팝업 */}
@@ -151,11 +167,21 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     isOpen={showPopUp}
                     type="info"
                     title="인증 파일을 제출하시겠습니까?"
-                    content="파일 제출 후 재 제출이 불가능합니다"
+                    content="파일 제출은 다시 할 수 없습니다"
                     leftButtonText="취소"
                     rightButtonText="제출"
                     onLeftClick={handlePopUpClose}
                     onRightClick={handleVerificationSubmit}
+                />
+            )}
+
+            {showConfirmPopUp && (
+                <PopUp
+                    isOpen={showConfirmPopUp}
+                    type="confirm"
+                    title="제출 완료 되었습니다"
+                    buttonText="확인"
+                    onClick={handleConfirmPopUpClose}
                 />
             )}
             
@@ -173,7 +199,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                             ✕
                         </button>
                         
-                        {selectedFile?.type.startsWith('image/') ? (
+                        {verificationFile?.type.startsWith('image/') ? (
                             <img 
                                 src={previewUrl} 
                                 alt="미리보기" 

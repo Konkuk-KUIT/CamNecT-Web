@@ -16,6 +16,8 @@ interface SignupStore {
     // todo 태그 및 소개글 
     selfIntroduction: string;
     profileImage: File | null; 
+    verificationFile: File | null;
+    isVerificationSubmitted: boolean;
     tags: string[];
 
     // UI 상태 
@@ -34,6 +36,8 @@ interface SignupStore {
     setEmailVerified: (emailVerified: boolean) => void;
     setSelfIntroduction: (selfIntroduction: string) => void;
     setProfileImage: (profileImage: File | null) => void;
+    setVerificationFile: (verificationFile: File | null) => void;
+    setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => void;
     setTags: (tags: string[]) => void;
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
@@ -63,6 +67,8 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     ...initialState,
     selfIntroduction: '',
     profileImage: null,
+    verificationFile: null,
+    isVerificationSubmitted: false,
     tags: [],
 
     // 상태 변경 함수들 구현
@@ -77,6 +83,8 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),
     setSelfIntroduction: (selfIntroduction: string) => set({ selfIntroduction }),
     setProfileImage: (profileImage: File | null) => set({ profileImage }),
+    setVerificationFile: (verificationFile: File | null) => set({ verificationFile }),
+    setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => set({ isVerificationSubmitted }),
     setTags: (tags: string[]) => set({ tags }),
 
     // API 요청 시 필요한 필드만 추출
