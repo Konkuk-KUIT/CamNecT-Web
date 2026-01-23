@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import { LastSplashPage } from "../onboarding/LastSplashPage";
-import { useNavigate } from "react-router-dom";
 
 const Logo = ({ className }: { className?: string }) => {
     return (
@@ -43,6 +43,7 @@ const Divider = () => {
 }
 
 // todo 로그인 버튼 API 연동 
+// todo width 반응형 구현 / 비밀번호 일치 X 구현 
 export const LoginPage = () => {
   const navigate = useNavigate();
 
@@ -72,23 +73,23 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <Logo className="mt-[194.54px]" />
+    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center overflow-hidden">
+      <Logo className="mt-[194.54px] max-w-[300px] w-full" />
 
-      <div className="flex flex-col gap-[20px] mt-[41.39px]">
+      <div className="flex flex-col max-w-[335px] w-full gap-[20px] mt-[41.39px]">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
-          className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
+          className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
           placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"/>
 
         {/* 비밀번호 입력 */}
-        <div className="relative w-[335px] h-[48px]">
+        <div className="relative w-full h-[48px]">
           <input type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해주세요" aria-label="비밀번호"
-            className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
+            className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
             placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"/>
           
           <button type="button"
               onClick={() => setShowPassword(!showPassword)} aria-label="비밀번호 표시/숨김" aria-pressed={showPassword}
-              className="absolute left-[295px] top-[12px] right-[16px] bottom-[10px]"
+              className="absolute right-[16px] top-1/2 -translate-y-1/2 flex items-center justify-center"
             >
               {showPassword ? <EyeOpenIcon /> : <EyeCloedIcon />} 
           </button>
@@ -97,7 +98,7 @@ export const LoginPage = () => {
 
       <Button label="로그인" className = "mt-[40px]" onClick={handleLogin} />
       
-      <div className="w-[201px] h-[17px] flex justify-between items-center mt-[18px]">
+      <div className="max-w-[201px] w-full h-[17px] flex justify-between items-center mt-[18px]">
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">아이디 찾기</button>
         <Divider/>
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">비밀번호 찾기</button>
