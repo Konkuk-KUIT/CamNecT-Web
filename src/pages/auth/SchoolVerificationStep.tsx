@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
+import PopUp from "../../components/Pop-up";
 
 interface SchoolVerificationStepProps {
     onNext: () => void;
@@ -12,6 +13,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPopUp, setShowPopUp] = useState(false);
 
     // selectedFile 변경 시 previewUrl 생성 
     // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
@@ -49,8 +51,17 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         setShowPreview(false);
     };
 
-    // TODO: 인증 요청 API 연동
-    const handleRequestVerification = () => {
+    const handleShowPopup = () => {
+        setShowPopUp(true);
+    };
+
+    const handlePopUpClose = () => {
+        setShowPopUp(false);
+    };
+
+    const handleVerificationSubmit = () => {
+        // TODO: 인증 요청 API 연동
+        setShowPopUp(false);
         setIsSubmitting(true);
     };
 
@@ -123,7 +134,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             {/* 인증요청 / 다음 버튼 */}
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
-                    <ButtonWhite label = "인증 요청" onClick={handleRequestVerification} disabled={!selectedFile}/>
+                    <ButtonWhite label = "인증 요청" onClick={handleShowPopup} disabled={(!selectedFile) || isSubmitting}/>
                     <Button 
                         disabled={!isSubmitting}
                         label="다음"
@@ -133,6 +144,20 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 </div>
                 
             </div>
+
+            {/* 인증요청 확인 팝업 */}
+            {showPopUp && (
+                <PopUp
+                    isOpen={showPopUp}
+                    type="info"
+                    title="인증 파일을 제출하시겠습니까?"
+                    content="파일 제출 후 재 제출이 불가능합니다"
+                    leftButtonText="취소"
+                    rightButtonText="제출"
+                    onLeftClick={handlePopUpClose}
+                    onRightClick={handleVerificationSubmit}
+                />
+            )}
             
             {/* 파일 미리보기 팝업 (이미지 + PDF) */}
             {showPreview && previewUrl && (
