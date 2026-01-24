@@ -1,12 +1,11 @@
-import { useState } from 'react';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import {
   notificationIconAssets,
-  notificationList,
   type NotificationItem,
   type NotificationType,
 } from './notificationData';
+import { useNotificationStore } from '../../store/useNotificationStore';
 
 const titleMap: Record<NotificationType, string> = {
   coffeeChatRequest: '커피챗 요청',
@@ -109,12 +108,11 @@ const renderIcon = (notification: NotificationItem) => {
 };
 
 export const NotificationPage = () => {
-  const [items, setItems] = useState(notificationList);
+  const items = useNotificationStore((state) => state.items);
+  const markAsRead = useNotificationStore((state) => state.markAsRead);
 
   const handleNotificationClick = (notification: NotificationItem) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
-    );
+    markAsRead(notification.id);
 
     switch (notification.type) {
       case 'coffeeChatRequest':

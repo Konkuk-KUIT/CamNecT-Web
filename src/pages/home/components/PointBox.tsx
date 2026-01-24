@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import Card from '../../../components/Card';
 
 // 홈 1/2-2: 포인트 박스 UI
 const PointBox = () => {
+    const navigate = useNavigate();
     const points = 1230; // TODO: 추후 실제 데이터 바인딩
     const formattedPoints = points.toLocaleString();
 
@@ -11,6 +13,7 @@ const PointBox = () => {
             width="100%"
             height="135px"
             className="relative flex flex-col justify-between cursor-pointer border-none !bg-gray-900 px-[16px] py-[13px] overflow-hidden [container-type:inline-size] flex-[180_180_0]"
+            onClick={() => navigate('/shop')}
         >
             {/* 포인트/CTA 텍스트 */}
             <div className="flex flex-col gap-[8px]">

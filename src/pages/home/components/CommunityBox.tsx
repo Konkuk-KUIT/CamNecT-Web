@@ -12,7 +12,7 @@ const CommunityBox = () => {
             width="100%"
             height="135px"
             className="relative cursor-pointer overflow-hidden border-none !bg-primary pt-[13px] pl-[15px] flex-[124_124_0]"
-            onClick={() => navigate('/home/community')}
+            onClick={() => navigate('/community')}
         >
             <div className="relative z-10 flex flex-col gap-[6px]">
                 <span className="text-sb-18 text-white tracking-[-0.04em]">

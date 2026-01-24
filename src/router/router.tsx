@@ -13,6 +13,7 @@ import { AuthGuard } from "./AuthGuard";
 import { CommunityPage } from "../pages/community/CommunityPage";
 import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
+import { ShopPage } from "../pages/shop/ShopPage";
 
 export const router = createBrowserRouter([
 
@@ -46,10 +47,6 @@ export const router = createBrowserRouter([
                         element: <HomePage />,
                     },
                     {
-                        path: "home/community",
-                        element: <CommunityPage />,
-                    },
-                    {
                         path: "home/notices",
                         element: <NotificationPage />,
                     },
@@ -76,6 +73,14 @@ export const router = createBrowserRouter([
                     {
                         path: "me",
                         element: <MyPage />,
+                    },
+                    {
+                        path: "community",
+                        element: <CommunityPage />,
+                    },
+                    {
+                        path: "shop",
+                        element: <ShopPage />,
                     },
                 ]
             },

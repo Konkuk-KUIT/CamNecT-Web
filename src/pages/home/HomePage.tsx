@@ -5,17 +5,21 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import CheckScheduleBox from './components/CheckScheduleBox';
 import PointBox from './components/PointBox';
-import ComunitiyBox from './components/CommunityBox';
-import RecommandBox from './components/RecommendBox';
+import CommunityBox from './components/CommunityBox';
+import RecommendBox from './components/RecommendBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
-import { coffeeChatRequests, contests, recommendList } from './homeData';
-import { notificationList } from './notificationData';
+import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
+import { useNotificationStore } from '../../store/useNotificationStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const Home = () => {
     const navigate = useNavigate();
     const visibleRecommands = recommendList.slice(0, 2);
-    const hasUnreadNotifications = notificationList.some((notice) => !notice.isRead);
+    const hasUnreadNotifications = useNotificationStore((state) =>
+        state.items.some((notice) => !notice.isRead),
+    );
+    const userName = useAuthStore((state) => state.user?.name) ?? homeGreetingUser.name;
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
@@ -27,7 +31,7 @@ const Home = () => {
                     {/* 1-1: 사용자 인사 메시지 */}
                     <div className="flex flex-col cursor-pointer gap-[7px] px-[6px] py-[13px]">
                         <p className="text-sb-18 text-gray-900 tracking-[-0.04em]">
-                            안녕하세요, <span className="text-primary">박원빈</span>님!
+                            안녕하세요, <span className="text-primary">{userName}</span>님!
                         </p>
                         <p className="text-m-14 text-gray-750 tracking-[-0.04em]">
                             오늘도 성공적인 캠퍼스 라이프를 응원합니다!
@@ -40,7 +44,7 @@ const Home = () => {
                         <CheckScheduleBox />
                         <div className="flex w-full justify-between gap-[20px]">
                             <PointBox />
-                            <ComunitiyBox />
+                            <CommunityBox />
                         </div>
                     </div>
                 </section>
@@ -55,7 +59,7 @@ const Home = () => {
                         <div className="flex w-full flex-col gap-[15px]">
                             <div className="flex w-full flex-col gap-[10px]">
                                 {visibleRecommands.map((recommand) => (
-                                    <RecommandBox
+                                    <RecommendBox
                                         key={`${recommand.name}-${recommand.studentId}`}
                                         name={recommand.name}
                                         profileImage={recommand.profileImage}

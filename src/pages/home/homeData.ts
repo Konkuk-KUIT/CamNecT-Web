@@ -9,6 +9,7 @@ const avatarPlaceholder =
 const posterPlaceholder =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='135' height='126'><rect width='135' height='126' fill='%23E5E7EB'/></svg>";
 
+    // TODO: 실제 사용자 데이터로 대체 예정
 export const recommendList: Recommend[] = [
     {
         name: '신다은',
@@ -77,3 +78,7 @@ export const contests: Contest[] = [
         isClosingSoon: true,
     },
 ];
+
+export const homeGreetingUser = {
+    name: '사용자',
+};
