@@ -61,6 +61,7 @@ const Home = () => {
                                 {visibleRecommands.map((recommand) => (
                                     <RecommendBox
                                         key={`${recommand.name}-${recommand.studentId}`}
+                                        userId={recommand.userId}
                                         name={recommand.name}
                                         profileImage={recommand.profileImage}
                                         major={recommand.major}

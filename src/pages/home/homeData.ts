@@ -12,6 +12,7 @@ const posterPlaceholder =
     // TODO: 실제 사용자 데이터로 대체 예정
 export const recommendList: Recommend[] = [
     {
+        userId: 'alumni-1',
         name: '신다은',
         profileImage: avatarPlaceholder,
         major: '컴퓨터공학부',
@@ -20,6 +21,7 @@ export const recommendList: Recommend[] = [
         categories: ['AI', '백엔드', '커리어', '프로젝트'],
     },
     {
+        userId: 'alumni-2',
         name: '박성윤',
         profileImage: avatarPlaceholder,
         major: '경영학부',
@@ -28,6 +30,7 @@ export const recommendList: Recommend[] = [
         categories: ['투자', 'VC', '자기소개서', '커피챗'],
     },
     {
+        userId: 'alumni-3',
         name: '이주하',
         profileImage: avatarPlaceholder,
         major: '디자인학부',

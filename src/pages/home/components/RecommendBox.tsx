@@ -1,81 +1,122 @@
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import Icon from '../../../components/Icon';
+import { useNavigate } from 'react-router-dom';
 
 
 type RecommendBoxProps = {
+    userId: string;
     name: string;
     profileImage?: string;
     major: string;
     studentId: string;
     intro: string;
     categories: string[];
+    onSelect?: () => void;
+    onRequestChat?: () => void;
 };
 
-function RecommendBox({ name, profileImage, major, studentId, intro, categories }: RecommendBoxProps) {
+function RecommendBox({
+    userId,
+    name,
+    profileImage,
+    major,
+    studentId,
+    intro,
+    categories,
+    onSelect,
+    onRequestChat,
+}: RecommendBoxProps) {
+    const navigate = useNavigate();
+
     return (
         //TODO: 동문추천 page 라우터 연결
         <Card
-            width='100%'
-            height='auto'
-            className='flex min-h-[147px] items-start justify-between px-4 py-[15px] [container-type:inline-size]'
+            width="100%"
+            height="auto"
+            className="flex min-h-[161px] flex-col [padding:clamp(12px,4cqw,15px)] gap-[20px]"
+            role={onSelect ? 'button' : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={onSelect}
+            onKeyDown={(event) => {
+                if (!onSelect) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onSelect();
+                }
+            }}
         >
-            {/* 그룹 1: 프로필 + 정보 */}
-            <div className='flex min-w-0 flex-1 items-start gap-[15px]'>
-                {profileImage ? (
-                    <img
-                        src={profileImage}
-                        alt={`${name} 프로필`}
-                        className='shrink-0 rounded-full object-cover'
-                        style={{ width: 'clamp(44px, 12cqw, 54px)', height: 'clamp(44px, 12cqw, 54px)' }}
-                    />
-                ) : (
-                    <div
-                        className='shrink-0 rounded-full bg-[#D5D5D5]'
-                        style={{
-                            width: 'clamp(44px, 12cqw, 54px)',
-                            height: 'clamp(44px, 12cqw, 54px)',
-                        }}
-                        aria-hidden
-                    />
-                )}
-                <div className='flex min-w-0 flex-1 flex-col items-start gap-[5px]'>
-                    <p
-                        className='text-gray-900 tracking-[-0.04em]'
-                        style={{ fontSize: 'clamp(15px, 4cqw, 18px)', lineHeight: '1.35', fontWeight: 600 }}
-                    >
-                        {name}
-                    </p>
-                    <p
-                        className='text-gray-750 tracking-[-0.04em]'
-                        style={{ fontSize: 'clamp(12px, 3.2cqw, 14px)', lineHeight: '1.35', fontWeight: 600 }}
-                    >
-                        {major} {studentId}학번
-                    </p>
-                    <p
-                        className='text-gray-750 tracking-[-0.02em]'
-                        style={{ fontSize: 'clamp(11px, 3cqw, 12px)', lineHeight: '1.4' }}
-                    >
-                        {intro}
-                    </p>
-                    <div className='flex flex-wrap gap-[5px]'>
-                        {categories.map((category, index) => (
-                            <Category key={`${name}-${category}-${index}`} label={category} />
-                        ))}
+            {/* 1그룹: 프로필/이름/학과/학번 + 더보기 아이콘 */}
+            <section className="flex justify-between">
+                <div className="flex items-center">
+                    <div className="flex items-center gap-[13px]">
+                        {profileImage ? (
+                            <img
+                                src={profileImage}
+                                alt={`${name} 프로필`}
+                                className="h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div
+                                className="h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full bg-[#D5D5D5]"
+                                aria-hidden
+                            />
+                        )}
+
+                        <div className="flex min-w-0 flex-col gap-[3px]">
+                            <div className="text-sb-16-hn text-[color:var(--ColorBlack,#202023)]">
+                                {name}
+                            </div>
+                            <div className="text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]">
+                                {major} {studentId}학번
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div className="py-[9px]">
+                    <button
+                        type="button"
+                        className="flex items-center justify-center"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            navigate(`/alumni/profile/${userId}`);
+                        }}
+                        aria-label={`${name} 프로필 더보기`}
+                    >
+                        <Icon name="more" className="h-6 w-6" />
+                    </button>
+                </div>
+            </section>
+
+            {/* 2그룹: 카테고리와 소개글 */}
+            <div className="flex min-w-0 flex-col gap-[10px] pl-[7px]">
+                <div className="flex flex-wrap gap-[5px]">
+                    {categories.map((category, index) => (
+                        <Category key={`${name}-${category}-${index}`} label={category} />
+                    ))}
+                </div>
+
+                <p className="line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]">
+                    {intro}
+                </p>
             </div>
 
-            {/*TODO: 동문 상세 프로필 페이지 라우터 연결*/}
-            <div className='flex shrink-0 flex-col items-end'>
-                <Icon
-                    name='transmit'
-                    style={{ width: 'clamp(18px, 3.8cqw, 24px)', height: 'clamp(18px, 3.8cqw, 24px)' }}
-                />
-            </div>
+            {/* 3그룹: 커피챗 요청 버튼 */}
+            <button
+                type="button"
+                className={`flex w-full items-center justify-center rounded-[clamp(8px,2.8cqw,10px)] bg-[var(--ColorMain,#00C56C)] py-[10px]${
+                    onRequestChat ? ' cursor-pointer' : ''
+                }`}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onRequestChat?.();
+                }}
+                aria-label={`${name} 커피챗 요청하기`}
+            >
+                <span className="text-sb-14 text-[color:var(--ColorWhite,#FFF)]">커피챗 요청하기</span>
+            </button>
         </Card>
-
-    )
+    );
 }
 
 export type { RecommendBoxProps };

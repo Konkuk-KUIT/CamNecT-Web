@@ -15,6 +15,7 @@ type CoffeeChatBoxProps = {
 
 const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
     const requestCount = requests.length;
+    const visibleRequests = requests.slice(0, 2);
 
     return (
         <Card
@@ -23,7 +24,10 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
             className="flex min-h-[60px] flex-col gap-[13px] px-[17px] py-[15px]"
         >
             <div className="flex items-center justify-between">
-                <span className="text-sb-16-hn text-gray-900 tracking-[-0.04em]">
+                <span
+                    className="text-gray-900 tracking-[-0.04em]"
+                    style={{ fontSize: 'clamp(13px, 4.5cqw, 16px)', lineHeight: '1.35', fontWeight: 600 }}
+                >
                     커피챗 요청이{' '}
                     <span className="text-primary">{requestCount}건</span> 도착했어요!
                 </span>
@@ -45,7 +49,7 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
             </div>
 
             <div className="flex flex-col gap-[8px]">
-                {requests.map((request) => (
+                {visibleRequests.map((request) => (
                     <Card
                         key={`${request.name}-${request.studentId}`}
                         width="100%"
@@ -55,10 +59,15 @@ const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
                         <span className="text-m-12 text-gray-750 tracking-[-0.04em]">
                             {request.name} ( {request.major} {request.studentId}학번 )
                         </span>
-                        {/*TODO: CoffeeChat page로 연결*/}
-                        <span className="cursor-pointer text-m-12 text-primary tracking-[-0.04em]">
+                        <button
+                            type="button"
+                            className="cursor-pointer text-m-12 text-primary tracking-[-0.04em]"
+                            onClick={() => {
+                                // TODO: 요청확인 클릭 시 커피챗 요청 상세 라우터 연결 예정
+                            }}
+                        >
                             요청확인
-                        </span>
+                        </button>
                     </Card>
                 ))}
             </div>
