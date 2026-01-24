@@ -1,6 +1,6 @@
 // API Request Body 타입 정의
 
-// /api/auth/login
+// 로그인 DTO (/api/auth/login)
 export interface LoginRequest {
   username: string; // 아이디
   password: string;
@@ -14,6 +14,12 @@ export interface LoginResponse {
   refreshTokenExpiresInMs: number;
   userId: number;
   status: string;
+}
+
+// 이메일 인증 요청 DTO (/api/verification/email/verify-code)
+export interface EmailVerificationRequest {
+  userId: number;
+  code: string;
 }
 
 export interface SignupRequestBody {

@@ -1,5 +1,5 @@
 import { axiosInstance } from "./axiosInstance";
-import type { LoginRequest, LoginResponse } from "../api-types/authApiTypes";
+import type { LoginRequest, LoginResponse, EmailVerificationRequest } from "../api-types/authApiTypes";
 
 // 1. 로그인 API (/api/auth/login)
 export const login = async (data: LoginRequest) => {
@@ -10,9 +10,14 @@ export const login = async (data: LoginRequest) => {
 
 // 2. 이메일 인증 번호 요청 API
 
-// 3. 이메일 인증 번호 검증 API
+// 3. 이메일 인증 번호 검증 API (/api/verification/email/verify-code)
+export const verifyEmailCode = async (data: EmailVerificationRequest) => {
+    
+    const response = await axiosInstance.post<void>("/api/verification/email/verify-code", data);
+    return response.data;
+}
 
-// 4. 학교 인증서 인증 요청 API
+// 4. 학교 인증서 인증 요청 API 
 
 // 5. 관심태그 리스트 조회 API
 

@@ -1,11 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import type { ButtonHTMLAttributes } from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
+import { verifyEmailCode } from '../../api/auth';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
+import PopUp from '../../components/Pop-up';
 import { useSignupStore } from '../../store/useSignupStore';
 
 type SmallButtonProps = {
@@ -45,6 +48,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
 
     const [isEmailVerificated, setIsEmailVerificated] = useState(false);
     const [emailSent, setEmailSent] = useState(false);  // 이메일 전송 여부
+    const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
     const {email, setEmail} = useSignupStore(
         useShallow((state) => ({
@@ -61,15 +65,31 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             "이메일 형식이 올바르지 않습니다"
         ),
+        verificationCode: z.string().length(6, "인증번호 6자리를 입력해 주세요"),
     });
 
     type EmailFormData = z.infer<typeof emailSchema>;
 
-    const {register, handleSubmit, formState : {errors, isValid}} = useForm<EmailFormData>({
+    const {register, handleSubmit, watch, formState : {errors, isValid}} = useForm<EmailFormData>({
         resolver: zodResolver(emailSchema),
         mode: "onChange",
         defaultValues: {
-            email: email
+            email: email,
+            verificationCode: "",
+        }
+    });
+
+    const codeValue = watch("verificationCode");
+
+
+    const emailVerifyMutation = useMutation({
+        mutationFn: verifyEmailCode,
+        onSuccess: () => {
+            setPopUpConfig({ title: "인증완료", content: "" });
+            setIsEmailVerificated(true);
+        },
+        onError: () => {
+            setPopUpConfig({ title: "인증번호 불일치", content: "다시 요청해주세요" });
         }
     });
 
@@ -103,17 +123,24 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                     </div>
                     
                     <div className='flex items-start gap-[10px]'>
-                        <SingleInput className = "flex-1" placeholder="인증 번호 6자리를 입력해 주세요" />
+                        <SingleInput 
+                            className = "flex-1" 
+                            placeholder="인증 번호 6자리를 입력해 주세요" 
+                            {...register("verificationCode")}
+                            error={errors.verificationCode?.message}
+                        />
                         <SmallButton 
                             onClick={() => {
-                                // TODO: 이메일 인증 API 연동 + 성공 시 완료 팝업
-                                // TODO: 불일치 시 다시 인증버튼 활성화
-                                setIsEmailVerificated(true); // 인증번호 일치하면 설정
+                                // TODO: userId를 적절한 곳에서 가져와야 함 (현재는 예시로 1 전달)
+                                emailVerifyMutation.mutate({
+                                    userId: 1, 
+                                    code: codeValue
+                                });
                             }}
                             label="인증하기" 
                             type="button"
                             className="mt-[6px]"
-                            disabled={!emailSent}  // 이메일 전송 후에만 활성화
+                            disabled={!emailSent || codeValue.length !== 6}  // 이메일 전송 후 && 6자리 입력 시 활성화
                         />
                     </div>
                 </div>
@@ -129,6 +156,19 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                 </div>
             
             </div>
+
+            {popUpConfig && (
+                <PopUp
+                    isOpen={true}
+                    type="confirm"
+                    title={popUpConfig.title}
+                    content={popUpConfig.content}
+                    onClick={() => {
+                        setPopUpConfig(null);
+                        setEmailSent(false); // 인증버튼 재활성화
+                    }}
+                />
+            )}
         </form> 
     )
 }

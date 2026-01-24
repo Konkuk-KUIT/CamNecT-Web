@@ -77,7 +77,6 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     });
 
     const onSubmit = (data : UserInfoFormData) => {
-        console.log("입력된 데이터 : ", data);
 
         setName(data.name);
         setPhoneNum(data.phoneNum);
