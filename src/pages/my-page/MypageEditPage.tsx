@@ -13,7 +13,7 @@ import CareerEditModal from "./components/CareerEditModal";
 import CertificateEditModal from "./components/CertificateEditModal";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
-import defaultProfileImg from "../../assets/image/defaultProfileImg.jpg"
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
 import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
 import { useImageUpload } from "../../hooks/useImageUpload";
