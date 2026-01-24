@@ -7,7 +7,7 @@ import { ActivityPage } from "../pages/activity/ActivityPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
-import HomePage from "../pages/home/HomePage";
+import { HomePage }  from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";

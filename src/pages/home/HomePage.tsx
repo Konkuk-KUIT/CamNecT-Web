@@ -13,7 +13,7 @@ import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from '.
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
-const Home = () => {
+export const HomePage = () => {
     const navigate = useNavigate();
     const visibleRecommands = recommendList.slice(0, 2);
     const hasUnreadNotifications = useNotificationStore((state) =>
@@ -97,5 +97,3 @@ const Home = () => {
         </FullLayout>
     );
 };
-
-export default Home;
