@@ -1,4 +1,21 @@
 // API Request Body 타입 정의
+
+// /api/auth/login
+export interface LoginRequest {
+  username: string; // 아이디
+  password: string;
+}
+
+export interface LoginResponse {
+  tokenType: string;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresInMs: number;
+  refreshTokenExpiresInMs: number;
+  userId: number;
+  status: string;
+}
+
 export interface SignupRequestBody {
   email: string;
   userName: string;

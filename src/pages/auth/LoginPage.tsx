@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import { LastSplashPage } from "../onboarding/LastSplashPage";
+import { AxiosError } from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../../api/auth";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useShallow } from "zustand/react/shallow";
+import PopUp from "../../components/Pop-up";
 
 const Logo = ({ className }: { className?: string }) => {
     return (
@@ -47,13 +53,54 @@ export const LoginPage = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  // const [id, setId] = useState("");
-  // const [password, setPassword] = useState("");
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
+
+  const { setLogin } = useAuthStore(
+    useShallow((state) => ({
+      setLogin: state.setLogin
+    }))
+  );
 
   const [showSplash, setShowSplash] = useState(false);
 
+  const loginMutation = useMutation({
+    mutationFn: login, // .mutate시에 실행 할 함수
+
+    // data : 서버의 response (response.data)
+    onSuccess: (data) => {
+      
+      // todo RefreshToken을 어떻게 관리할지
+      setLogin(data.accessToken, {
+        id: String(data.userId)
+      })
+      setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
+
+      navigate("/home");
+    },
+    onError: (error: AxiosError) => {
+      const status = error.response?.status;
+      
+      if (status === 401) {
+        setPopUpConfig({ title: "로그인 실패", content: "아이디 또는 비밀번호가 일치하지 않습니다." });
+      }
+      else if (status === 404) {
+        setPopUpConfig({ title: "로그인 실패", content: "아이디가 존재하지 않습니다." });
+      }      
+    }
+  })
+
   const handleLogin = () => {
-    setShowSplash(true);
+    if(!(id && password)) {
+      setPopUpConfig({ title: "아이디와 비밀번호를 입력해주세요", content: "" });
+      return;
+    }
+
+    // 서버에 요청
+    // 브라우저에서 입력한 값을 props에 전송 -> TanStackQuery가 login 함수에 props 전달
+    loginMutation.mutate({ username: id, password });
   }
 
   useEffect(() => {
@@ -81,13 +128,19 @@ export const LoginPage = () => {
       <div className="flex flex-col max-w-[335px] w-full gap-[20px] mb-[40px] flex-none">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
           className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
-          placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"/>
+          placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+        />
 
         {/* 비밀번호 입력 */}
         <div className="relative w-full h-[48px]">
           <input type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해주세요" aria-label="비밀번호"
             className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
-            placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"/>
+            placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           
           <button type="button"
               onClick={() => setShowPassword(!showPassword)} aria-label="비밀번호 표시/숨김" aria-pressed={showPassword}
@@ -108,7 +161,16 @@ export const LoginPage = () => {
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
-      {/* todo 추후 소셜 로그인 구현 */}
+      {popUpConfig && (
+        <PopUp
+          isOpen={true}
+          type="confirm"
+          title={popUpConfig.title}
+          content={popUpConfig.content}
+          onClick={() => setPopUpConfig(null)}
+        />
+      )}
+
     </div>
   );
 };
