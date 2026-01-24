@@ -18,14 +18,14 @@ const titleMap: Record<NotificationType, string> = {
 
 const formatPoints = (points: number) => points.toLocaleString('ko-KR');
 
-const getIconFill = (type: NotificationType) => {
+const getIconSvg = (type: NotificationType) => {
   if (type === 'pointUse') {
-    return notificationIconAssets.find((icon) => icon.type === 'pointUse')?.fill;
+    return notificationIconAssets.find((icon) => icon.type === 'pointUse')?.svg;
   }
   if (type === 'pointEarn') {
-    return notificationIconAssets.find((icon) => icon.type === 'pointEarn')?.fill;
+    return notificationIconAssets.find((icon) => icon.type === 'pointEarn')?.svg;
   }
-  return notificationIconAssets.find((icon) => icon.type === 'default')?.fill;
+  return notificationIconAssets.find((icon) => icon.type === 'default')?.svg;
 };
 
 const renderContent = (notification: NotificationItem) => {
@@ -90,20 +90,14 @@ const renderIcon = (notification: NotificationItem) => {
     );
   }
 
-  const fill = getIconFill(notification.type) ?? '#00C56C';
+  const svg = getIconSvg(notification.type);
 
   return (
-    <div className="h-[50px] w-[50px]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="50"
-        height="50"
-        viewBox="0 0 50 50"
-        fill="none"
-      >
-        <circle cx="25" cy="25" r="25" fill={fill} />
-      </svg>
-    </div>
+    <div
+      className="h-[50px] w-[50px]"
+      aria-hidden
+      dangerouslySetInnerHTML={{ __html: svg ?? '' }}
+    />
   );
 };
 
