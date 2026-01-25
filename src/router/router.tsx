@@ -11,6 +11,9 @@ import { HomePage }  from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
+import { WritePage } from "../pages/community/WritePage";
+import CommunityPostPage from "../pages/community/CommunityPostPage";
+
 import { AuthGuard } from "./AuthGuard";
 import { CommunityPage } from "../pages/community/CommunityPage";
 import { NotificationPage } from "../pages/home/NotificationPage";
@@ -31,6 +34,14 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <OnboardingPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "signup",
+                element: <SignUpPage />,
             },
             {
                 path: "login",
@@ -99,6 +110,23 @@ export const router = createBrowserRouter([
                     {
                         path: "shop",
                         element: <ShopPage />,
+                    },
+                    {
+                        path: "community",
+                        element: <CommunityPage />,
+                        
+                    },
+                    {
+                        path: "community/write",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/edit/:postId",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
                     },
                 ]
             },

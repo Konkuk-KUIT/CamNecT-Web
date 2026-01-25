@@ -1,0 +1,195 @@
+import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import BottomSheetModal from '../../../components/BottomSheetModal';
+import BoardTypeToggle from '../components/BoardTypeToggle';
+import Category from '../../../components/Category';
+import FilterHeader from '../../../components/FilterHeader';
+import FilterModal from '../../../components/FilterModal';
+import Icon from '../../../components/Icon';
+import Toggle from '../../../components/Toggle/Toggle';
+import WriteButton from '../components/WriteButton';
+import type { InfoPost } from '../data';
+import useCommunityFilters from '../../../hooks/useCommunityFilters';
+import { formatTimeAgo } from '../time';
+
+type InfoTabProps = {
+  posts: InfoPost[];
+};
+
+type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
+
+const sortLabels: Record<SortKey, string> = {
+  recommended: '추천순',
+  latest: '최신순',
+  likes: '좋아요 많은 순',
+  bookmarks: '북마크 많은 순',
+};
+
+// 정보 탭: 필터 + 정렬 + 정보글 리스트
+const InfoTab = ({ posts }: InfoTabProps) => {
+  const {
+    activeFilters,
+    filteredPosts,
+    isFilterOpen,
+    activeTab,
+    setActiveTab,
+    openFilterModal,
+    handleCancel,
+    handleApply,
+    handleRemoveFilter,
+    draftMajor,
+    draftInterests,
+    toggleDraftMajor,
+    toggleDraftInterest,
+    hasDraftSelection,
+  } = useCommunityFilters(posts);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('recommended');
+
+  // 정렬 기준에 따른 목록 재계산
+  const sortedPosts = useMemo(() => {
+    if (sortKey === 'recommended') return filteredPosts;
+    const cloned = [...filteredPosts];
+    if (sortKey === 'latest') {
+      return cloned.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    }
+    if (sortKey === 'likes') {
+      return cloned.sort((a, b) => b.likes - a.likes);
+    }
+    return cloned.sort((a, b) => b.saveCount - a.saveCount);
+  }, [filteredPosts, sortKey]);
+
+  return (
+    <div
+      className='flex flex-col bg-white'
+      style={{ padding: '20px 25px', gap: '10px' }}
+    >
+      {/* 필터 영역: 선택된 태그 표시 + 모달 호출 */}
+      <div className='flex flex-wrap items-center gap-[12px]'>
+        <div className='flex-1'>
+          <FilterHeader
+            activeFilters={activeFilters}
+            onOpenFilter={openFilterModal}
+            onRemoveFilter={handleRemoveFilter}
+          />
+        </div>
+        <div className='flex items-center gap-[6px]'>
+          <button
+            type='button'
+            onClick={() => setIsSortOpen(true)}
+            className='text-r-14 text-[var(--ColorGray2,#A1A1A1)]'
+          >
+            {sortLabels[sortKey]}
+          </button>
+          <Toggle
+            width={20}
+            height={20}
+            toggled={isSortOpen}
+            onToggle={(next) => setIsSortOpen(next)}
+          />
+        </div>
+      </div>
+
+      {/* 정보글 리스트 */}
+      <div className='flex flex-col' style={{ gap: '10px' }}>
+        {/* TODO: 정보글 리스트 API 연결 */}
+        {sortedPosts.map((post) => (
+          <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
+            <article
+              className='flex flex-col'
+              style={{
+                gap: '10px',
+                paddingBottom: '10px',
+                borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
+              }}
+            >
+              <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
+                {post.categories.map((category) => (
+                  <Category key={category} label={category} className='h-[20px] px-[6px]' />
+                ))}
+              </div>
+
+              <div className='flex flex-col' style={{ gap: '7px' }}>
+                <div className='flex flex-col' style={{ gap: '5px' }}>
+                  <div className='flex items-center gap-[6px]'>
+                    <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
+                    <span className='text-r-12 text-gray-750'>· {post.author.major} {post.author.studentId}학번</span>
+                  </div>
+
+                  <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
+
+                  <div className='line-clamp-2 text-r-16 text-gray-750'>
+                    {post.content}
+                  </div>
+                </div>
+
+                <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
+                  <span className='flex items-center gap-[4px]'>
+                    <Icon name='like' className='h-[12px] w-[12px]' />
+                    {post.likes}
+                  </span>
+                  <span className='flex items-center gap-[4px]'>
+                    <Icon name='comment' className='h-[12px] w-[12px]' />
+                    {post.comments}
+                  </span>
+                  <span>{formatTimeAgo(post.createdAt)}</span>
+                </div>
+              </div>
+            </article>
+          </Link>
+        ))}
+      </div>
+
+      {/* 필터 모달: 전공/관심사 선택 */}
+      <FilterModal
+        isOpen={isFilterOpen}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        draftMajor={draftMajor}
+        draftInterests={draftInterests}
+        onToggleMajor={toggleDraftMajor}
+        onToggleInterest={toggleDraftInterest}
+        hasDraftSelection={hasDraftSelection}
+        onCancel={handleCancel}
+        onApply={handleApply}
+      />
+
+      <BottomSheetModal isOpen={isSortOpen} onClose={() => setIsSortOpen(false)}>
+        <div className='flex flex-col gap-[30px] px-[25px] pb-[50px] pt-[45px]'>
+          <div className='text-b-18 text-[var(--ColorBlack,#202023)]'>정렬</div>
+          <div className='flex flex-col gap-[20px] px-[7px]'>
+            {(Object.keys(sortLabels) as SortKey[]).map((key) => (
+              <div key={key} className='flex items-center justify-between'>
+                <button
+                  type='button'
+                  className='text-m-16 text-[var(--ColorGray3,#646464)]'
+                  onClick={() => {
+                    setSortKey(key);
+                    setIsSortOpen(false);
+                  }}
+                >
+                  {sortLabels[key]}
+                </button>
+                <BoardTypeToggle
+                  selected={sortKey === key}
+                  onClick={() => {
+                    setSortKey(key);
+                    setIsSortOpen(false);
+                  }}
+                  label={sortLabels[key]}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </BottomSheetModal>
+
+      {/* TODO: 글쓰기 라우터 연결 (버튼 클릭 / 현재는 임시) */}
+      <WriteButton />
+    </div>
+  );
+};
+
+export default InfoTab;
