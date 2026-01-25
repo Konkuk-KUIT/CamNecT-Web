@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import Icon from '../../components/Icon';
-import SaveToggle from '../../components/Toggle/SaveToggle';
+import SaveToggle from './components/SaveToggle';
 import LikeToggle from './components/LikeToggle';
 
 type BottomChatProps = {
