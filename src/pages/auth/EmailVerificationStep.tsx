@@ -58,6 +58,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     );
 
     const emailSchema = z.object({
+        // 1. 이메일 값
         email: z
         .string()
         .min(1, "이메일을 입력해 주세요")
@@ -65,12 +66,13 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             "이메일 형식이 올바르지 않습니다"
         ),
+        // 2. 이메일 인증번호
         verificationCode: z.string().length(6, "인증번호 6자리를 입력해 주세요"),
     });
 
     type EmailFormData = z.infer<typeof emailSchema>;
 
-    const {register, handleSubmit, watch, formState : {errors, isValid}} = useForm<EmailFormData>({
+    const {register, handleSubmit, watch, formState : {errors}} = useForm<EmailFormData>({
         resolver: zodResolver(emailSchema),
         mode: "onChange",
         defaultValues: {
@@ -79,8 +81,9 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         }
     });
 
+    // SingleInput에 입력되는 값들 실시간 감지
+    const emailValue = watch("email");
     const codeValue = watch("verificationCode");
-
 
     const emailVerifyMutation = useMutation({
         mutationFn: verifyEmailCode,
@@ -109,11 +112,19 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
 
                 <div className="flex-1 overflow-y-auto space-y-[20px] pt-[40px] scrollbar-hide">
                     <div className='flex items-start gap-[10px]'>
-                        <SingleInput className = "flex-1" label='이메일 인증' placeholder='이메일을 입력해 주세요' {...register("email")} error={errors.email?.message} successMessage={emailSent ? "메일이 전송되었습니다. 메일함을 확인해 주세요!" : ""} /> 
+                        <SingleInput
+                            className="flex-1"
+                            label='이메일 인증'
+                            placeholder='이메일을 입력해 주세요'
+                            {...register("email")}
+                            error={errors.email?.message}
+                            successMessage={emailSent ? "메일이 전송되었습니다. 메일함을 확인해 주세요!" : ""}
+                        /> 
+                        
                         <SmallButton 
                             label="인증요청" 
                             className="mt-[36px]"
-                            disabled={!isValid}
+                            disabled={!emailValue || !!errors.email}
                             onClick={() => {
                                 // TODO: 이메일 전송 API 호출
                                 console.log("이메일 전송 요청");
