@@ -1,7 +1,7 @@
-import type { SchoolVerificationResponse } from "../../api-types/authApiTypes"
+import { useNavigate } from "react-router-dom";
+import type { SchoolInfoResponse } from "../../api-types/authApiTypes";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
-import { useNavigate } from "react-router-dom";
 
 // 학교 인증 정보 표시 컴포넌트
 const InfoItem = ({ label, value }: { label: string; value: string }) => (
@@ -19,7 +19,7 @@ export const SchoolCompletion = () => {
     const navigate = useNavigate();
 
     // todo API 응답값을 대입 
-    const mockData: SchoolVerificationResponse = {
+    const mockData: SchoolInfoResponse = {
         name: "박원빈",
         studentId: "A3291304",
         univ: "한국대학교",

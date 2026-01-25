@@ -16,10 +16,26 @@ export interface LoginResponse {
   status: string;
 }
 
-// 이메일 인증 요청 DTO (/api/verification/email/verify-code)
+// 이메일 인증 번호 검증 DTO (/api/verification/email/verify-code)
 export interface EmailVerificationRequest {
   email: string;
   code: string;
+}
+
+// 학교 인증서 인증 요청 DTO (/api/verification/documents)
+// 학교 인증서 종류 타입 추출
+export type SchoolDocType = 'ENROLLMENT_CERTIFICATE' | 'GRADUATION_CERTIFICATE';
+
+export interface SchoolVerificationRequest {
+  email: string;        
+  docType: SchoolDocType; 
+  documents: File[];     // 파일 객체 배열
+}
+
+export interface SchoolVerificationResponse {
+  submissionId: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'Canceled'; 
+  submittedAt: string;
 }
 
 export interface SignupRequestBody {
@@ -34,7 +50,7 @@ export interface SignupRequestBody {
   };
 }
 
-export interface SchoolVerificationResponse {
+export interface SchoolInfoResponse {
     name: string;
     studentId: string;
     univ: string;
