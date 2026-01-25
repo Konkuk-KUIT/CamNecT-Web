@@ -48,7 +48,6 @@ const Divider = () => {
   )
 }
 
-// todo 로그인 버튼 API 연동 
 export const LoginPage = () => {
   const navigate = useNavigate();
 

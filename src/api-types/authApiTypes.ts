@@ -1,6 +1,8 @@
 // API Request Body 타입 정의
 
 // 로그인 DTO (/api/auth/login)
+// todo 정해지는대로 수정
+export type LoginStatusType = 'SUCCESS' | 'FAILED';
 export interface LoginRequest {
   username: string; // 아이디
   password: string;
@@ -32,11 +34,28 @@ export interface SchoolVerificationRequest {
   documents: File[];     // 파일 객체 배열
 }
 
+export type SchoolVerificationStatusType = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED';
+
 export interface SchoolVerificationResponse {
   submissionId: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'Canceled'; 
+  status: SchoolVerificationStatusType; 
   submittedAt: string;
 }
+
+// 학교 인증서 인증 대기화면 조회 API DTO (/api/verification/documents/me)
+export interface SchoolVerificationStatusRequest {
+  email: string;
+}
+
+export interface SchoolVerificationStatusItem {
+  submissionId: number;
+  docType: SchoolDocType; // 'ENROLLMENT_CERTIFICATE' 등
+  status: SchoolVerificationStatusType; 
+  submittedAt: string;
+  reviewedAt: string | null; // 리뷰 전 일 가능성 -> null
+}
+
+export type SchoolVerificationStatusResponse = SchoolVerificationStatusItem[];
 
 export interface SignupRequestBody {
   email: string;
