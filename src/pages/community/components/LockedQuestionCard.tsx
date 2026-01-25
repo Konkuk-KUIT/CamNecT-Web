@@ -7,6 +7,7 @@ type LockedQuestionCardProps = {
   onPurchaseClick: () => void;
 };
 
+// 잠금된 질문 구매 안내 카드
 const LockedQuestionCard = ({
   requiredPoints,
   textCount,

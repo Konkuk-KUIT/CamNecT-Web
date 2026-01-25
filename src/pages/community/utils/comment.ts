@@ -1,5 +1,6 @@
 import type { CommentItem } from '../data';
 
+// 댓글 트리 탐색/수정/표시 포맷 유틸
 export const findCommentContent = (
   comments: CommentItem[],
   commentId: string,

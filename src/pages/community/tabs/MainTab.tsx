@@ -11,6 +11,7 @@ type MainTabProps = {
   unansweredQuestions: QuestionPost[];
 };
 
+// 메인 탭: 전공 히어로 + 동문 카드 + 미답변 질문 목록
 const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) => {
   return (
     <div>

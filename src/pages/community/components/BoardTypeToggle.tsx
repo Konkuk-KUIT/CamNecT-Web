@@ -4,6 +4,7 @@ type BoardTypeToggleProps = {
   label: string;
 };
 
+// 정렬/선택 상태를 보여주는 라디오형 토글
 const BoardTypeToggle = ({ selected, onClick, label }: BoardTypeToggleProps) => {
   return (
     <button

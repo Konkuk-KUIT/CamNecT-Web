@@ -45,6 +45,7 @@ const CommentItem = ({
 }: CommentItemProps) => {
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // 편집 모드에서 textarea 높이를 자동으로 맞춤
   useEffect(() => {
     if (!isEditing) return;
     const textarea = editTextareaRef.current;
@@ -54,6 +55,7 @@ const CommentItem = ({
   }, [editingContent, isEditing]);
 
   if (isQuestionPost && isReply) return null;
+  // 채택된 댓글 표시 여부 계산
   const isAdoptedComment = isQuestionPost && isAdopted && adoptedCommentId === comment.id;
   return (
     <Fragment>

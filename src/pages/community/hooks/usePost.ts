@@ -6,6 +6,7 @@ type UsePostParams = {
   currentUserName: string;
 };
 
+// 게시글 선택 및 파생 상태 계산을 캡슐화
 export const usePost = ({ postId, currentUserName }: UsePostParams) => {
   const selectedPost = useMemo(() => mapToCommunityPost(postId), [postId]);
 

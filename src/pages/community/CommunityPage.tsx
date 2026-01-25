@@ -15,6 +15,7 @@ const tabItems: TabItem[] = [
 ];
 
 export const CommunityPage = () => {
+  // 탭 선택 및 검색 UI 상태
   const [activeTab, setActiveTab] = useState<string>(() => {
     const stored = sessionStorage.getItem('communityActiveTab');
     return stored ?? tabItems[0].id;
@@ -22,6 +23,7 @@ export const CommunityPage = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // 검색어 정규화
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈

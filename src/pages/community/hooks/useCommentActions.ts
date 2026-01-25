@@ -29,6 +29,7 @@ type UseCommentActionsParams = {
   adoptedCommentId?: string;
 };
 
+// 댓글 작성/편집/답글/정렬에 필요한 상태와 핸들러 제공
 export const useCommentActions = ({
   currentUser,
   initialComments = communityCommentList,
@@ -47,6 +48,7 @@ export const useCommentActions = ({
   const [replyFocusToken, setReplyFocusToken] = useState(0);
   const highlightTimerRef = useRef<number | null>(null);
 
+  // 채택된 댓글을 상단에 고정하는 정렬 로직
   const sortedComments = useMemo(() => {
     if (isQuestionPost && isAdopted && adoptedCommentId) {
       return [
@@ -85,6 +87,7 @@ export const useCommentActions = ({
     }, 3000);
   };
 
+  // 댓글 등록 (답글 포함)
   const handleSubmitComment = (event?: SyntheticEvent) => {
     event?.preventDefault();
     if (isLockedQuestion) return;
@@ -112,6 +115,7 @@ export const useCommentActions = ({
     setCommentContent('');
   };
 
+  // 댓글 편집 취소/저장
   const handleCancelEdit = () => {
     setEditingCommentId(null);
     setEditingCommentContent('');
@@ -129,6 +133,7 @@ export const useCommentActions = ({
     handleCancelEdit();
   };
 
+  // 편집 대상 댓글 본문 로드
   const startEditingComment = (commentId: string) => {
     const existingContent = findCommentContent(commentList, commentId);
     if (existingContent !== null) {
@@ -137,6 +142,7 @@ export const useCommentActions = ({
     }
   };
 
+  // 하이라이트 타이머 정리
   useEffect(
     () => () => {
       if (highlightTimerRef.current) {

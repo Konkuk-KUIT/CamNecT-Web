@@ -1,3 +1,4 @@
+// 커뮤니티 화면에서 사용하는 타입 정의
 export type AuthorProfile = {
   name: string;
   major: string;
@@ -68,6 +69,7 @@ export type CommunityPostDetail = {
   myPoints?: number;
 };
 
+// 로그인 사용자 더미 데이터
 export const loggedInUserMajor = '컴퓨터공학부';
 export const loggedInUserProfile: CommentAuthor = {
   name: '박원빈',
@@ -83,6 +85,7 @@ const sampleProfileImage =
 const samplePostImage =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDE2MCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxMjAiIHJ4PSIxMiIgZmlsbD0iI0U5RjdGMSIvPjxyZWN0IHg9IjEyIiB5PSIxMiIgd2lkdGg9IjEzNiIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiNDOUU5RDgiLz48Y2lyY2xlIGN4PSI0MCIgY3k9Ijg4IiByPSIxMCIgZmlsbD0iIzg2RDVCMCIvPjxyZWN0IHg9IjU2IiB5PSI4MCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0iI0E1RTFDNCIvPjwvc3ZnPg==';
 
+// 게시글 상세 더미 데이터
 export const communityPostData: CommunityPostDetail = {
   id: 'post-1',
   boardType: '질문',

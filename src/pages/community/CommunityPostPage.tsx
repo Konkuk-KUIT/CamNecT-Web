@@ -25,6 +25,7 @@ const CommunityPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const currentUser = loggedInUserProfile;
+  // 옵션/팝업/이미지 실패 등 화면 단일 상태
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<'post' | 'comment'>('comment');
@@ -36,7 +37,9 @@ const CommunityPostPage = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
+  // 토스트 표시 제어
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
+  // 게시글 파생 상태
   const {
     selectedPost,
     isQuestionPost,
@@ -50,6 +53,7 @@ const CommunityPostPage = () => {
     imageCount,
   } = usePost({ postId, currentUserName: currentUser.name });
 
+  // 댓글 상태/액션 묶음
   const {
     commentContent,
     setCommentContent,
@@ -76,6 +80,7 @@ const CommunityPostPage = () => {
     adoptedCommentId: selectedPost.adoptedCommentId,
   });
 
+  // 게시글/댓글 옵션 열기
   const handleOpenCommentOptions = (comment: CommentItem) => {
     setSelectedIsMine(comment.author.name === currentUser.name);
     setSelectedTarget('comment');
@@ -90,6 +95,7 @@ const CommunityPostPage = () => {
     setIsOptionOpen(true);
   };
 
+  // 채택/구매 팝업 제어
   const handleOpenAdoptPopup = () => setIsAdoptPopupOpen(true);
   const handleCloseAdoptPopup = () => setIsAdoptPopupOpen(false);
   const handleConfirmAdopt = () => {
@@ -99,6 +105,7 @@ const CommunityPostPage = () => {
   const handleOpenPurchasePopup = () => setIsPurchasePopupOpen(true);
   const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
 
+  // URL 복사: 클립보드 실패 시 fallback 적용
   const copyPostUrl = async () => {
     const postUrl = `${window.location.origin}/community/post/${selectedPost.id}`;
     try {
@@ -118,6 +125,7 @@ const CommunityPostPage = () => {
     }
   };
 
+  // 옵션 id 기반 동작 매핑
   const optionHandlers: Record<OptionItemId, () => Promise<void> | void> = {
     'copy-url': async () => {
       await copyPostUrl();
@@ -140,6 +148,7 @@ const CommunityPostPage = () => {
     'delete-comment': () => undefined,
   };
 
+  // 옵션 선택 처리 (채택 완료 상태 예외 포함)
   const handleOptionItemClick = async (
     item: ActionItem,
     target: 'post' | 'comment',
@@ -173,6 +182,7 @@ const CommunityPostPage = () => {
     setIsOptionOpen(false);
   };
 
+  // 댓글(답글) 렌더 헬퍼
   const renderComment = (comment: CommentItem, isReply = false) => (
     <CommentListItem
       key={comment.id}

@@ -24,6 +24,7 @@ const sortLabels: Record<SortKey, string> = {
   bookmarks: '북마크 많은 순',
 };
 
+// 질문 탭: 필터 + 정렬 + 질문글 리스트
 const QuestionTab = ({ posts }: QuestionTabProps) => {
   const {
     activeFilters,
@@ -44,6 +45,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
 
+  // 정렬 기준에 따른 목록 재계산
   const sortedPosts = useMemo(() => {
     if (sortKey === 'recommended') return filteredPosts;
     const cloned = [...filteredPosts];
@@ -113,7 +115,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
                   {post.isAdopted ? '채택 완료' : '채택 전'}
                 </span>
                 {post.categories.map((category) => (
-                  <Category key={category} label={category} className='px-[6px]' />
+                  <Category key={category} label={category} className='h-[20px] px-[6px]' />
                 ))}
               </div>
 

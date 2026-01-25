@@ -14,6 +14,7 @@ type MainBoxProps = {
   post: MainBoxPost;
 };
 
+// 메인 캐러셀에서 사용하는 요약 카드
 const MainBox = ({ post }: MainBoxProps) => {
   const postImageUrl = post.postImageUrl ?? post.imageUrl;
 
@@ -82,7 +83,7 @@ const MainBox = ({ post }: MainBoxProps) => {
 
           <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
             {post.categories.map((category) => (
-              <Category key={category} label={category} height={20} className='px-[6px]' />
+              <Category key={category} label={category} className='h-[20px] px-[6px]' />
             ))}
           </div>
         </div>

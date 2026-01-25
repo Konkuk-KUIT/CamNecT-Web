@@ -23,6 +23,7 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
+    // 페이지 공통 상태: 게시판/입력/모달/미리보기
     // 게시판 선택 모달 상태
     const [isBoardOpen, setIsBoardOpen] = useState(false);
     // 게시판 타입: 확정/임시 선택
@@ -91,6 +92,7 @@ export const WritePage = () => {
         activeFilters.length > 0;
 
     const editPost = useMemo<CommunityPostDetail | null>(() => {
+        // 편집 진입 시 기존 글 데이터 매핑
         if (!postId) return null;
         if (communityPostData.id === postId) return communityPostData;
 
@@ -174,6 +176,7 @@ export const WritePage = () => {
 
     useEffect(() => {
         if (!isEditMode || !editPost) return;
+        // 편집 모드 초기값 주입
         setBoardType(editPost.boardType as BoardType);
         setDraftBoardType(editPost.boardType as BoardType);
         setTitle(editPost.title);

@@ -8,6 +8,7 @@ export type OptionItemId =
   | 'delete-post'
   | 'delete-comment';
 
+// 옵션 종류 판별 유틸
 export const isEditOption = (id: OptionItemId) =>
   id === 'edit-post' ||
   id === 'edit-comment' ||

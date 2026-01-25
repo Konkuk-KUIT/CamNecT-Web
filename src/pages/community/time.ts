@@ -1,3 +1,4 @@
+// ISO/Date 입력을 상대 시간 텍스트로 변환
 export const formatTimeAgo = (dateInput: string | number | Date) => {
   const targetDate = new Date(dateInput);
   if (Number.isNaN(targetDate.getTime())) return '';

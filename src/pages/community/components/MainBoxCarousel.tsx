@@ -8,6 +8,7 @@ type MainBoxCarouselProps = {
   edgePadding?: number;
 };
 
+// 카드 캐러셀: 포인터 스와이프와 인디케이터 제공
 const MainBoxCarousel = ({
   items,
   gap = 20,

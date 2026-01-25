@@ -8,6 +8,7 @@ export type InterestGroup = {
   items: string[];
 };
 
+// 전공/관심사 필터 옵션 데이터
 export const majorOptions: MajorGroup[] = [
   {
     college: '조형대학',

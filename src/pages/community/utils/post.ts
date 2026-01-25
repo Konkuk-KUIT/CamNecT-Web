@@ -9,6 +9,7 @@ import {
   type QuestionPost,
 } from '../data';
 
+// 게시글 타입별 상세 모델 매핑 유틸
 const buildInfoPostDetail = (post: InfoPost): CommunityPostDetail => ({
   id: post.id,
   boardType: '정보',

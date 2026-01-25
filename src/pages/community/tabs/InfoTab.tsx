@@ -25,6 +25,7 @@ const sortLabels: Record<SortKey, string> = {
   bookmarks: '북마크 많은 순',
 };
 
+// 정보 탭: 필터 + 정렬 + 정보글 리스트
 const InfoTab = ({ posts }: InfoTabProps) => {
   const {
     activeFilters,
@@ -45,6 +46,7 @@ const InfoTab = ({ posts }: InfoTabProps) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
 
+  // 정렬 기준에 따른 목록 재계산
   const sortedPosts = useMemo(() => {
     if (sortKey === 'recommended') return filteredPosts;
     const cloned = [...filteredPosts];
@@ -105,7 +107,7 @@ const InfoTab = ({ posts }: InfoTabProps) => {
             >
               <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
                 {post.categories.map((category) => (
-                  <Category key={category} label={category} height={20} className='px-[6px]' />
+                  <Category key={category} label={category} className='h-[20px] px-[6px]' />
                 ))}
               </div>
 

@@ -5,6 +5,7 @@ type WriteButtonProps = {
   onClick?: () => void;
 };
 
+// 글쓰기 페이지로 이동하는 고정 CTA 버튼
 const WriteButton = ({ onClick }: WriteButtonProps) => {
   const navigate = useNavigate();
 
