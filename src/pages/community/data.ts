@@ -44,6 +44,9 @@ export type QuestionPost = {
   answers: number;
   isAdopted: boolean;
   createdAt: string;
+  accessStatus: 'GRANTED' | 'LOCKED';
+  requiredPoints: number;
+  myPoints: number;
 };
 
 export type CommunityPostDetail = {
@@ -60,9 +63,18 @@ export type CommunityPostDetail = {
   content: string;
   categories: string[];
   postImages?: string[];
+  accessStatus?: 'GRANTED' | 'LOCKED';
+  requiredPoints?: number;
+  myPoints?: number;
 };
 
 export const loggedInUserMajor = '컴퓨터공학부';
+export const loggedInUserProfile: CommentAuthor = {
+  name: '박원빈',
+  major: '컴퓨터공학부',
+  studentId: '20',
+  profileImageUrl: '',
+};
 //TODO: 나중에 랜덤 태그로 변경
 
 const sampleProfileImage =
@@ -81,6 +93,9 @@ export const communityPostData: CommunityPostDetail = {
   isAdopted: false,
   adoptedCommentId: undefined,
   createdAt: '25.01.31 04:01',
+  accessStatus: 'LOCKED',
+  requiredPoints: 100,
+  myPoints: 0,
   author: {
     name: '박원빈',
     major: '컴퓨터공학부',
@@ -124,6 +139,9 @@ export const communityPostSamples: CommunityPostDetail[] = [
     isAdopted: false,
     adoptedCommentId: undefined,
     createdAt: '25.02.05 13:05',
+    accessStatus: 'GRANTED',
+    requiredPoints: 100,
+    myPoints: 120,
     author: {
       name: '박원빈',
       major: '컴퓨터공학부',
@@ -144,6 +162,9 @@ export const communityPostSamples: CommunityPostDetail[] = [
     isAdopted: false,
     adoptedCommentId: undefined,
     createdAt: '25.02.06 09:40',
+    accessStatus: 'LOCKED',
+    requiredPoints: 100,
+    myPoints: 0,
     author: {
       name: '김은지',
       major: '경영학부',
@@ -281,6 +302,9 @@ export const questionPosts: QuestionPost[] = [
     answers: 0,
     isAdopted: false,
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    accessStatus: 'LOCKED',
+    requiredPoints: 100,
+    myPoints: 0,
   },
   {
     id: 'question-2',
@@ -293,6 +317,9 @@ export const questionPosts: QuestionPost[] = [
     answers: 3,
     isAdopted: true,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    accessStatus: 'GRANTED',
+    requiredPoints: 100,
+    myPoints: 120,
   },
   {
     id: 'question-3',
@@ -305,5 +332,8 @@ export const questionPosts: QuestionPost[] = [
     answers: 0,
     isAdopted: false,
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    accessStatus: 'LOCKED',
+    requiredPoints: 100,
+    myPoints: 0,
   },
 ];

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
@@ -8,11 +8,14 @@ import BottomSheetModalPost from '../../components/BottomSheetModal/BottomSheetM
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import CommentListItem from './components/CommentItem';
+import LockedQuestionCard from './components/LockedQuestionCard';
 import {
   communityCommentList,
   communityPostData,
   communityPostSamples,
   infoPosts,
+  loggedInUserProfile,
   questionPosts,
   type CommentItem,
   type CommunityPostDetail,
@@ -21,7 +24,7 @@ import {
 const CommunityPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const currentUserName = '박원빈';
+  const currentUser = loggedInUserProfile;
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<'post' | 'comment'>('comment');
@@ -31,8 +34,20 @@ const CommunityPostPage = () => {
   const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
   const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
+  const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [isToastFading, setIsToastFading] = useState(false);
+  const [commentContent, setCommentContent] = useState('');
+  const [commentList, setCommentList] = useState<CommentItem[]>(communityCommentList);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
+  const [replyTarget, setReplyTarget] = useState<{ id: string; name: string } | null>(
+    null,
+  );
+  const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
+  const [replyFocusToken, setReplyFocusToken] = useState(0);
+  const highlightTimerRef = useRef<number | null>(null);
 
   const selectedPost = useMemo<CommunityPostDetail>(() => {
     if (!postId) return communityPostData;
@@ -69,6 +84,9 @@ const CommunityPostPage = () => {
         isAdopted: questionMatch.isAdopted,
         adoptedCommentId: questionMatch.isAdopted ? communityCommentList[0]?.id : undefined,
         createdAt: questionMatch.createdAt,
+        accessStatus: questionMatch.accessStatus,
+        requiredPoints: questionMatch.requiredPoints,
+        myPoints: questionMatch.myPoints,
         author: questionMatch.author,
         content: questionMatch.content,
         categories: questionMatch.categories,
@@ -89,36 +107,41 @@ const CommunityPostPage = () => {
   }, [postId]);
 
   const isQuestionPost = selectedPost.boardType === '질문';
-  const isPostMine = selectedPost.author.name === currentUserName;
+  const isInfoPost = !isQuestionPost;
+  const isPostMine = selectedPost.author.name === currentUser.name;
   const isAdopted = selectedPost.isAdopted;
   const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
+  const isLockedQuestion = isQuestionPost && selectedPost.accessStatus !== 'GRANTED';
+  const requiredPoints = selectedPost.requiredPoints ?? 100;
+  const textCount = selectedPost.content.length;
+  const imageCount = selectedPost.postImages?.length ?? 0;
 
   const sortedComments =
     isQuestionPost && isAdopted && selectedPost.adoptedCommentId
       ? [
-          ...communityCommentList.filter(
+          ...commentList.filter(
             (comment) => comment.id === selectedPost.adoptedCommentId,
           ),
-          ...communityCommentList.filter(
+          ...commentList.filter(
             (comment) => comment.id !== selectedPost.adoptedCommentId,
           ),
         ]
-      : communityCommentList;
+      : commentList;
 
-  const commentCount = communityCommentList.reduce(
+  const commentCount = commentList.reduce(
     (count, comment) => count + 1 + (comment.replies?.length ?? 0),
     0,
   );
 
   const handleOpenCommentOptions = (comment: CommentItem) => {
-    setSelectedIsMine(comment.author.name === currentUserName);
+    setSelectedIsMine(comment.author.name === currentUser.name);
     setSelectedTarget('comment');
     setSelectedCommentId(comment.id);
     setIsOptionOpen(true);
   };
 
   const handleOpenPostOptions = () => {
-    setSelectedIsMine(selectedPost.author.name === currentUserName);
+    setSelectedIsMine(selectedPost.author.name === currentUser.name);
     setSelectedTarget('post');
     setSelectedCommentId(null);
     setIsOptionOpen(true);
@@ -129,6 +152,113 @@ const CommunityPostPage = () => {
   const handleConfirmAdopt = () => {
     // TODO: 채택 이후 라우터 연결 예정
     setIsAdoptPopupOpen(false);
+  };
+  const handleOpenPurchasePopup = () => setIsPurchasePopupOpen(true);
+  const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
+  const findCommentContent = (comments: CommentItem[], commentId: string): string | null => {
+    for (const comment of comments) {
+      if (comment.id === commentId) return comment.content;
+      if (comment.replies) {
+        const replyContent = findCommentContent(comment.replies, commentId);
+        if (replyContent) return replyContent;
+      }
+    }
+    return null;
+  };
+  const updateCommentContent = (
+    comments: CommentItem[],
+    commentId: string,
+    content: string,
+  ): CommentItem[] =>
+    comments.map((comment) => {
+      if (comment.id === commentId) {
+        return { ...comment, content };
+      }
+      if (comment.replies) {
+        return {
+          ...comment,
+          replies: updateCommentContent(comment.replies, commentId, content),
+        };
+      }
+      return comment;
+    });
+  const handleReplyClick = (comment: CommentItem) => {
+    if (!isInfoPost) return;
+    if (replyTarget?.id === comment.id) {
+      setReplyTarget(null);
+      setHighlightedCommentId(null);
+      return;
+    }
+    setReplyTarget({ id: comment.id, name: comment.author.name });
+    setReplyFocusToken((prev) => prev + 1);
+    setHighlightedCommentId(comment.id);
+    if (highlightTimerRef.current) {
+      window.clearTimeout(highlightTimerRef.current);
+    }
+    highlightTimerRef.current = window.setTimeout(() => {
+      setHighlightedCommentId(null);
+      highlightTimerRef.current = null;
+    }, 3000);
+  };
+  const formatCommentDate = (date: Date) => {
+    const year = String(date.getFullYear()).slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+  const formatCommentDisplayDate = (value: string) => {
+    if (!value) return value;
+    if (/^\d{2}\.\d{2}\.\d{2}/.test(value)) {
+      return value.split(' ')[0];
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value.split(' ')[0];
+    }
+    return formatCommentDate(parsed);
+  };
+  const handleSubmitComment = (event?: SyntheticEvent) => {
+    event?.preventDefault();
+    if (isLockedQuestion) return;
+    const trimmed = commentContent.trim();
+    if (!trimmed) return;
+    const now = new Date();
+    const newComment: CommentItem = {
+      id: `comment-${Date.now()}`,
+      author: { ...currentUser },
+      content: trimmed,
+      createdAt: formatCommentDate(now),
+    };
+    if (replyTarget) {
+      setCommentList((prev) =>
+        prev.map((comment) =>
+          comment.id === replyTarget.id
+            ? { ...comment, replies: [...(comment.replies ?? []), newComment] }
+            : comment,
+        ),
+      );
+      setReplyTarget(null);
+    } else {
+      setCommentList((prev) => [...prev, newComment]);
+    }
+    setCommentContent('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingCommentContent('');
+  };
+
+  const handleSaveEdit = () => {
+    const trimmed = editingCommentContent.trim();
+    if (!editingCommentId || !trimmed) {
+      handleCancelEdit();
+      return;
+    }
+    setCommentList((prev) =>
+      updateCommentContent(prev, editingCommentId, trimmed),
+    );
+    handleCancelEdit();
   };
 
   useEffect(() => {
@@ -143,6 +273,15 @@ const CommunityPostPage = () => {
       window.clearTimeout(closeTimer);
     };
   }, [isToastOpen]);
+
+  useEffect(
+    () => () => {
+      if (highlightTimerRef.current) {
+        window.clearTimeout(highlightTimerRef.current);
+      }
+    },
+    [],
+  );
 
   const copyPostUrl = async () => {
     const postUrl = `${window.location.origin}/community/post/${selectedPost.id}`;
@@ -173,6 +312,13 @@ const CommunityPostPage = () => {
     if (!isEditOrDelete) {
       if (item.label.includes('URL')) {
         await copyPostUrl();
+        setIsOptionOpen(false);
+        return;
+      }
+      if (item.label.includes('신고')) {
+        setIsReportPopupOpen(true);
+        setIsOptionOpen(false);
+        return;
       }
       setIsOptionOpen(false);
       return;
@@ -202,6 +348,20 @@ const CommunityPostPage = () => {
       return;
     }
 
+    if (target === 'comment' && item.label.includes('수정') && selectedIsMine) {
+      if (!selectedCommentId) {
+        setIsOptionOpen(false);
+        return;
+      }
+      const existingContent = findCommentContent(commentList, selectedCommentId);
+      if (existingContent !== null) {
+        setEditingCommentId(selectedCommentId);
+        setEditingCommentContent(existingContent);
+      }
+      setIsOptionOpen(false);
+      return;
+    }
+
     if (target === 'post' && item.label.includes('삭제') && selectedIsMine) {
       setIsDeletePopupOpen(true);
       setIsOptionOpen(false);
@@ -211,83 +371,29 @@ const CommunityPostPage = () => {
     setIsOptionOpen(false);
   };
 
-  const renderComment = (comment: CommentItem, isReply = false) => {
-    if (isQuestionPost && isReply) return null;
-    const isAdoptedComment =
-      isQuestionPost && isAdopted && selectedPost.adoptedCommentId === comment.id;
-    return (
-      <Fragment key={comment.id}>
-        <div
-          className={`flex flex-col border-b border-[var(--ColorGray1,#ECECEC)] ${
-            isReply
-              ? 'bg-[var(--Color_Gray_B,#FCFCFC)]'
-              : isAdoptedComment
-                ? 'bg-[var(--ColorSub2,#F2FCF8)]'
-                : ''
-          }`}
-        >
-          <div
-            className={`flex gap-[10px] ${
-              isReply
-                ? 'py-[15px] pl-[35px] pr-[25px]'
-                : 'px-[25px] pb-[20px] pt-[17px]'
-            }`}
-          >
-            {isReply ? <Icon name='reply' className='h-6 w-6 shrink-0' /> : null}
-            <div className={`flex w-full flex-col ${isReply ? 'pt-1' : ''}`}>
-              <div className='flex items-start justify-between gap-[12px]'>
-                <div>
-                  <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
-                    {comment.author.name}
-                  </div>
-                  <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {comment.author.major} · {comment.author.studentId}학번
-                  </div>
-                </div>
-                <button
-                  type='button'
-                  className='shrink-0'
-                  onClick={() => handleOpenCommentOptions(comment)}
-                  aria-label='댓글 옵션 열기'
-                >
-                  <Icon name='option' className='h-6 w-6' />
-                </button>
-              </div>
-
-              <div className='mt-[5px] text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
-                {comment.content}
-              </div>
-
-              <div className='mt-[15px] flex items-center justify-between text-[12px] font-medium text-[var(--ColorGray2,#A1A1A1)]'>
-                <div className='flex items-center gap-[10px]'>
-                  {showAdoptButton ? (
-                    <button
-                      type='button'
-                      className='inline-flex items-center justify-center gap-[7px] rounded-[5px] border border-[var(--ColorMain,#00C56C)] px-[8px] py-[4px] text-m-14 text-[var(--ColorMain,#00C56C)]'
-                      onClick={handleOpenAdoptPopup}
-                    >
-                      <Icon name='checkCircle' className='h-5 w-5' />
-                      채택하기
-                    </button>
-                  ) : null}
-                  {isAdoptedComment ? (
-                    <span className='inline-flex items-center gap-[7px] rounded-[5px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[4px] text-r-12 text-[var(--ColorMain,#00C56C)]'>
-                      <Icon name='checkCircle' className='h-[16px] w-[16px]' />
-                      채택된 댓글
-                    </span>
-                  ) : null}
-                </div>
-                <span>{comment.createdAt}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        {!isQuestionPost && comment.replies && comment.replies.length > 0
-          ? comment.replies.map((reply) => renderComment(reply, true))
-          : null}
-      </Fragment>
-    );
-  };
+  const renderComment = (comment: CommentItem, isReply = false) => (
+    <CommentListItem
+      key={comment.id}
+      comment={comment}
+      isReply={isReply}
+      isQuestionPost={isQuestionPost}
+      isAdopted={isAdopted}
+      adoptedCommentId={selectedPost.adoptedCommentId}
+      showAdoptButton={showAdoptButton}
+      isInfoPost={isInfoPost}
+      isHighlighted={highlightedCommentId === comment.id}
+      isEditing={editingCommentId === comment.id}
+      editingContent={editingCommentId === comment.id ? editingCommentContent : comment.content}
+      onEditingChange={setEditingCommentContent}
+      onSaveEdit={handleSaveEdit}
+      onCancelEdit={handleCancelEdit}
+      onOpenCommentOptions={handleOpenCommentOptions}
+      onOpenAdoptPopup={handleOpenAdoptPopup}
+      onReplyClick={handleReplyClick}
+      formatDate={formatCommentDisplayDate}
+      renderReply={(reply) => renderComment(reply, true)}
+    />
+  );
 
   return (
     <HeaderLayout
@@ -370,38 +476,49 @@ const CommunityPostPage = () => {
             </div>
 
             <div className='flex flex-col gap-[20px]'>
-              <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
-                {selectedPost.content}
-              </div>
-              {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
-                <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
-                  <div className='flex w-max gap-[5px] pr-[20px]'>
-                    {selectedPost.postImages.map((imageUrl, index) => {
-                      const imageKey = `${selectedPost.id}-image-${index + 1}`;
-                      if (failedImages[imageKey]) {
-                        return (
-                          <div
-                            key={imageKey}
-                            className='h-[150px] w-[150px] shrink-0 rounded-[5px] bg-[#D9D9D9]'
-                            aria-label='이미지 불러오기 실패'
-                          />
-                        );
-                      }
-                      return (
-                        <img
-                          key={imageKey}
-                          src={imageUrl}
-                          alt={`${selectedPost.title} 이미지 ${index + 1}`}
-                          className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
-                          onError={() =>
-                            setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
-                          }
-                        />
-                      );
-                    })}
+              {isLockedQuestion ? (
+                <LockedQuestionCard
+                  requiredPoints={requiredPoints}
+                  textCount={textCount}
+                  imageCount={imageCount}
+                  onPurchaseClick={handleOpenPurchasePopup}
+                />
+              ) : (
+                <>
+                  <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+                    {selectedPost.content}
                   </div>
-                </div>
-              ) : null}
+                  {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
+                    <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
+                      <div className='flex w-max gap-[5px] pr-[20px]'>
+                        {selectedPost.postImages.map((imageUrl, index) => {
+                          const imageKey = `${selectedPost.id}-image-${index + 1}`;
+                          if (failedImages[imageKey]) {
+                            return (
+                              <div
+                                key={imageKey}
+                                className='h-[150px] w-[150px] shrink-0 rounded-[5px] bg-[#D9D9D9]'
+                                aria-label='이미지 불러오기 실패'
+                              />
+                            );
+                          }
+                          return (
+                            <img
+                              key={imageKey}
+                              src={imageUrl}
+                              alt={`${selectedPost.title} 이미지 ${index + 1}`}
+                              className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
+                              onError={() =>
+                                setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
+                              }
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              )}
               <div className='flex flex-wrap gap-[5px]'>
                 {selectedPost.categories.map((category) => (
                   <Category key={category} label={category} />
@@ -414,13 +531,28 @@ const CommunityPostPage = () => {
             <div className='px-[25px] pb-[15px] pt-[20px] text-[16px] font-semibold text-[var(--ColorBlack,#202023)]'>
               댓글 ({commentCount})
             </div>
-            <div className='flex flex-col'>
-              {sortedComments.map((comment) => renderComment(comment))}
-            </div>
+            {isLockedQuestion ? (
+              <div className='flex items-center justify-center px-[25px] py-[30px] text-m-14 text-[var(--ColorGray2,#A1A1A1)]'>
+                질문 구매 후 열람이 가능합니다
+              </div>
+            ) : (
+              <div className='flex flex-col'>
+                {sortedComments.map((comment) => renderComment(comment))}
+              </div>
+            )}
           </section>
         </div>
       </main>
-      <BottomChat likeCount={selectedPost.likes} />
+      <BottomChat
+        likeCount={selectedPost.likes}
+        placeholder={isLockedQuestion ? '구매 후 입력 가능' : '댓글을 입력해 주세요'}
+        content={commentContent}
+        onChange={setCommentContent}
+        onSubmit={handleSubmitComment}
+        disabled={isLockedQuestion}
+        replyTargetName={replyTarget?.name}
+        focusToken={replyFocusToken}
+      />
       <BottomSheetModalPost
         isOpen={isOptionOpen}
         onClose={() => setIsOptionOpen(false)}
@@ -464,6 +596,23 @@ const CommunityPostPage = () => {
           setIsDeletePopupOpen(false);
         }}
         onRightClick={() => setIsDeletePopupOpen(false)}
+      />
+      <PopUp
+        isOpen={isPurchasePopupOpen}
+        type='info'
+        title='질문을 구매하시겠습니까?'
+        content={'구매 시 포인트가 즉시 차감되며, \n결제 후에는 취소나 환불이 불가능합니다.'}
+        onLeftClick={handleClosePurchasePopup}
+        onRightClick={handleClosePurchasePopup}
+      />
+      <PopUp
+        isOpen={isReportPopupOpen}
+        type='confirm'
+        title='현재 제작 중이에요!'
+        content={
+          '유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!'
+        }
+        onClick={() => setIsReportPopupOpen(false)}
       />
       <Toast
         isOpen={isToastOpen}

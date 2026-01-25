@@ -89,8 +89,11 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
       {/* 질문글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 질문글 리스트 API 연결 */}
-        {sortedPosts.map((post) => (
-          <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
+        {sortedPosts.map((post) => {
+          const isLocked = post.accessStatus !== 'GRANTED';
+          const requiredPoints = post.requiredPoints;
+          return (
+            <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
             <article
               className='flex flex-col'
               style={{
@@ -124,7 +127,13 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
 
                 <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-                <div className='line-clamp-2 text-r-16 text-gray-750'>{post.content}</div>
+                {isLocked ? (
+                  <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
+                    {requiredPoints} P
+                  </div>
+                ) : (
+                  <div className='line-clamp-2 text-r-16 text-gray-750'>{post.content}</div>
+                )}
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
                   <span>답변 {post.answers}</span>
@@ -133,8 +142,9 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
                 </div>
               </div>
             </article>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       {/* 필터 모달: 전공/관심사 선택 */}
