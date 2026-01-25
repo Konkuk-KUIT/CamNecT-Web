@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import BottomSheetModal from '../../../components/BottomSheetModal/BottomSheetModal';
+import BottomSheetModal from '../../../components/BottomSheetModal';
 import BoardTypeToggle from '../components/BoardTypeToggle';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';

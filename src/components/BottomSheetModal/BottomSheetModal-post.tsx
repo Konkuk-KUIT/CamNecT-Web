@@ -1,4 +1,4 @@
-import BottomSheetModal from './BottomSheetModal';
+import BottomSheetModal from '../BottomSheetModal';
 import Icon, { type IconName } from './Icon';
 
 type ContentTarget = 'post' | 'comment';

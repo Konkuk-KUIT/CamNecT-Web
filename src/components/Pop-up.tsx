@@ -78,7 +78,6 @@ const PopUp = ({
       );
     }
 
-
     return (
       <div className={`flex flex-col justify-center h-[clamp(85px,10vw,100px)] gap-[15px] px-[15px] pt-[10px] ${contentAlign}`}>
         {type === 'error' ? (
