@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 // 이미지 업로드 처리를 위한 훅 (유효성 검사, 미리보기, FormData 변환)
+// MypageEditPage에 이미 사용되고 있으므로 임시 유지, 추후에 useFileUpload 훅 사용해서 대체해주시거나 그냥 유지하시면 됩니다
 export const useImageUpload = () => {
     const [isLoading, setIsLoading] = useState(false);
     
