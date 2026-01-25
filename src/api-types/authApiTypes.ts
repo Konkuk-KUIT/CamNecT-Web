@@ -18,7 +18,7 @@ export interface LoginResponse {
 
 // 이메일 인증 요청 DTO (/api/verification/email/verify-code)
 export interface EmailVerificationRequest {
-  userId: number;
+  email: string;
   code: string;
 }
 

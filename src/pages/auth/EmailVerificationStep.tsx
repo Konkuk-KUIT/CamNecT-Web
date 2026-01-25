@@ -50,6 +50,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const [emailSent, setEmailSent] = useState(false);  // 이메일 전송 여부
     const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
+    // 이메일 전역상태 
     const {email, setEmail} = useSignupStore(
         useShallow((state) => ({
             email: state.email,
@@ -57,6 +58,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         }))
     );
 
+    // 이메일 인증 폼 검증 (zod)
     const emailSchema = z.object({
         // 1. 이메일 값
         email: z
@@ -72,6 +74,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
 
     type EmailFormData = z.infer<typeof emailSchema>;
 
+    // RHF로 폼 제어
     const {register, handleSubmit, watch, formState : {errors}} = useForm<EmailFormData>({
         resolver: zodResolver(emailSchema),
         mode: "onChange",
@@ -85,6 +88,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const emailValue = watch("email");
     const codeValue = watch("verificationCode");
 
+    // 이메일 인증번호 검증 mutation
     const emailVerifyMutation = useMutation({
         mutationFn: verifyEmailCode,
         onSuccess: () => {
@@ -96,8 +100,10 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         }
     });
 
+    // '다음'버튼 클릭 시
     const onSubmit = (data : EmailFormData) => {
         setEmail(data.email);
+        onNext();
     };
     
     // todo 인증하기 누르면 이메일로 발송됐다는 팝업 (merge 이후...)
@@ -123,11 +129,13 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                         
                         <SmallButton 
                             label="인증요청" 
+                            type="button"
                             className="mt-[36px]"
                             disabled={!emailValue || !!errors.email}
                             onClick={() => {
                                 // TODO: 이메일 전송 API 호출
                                 console.log("이메일 전송 요청");
+                                setEmail(emailValue);
                                 setEmailSent(true);  // 이메일 전송 완료
                             }}
                         />
@@ -142,9 +150,8 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                         />
                         <SmallButton 
                             onClick={() => {
-                                // TODO: userId를 적절한 곳에서 가져와야 함 (현재는 예시로 1 전달)
                                 emailVerifyMutation.mutate({
-                                    userId: 1, 
+                                    email: email, // 이메일 전역상태
                                     code: codeValue
                                 });
                             }}
@@ -159,11 +166,11 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                 <div className="h-[40px] flex-none" />
                 
                 <div className="flex-none pb-[60px] relative z-10 w-full flex justify-center">
-                        <Button 
-                            disabled={!isEmailVerificated}
-                            label="다음" 
-                            onClick={onNext}
-                        />
+                    <Button 
+                        type="submit"
+                        disabled={!isEmailVerificated}
+                        label="다음" 
+                    />
                 </div>
             
             </div>
