@@ -1,5 +1,6 @@
 import BottomSheetModal from '../BottomSheetModal';
 import Icon, { type IconName } from './Icon';
+import { isDeleteOption, type OptionItemId } from '../../pages/community/utils/option';
 
 type ContentTarget = 'post' | 'comment';
 
@@ -11,30 +12,31 @@ type BottomSheetModalPostProps = {
   onItemClick?: (item: ActionItem, target: ContentTarget) => void;
 };
 
-type ActionItem = {
+export type ActionItem = {
   icon: IconName;
+  id: OptionItemId;
   label: string;
 };
 
 const optionsMap: Record<ContentTarget, { mine: ActionItem[]; other: ActionItem[] }> = {
   post: {
     mine: [
-      { icon: 'edit', label: '게시글 수정' },
-      { icon: 'delete', label: '게시글 삭제' },
+      { icon: 'edit', id: 'edit-post', label: '게시글 수정' },
+      { icon: 'delete', id: 'delete-post', label: '게시글 삭제' },
     ],
     other: [
-      { icon: 'url', label: 'URL 복사' },
-      { icon: 'report', label: '게시글 신고' },
+      { icon: 'url', id: 'copy-url', label: 'URL 복사' },
+      { icon: 'report', id: 'report-post', label: '게시글 신고' },
     ],
   },
   comment: {
     mine: [
-      { icon: 'edit', label: '댓글 수정' },
-      { icon: 'delete', label: '댓글 삭제' },
+      { icon: 'edit', id: 'edit-comment', label: '댓글 수정' },
+      { icon: 'delete', id: 'delete-comment', label: '댓글 삭제' },
     ],
     other: [
-      { icon: 'profile', label: '작성자 프로필 보기' },
-      { icon: 'report', label: '댓글 신고' },
+      { icon: 'profile', id: 'view-author-profile', label: '작성자 프로필 보기' },
+      { icon: 'report', id: 'report-comment', label: '댓글 신고' },
     ],
   },
 };
@@ -63,7 +65,7 @@ const BottomSheetModalPost = ({
               <span
                 className='text-[16px] font-medium'
                 style={{
-                  color: item.label.includes('삭제')
+                  color: isDeleteOption(item.id)
                     ? 'var(--Color_Red, #FF3838)'
                     : 'var(--ColorGray3,#646464)',
                 }}

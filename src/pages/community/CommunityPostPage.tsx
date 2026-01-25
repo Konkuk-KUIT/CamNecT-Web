@@ -1,25 +1,25 @@
-import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
 import Toast from '../../components/Toast';
-import BottomSheetModalPost from '../../components/BottomSheetModal/BottomSheetModal-post';
+import BottomSheetModalPost, {
+  type ActionItem,
+} from '../../components/BottomSheetModal/BottomSheetModal-post';
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { useToast } from '../../hooks/useToast';
 import CommentListItem from './components/CommentItem';
 import LockedQuestionCard from './components/LockedQuestionCard';
 import {
-  communityCommentList,
-  communityPostData,
-  communityPostSamples,
-  infoPosts,
   loggedInUserProfile,
-  questionPosts,
   type CommentItem,
-  type CommunityPostDetail,
 } from './data';
+import { useCommentActions } from './hooks/useCommentActions';
+import { usePost } from './hooks/usePost';
+import { isEditOption, type OptionItemId } from './utils/option';
 
 const CommunityPostPage = () => {
   const { postId } = useParams();
@@ -36,102 +36,45 @@ const CommunityPostPage = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
-  const [isToastOpen, setIsToastOpen] = useState(false);
-  const [isToastFading, setIsToastFading] = useState(false);
-  const [commentContent, setCommentContent] = useState('');
-  const [commentList, setCommentList] = useState<CommentItem[]>(communityCommentList);
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editingCommentContent, setEditingCommentContent] = useState('');
-  const [replyTarget, setReplyTarget] = useState<{ id: string; name: string } | null>(
-    null,
-  );
-  const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
-  const [replyFocusToken, setReplyFocusToken] = useState(0);
-  const highlightTimerRef = useRef<number | null>(null);
+  const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
+  const {
+    selectedPost,
+    isQuestionPost,
+    isInfoPost,
+    isPostMine,
+    isAdopted,
+    showAdoptButton,
+    isLockedQuestion,
+    requiredPoints,
+    textCount,
+    imageCount,
+  } = usePost({ postId, currentUserName: currentUser.name });
 
-  const selectedPost = useMemo<CommunityPostDetail>(() => {
-    if (!postId) return communityPostData;
-    if (communityPostData.id === postId) return communityPostData;
-
-    const infoMatch = infoPosts.find((post) => post.id === postId);
-    if (infoMatch) {
-      const post = {
-        id: infoMatch.id,
-        boardType: '정보',
-        title: infoMatch.title,
-        likes: infoMatch.likes,
-        comments: infoMatch.comments,
-        saveCount: infoMatch.saveCount,
-        isAdopted: false,
-        createdAt: infoMatch.createdAt,
-        author: infoMatch.author,
-        content: infoMatch.content,
-        categories: infoMatch.categories,
-        postImages: infoMatch.postImageUrl ? [infoMatch.postImageUrl] : undefined,
-      };
-      return post;
-    }
-
-    const questionMatch = questionPosts.find((post) => post.id === postId);
-    if (questionMatch) {
-      const post = {
-        id: questionMatch.id,
-        boardType: '질문',
-        title: questionMatch.title,
-        likes: questionMatch.likes,
-        comments: questionMatch.answers,
-        saveCount: questionMatch.saveCount,
-        isAdopted: questionMatch.isAdopted,
-        adoptedCommentId: questionMatch.isAdopted ? communityCommentList[0]?.id : undefined,
-        createdAt: questionMatch.createdAt,
-        accessStatus: questionMatch.accessStatus,
-        requiredPoints: questionMatch.requiredPoints,
-        myPoints: questionMatch.myPoints,
-        author: questionMatch.author,
-        content: questionMatch.content,
-        categories: questionMatch.categories,
-      };
-      return post;
-    }
-
-    const sampleMatch = communityPostSamples.find((post) => post.id === postId);
-    if (sampleMatch) {
-      return {
-        ...sampleMatch,
-        adoptedCommentId:
-          sampleMatch.isAdopted ? sampleMatch.adoptedCommentId ?? communityCommentList[0]?.id : undefined,
-      };
-    }
-
-    return communityPostData;
-  }, [postId]);
-
-  const isQuestionPost = selectedPost.boardType === '질문';
-  const isInfoPost = !isQuestionPost;
-  const isPostMine = selectedPost.author.name === currentUser.name;
-  const isAdopted = selectedPost.isAdopted;
-  const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
-  const isLockedQuestion = isQuestionPost && selectedPost.accessStatus !== 'GRANTED';
-  const requiredPoints = selectedPost.requiredPoints ?? 100;
-  const textCount = selectedPost.content.length;
-  const imageCount = selectedPost.postImages?.length ?? 0;
-
-  const sortedComments =
-    isQuestionPost && isAdopted && selectedPost.adoptedCommentId
-      ? [
-          ...commentList.filter(
-            (comment) => comment.id === selectedPost.adoptedCommentId,
-          ),
-          ...commentList.filter(
-            (comment) => comment.id !== selectedPost.adoptedCommentId,
-          ),
-        ]
-      : commentList;
-
-  const commentCount = commentList.reduce(
-    (count, comment) => count + 1 + (comment.replies?.length ?? 0),
-    0,
-  );
+  const {
+    commentContent,
+    setCommentContent,
+    commentCount,
+    sortedComments,
+    editingCommentId,
+    editingCommentContent,
+    setEditingCommentContent,
+    highlightedCommentId,
+    replyTarget,
+    replyFocusToken,
+    handleReplyClick,
+    handleSubmitComment,
+    handleSaveEdit,
+    handleCancelEdit,
+    startEditingComment,
+    formatCommentDisplayDate,
+  } = useCommentActions({
+    currentUser,
+    isInfoPost,
+    isLockedQuestion,
+    isQuestionPost,
+    isAdopted,
+    adoptedCommentId: selectedPost.adoptedCommentId,
+  });
 
   const handleOpenCommentOptions = (comment: CommentItem) => {
     setSelectedIsMine(comment.author.name === currentUser.name);
@@ -155,140 +98,12 @@ const CommunityPostPage = () => {
   };
   const handleOpenPurchasePopup = () => setIsPurchasePopupOpen(true);
   const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
-  const findCommentContent = (comments: CommentItem[], commentId: string): string | null => {
-    for (const comment of comments) {
-      if (comment.id === commentId) return comment.content;
-      if (comment.replies) {
-        const replyContent = findCommentContent(comment.replies, commentId);
-        if (replyContent) return replyContent;
-      }
-    }
-    return null;
-  };
-  const updateCommentContent = (
-    comments: CommentItem[],
-    commentId: string,
-    content: string,
-  ): CommentItem[] =>
-    comments.map((comment) => {
-      if (comment.id === commentId) {
-        return { ...comment, content };
-      }
-      if (comment.replies) {
-        return {
-          ...comment,
-          replies: updateCommentContent(comment.replies, commentId, content),
-        };
-      }
-      return comment;
-    });
-  const handleReplyClick = (comment: CommentItem) => {
-    if (!isInfoPost) return;
-    if (replyTarget?.id === comment.id) {
-      setReplyTarget(null);
-      setHighlightedCommentId(null);
-      return;
-    }
-    setReplyTarget({ id: comment.id, name: comment.author.name });
-    setReplyFocusToken((prev) => prev + 1);
-    setHighlightedCommentId(comment.id);
-    if (highlightTimerRef.current) {
-      window.clearTimeout(highlightTimerRef.current);
-    }
-    highlightTimerRef.current = window.setTimeout(() => {
-      setHighlightedCommentId(null);
-      highlightTimerRef.current = null;
-    }, 3000);
-  };
-  const formatCommentDate = (date: Date) => {
-    const year = String(date.getFullYear()).slice(-2);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}.${month}.${day}`;
-  };
-  const formatCommentDisplayDate = (value: string) => {
-    if (!value) return value;
-    if (/^\d{2}\.\d{2}\.\d{2}/.test(value)) {
-      return value.split(' ')[0];
-    }
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return value.split(' ')[0];
-    }
-    return formatCommentDate(parsed);
-  };
-  const handleSubmitComment = (event?: SyntheticEvent) => {
-    event?.preventDefault();
-    if (isLockedQuestion) return;
-    const trimmed = commentContent.trim();
-    if (!trimmed) return;
-    const now = new Date();
-    const newComment: CommentItem = {
-      id: `comment-${Date.now()}`,
-      author: { ...currentUser },
-      content: trimmed,
-      createdAt: formatCommentDate(now),
-    };
-    if (replyTarget) {
-      setCommentList((prev) =>
-        prev.map((comment) =>
-          comment.id === replyTarget.id
-            ? { ...comment, replies: [...(comment.replies ?? []), newComment] }
-            : comment,
-        ),
-      );
-      setReplyTarget(null);
-    } else {
-      setCommentList((prev) => [...prev, newComment]);
-    }
-    setCommentContent('');
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditingCommentContent('');
-  };
-
-  const handleSaveEdit = () => {
-    const trimmed = editingCommentContent.trim();
-    if (!editingCommentId || !trimmed) {
-      handleCancelEdit();
-      return;
-    }
-    setCommentList((prev) =>
-      updateCommentContent(prev, editingCommentId, trimmed),
-    );
-    handleCancelEdit();
-  };
-
-  useEffect(() => {
-    if (!isToastOpen) return;
-    const fadeTimer = window.setTimeout(() => setIsToastFading(true), 1500);
-    const closeTimer = window.setTimeout(() => {
-      setIsToastFading(false);
-      setIsToastOpen(false);
-    }, 3500);
-    return () => {
-      window.clearTimeout(fadeTimer);
-      window.clearTimeout(closeTimer);
-    };
-  }, [isToastOpen]);
-
-  useEffect(
-    () => () => {
-      if (highlightTimerRef.current) {
-        window.clearTimeout(highlightTimerRef.current);
-      }
-    },
-    [],
-  );
 
   const copyPostUrl = async () => {
     const postUrl = `${window.location.origin}/community/post/${selectedPost.id}`;
     try {
       await navigator.clipboard.writeText(postUrl);
-      setIsToastFading(false);
-      setIsToastOpen(true);
+      openToast();
       return;
     } catch {
       const textarea = document.createElement('textarea');
@@ -299,27 +114,38 @@ const CommunityPostPage = () => {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
-      setIsToastFading(false);
-      setIsToastOpen(true);
+      openToast();
     }
   };
 
+  const optionHandlers: Record<OptionItemId, () => Promise<void> | void> = {
+    'copy-url': async () => {
+      await copyPostUrl();
+    },
+    'report-post': () => setIsReportPopupOpen(true),
+    'report-comment': () => setIsReportPopupOpen(true),
+    'view-author-profile': () => undefined,
+    'edit-post': () => {
+      if (!selectedIsMine) return;
+      navigate(`/community/edit/${selectedPost.id}`);
+    },
+    'edit-comment': () => {
+      if (!selectedIsMine || !selectedCommentId) return;
+      startEditingComment(selectedCommentId);
+    },
+    'delete-post': () => {
+      if (!selectedIsMine) return;
+      setIsDeletePopupOpen(true);
+    },
+    'delete-comment': () => undefined,
+  };
+
   const handleOptionItemClick = async (
-    item: { label: string },
+    item: ActionItem,
     target: 'post' | 'comment',
   ) => {
-    const isEditOrDelete = item.label.includes('수정') || item.label.includes('삭제');
-    if (!isEditOrDelete) {
-      if (item.label.includes('URL')) {
-        await copyPostUrl();
-        setIsOptionOpen(false);
-        return;
-      }
-      if (item.label.includes('신고')) {
-        setIsReportPopupOpen(true);
-        setIsOptionOpen(false);
-        return;
-      }
+    if (!isEditOption(item.id)) {
+      await optionHandlers[item.id]();
       setIsOptionOpen(false);
       return;
     }
@@ -342,31 +168,7 @@ const CommunityPostPage = () => {
       return;
     }
 
-    if (target === 'post' && item.label.includes('수정') && selectedIsMine) {
-      navigate(`/community/edit/${selectedPost.id}`);
-      setIsOptionOpen(false);
-      return;
-    }
-
-    if (target === 'comment' && item.label.includes('수정') && selectedIsMine) {
-      if (!selectedCommentId) {
-        setIsOptionOpen(false);
-        return;
-      }
-      const existingContent = findCommentContent(commentList, selectedCommentId);
-      if (existingContent !== null) {
-        setEditingCommentId(selectedCommentId);
-        setEditingCommentContent(existingContent);
-      }
-      setIsOptionOpen(false);
-      return;
-    }
-
-    if (target === 'post' && item.label.includes('삭제') && selectedIsMine) {
-      setIsDeletePopupOpen(true);
-      setIsOptionOpen(false);
-      return;
-    }
+    await optionHandlers[item.id]();
 
     setIsOptionOpen(false);
   };
