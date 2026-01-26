@@ -1,5 +1,6 @@
 import Badge from '../../components/Badge';
 import Icon from '../../components/Icon';
+import { useNavigate } from 'react-router-dom';
 
 const Logo = () => (
   <svg
@@ -54,6 +55,8 @@ type HomeHeaderProps = {
 };
 
 export const HomeHeader = ({ showBadge }: HomeHeaderProps) => {
+  const navigate = useNavigate();
+
   return (
     <header
       className='sticky left-0 right-0 top-0 z-50 flex w-full items-center justify-between bg-white px-[25px] py-[15px]'
@@ -67,10 +70,15 @@ export const HomeHeader = ({ showBadge }: HomeHeaderProps) => {
       <span role='img' aria-label='캠넥트 로고'>
         <Logo />
       </span>
-      <span role='img' aria-label='알림' className='relative inline-flex'>
+      <button
+        type='button'
+        aria-label='알림'
+        className='relative inline-flex'
+        onClick={() => navigate('/home/notices')}
+      >
         <Icon name='alarm' />
         {showBadge ? <Badge /> : null}
-      </span>
+      </button>
     </header>
   );
 };
