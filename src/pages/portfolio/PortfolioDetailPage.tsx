@@ -21,6 +21,7 @@ export const PortfolioDetailPage = () => {
     const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
     //URL에서 edit 파라미터 확인
     useEffect(() => {
@@ -77,11 +78,7 @@ export const PortfolioDetailPage = () => {
 
     const handleDelete = () => {
         setIsMenuOpen(false);
-        if (confirm('포트폴리오를 삭제하시겠습니까?')) {
-            // TODO: API 호출
-            console.log('포트폴리오 삭제:', portfolioId);
-            navigate(-1); 
-        }
+        setShowDeleteWarning(true);
     };
 
     const toggleVisibility = () => {
@@ -363,6 +360,20 @@ export const PortfolioDetailPage = () => {
                     </button>
                 </div>
             </BottomSheetModal>
+            {showDeleteWarning && (<PopUp
+                type="warning"
+                title='포트폴리오를 삭제하시겠습니까?'
+                content='삭제할 시 복구할 수 없습니다.'
+                isOpen={true}
+                leftButtonText='삭제하기'
+                onLeftClick={() => {
+                    setShowDeleteWarning(false);
+                    // TODO: API 호출
+                    console.log('포트폴리오 삭제:', portfolioId);
+                    navigate(-1); 
+                }}
+                onRightClick={() => setShowDeleteWarning(false)}
+            />)}
         </div>
     );
 }

@@ -67,175 +67,175 @@ export default function PortfolioEditModal({
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
 
-  // 초기 데이터 저장 (변경사항 추적용)
-  const initialDataRef = useRef<{
-    title: string;
-    content: string;
-    role: string;
-    skills: string;
-    thumbnailImage: ImageData | null;
-    portfolioImages: ImageData[];
-    portfolioPdf: Media[];
-    portfolioLink: string[];
-    problemSolution: string;
-  } | null>(null);
+    // 초기 데이터 저장 (변경사항 추적용)
+    const initialDataRef = useRef<{
+        title: string;
+        content: string;
+        role: string;
+        skills: string;
+        thumbnailImage: ImageData | null;
+        portfolioImages: ImageData[];
+        portfolioPdf: Media[];
+        portfolioLink: string[];
+        problemSolution: string;
+    } | null>(null);
 
   // 변경사항이 있는지 확인
   const hasUnsavedChanges = 
     initialDataRef.current !== null && (
-      title !== initialDataRef.current.title ||
-      content !== initialDataRef.current.content ||
-      role !== initialDataRef.current.role ||
-      skills !== initialDataRef.current.skills ||
-      thumbnailImage !== initialDataRef.current.thumbnailImage ||
-      portfolioImages !== initialDataRef.current.portfolioImages ||
-      portfolioPdf !== initialDataRef.current.portfolioPdf ||
-      portfolioLink !== initialDataRef.current.portfolioLink ||
-      problemSolution !== initialDataRef.current.problemSolution
+        title !== initialDataRef.current.title ||
+        content !== initialDataRef.current.content ||
+        role !== initialDataRef.current.role ||
+        skills !== initialDataRef.current.skills ||
+        thumbnailImage !== initialDataRef.current.thumbnailImage ||
+        portfolioImages !== initialDataRef.current.portfolioImages ||
+        portfolioPdf !== initialDataRef.current.portfolioPdf ||
+        portfolioLink !== initialDataRef.current.portfolioLink ||
+        problemSolution !== initialDataRef.current.problemSolution
     );
 
-  // useModalHistory 훅 사용
-  useModalHistory(onClose, hasUnsavedChanges, () => setShowCloseWarning(true));
+    // useModalHistory 훅 사용
+    useModalHistory(onClose, hasUnsavedChanges, () => setShowCloseWarning(true));
 
-  // initialData 변경 시 state 업데이트
-  useEffect(() => {
-    const loadData = async () => {
-      if (initialData) {
-        setIsInitializing(true);
-        setError(null);
-        
-        try {
-          setTitle(initialData.title);
-          setContent(initialData.content || '');
-          setStartYear(initialData.startYear || new Date().getFullYear());
-          setStartMonth(initialData.startMonth || 1);
-          setEndYear(initialData.endYear || new Date().getFullYear());
-          setEndMonth(initialData.endMonth || 1);
-          setRole(initialData.role || '');
-          setSkills(initialData.skills || '');
-          
-          // 썸네일 이미지 처리
-          let thumbnail = null;
-          if (initialData.portfolioThumbnail) {
-            thumbnail = {
-              media: initialData.portfolioThumbnail,
-              previewUrl: typeof initialData.portfolioThumbnail === 'string' 
-                ? initialData.portfolioThumbnail 
-                : URL.createObjectURL(initialData.portfolioThumbnail)
-            };
-            setThumbnailImage(thumbnail);
-          }
-          
-          // 추가 이미지 처리
-          const additionalImages = (initialData.portfolioImage || []).map(img => ({
-            media: img,
-            previewUrl: typeof img === 'string' ? img : URL.createObjectURL(img)
-          }));
-          setPortfolioImages(additionalImages);
-          
-          setPortfolioPdf(initialData.portfolioPdf || []);
-          setPortfolioLink(initialData.portfolioLink || []);
-          setProblemSolution(initialData.problemSolution || '');
+    // initialData 변경 시 state 업데이트
+    useEffect(() => {
+        const loadData = async () => {
+            if (initialData) {
+                setIsInitializing(true);
+                setError(null);
+                
+                try {
+                    setTitle(initialData.title);
+                    setContent(initialData.content || '');
+                    setStartYear(initialData.startYear || new Date().getFullYear());
+                    setStartMonth(initialData.startMonth || 1);
+                    setEndYear(initialData.endYear || new Date().getFullYear());
+                    setEndMonth(initialData.endMonth || 1);
+                    setRole(initialData.role || '');
+                    setSkills(initialData.skills || '');
+                    
+                    // 썸네일 이미지 처리
+                    let thumbnail = null;
+                    if (initialData.portfolioThumbnail) {
+                        thumbnail = {
+                        media: initialData.portfolioThumbnail,
+                        previewUrl: typeof initialData.portfolioThumbnail === 'string' 
+                            ? initialData.portfolioThumbnail 
+                            : URL.createObjectURL(initialData.portfolioThumbnail)
+                        };
+                        setThumbnailImage(thumbnail);
+                    }
+                    
+                    // 추가 이미지 처리
+                    const additionalImages = (initialData.portfolioImage || []).map(img => ({
+                        media: img,
+                        previewUrl: typeof img === 'string' ? img : URL.createObjectURL(img)
+                    }));
+                    setPortfolioImages(additionalImages);
+                    
+                    setPortfolioPdf(initialData.portfolioPdf || []);
+                    setPortfolioLink(initialData.portfolioLink || []);
+                    setProblemSolution(initialData.problemSolution || '');
 
-          // 초기 데이터 저장 (변경사항 추적용)
-          initialDataRef.current = {
-            title: initialData.title,
-            content: initialData.content || '',
-            role: initialData.role || '',
-            skills: initialData.skills || '',
-            thumbnailImage: thumbnail,
-            portfolioImages: additionalImages,
-            portfolioPdf: initialData.portfolioPdf || [],
-            portfolioLink: initialData.portfolioLink || [],
-            problemSolution: initialData.problemSolution || '',
-          };
-          
-          // 약간의 지연 후 로딩 완료
-          await new Promise(resolve => setTimeout(resolve, 200));
-        } catch (err) {
-          console.error('데이터 로드 실패:', err);
-          setError('데이터를 불러오는 중 오류가 발생했습니다.');
-        } finally {
-          setIsInitializing(false);
-        }
-      } else {
-        // 새 포트폴리오 작성 - 빈 초기 데이터
-        initialDataRef.current = {
-          title: '',
-          content: '',
-          role: '',
-          skills: '',
-          thumbnailImage: null,
-          portfolioImages: [],
-          portfolioPdf: [],
-          portfolioLink: [],
-          problemSolution: '',
+                    // 초기 데이터 저장 (변경사항 추적용)
+                    initialDataRef.current = {
+                        title: initialData.title,
+                        content: initialData.content || '',
+                        role: initialData.role || '',
+                        skills: initialData.skills || '',
+                        thumbnailImage: thumbnail,
+                        portfolioImages: additionalImages,
+                        portfolioPdf: initialData.portfolioPdf || [],
+                        portfolioLink: initialData.portfolioLink || [],
+                        problemSolution: initialData.problemSolution || '',
+                    };
+                    
+                    // 약간의 지연 후 로딩 완료
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                } catch (err) {
+                    console.error('데이터 로드 실패:', err);
+                    setError('데이터를 불러오는 중 오류가 발생했습니다.');
+                } finally {
+                    setIsInitializing(false);
+                }
+            } else {
+                // 새 포트폴리오 작성 - 빈 초기 데이터
+                initialDataRef.current = {
+                    title: '',
+                    content: '',
+                    role: '',
+                    skills: '',
+                    thumbnailImage: null,
+                    portfolioImages: [],
+                    portfolioPdf: [],
+                    portfolioLink: [],
+                    problemSolution: '',
+                };
+                setIsInitializing(false);
+                setError(null);
+            }
         };
-        setIsInitializing(false);
-        setError(null);
-      }
+
+        if (isOpen) {
+            loadData();
+        }
+    }, [initialData, isOpen]);
+
+    // 모달 열림/닫힘 시 body 스크롤 제어
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
+
+    const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        const file = files[0]; // 첫 번째 파일만
+        const result = prepareImage(file);
+        if (result) {
+            setThumbnailImage({
+                media: result.file,
+                previewUrl: result.previewUrl
+            });
+        }
+
+        // input 초기화
+        if (thumbnailInputRef.current) {
+            thumbnailInputRef.current.value = '';
+        }
     };
 
-    if (isOpen) {
-      loadData();
-    }
-  }, [initialData, isOpen]);
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
-  // 모달 열림/닫힘 시 body 스크롤 제어
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+        const newImages: ImageData[] = [];
 
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const file = files[0]; // 첫 번째 파일만
-    const result = prepareImage(file);
-    if (result) {
-      setThumbnailImage({
-        media: result.file,
-        previewUrl: result.previewUrl
-      });
-    }
-
-    // input 초기화
-    if (thumbnailInputRef.current) {
-      thumbnailInputRef.current.value = '';
-    }
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    const newImages: ImageData[] = [];
-
-    files.forEach(file => {
-      const result = prepareImage(file);
-      if (result) {
-        newImages.push({
-          media: result.file,
-          previewUrl: result.previewUrl
+        files.forEach(file => {
+            const result = prepareImage(file);
+            if (result) {
+                newImages.push({
+                media: result.file,
+                previewUrl: result.previewUrl
+                });
+            }
         });
-      }
-    });
 
-    setPortfolioImages([...portfolioImages, ...newImages]);
+        setPortfolioImages([...portfolioImages, ...newImages]);
     
-    // input 초기화
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-  };
+        // input 초기화
+        if (imageInputRef.current) {
+            imageInputRef.current.value = '';
+        }
+    };
 
     const handleCameraUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -245,120 +245,120 @@ export default function PortfolioEditModal({
         const result = prepareImage(file);
         if (result) {
             setPortfolioImages([...portfolioImages, {
-            media: result.file,
-            previewUrl: result.previewUrl
-        }]);
-    }
+                media: result.file,
+                previewUrl: result.previewUrl
+            }]);
+        }
     
-    // input 초기화
-    if (cameraInputRef.current) {
-      cameraInputRef.current.value = '';
+        // input 초기화
+        if (cameraInputRef.current) {
+            cameraInputRef.current.value = '';
+        }
+    };
+
+    const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            setPortfolioPdf([...portfolioPdf, ...files]);
+        }
+        
+        // input 초기화
+        if (pdfInputRef.current) {
+            pdfInputRef.current.value = '';
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setPortfolioImages(portfolioImages.filter((_, i) => i !== index));
+    };
+
+    const removePdf = (index: number) => {
+        setPortfolioPdf(portfolioPdf.filter((_, i) => i !== index));
+    };
+
+    const removeLink = (index: number) => {
+        setPortfolioLink(portfolioLink.filter((_, i) => i !== index));
+    };
+
+    const handleLinkSave = () => {
+        if (linkInput.trim()) {
+            setPortfolioLink([...portfolioLink, linkInput.trim()]);
+            setLinkInput('');
+            setIsLinkModalOpen(false);
+        }
+    };
+
+    const handleLinkModalClose = () => {
+        setLinkInput('');
+        setIsLinkModalOpen(false);
+    };
+
+    const getMissingFields = () => {
+        const missing: string[] = [];
+        if (!title.trim()) missing.push('포트폴리오 제목');
+        if (!content.trim()) missing.push('포트폴리오 개요');
+        if (!role.trim()) missing.push('프로젝트 역할');
+        if (!skills.trim()) missing.push('사용 기술');
+        if (!thumbnailImage) missing.push('대표 이미지');
+        return missing;
+    };
+
+    const handleClose = () => {
+        if (hasUnsavedChanges) {
+            setShowCloseWarning(true);
+        } else {
+            onClose();
+        }
     }
-  };
 
-  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      setPortfolioPdf([...portfolioPdf, ...files]);
-    }
-    
-    // input 초기화
-    if (pdfInputRef.current) {
-      pdfInputRef.current.value = '';
-    }
-  };
+    const handleSaveClick = () => {
+        if (!hasEssential) {
+            setShowValidationPopup(true);
+        } else {
+            setConfirm(true);
+        }
+    };
 
-  const removeImage = (index: number) => {
-    setPortfolioImages(portfolioImages.filter((_, i) => i !== index));
-  };
+    const handleSave = async () => {
+        setIsSaving(true);
+        setError(null);
+        
+        try {
+            const data: PortfolioDetail = {
+                ...(initialData || {}),
+                portfolioId: initialData?.portfolioId || `pf_${userId}_${Date.now()}`,
+                id: initialData?.id || userId,
+                title,
+                content,
+                startYear,
+                startMonth,
+                endYear,
+                endMonth,
+                role,
+                skills,
+                portfolioImage: portfolioImages.map(img => img.media),
+                portfolioPdf,
+                portfolioLink: portfolioLink.filter(link => link.trim() !== ''),
+                problemSolution,
+                portfolioThumbnail: thumbnailImage?.media || initialData?.portfolioThumbnail || '',
+                updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
+                portfolioVisibility: initialData?.portfolioVisibility ?? true,
+                isImportant: initialData?.isImportant ?? false,
+            } as PortfolioDetail;
 
-  const removePdf = (index: number) => {
-    setPortfolioPdf(portfolioPdf.filter((_, i) => i !== index));
-  };
+            // TODO: 실제로는 API 호출
+            // await savePortfolio(data);
+            await new Promise(resolve => setTimeout(resolve, 200));
 
-  const removeLink = (index: number) => {
-    setPortfolioLink(portfolioLink.filter((_, i) => i !== index));
-  };
-
-  const handleLinkSave = () => {
-    if (linkInput.trim()) {
-      setPortfolioLink([...portfolioLink, linkInput.trim()]);
-      setLinkInput('');
-      setIsLinkModalOpen(false);
-    }
-  };
-
-  const handleLinkModalClose = () => {
-    setLinkInput('');
-    setIsLinkModalOpen(false);
-  };
-
-  const getMissingFields = () => {
-    const missing: string[] = [];
-    if (!title.trim()) missing.push('포트폴리오 제목');
-    if (!content.trim()) missing.push('포트폴리오 개요');
-    if (!role.trim()) missing.push('프로젝트 역할');
-    if (!skills.trim()) missing.push('사용 기술');
-    if (!thumbnailImage) missing.push('대표 이미지');
-    return missing;
-  };
-
-  const handleClose = () => {
-    if (hasUnsavedChanges) {
-        setShowCloseWarning(true);
-    } else {
-        onClose();
-    }
-  }
-
-  const handleSaveClick = () => {
-    if (!hasEssential) {
-      setShowValidationPopup(true);
-    } else {
-        setConfirm(true);
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setError(null);
-    
-    try {
-      const data: PortfolioDetail = {
-        ...(initialData || {}),
-        portfolioId: initialData?.portfolioId || `pf_${userId}_${Date.now()}`,
-        id: initialData?.id || userId,
-        title,
-        content,
-        startYear,
-        startMonth,
-        endYear,
-        endMonth,
-        role,
-        skills,
-        portfolioImage: portfolioImages.map(img => img.media),
-        portfolioPdf,
-        portfolioLink: portfolioLink.filter(link => link.trim() !== ''),
-        problemSolution,
-        portfolioThumbnail: thumbnailImage?.media || initialData?.portfolioThumbnail || '',
-        updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
-        portfolioVisibility: initialData?.portfolioVisibility ?? true,
-        isImportant: initialData?.isImportant ?? false,
-      } as PortfolioDetail;
-
-      // TODO: 실제로는 API 호출
-      // await savePortfolio(data);
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      onSave(data);
-      onClose();
-    } catch (error) {
-      console.error('저장 실패:', error);
-      setError('포트폴리오 저장에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+            onSave(data);
+            onClose();
+        } catch (error) {
+            console.error('저장 실패:', error);
+            setError('포트폴리오 저장에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const hasEssential = 
         title.trim() !== '' && 
@@ -941,15 +941,15 @@ export default function PortfolioEditModal({
                     </div>
                 </BottomSheetModal>
                 <PopUp
-                isOpen={confirm}
-                type="confirm"
-                title={initialData?.portfolioId ? '수정사항이 저장되었습니다!' : '포트폴리오가 생성되었습니다!'}
-                buttonText="확인"
-                onClick={() => {
-                    handleSave();
-                    setConfirm(false);
-                }}
-            />
+                    isOpen={confirm}
+                    type="confirm"
+                    title={initialData?.portfolioId ? '수정사항이 저장되었습니다!' : '포트폴리오가 생성되었습니다!'}
+                    buttonText="확인"
+                    onClick={() => {
+                        handleSave();
+                        setConfirm(false);
+                    }}
+                />
             </div>
         </div>
     );
