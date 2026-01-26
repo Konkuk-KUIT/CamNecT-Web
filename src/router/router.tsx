@@ -1,22 +1,24 @@
-import {createBrowserRouter} from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-import { AlumniPage } from "../pages/alumni/AlumniPage";
-import { CoffeeChatPage } from "../pages/coffee-chat/CoffeeChatPage";
-import { CoffeeChatRequest } from "../pages/coffee-chat/CoffeeChat-request";
 import { ActivityPage } from "../pages/activity/ActivityPage";
+import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
+import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
+import { AlumniPage } from "../pages/alumni/AlumniPage";
+import { ProfilePage } from "../pages/alumni/ProfilePage";
 import { LoginPage } from "../pages/auth/LoginPage";
-import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
-import { HomePage }  from "../pages/home/HomePage";
-import { MypagePage } from "../pages/my-page/MypagePage";
+import { CoffeeChatRequest } from "../pages/coffee-chat/CoffeeChat-request";
+import { CoffeeChatPage } from "../pages/coffee-chat/CoffeeChatPage";
+import { CommunityPage } from "../pages/community/CommunityPage";
+import { HomePage } from "../pages/home/HomePage";
+import { NotificationPage } from "../pages/home/NotificationPage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
-import { AuthGuard } from "./AuthGuard";
-import { CommunityPage } from "../pages/community/CommunityPage";
-import { NotificationPage } from "../pages/home/NotificationPage";
+import { MypagePage } from "../pages/my-page/MypagePage";
+import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
-import { ProfilePage } from "../pages/alumni/ProfilePage";
+import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
 
@@ -45,6 +47,21 @@ export const router = createBrowserRouter([
             {
                 element: <AuthGuard/>,
                 children: [
+                    {
+                        path: "admin",
+                        children: [
+                            {
+                                path: "schoolVerification",
+                                element: <AdminVerificationList />,
+                            },
+                            {
+                                path: "schoolVerification/:id",
+                                element: <AdminVerificationDetail />,
+                            }
+                            // todo 관리자 대외활동 등록 페이지도 추가
+                        ]
+                    },
+                
                     {
                         path: "home",
                         element: <HomePage />,
