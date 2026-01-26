@@ -136,11 +136,6 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
       portfolioImage: ["https://picsum.photos/seed/pf_002_3_img1/900/700"],
       portfolioPdf: [],
       portfolioLink: ["https://example.com/pf_002_3"],
-
-      problemSolution:
-        "문제: 리서치 자료가 흩어짐.\n" +
-        "해결: 문서 구조 표준화.\n" +
-        "결과: 공유/발표 효율 증가.",
     },
   ],
 };
