@@ -22,6 +22,18 @@ export const PortfolioDetailPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    //URL에서 edit 파라미터 확인
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldEdit = urlParams.get('edit') === 'true';
+        
+        if (shouldEdit && portfolio) {
+            setIsModalOpen(true);
+            // URL에서 edit 파라미터 제거
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, [portfolio]);
+
     // Mock 데이터에서 포트폴리오 가져오기
     useEffect(() => {
         const fetchData = async () => {
@@ -34,7 +46,7 @@ export const PortfolioDetailPage = () => {
                 // setPortfolio(data);
                 
                 // Mock 데이터 시뮬레이션 (약간의 지연)
-                await new Promise(resolve => setTimeout(resolve, 300));
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[userId] || [];
                 const found = userPortfolios.find(p => p.portfolioId === portfolioId);
@@ -66,9 +78,9 @@ export const PortfolioDetailPage = () => {
     const handleDelete = () => {
         setIsMenuOpen(false);
         if (confirm('포트폴리오를 삭제하시겠습니까?')) {
-        // TODO: API 호출
-        console.log('포트폴리오 삭제:', portfolioId);
-        navigate(-1); 
+            // TODO: API 호출
+            console.log('포트폴리오 삭제:', portfolioId);
+            navigate(-1); 
         }
     };
 
@@ -293,13 +305,16 @@ export const PortfolioDetailPage = () => {
             </HeaderLayout>
 
             {/* 수정 모달 */}
-            <PortfolioEditModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                userId={userId}
-                initialData={portfolio}
-                onSave={handleSave}
-            />
+            {isModalOpen && (
+                <PortfolioEditModal
+                    key={`edit-${portfolioId}`}
+                    isOpen={true}
+                    onClose={() => setIsModalOpen(false)}
+                    userId={userId}
+                    initialData={portfolio}
+                    onSave={handleSave}
+                />
+            )}
 
             {/* 메뉴 BottomModal */}
             <BottomSheetModal

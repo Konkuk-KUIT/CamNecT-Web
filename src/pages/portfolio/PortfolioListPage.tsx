@@ -19,32 +19,33 @@ export const  PortfolioListPage = () => {
     const [error, setError] = useState<string | null>(null);
 
     //데이터 로드
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // TODO: 실제로는 API 호출
-        // const data = await fetchPortfolios(userId);
-        // setPortfolios(data);
+    useEffect(() => {
+        const fetchData = async () => {
+        setIsLoading(true);
+        setError(null);
         
-        // Mock 데이터 시뮬레이션 (약간의 지연)
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[userId] || [];
-        
-        setPortfolios(userPortfolios);
-      } catch (err) {
-        console.error('포트폴리오 목록 로드 실패:', err);
-        setError('포트폴리오 목록을 불러오는 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+            try {
+                // TODO: 실제로는 API 호출
+                // const data = await fetchPortfolios(userId);
+                // setPortfolios(data);
+                
+                // Mock 데이터 시뮬레이션 (약간의 지연)
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[userId] || [];
+                
+                setPortfolios(userPortfolios);
+            } catch (err) {
+                console.error('포트폴리오 목록 로드 실패:', err);
+                setError('포트폴리오 목록을 불러오는 중 오류가 발생했습니다.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    fetchData();
-  }, []);
+        fetchData();
+    }, []);
+
     const handlePortfolioClick = (portfolioId: string) => {
         navigate(`/me/portfolio/${portfolioId}`);
     };
@@ -199,12 +200,14 @@ export const  PortfolioListPage = () => {
             </HeaderLayout>
 
             {/* 포트폴리오 추가/수정 모달 */}
-            <PortfolioEditModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                userId={userId}
-                onSave={handleSavePortfolio}
-            />
+            {isModalOpen && (
+                <PortfolioEditModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    userId={userId}
+                    onSave={handleSavePortfolio}
+                />
+            )}
         </div>
     );
 }

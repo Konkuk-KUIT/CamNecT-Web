@@ -3,7 +3,7 @@ import Icon from "../../../components/Icon";
 import { type CareerItem } from "../../../types/mypage/mypageTypes";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
-import { useModalHistory } from "../hooks/useModalHistory";
+import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 import { generateId } from "../../../utils/uuid";
 

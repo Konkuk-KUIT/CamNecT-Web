@@ -7,6 +7,7 @@ import BottomSheetModal from '../../../components/BottomSheetModal/BottomSheetMo
 import PopUp from '../../../components/Pop-up';
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
+import { useModalHistory } from '../../../hooks/useModalHistory';
 
 interface PortfolioEditModalProps {
     isOpen: boolean;
@@ -52,7 +53,7 @@ export default function PortfolioEditModal({
     const [isInitializing, setIsInitializing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showValidationPopup, setShowValidationPopup] = useState(false);
-  
+    const [showCloseWarning, setShowCloseWarning] = useState(false);
 
     const [showStartYearDropdown, setShowStartYearDropdown] = useState(false);
     const [showStartMonthDropdown, setShowStartMonthDropdown] = useState(false);
@@ -64,6 +65,36 @@ export default function PortfolioEditModal({
     const imageInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  // 초기 데이터 저장 (변경사항 추적용)
+  const initialDataRef = useRef<{
+    title: string;
+    content: string;
+    role: string;
+    skills: string;
+    thumbnailImage: ImageData | null;
+    portfolioImages: ImageData[];
+    portfolioPdf: Media[];
+    portfolioLink: string[];
+    problemSolution: string;
+  } | null>(null);
+
+  // 변경사항이 있는지 확인
+  const hasUnsavedChanges = 
+    initialDataRef.current !== null && (
+      title !== initialDataRef.current.title ||
+      content !== initialDataRef.current.content ||
+      role !== initialDataRef.current.role ||
+      skills !== initialDataRef.current.skills ||
+      thumbnailImage !== initialDataRef.current.thumbnailImage ||
+      portfolioImages !== initialDataRef.current.portfolioImages ||
+      portfolioPdf !== initialDataRef.current.portfolioPdf ||
+      portfolioLink !== initialDataRef.current.portfolioLink ||
+      problemSolution !== initialDataRef.current.problemSolution
+    );
+
+  // useModalHistory 훅 사용
+  useModalHistory(onClose, hasUnsavedChanges, () => setShowCloseWarning(true));
 
   // initialData 변경 시 state 업데이트
   useEffect(() => {
@@ -83,13 +114,15 @@ export default function PortfolioEditModal({
           setSkills(initialData.skills || '');
           
           // 썸네일 이미지 처리
+          let thumbnail = null;
           if (initialData.portfolioThumbnail) {
-            setThumbnailImage({
+            thumbnail = {
               media: initialData.portfolioThumbnail,
               previewUrl: typeof initialData.portfolioThumbnail === 'string' 
                 ? initialData.portfolioThumbnail 
                 : URL.createObjectURL(initialData.portfolioThumbnail)
-            });
+            };
+            setThumbnailImage(thumbnail);
           }
           
           // 추가 이미지 처리
@@ -102,6 +135,19 @@ export default function PortfolioEditModal({
           setPortfolioPdf(initialData.portfolioPdf || []);
           setPortfolioLink(initialData.portfolioLink || []);
           setProblemSolution(initialData.problemSolution || '');
+
+          // 초기 데이터 저장 (변경사항 추적용)
+          initialDataRef.current = {
+            title: initialData.title,
+            content: initialData.content || '',
+            role: initialData.role || '',
+            skills: initialData.skills || '',
+            thumbnailImage: thumbnail,
+            portfolioImages: additionalImages,
+            portfolioPdf: initialData.portfolioPdf || [],
+            portfolioLink: initialData.portfolioLink || [],
+            problemSolution: initialData.problemSolution || '',
+          };
           
           // 약간의 지연 후 로딩 완료
           await new Promise(resolve => setTimeout(resolve, 200));
@@ -112,7 +158,18 @@ export default function PortfolioEditModal({
           setIsInitializing(false);
         }
       } else {
-        // 새 포트폴리오 작성
+        // 새 포트폴리오 작성 - 빈 초기 데이터
+        initialDataRef.current = {
+          title: '',
+          content: '',
+          role: '',
+          skills: '',
+          thumbnailImage: null,
+          portfolioImages: [],
+          portfolioPdf: [],
+          portfolioLink: [],
+          problemSolution: '',
+        };
         setIsInitializing(false);
         setError(null);
       }
@@ -245,8 +302,16 @@ export default function PortfolioEditModal({
     return missing;
   };
 
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+        setShowCloseWarning(true);
+    } else {
+        onClose();
+    }
+  }
+
   const handleSaveClick = () => {
-    if (!hasChanges) {
+    if (!hasEssential) {
       setShowValidationPopup(true);
       return;
     }
@@ -260,7 +325,7 @@ export default function PortfolioEditModal({
     try {
       const data: PortfolioDetail = {
         ...(initialData || {}),
-        portfolioId: initialData?.portfolioId || `pf_${Date.now()}`,
+        portfolioId: initialData?.portfolioId || `pf_${userId}_${Date.now()}`,
         id: initialData?.id || userId,
         title,
         content,
@@ -282,7 +347,7 @@ export default function PortfolioEditModal({
 
       // TODO: 실제로는 API 호출
       // await savePortfolio(data);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       onSave(data);
       onClose();
@@ -294,7 +359,7 @@ export default function PortfolioEditModal({
     }
   };
 
-    const hasChanges = 
+    const hasEssential = 
         title.trim() !== '' && 
         content.trim() !== '' && 
         role.trim() !== '' && 
@@ -303,12 +368,12 @@ export default function PortfolioEditModal({
     const contentLength = content.length;
     const problemLength = problemSolution.length;
 
-  // 연도 옵션 생성
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    // 연도 옵션 생성
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
     return (
         <div className='flex items-center justify-center fixed inset-0 z-50 bg-white'>
@@ -317,12 +382,12 @@ export default function PortfolioEditModal({
                     headerSlot = {
                         <EditHeader
                             title={initialData?.portfolioId ? '프로젝트 수정' : '프로젝트 추가'}
-                            leftAction = {{onClick: onClose}}
+                            leftAction = {{onClick: handleClose}}
                             rightElement = {
                                 <button
                                     onClick={handleSaveClick}
                                     className={`text-m-14-hn ${
-                                        hasChanges && !isSaving && !isInitializing ? 'text-primary': 'text-gray-650'
+                                        hasEssential && !isSaving && !isInitializing ? 'text-primary': 'text-gray-650'
                                     }`}
                                 >
                                     완료
@@ -370,9 +435,26 @@ export default function PortfolioEditModal({
                             </div>
                         )}
 
+                        {showCloseWarning && (
+                            <div className="absolute inset-0 z-50">
+                                <PopUp
+                                    type="warning"
+                                    title='변경사항이 있습니다.\n나가시겠습니까?'
+                                    content='저장하지 않을 시 변경사항이 삭제됩니다.'
+                                    isOpen={true}
+                                    leftButtonText='나가기'
+                                    onLeftClick={() => {
+                                        setShowCloseWarning(false);
+                                        onClose();
+                                    }}
+                                    onRightClick={() => setShowCloseWarning(false)}
+                                />
+                            </div>
+                        )}
+
                         {/* 스크롤 가능한 콘텐츠 영역 */}
                         <div className="flex-1 overflow-y-auto">
-                            <div className="px-[25px] py-[20px] flex flex-col gap-[20px]">
+                            <div className="px-[25px] py-[20px] flex flex-col gap-[20px] border-t border-gray-150">
                                 {/* 포트폴리오 제목 */}
                                 <div className="flex flex-col gap-[10px]">
                                     <span className="text-sb-16-hn text-gray-900">
@@ -631,7 +713,7 @@ export default function PortfolioEditModal({
                                 {/* 프로젝트 파일 추가 */}
                                 <div className="flex flex-col gap-[10px]">
                                     <span className="text-sb-16-hn text-gray-900">
-                                        프로젝트 파일 추가 (필수)
+                                        프로젝트 파일 추가 (선택)
                                     </span>
                                 
                                     {/* 이미지 3x3 그리드 */}
@@ -857,15 +939,6 @@ export default function PortfolioEditModal({
                     />
                     </div>
                 </BottomSheetModal>
-
-                {isSaving && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-[15px] px-[30px] py-[25px] flex flex-col items-center gap-[15px] shadow-lg">
-                            <div className="w-[40px] h-[40px] border-4 border-gray-200 border-t-primary rounded-full animate-spin" />
-                            <div className="text-m-14-hn text-gray-900">저장 중...</div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );
