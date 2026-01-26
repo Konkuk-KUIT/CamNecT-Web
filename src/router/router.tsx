@@ -11,6 +11,8 @@ import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { AuthGuard } from "./AuthGuard";
+import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
+import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
 
 export const router = createBrowserRouter([
 
@@ -69,6 +71,14 @@ export const router = createBrowserRouter([
                     {
                         path: "me/follower",
                         element: <FollowerPage />
+                    },
+                    {
+                        path: "me/portfolio",
+                        element: <PortfolioListPage />
+                    },
+                    {
+                        path: "me/portfolio/:portfolioId",
+                        element: <PortfolioDetailPage />
                     },
                 ]
             },
