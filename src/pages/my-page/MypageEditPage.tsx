@@ -26,7 +26,7 @@ export const MypageEditPage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
     const imageFileRef = useRef<File | null>(null);
 
-    const { data, setData, hasChanges, meDetail } = useProfileEdit(userId);
+    const { data, setData, hasChanges } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
 
     const [confirm, setConfirm] = useState(false);
@@ -74,7 +74,7 @@ export const MypageEditPage = () => {
         closeModal();
         };
 
-    if (!meDetail) 
+    if (!data) 
         return (
         <PopUp
             type="error"

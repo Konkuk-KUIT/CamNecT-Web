@@ -54,6 +54,7 @@ export default function PortfolioEditModal({
     const [error, setError] = useState<string | null>(null);
     const [showValidationPopup, setShowValidationPopup] = useState(false);
     const [showCloseWarning, setShowCloseWarning] = useState(false);
+    const [confirm, setConfirm] = useState(false);
 
     const [showStartYearDropdown, setShowStartYearDropdown] = useState(false);
     const [showStartMonthDropdown, setShowStartMonthDropdown] = useState(false);
@@ -313,9 +314,9 @@ export default function PortfolioEditModal({
   const handleSaveClick = () => {
     if (!hasEssential) {
       setShowValidationPopup(true);
-      return;
+    } else {
+        setConfirm(true);
     }
-    handleSave();
   };
 
   const handleSave = async () => {
@@ -939,6 +940,16 @@ export default function PortfolioEditModal({
                     />
                     </div>
                 </BottomSheetModal>
+                <PopUp
+                isOpen={confirm}
+                type="confirm"
+                title={initialData?.portfolioId ? '수정사항이 저장되었습니다!' : '포트폴리오가 생성되었습니다!'}
+                buttonText="확인"
+                onClick={() => {
+                    handleSave();
+                    setConfirm(false);
+                }}
+            />
             </div>
         </div>
     );
