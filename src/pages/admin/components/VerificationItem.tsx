@@ -1,11 +1,13 @@
-import Icon from "../../components/Icon";
-import type { VerificationItemType } from "./AdminVerificationList";
+import { useNavigate } from "react-router-dom";
+import Icon from "../../../components/Icon";
+import type { VerificationItemType } from "../AdminVerificationList";
 
 export interface VerificationItemProps {
     item: VerificationItemType;
 }
 
 export const VerificationItem = ({ item }: VerificationItemProps) => {
+    const navigate = useNavigate();
     
     // 상태에 따른 배지 텍스트와 스타일 결정
     const getStatusInfo = () => {
@@ -23,8 +25,22 @@ export const VerificationItem = ({ item }: VerificationItemProps) => {
 
     const statusInfo = getStatusInfo();
 
+    const handleItemClick = () => {
+        if (item.status === 'PENDING') {
+            navigate(`/admin/school-verification/${item.id}`, {
+                // 현재 데이터를 함께 전달 (캐싱, DetailPage에서 서버요청 불 필요)
+                state: {itemData : item}
+            });
+        }
+    };
+
     return (
-        <div className="flex items-center justify-between w-full py-4">
+        <div 
+            onClick={handleItemClick}
+            className={`flex items-center justify-between w-full py-4 transition-opacity ${
+                item.status === 'PENDING' ? 'cursor-pointer active:opacity-70' : ''
+            }`}
+        >
             <div className="flex items-center gap-3">
                 {/* 아바타 아이콘 */}
                 <div className="w-10 h-10 rounded-full bg-gray-150 flex items-center justify-center overflow-hidden">
@@ -45,7 +61,7 @@ export const VerificationItem = ({ item }: VerificationItemProps) => {
             {/* 상태 배지 버튼 */}
             <button 
                 type="button"
-                className={`px-4 py-1.5 rounded-full text-m-12-hn tracking-[-0.48px] min-w-[70px] text-center cursor-pointer transition-opacity active:opacity-70 ${statusInfo.color}`}
+                className={`px-4 py-1.5 rounded-full text-m-12-hn tracking-[-0.48px] min-w-[70px] text-center transition-opacity ${statusInfo.color}`}
             >
                 {statusInfo.label}
             </button>

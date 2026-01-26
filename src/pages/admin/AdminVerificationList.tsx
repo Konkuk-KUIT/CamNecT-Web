@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-import { VerificationItem } from "./VerificationItem";
+import { VerificationItem } from "./components/VerificationItem";
 
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -50,8 +50,11 @@ const mockData: VerificationItemType[] = [
     },
 ];
 
+// todo useQuery로 제출된 증명서들 조회
+
 // 관리자 승인 대기 화면 리스트
 export const AdminVerificationList = () => {
+
     const [currentStatus, setCurrentStatus] = useState<VerificationStatus>('PENDING');
 
     const renderContent = () => {
@@ -104,7 +107,7 @@ export const AdminVerificationList = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex flex-col h-full bg-white">
             <MainHeader title="재학증명서 승인 리스트" />
             
             {/* 큰 틀: 버튼(탭) 섹션 */}

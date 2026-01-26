@@ -51,11 +51,11 @@ export const router = createBrowserRouter([
                         path: "admin",
                         children: [
                             {
-                                path: "schoolVerification",
+                                path: "school-verification",
                                 element: <AdminVerificationList />,
                             },
                             {
-                                path: "schoolVerification/:id",
+                                path: "school-verification/:id",
                                 element: <AdminVerificationDetail />,
                             }
                             // todo 관리자 대외활동 등록 페이지도 추가
