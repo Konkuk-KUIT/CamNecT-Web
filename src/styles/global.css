@@ -52,19 +52,19 @@
     /* B (700) */
     --text-B-36: 36px;
     --text-B-36--line-height: 50.4px;
-    --text-B-36--font-weight: 700;
+    --text-B-36--font-weight: 600;
 
     --text-B-28: 28px;
     --text-B-28--line-height: 39.2px;
-    --text-B-28--font-weight: 700;
+    --text-B-28--font-weight: 600;
 
     --text-B-20: 20px;
     --text-B-20--line-height: 28px;
-    --text-B-20--font-weight: 700;
+    --text-B-20--font-weight: 600;
 
     --text-B-18: 18px;
     --text-B-18--line-height: 25.2px;
-    --text-B-18--font-weight: 700;
+    --text-B-18--font-weight: 600;
 
     --text-B-18-hn: 18px;
     --text-B-18-hn--line-height: normal;
@@ -72,32 +72,32 @@
 
     --text-B-16-hn: 16px;
     --text-B-16-hn--line-height: normal;
-    --text-B-16-hn--font-weight: 700;
+    --text-B-16-hn--font-weight: 600;
 
     --text-B-14-hn: 14px;
     --text-B-14-hn--line-height: normal;
-    --text-B-14-hn--font-weight: 700;
+    --text-B-14-hn--font-weight: 600;
 
     /* SB (600) */
     --text-SB-30: 30px;
     --text-SB-30--line-height: 42px;
-    --text-SB-30--font-weight: 600;
+    --text-SB-30--font-weight: 500;
 
     --text-SB-20: 20px;
     --text-SB-20--line-height: 28px;
-    --text-SB-20--font-weight: 600;
+    --text-SB-20--font-weight: 500;
 
     --text-SB-18: 18px;
     --text-SB-18--line-height: 25.2px;
-    --text-SB-18--font-weight: 600;
+    --text-SB-18--font-weight: 500;
 
     --text-SB-16-hn: 16px;
     --text-SB-16-hn--line-height: normal;
-    --text-SB-16-hn--font-weight: 600;
+    --text-SB-16-hn--font-weight: 500;
 
     --text-SB-14: 14px;
     --text-SB-14--line-height: 19.6px;
-    --text-SB-14--font-weight: 600;
+    --text-SB-14--font-weight: 500;
 
     --text-SB-14-hn: 14px;
     --text-SB-14-hn--line-height: normal;
@@ -106,15 +106,15 @@
     /* M (500) */
     --text-M-20: 20px;
     --text-M-20--line-height: 28px;
-    --text-M-20--font-weight: 500;
+    --text-M-20--font-weight: 400;
 
     --text-M-16: 16px;
     --text-M-16--line-height: 22.4px;
-    --text-M-16--font-weight: 500;
+    --text-M-16--font-weight: 400;
 
     --text-M-14: 14px;
     --text-M-14--line-height: 19.6px;
-    --text-M-14--font-weight: 500;
+    --text-M-14--font-weight: 400;
 
     --text-M-14-hn: 14px;
     --text-M-14-hn--line-height: normal;
@@ -122,28 +122,28 @@
 
     --text-M-12: 12px;
     --text-M-12--line-height: 16.8px;
-    --text-M-12--font-weight: 500;
+    --text-M-12--font-weight: 400;
 
     --text-M-12-hn: 11px;
     --text-M-12-hn--line-height: normal;
-    --text-M-12-hn--font-weight: 500;
+    --text-M-12-hn--font-weight: 400;
 
     /* R (400) */
     --text-R-18: 18px;
     --text-R-18--line-height: 25.2px;
-    --text-R-18--font-weight: 400;
+    --text-R-18--font-weight: 300;
 
     --text-R-16: 16px;
     --text-R-16--line-height: 22.4px;
-    --text-R-16--font-weight: 400;
+    --text-R-16--font-weight: 300;
 
     --text-R-16-hn: 16px;
     --text-R-16-hn--line-height: normal;
-    --text-R-16-hn--font-weight: 400;
+    --text-R-16-hn--font-weight: 300;
 
     --text-R-14: 14px;
     --text-R-14--line-height: 19.6px;
-    --text-R-14--font-weight: 400;
+    --text-R-14--font-weight: 300;
 
     --text-R-14-hn: 14px;
     --text-R-14-hn--line-height: normal;
@@ -151,19 +151,19 @@
 
     --text-R-12: 12px;
     --text-R-12--line-height: 16.8px;
-    --text-R-12--font-weight: 400;
+    --text-R-12--font-weight: 300;
 
     --text-R-12-hn: 12px;
     --text-R-12-hn--line-height: normal;
-    --text-R-12-hn--font-weight: 400;
+    --text-R-12-hn--font-weight: 300;
 
     --text-R-11-hn: 11px;
     --text-R-11-hn--line-height: normal;
-    --text-R-11-hn--font-weight: 400;
+    --text-R-11-hn--font-weight: 300;
 
     --text-R-10-hn: 10px;
     --text-R-10-hn--line-height: normal;
-    --text-R-10-hn--font-weight: 400;
+    --text-R-10-hn--font-weight: 300;
 }
 
 @layer base {
@@ -319,5 +319,13 @@
         line-height: var(--text-R-10-hn--line-height);
         font-weight: var(--text-R-10-hn--font-weight);
     }
-}
 
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+    }
+}
