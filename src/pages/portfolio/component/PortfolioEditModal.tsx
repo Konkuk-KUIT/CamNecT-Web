@@ -8,6 +8,7 @@ import PopUp from '../../../components/Pop-up';
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from '../../../hooks/useModalHistory';
+import SingleInput from '../../../components/common/SingleInput';
 
 interface PortfolioEditModalProps {
     isOpen: boolean;
@@ -49,6 +50,7 @@ export default function PortfolioEditModal({
     const [isFileAddModalOpen, setIsFileAddModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [linkInput, setLinkInput] = useState('');
+    const [linkError, setLinkError] = useState<string|undefined>(undefined);
     const [isSaving, setIsSaving] = useState(false);
     const [isInitializing, setIsInitializing] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -280,16 +282,53 @@ export default function PortfolioEditModal({
         setPortfolioLink(portfolioLink.filter((_, i) => i !== index));
     };
 
-    const handleLinkSave = () => {
-        if (linkInput.trim()) {
-            setPortfolioLink([...portfolioLink, linkInput.trim()]);
-            setLinkInput('');
-            setIsLinkModalOpen(false);
+    const isUrl = (input: string) => {
+        const s = input.trim();
+        if (!s) return null;
+
+        const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+
+        try {
+            const url = new URL(withScheme);
+            if (!url.hostname.includes(".")) return null;
+            return url.toString();
+        } catch {
+            return null;
         }
+    };
+
+    const canSave = !!isUrl(linkInput);
+
+    const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const next = e.target.value;
+        setLinkInput(next);
+
+        //입력이 유효해지는 순간 에러 제거
+        if (linkError && isUrl(next)) {
+            setLinkError(undefined);
+        }
+
+        if (!next.trim()) {
+            setLinkError(undefined);
+        }
+    };
+
+
+    const handleLinkSave = () => {
+        const link = isUrl(linkInput);
+        if (!link) {
+            setLinkError("올바른 링크 형식을 적어주세요.");
+            return;
+        }
+        setPortfolioLink([...portfolioLink, linkInput.trim()]);
+        setLinkInput("");
+        setLinkError(undefined);
+        setIsLinkModalOpen(false);
     };
 
     const handleLinkModalClose = () => {
         setLinkInput('');
+        setLinkError(undefined);
         setIsLinkModalOpen(false);
     };
 
@@ -841,7 +880,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={pdfInputRef}
                     type="file"
-                    accept=".pdf,.txt,.html" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
+                    accept=".pdf,.txt,.html,.hwp,.word" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
                     multiple
                     onChange={handlePdfUpload}
                     className="hidden"
@@ -912,32 +951,29 @@ export default function PortfolioEditModal({
                     onClose={handleLinkModalClose} 
                     height="auto"
                 >
-                    <div className="px-[25px] pb-[30px]">
-                    {/* 헤더 */}
-                    <div className="flex items-center justify-between mb-[20px]">
-                        <button onClick={handleLinkModalClose} className="p-[8px] -ml-[8px]">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M18 6L6 18M6 6L18 18" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        </button>
-                        <h2 className="text-m-16-hn text-gray-900">링크 추가</h2>
-                        <button
-                        onClick={handleLinkSave}
-                        disabled={!linkInput.trim()}
-                        className={`text-m-14-hn ${linkInput.trim() ? 'text-primary' : 'text-gray-400'}`}
-                        >
-                        완료
-                        </button>
-                    </div>
+                    <div className="px-[25px] pb-[40px]">
+                        {/* 헤더 */}
+                        <div className="relative flex items-center justify-center">
+                            <span className="text-sb-18 text-gray-900">링크 추가</span>
+                            <button
+                                onClick={handleLinkSave}
+                                disabled={!linkInput.trim()}
+                                className={`absolute top-[4px] right-[20px] text-b-16-hn ${canSave ? 'text-primary' : 'text-gray-650'}`}
+                            >
+                                완료
+                            </button>
+                        </div>
+                        {/* URL 입력 */}
+                        <div className="mt-[18px]">
+                        <SingleInput
+                            type="url"
+                            value={linkInput}
+                            onChange={handleLinkChange}
+                            placeholder="URL 입력..."
+                            error={linkError}
+                        />
+                        </div>
 
-                    {/* URL 입력 */}
-                    <input
-                        type="url"
-                        value={linkInput}
-                        onChange={(e) => setLinkInput(e.target.value)}
-                        placeholder="URL 입력..."
-                        className="w-full px-[15px] py-[12px] border border-gray-300 rounded-[10px] text-r-14-hn text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary"
-                    />
                     </div>
                 </BottomSheetModal>
                 <PopUp
