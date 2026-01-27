@@ -887,7 +887,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={pdfInputRef}
                     type="file"
-                    accept=".pdf,.txt,.html,.hwp,.word" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
+                    accept=".pdf,.txt,.html,.hwp,.doc,.docx" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
                     multiple
                     onChange={handlePdfUpload}
                     className="hidden"
