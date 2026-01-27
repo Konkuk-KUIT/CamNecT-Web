@@ -13,7 +13,22 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 export const PortfolioDetailPage = () => {
     const userId = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
     const userDetail = MOCK_PROFILE_DETAIL_BY_UID[userId];
-    const {user} = userDetail;
+    const user = userDetail?.user;
+
+    // userDetail이 없는 경우 에러 처리
+    if (!userDetail || !user) {
+        return (
+            <PopUp
+                type="error"
+                title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
+                titleSecondary='잠시 후 다시 시도해주세요'
+                isOpen={true}
+                rightButtonText='돌아가기'
+                onClick={() => navigate(-1)}
+            />
+        );
+    }
+
     const navigate = useNavigate();
     const { portfolioId } = useParams();
     const [isMenuOpen, setIsMenuOpen] = useState(false);

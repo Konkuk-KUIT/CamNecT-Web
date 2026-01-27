@@ -104,7 +104,7 @@ export const  PortfolioListPage = () => {
         return (
             <PopUp
             type="error"
-            title='일시적 오류로 인해\n포트폴리오 목록을 불러올 수 없습니다.'
+            title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
             titleSecondary='잠시 후 다시 시도해주세요'
             isOpen={true}
             rightButtonText='확인'
