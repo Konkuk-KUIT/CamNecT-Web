@@ -7,7 +7,6 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
       id: "user_001",
       title: "나의 프로젝트 1",
 
-      // ✅ 서버에서 받는 값: URL
       portfolioThumbnail: "https://picsum.photos/seed/pf_001_1_thumb/600/400",
 
       updatedAt: "2025.11.11",
@@ -26,7 +25,6 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
       role: "프론트엔드 개발",
       skills: "React, TypeScript, react-hook-form",
 
-      // ✅ 이미지/자료도 URL로
       portfolioImage: [
         "https://picsum.photos/seed/pf_001_1_img1/900/700",
         "https://picsum.photos/seed/pf_001_1_img2/900/700",
