@@ -44,7 +44,7 @@ export const  PortfolioListPage = () => {
         };
 
         fetchData();
-    }, []);
+    }, [userId]);
 
     const handlePortfolioClick = (portfolioId: string) => {
         navigate(`/me/portfolio/${portfolioId}`);
