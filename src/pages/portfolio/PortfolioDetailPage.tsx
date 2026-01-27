@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import PortfolioEditModal from './component/PortfolioEditModal';
+import PortfolioEditModal from './components/PortfolioEditModal';
 import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
 import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
