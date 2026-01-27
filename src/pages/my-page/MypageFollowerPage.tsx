@@ -4,10 +4,12 @@ import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import PopUp from "../../components/Pop-up";
+import { useNavigate } from "react-router-dom";
 
 type TabType = "follower" | "following";
 
 export const FollowerPage = () => {
+    const navigate = useNavigate();
     const { userId } = useParams<{ userId: string }>();
     const targetUserId = userId || MOCK_SESSION.meUid;
     
@@ -24,6 +26,7 @@ export const FollowerPage = () => {
                 titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
+                onClick={() => navigate(-1)}
             />
         );
     }
