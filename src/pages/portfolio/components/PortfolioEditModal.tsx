@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Icon from '../../../components/Icon';
 import type { PortfolioDetail, Media } from '../../../types/portfolio/portfolioTypes';
 import { useImageUpload } from '../../../hooks/useImageUpload';
@@ -82,19 +82,34 @@ export default function PortfolioEditModal({
         problemSolution: string;
     } | null>(null);
 
-  // 변경사항이 있는지 확인
-  const hasUnsavedChanges = 
-    initialDataRef.current !== null && (
-        title !== initialDataRef.current.title ||
-        content !== initialDataRef.current.content ||
-        role !== initialDataRef.current.role ||
-        skills !== initialDataRef.current.skills ||
-        thumbnailImage !== initialDataRef.current.thumbnailImage ||
-        portfolioImages !== initialDataRef.current.portfolioImages ||
-        portfolioPdf !== initialDataRef.current.portfolioPdf ||
-        portfolioLink !== initialDataRef.current.portfolioLink ||
-        problemSolution !== initialDataRef.current.problemSolution
-    );
+    // 변경사항이 있는지 확인
+    const hasUnsavedChanges = useMemo(() => {
+        if (initialDataRef.current === null) return false;
+        
+        const initial = initialDataRef.current;
+        
+        return (
+            title !== initial.title ||
+            content !== initial.content ||
+            role !== initial.role ||
+            skills !== initial.skills ||
+            problemSolution !== initial.problemSolution ||
+            JSON.stringify(thumbnailImage) !== JSON.stringify(initial.thumbnailImage) ||
+            JSON.stringify(portfolioImages) !== JSON.stringify(initial.portfolioImages) ||
+            JSON.stringify(portfolioPdf) !== JSON.stringify(initial.portfolioPdf) ||
+            JSON.stringify(portfolioLink) !== JSON.stringify(initial.portfolioLink)
+        );
+    }, [
+        title,
+        content,
+        role,
+        skills,
+        problemSolution,
+        thumbnailImage,
+        portfolioImages,
+        portfolioPdf,
+        portfolioLink,
+    ]);
 
     // useModalHistory 훅 사용
     useModalHistory(onClose, hasUnsavedChanges, () => setShowCloseWarning(true));
