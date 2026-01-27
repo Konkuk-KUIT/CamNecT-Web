@@ -517,9 +517,12 @@ export default function PortfolioEditModal({
                                     <div className="flex flex-col gap-[5px]">
                                         <textarea
                                             value={content}
-                                            onChange={(e) => setContent(e.target.value)}
+                                            onChange={(e) => {
+                                                if (e.target.value.length <= 300) {
+                                                    setContent(e.target.value);
+                                                }
+                                            }}
                                             placeholder="프로젝트 개요를 간단히 입력해 주세요 (300자 이내)"
-                                            maxLength={300}
                                             className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-16 text-gray-750 break-keep placeholder:text-gray-650 focus:outline-none focus:border-primary resize-none min-h-[130px]"
                                         />
                                         <span className="text-right text-r-12-hn text-gray-650">{contentLength}/300</span>
@@ -841,7 +844,11 @@ export default function PortfolioEditModal({
                                 <div className="flex flex-col gap-[5px]">
                                     <textarea
                                         value={problemSolution}
-                                        onChange={(e) => setProblemSolution(e.target.value)}
+                                        onChange={(e) => {
+                                                if (e.target.value.length <= 100) {
+                                                    setProblemSolution(e.target.value);
+                                                }
+                                            }}
                                         placeholder="문제와 해결방법을 간단히 작성해 주세요 (100자 이내)"
                                         maxLength={100}
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-14-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary resize-none min-h-[120px]"
