@@ -105,11 +105,15 @@ export default function PortfolioEditModal({
             // PDF (길이 + 파일명/URL)
             portfolioPdf.length !== initial.portfolioPdf.length ||
             portfolioPdf.some((pdf, i) => {
-            const initialPdf = initial.portfolioPdf[i];
-            if (pdf instanceof File && initialPdf instanceof File) {
-                return pdf.name !== initialPdf.name;
-            }
-            return pdf !== initialPdf;
+                const initialPdf = initial.portfolioPdf[i];
+                if (pdf instanceof File && initialPdf instanceof File) {
+                    return (
+                        pdf.name !== initialPdf.name ||
+                        pdf.size !== initialPdf.size ||
+                        pdf.lastModified !== initialPdf.lastModified
+                    );
+                }
+                return pdf !== initialPdf;
             }) ||
             JSON.stringify(portfolioLink) !== JSON.stringify(initial.portfolioLink)
         );
