@@ -20,6 +20,7 @@ export const MypagePage = () => {
                 titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
+                onClick={() => navigate(-1)}
             />
         );
     }
