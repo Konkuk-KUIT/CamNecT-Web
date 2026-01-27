@@ -41,7 +41,7 @@ export default function PortfolioSection({
                 </div>
                 ) : (
                 portfolios.map((p) => {
-                    const thumbnail = typeof p.portfolioThumbnail === "string" ? p.portfolioThumbnail : null;
+                    const thumbnail = typeof p.portfolioThumbnail === "string" ? p.portfolioThumbnail : URL.createObjectURL(p.portfolioThumbnail);
 
                     return (
                     <button

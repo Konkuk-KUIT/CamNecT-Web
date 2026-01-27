@@ -59,18 +59,18 @@ export const  PortfolioListPage = () => {
         
         // 새 포트폴리오인 경우 추가
         if (!data.portfolioId || !portfolios.find(p => p.portfolioId === data.portfolioId)) {
-        const newPortfolio: PortfolioDetail = {
-            ...data,
-            portfolioId: `pf_${userId}_${Date.now()}`,
-            id: userId,
-            updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
-        };
-        setPortfolios([...portfolios, newPortfolio]);
-        } else {
-        // 기존 포트폴리오 수정
-        setPortfolios(portfolios.map(p => 
-            p.portfolioId === data.portfolioId ? data : p
-        ));
+            const newPortfolio: PortfolioDetail = {
+                ...data,
+                portfolioId: `pf_${userId}_${Date.now()}`,
+                id: userId,
+                updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
+            };
+            setPortfolios([...portfolios, newPortfolio]);
+            } else {
+            // 기존 포트폴리오 수정
+            setPortfolios(portfolios.map(p => 
+                p.portfolioId === data.portfolioId ? data : p
+            ));
         }
         
         // TODO: API 호출

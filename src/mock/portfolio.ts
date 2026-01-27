@@ -136,4 +136,5 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
       portfolioLink: ["https://example.com/pf_002_3"],
     },
   ],
+  user_003: [],
 };
