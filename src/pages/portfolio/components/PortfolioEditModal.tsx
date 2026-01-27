@@ -94,9 +94,23 @@ export default function PortfolioEditModal({
             role !== initial.role ||
             skills !== initial.skills ||
             problemSolution !== initial.problemSolution ||
-            JSON.stringify(thumbnailImage) !== JSON.stringify(initial.thumbnailImage) ||
-            JSON.stringify(portfolioImages) !== JSON.stringify(initial.portfolioImages) ||
-            JSON.stringify(portfolioPdf) !== JSON.stringify(initial.portfolioPdf) ||
+            
+            // 썸네일 (previewUrl만 비교)
+            thumbnailImage?.previewUrl !== initial.thumbnailImage?.previewUrl ||
+            // 이미지 배열 (길이 + 각 previewUrl)
+            portfolioImages.length !== initial.portfolioImages.length ||
+            portfolioImages.some((img, i) => 
+                img.previewUrl !== initial.portfolioImages[i]?.previewUrl
+            ) ||
+            // PDF (길이 + 파일명/URL)
+            portfolioPdf.length !== initial.portfolioPdf.length ||
+            portfolioPdf.some((pdf, i) => {
+            const initialPdf = initial.portfolioPdf[i];
+            if (pdf instanceof File && initialPdf instanceof File) {
+                return pdf.name !== initialPdf.name;
+            }
+            return pdf !== initialPdf;
+            }) ||
             JSON.stringify(portfolioLink) !== JSON.stringify(initial.portfolioLink)
         );
     }, [
@@ -210,6 +224,22 @@ export default function PortfolioEditModal({
             document.body.style.overflow = '';
         };
     }, [isOpen]);
+
+    //컴포넌트가 unmount될 때 blob을 해제해서 메모리 누수를 막음
+    useEffect(() => {
+        return () => {
+            // Blob URL cleanup
+            if (thumbnailImage?.previewUrl?.startsWith('blob:')) {
+                URL.revokeObjectURL(thumbnailImage.previewUrl);
+            }
+            
+            portfolioImages.forEach(img => {
+                if (img.previewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(img.previewUrl);
+                }
+            });
+        };
+    }, []);
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -335,7 +365,7 @@ export default function PortfolioEditModal({
             setLinkError("올바른 링크 형식을 적어주세요.");
             return;
         }
-        setPortfolioLink([...portfolioLink, linkInput.trim()]);
+        setPortfolioLink([...portfolioLink, link]);
         setLinkInput("");
         setLinkError(undefined);
         setIsLinkModalOpen(false);
