@@ -22,8 +22,8 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
           <button
             key={tab.id}
             type='button'
-            className={`relative px-3 py-2 text-[16px] leading-[140%] tracking-[-0.04em] font-normal text-gray-650 transition-colors duration-150 whitespace-nowrap shrink-0 bg-transparent cursor-pointer ${
-              activeId === tab.id ? 'text-gray-900 font-bold tracking-[-0.02em]' : ''
+            className={`relative px-3 py-2 text-[16px] leading-[140%] tracking-[-0.64px] font-semibold transition-colors duration-150 whitespace-nowrap shrink-0 bg-transparent cursor-pointer ${
+              activeId === tab.id ? 'text-[#202023]' : 'text-[#A1A1A1]'
             }`}
             onClick={() => onChange(tab.id)}
           >
