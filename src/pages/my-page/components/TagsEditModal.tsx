@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../../mock/tags";
-import { useModalHistory } from "../hooks/useModalHistory";
+import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 
 interface TagEditModalProps {

@@ -12,6 +12,8 @@ import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { AuthGuard } from "./AuthGuard";
+import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
+import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
 import { CommunityPage } from "../pages/community/CommunityPage";
 import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
@@ -81,16 +83,33 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "me",
-                        element: <MypagePage />,
-
-                    },
-                    {
-                        path: "me/edit",
-                        element: <MypageEditPage />
-                    },
-                    {
-                        path: "me/follower",
-                        element: <FollowerPage />
+                        children: [
+                            {
+                                index: true,
+                                element: <MypagePage />
+                            },
+                            {
+                                path: "edit",
+                                element: <MypageEditPage />
+                            },
+                            {
+                                path: "follower",
+                                element: <FollowerPage />
+                            },
+                            {
+                                path: "portfolio",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <PortfolioListPage />
+                                    },
+                                    {
+                                        path: ":portfolioId",
+                                        element: <PortfolioDetailPage />
+                                    },
+                                ]
+                            },
+                        ]
                     },
                     {
                         path: "community",
@@ -99,6 +118,7 @@ export const router = createBrowserRouter([
                     {
                         path: "shop",
                         element: <ShopPage />,
+
                     },
                 ]
             },

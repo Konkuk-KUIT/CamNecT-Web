@@ -34,6 +34,5 @@ export function useProfileEdit(userId: string) {
         data, 
         setData, 
         hasChanges,
-        meDetail
     };
 }
