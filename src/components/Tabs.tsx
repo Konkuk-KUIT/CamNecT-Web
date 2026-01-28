@@ -17,7 +17,7 @@ type TabsProps = {
 export function Tabs({ tabs, activeId, onChange, children, className = '' }: TabsProps) {
   return (
     <div className={`w-full ${className}`}>
-      <div className='relative flex w-full justify-evenly px-6 pb-2.5'>
+      <div className='relative flex w-full justify-evenly pb-2.5'>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -38,9 +38,9 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
           </button>
         ))}
         {/* 하단 전체 가로선 */}
-        <span className='absolute left-6 right-6 bottom-0 h-0.5 bg-gray-650 opacity-10' />
+        <span className='absolute left-0 right-0 bottom-0 h-[1px] bg-gray-650' />
       </div>
-      {children && <div className='mt-3 px-6'>{children}</div>}
+      {children && <div>{children}</div>}
     </div>
   );
 }
