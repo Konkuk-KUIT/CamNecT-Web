@@ -4,12 +4,13 @@ import { formatDate } from "../../../utils/formatDate";
 interface ChatListProps {
     chatRoom: ChatRoomListItem;
     searchQuery?: string; // todo 추후 검색어 부분만 하이라이트
+    isFirstPaddingDisabled?: boolean;
 }
 
 // 
-export const ChatList = ({ chatRoom }: ChatListProps) => {
+export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true }: ChatListProps) => {
     return (
-        <li className="flex gap-[12px] py-[16px] border-b border-gray-100 cursor-pointer active:bg-gray-50 transition-colors">
+        <li className={`flex gap-[12px] px-[25px] py-[15px] border-b border-gray-150 cursor-pointer active:bg-gray-100 transition-colors ${isFirstPaddingDisabled ? 'first:pt-0' : ''}`}>
             {/* 프로필 이미지 영역 */}
             <div className="shrink-0">
                 {chatRoom.partner.profileImg ? (

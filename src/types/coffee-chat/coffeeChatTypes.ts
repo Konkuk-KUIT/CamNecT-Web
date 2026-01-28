@@ -57,6 +57,7 @@ export interface ChatRoomListItem {
   lastMessageDate: string; // ISO 8601 형식 (e.g., "2026-01-27T05:26:06Z")
   
   unreadCount: number; // 0이면 뱃지 숨김, 1이상이면 초록색 원에 숫자 표시
+  requestPostTitle?: string; // 팀원 모집 게시글 제목
 }
 
 // 5. 커피챗 요청 수락/거절용 (Request)

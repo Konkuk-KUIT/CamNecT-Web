@@ -2,7 +2,7 @@ import {createBrowserRouter} from "react-router-dom";
 import App from "../App";
 import { AlumniPage } from "../pages/alumni/AlumniPage";
 import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
-import { ChatRequestPage } from "../pages/coffee-chat/ChatRequestPage";
+import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
@@ -65,14 +65,22 @@ export const router = createBrowserRouter([
                         path: "alumni/profile/:id",
                         element: <ProfilePage />,
                     },
+
                     {
                         path: "chat",
-                        element: <ChatListPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ChatListPage />,
+                            },
+                            {
+                                path: "requests",
+                                element: <ChatRequestListPage />,
+                            }
+                        ]
+                        
                     },
-                    {
-                        path: "chat/requests",
-                        element: <ChatRequestPage />,
-                    },
+
                     {
                         path: "activity",
                         element: <ActivityPage />,

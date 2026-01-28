@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs } from '../../components/Tabs';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
@@ -69,6 +70,8 @@ export const ChatListPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const unreadCount = 3;
 
+  const navigate = useNavigate();
+
   const tabs = [
     { id: 'COFFEE_CHAT', label: '커피챗' },
     { id: 'TEAM_RECRUIT', label: '팀원모집' },
@@ -96,7 +99,7 @@ export const ChatListPage = () => {
           title="커피챗"
           leftIcon="empty"
           rightActions={[
-            { icon: 'coffeeChat', onClick: () => console.log('chat') }
+            { icon: 'coffeeChat', onClick: () => navigate('/chat/requests') }
           ]}
           showBadge={unreadCount > 0}
         />
@@ -108,7 +111,7 @@ export const ChatListPage = () => {
         onChange={(id) => setActiveId(id)}
       >
         {/* 검색영역 */}
-        <section className="w-full">
+        <section className="w-full px-[25px] py-[20px] ">
           <div className="relative">
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none"
               className="absolute left-[19px] top-[50%] translate-y-[-50%]">
