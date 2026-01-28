@@ -165,7 +165,7 @@ export const MypageEditPage = () => {
                                             <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
                                         </button>
                                     </div>
-                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep">
+                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep [overflow-wrap:anywhere]">
                                         {user.introduction}
                                     </div>
                                 </div>

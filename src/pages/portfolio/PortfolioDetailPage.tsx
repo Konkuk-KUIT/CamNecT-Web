@@ -198,7 +198,7 @@ export const PortfolioDetailPage = () => {
                                 {/* 제목 및 내용 */}
                                 <div className="flex flex-col gap-[15px]">
                                     <span className="text-sb-16-hn text-gray-900">{portfolio.title}</span>
-                                    <div className="text-r-14 text-gray-750 whitespace-pre-wrap break-keep">
+                                    <div className="text-r-14 text-gray-750 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]">
                                         {portfolio.content}
                                     </div>
                                 </div>
@@ -306,7 +306,7 @@ export const PortfolioDetailPage = () => {
                         <div className="w-full h-[10px] mt-[40px] mb-[30px] bg-gray-300"/>
                         <div className="px-[25px] flex flex-col gap-[8px]">
                             <span className="text-m-14-hn text-gray-750">Problem & Solution</span>
-                            <div className="text-r-12 text-gray-650 whitespace-pre-wrap break-keep">
+                            <div className="text-r-12 text-gray-650 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]">
                                 {portfolio.problemSolution}
                             </div>
                         </div>

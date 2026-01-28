@@ -84,7 +84,7 @@ export const MypagePage = () => {
                                 </div>
                             </button>
 
-                            <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750">
+                            <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750 [overflow-wrap:anywhere]">
                                 {user.introduction}
                             </p>
                         </div>
