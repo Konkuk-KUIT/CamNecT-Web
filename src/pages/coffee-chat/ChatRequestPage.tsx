@@ -1,4 +1,4 @@
-export const CoffeeChatRequest = () => {
+export const ChatRequestPage = () => {
   return (
     <div>coffee chat request</div>
   );

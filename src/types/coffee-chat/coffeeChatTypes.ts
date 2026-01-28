@@ -1,12 +1,12 @@
 // 1. 채팅 도메인에서의 유저 정보
 export interface ChatUser {
   id: string;          // 유저 식별자
-  nickname: string;    // "김갑수", "김익명"
+  name: string;    // "김갑수", "김익명"
   profileImg: string | null; // null -> placeholder 이미지
   major: string;      
   studentId: string;  
   introduction?: string; 
-  tags: string[];      // ["UX&UI", "취업", "포트폴리오"] 
+  tags?: string[];      // ["UX&UI", "취업", "포트폴리오"] 
 }
 
 // 2. 첨부파일 및 게시글 데이터 정의
@@ -46,13 +46,15 @@ export interface ChatMessage {
   isRead: boolean;     
 }
 
+export type ChatRoomListItemType = "COFFEE_CHAT" | "TEAM_RECRUIT";
 // 4. 채팅 목록 아이템 (ChatRoomListItem)
 export interface ChatRoomListItem {
   roomId: string;
+  type: ChatRoomListItemType;
   partner: ChatUser;   // 상대방 정보 객체 
   
-  lastMessage: string; // "어제 부탁드린 자료 잘 확인했습니다..." -> 내가 보낸 메시지 일 수도
-  lastMessageDate: string; // "어제", "오전 10:23", "2024.01.23" 
+  lastMessage: string; // 내가 보낸 메시지 일 수도
+  lastMessageDate: string; // ISO 8601 형식 (e.g., "2026-01-27T05:26:06Z")
   
   unreadCount: number; // 0이면 뱃지 숨김, 1이상이면 초록색 원에 숫자 표시
 }

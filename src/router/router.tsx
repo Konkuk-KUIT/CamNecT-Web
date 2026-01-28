@@ -1,8 +1,8 @@
 import {createBrowserRouter} from "react-router-dom";
 import App from "../App";
 import { AlumniPage } from "../pages/alumni/AlumniPage";
-import { CoffeeChatPage } from "../pages/coffee-chat/CoffeeChatPage";
-import { CoffeeChatRequest } from "../pages/coffee-chat/CoffeeChat-request";
+import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
+import { ChatRequestPage } from "../pages/coffee-chat/ChatRequestPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
@@ -65,11 +65,11 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "chat",
-                        element: <CoffeeChatPage />,
+                        element: <ChatListPage />,
                     },
                     {
                         path: "chat/requests",
-                        element: <CoffeeChatRequest />,
+                        element: <ChatRequestPage />,
                     },
                     {
                         path: "activity",
