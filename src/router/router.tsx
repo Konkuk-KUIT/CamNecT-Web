@@ -83,24 +83,33 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "me",
-                        element: <MypagePage />,
-
-                    },
-                    {
-                        path: "me/edit",
-                        element: <MypageEditPage />
-                    },
-                    {
-                        path: "me/follower",
-                        element: <FollowerPage />
-                    },
-                    {
-                        path: "me/portfolio",
-                        element: <PortfolioListPage />
-                    },
-                    {
-                        path: "me/portfolio/:portfolioId",
-                        element: <PortfolioDetailPage />
+                        children: [
+                            {
+                                index: true,
+                                element: <MypagePage />
+                            },
+                            {
+                                path: "edit",
+                                element: <MypageEditPage />
+                            },
+                            {
+                                path: "follower",
+                                element: <FollowerPage />
+                            },
+                            {
+                                path: "portfolio",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <PortfolioListPage />
+                                    },
+                                    {
+                                        path: ":portfolioId",
+                                        element: <PortfolioDetailPage />
+                                    },
+                                ]
+                            },
+                        ]
                     },
                     {
                         path: "community",
