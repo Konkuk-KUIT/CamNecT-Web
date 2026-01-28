@@ -3,9 +3,10 @@ import { formatDate } from "../../../utils/formatDate";
 
 interface ChatListProps {
     chatRoom: ChatRoomListItem;
+    searchQuery?: string; // todo 추후 검색어 부분만 하이라이트
 }
 
-// todo 비었을때 placeholder 필요 
+// 
 export const ChatList = ({ chatRoom }: ChatListProps) => {
     return (
         <li className="flex gap-[12px] py-[16px] border-b border-gray-100 cursor-pointer active:bg-gray-50 transition-colors">
@@ -15,7 +16,7 @@ export const ChatList = ({ chatRoom }: ChatListProps) => {
                     <img src={chatRoom.partner.profileImg} alt="프로필 이미지" className="w-[60px] h-[60px] rounded-full object-cover" />
                 ) : (
                     <div className="w-[60px] h-[60px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <span className="text-gray-500 text-[14px] font-bold">{chatRoom.partner.name.charAt(0)}</span>
+                        <span className="text-gray-500 text-[18px] font-bold">{chatRoom.partner.name.charAt(0)}</span>
                     </div>
                 )}
             </div>
