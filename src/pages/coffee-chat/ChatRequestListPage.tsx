@@ -1,8 +1,9 @@
+import { useState } from "react";
+import { Tabs } from "../../components/Tabs";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-import {Tabs} from "../../components/Tabs";
-import { useState } from "react";
 import type { ChatRoomListItem } from "../../types/coffee-chat/coffeeChatTypes";
+import { AllRequestDeleteButton } from "./components/AllRequestDeleteButton";
 import { ChatList } from "./components/ChatList";
 import { ChatPostAccordian } from "./components/ChatPostAccordian";
 
@@ -90,8 +91,7 @@ export const ChatRequestListPage = () => {
   ];
 
   const [activeId, setActiveId] = useState('COFFEE_CHAT');
-  // 열려있는 공모전 제목
-  const [openPostTitles, setOpenPostTitles] = useState<string[]>([]);
+  const [openPostTitle, setOpenPostTitle] = useState<string | null>(null); // 1개만 열릴 수 있음
 
     // mock데이터 타입별 filtering + 날짜 내림차순 정렬
   const filteredChatRoomList = mockChatRequestRoomList
@@ -117,10 +117,25 @@ export const ChatRequestListPage = () => {
   
   // 토글 함수
   const togglePostTitle = (title: string) => {
-    setOpenPostTitles((prev) => {
-      return prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title];
-    })
+    setOpenPostTitle((prev) => (prev === title ? null : title));
   }
+
+  // 삭제 대상 개수 계산
+  const currentDeleteCount = activeId === 'TEAM_RECRUIT'
+    ? (openPostTitle ? (filteredChatRoomListByPost[openPostTitle]?.length || 0) : 0)
+    : filteredChatRoomList.length;
+
+  // todo 삭제 핸들러
+  const handleDeleteAll = () => {
+    if (activeId === 'TEAM_RECRUIT') {
+      if (!openPostTitle) return;
+      console.log(`${openPostTitle} 그룹의 요청 ${currentDeleteCount}개 삭제`);
+    } else {
+      console.log('커피챗 요청 전체 삭제');
+    }
+  };
+
+  
 
   return (
     <HeaderLayout
@@ -134,14 +149,13 @@ export const ChatRequestListPage = () => {
         activeId={activeId}
         onChange={(id) => setActiveId(id)}
       >
-
         <ol>
           {
             activeId === 'TEAM_RECRUIT' ? 
               // Object.entries : Object -> Array ([index0, index1])
               Object.entries(filteredChatRoomListByPost).map(([key, chatRoomList]) => {
                 
-                const isOpen = openPostTitles.includes(key);
+                const isOpen = openPostTitle === key;
                 const requestCount = chatRoomList.length;
                 
                 return (
@@ -168,6 +182,12 @@ export const ChatRequestListPage = () => {
               ))
           }
         </ol>
+
+
+        <AllRequestDeleteButton
+          requestCount={currentDeleteCount}
+          onClick={handleDeleteAll}
+        />
       </Tabs>
     </HeaderLayout>
   );
