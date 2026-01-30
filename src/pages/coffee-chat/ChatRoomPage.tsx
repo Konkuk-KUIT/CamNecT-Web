@@ -3,6 +3,8 @@ import PopUp from "../../components/Pop-up";
 import { useChatRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import { ChatRoomInfo } from "./components/ChatRoomInfo";
+import { TypingArea } from "./components/TypingArea";
 
 export const ChatRoomPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -19,11 +21,10 @@ export const ChatRoomPage = () => {
                 />
             }
         >
-            <div className="p-4">
-                <h1 className="text-xl font-bold mb-4">{roomInfo.partner.name}님과의 채팅방</h1>
-                <p className="text-gray-600">마지막 메시지: {roomInfo.lastMessage}</p>
-                <p className="text-gray-400 text-sm mt-2">ID: {id}</p>
+            <div className="flex flex-col pt-[74px] pb-[150px]">
+                <ChatRoomInfo chatRoom={roomInfo} />
             </div>
+            <TypingArea />
         </HeaderLayout>
     )
 }
