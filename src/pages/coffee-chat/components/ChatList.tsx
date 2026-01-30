@@ -5,12 +5,16 @@ interface ChatListProps {
     chatRoom: ChatRoomListItem;
     searchQuery?: string; // todo 추후 검색어 부분만 하이라이트
     isFirstPaddingDisabled?: boolean;
+    onClick?: () => void;
 }
 
 // 
-export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true }: ChatListProps) => {
+export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true, onClick }: ChatListProps) => {
     return (
-        <li className={`flex gap-[12px] px-[25px] py-[15px] border-b border-gray-150 cursor-pointer active:bg-gray-100 transition-colors ${isFirstPaddingDisabled ? 'first:pt-0' : ''}`}>
+        <li 
+            onClick={onClick}
+            className={`flex gap-[12px] px-[25px] py-[15px] border-b border-gray-150 cursor-pointer active:bg-gray-100 transition-colors ${isFirstPaddingDisabled ? 'first:pt-0' : ''}`}
+        >
             {/* 프로필 이미지 영역 */}
             <div className="shrink-0">
                 {chatRoom.partner.profileImg ? (

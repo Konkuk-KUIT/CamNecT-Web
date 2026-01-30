@@ -19,6 +19,8 @@ import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
 import { ProfilePage } from "../pages/alumni/ProfilePage";
+import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
+import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
 
 export const router = createBrowserRouter([
 
@@ -74,8 +76,21 @@ export const router = createBrowserRouter([
                                 element: <ChatListPage />,
                             },
                             {
-                                path: "requests",
-                                element: <ChatRequestListPage />,
+                                path: ":id",
+                                element: <ChatRoomPage />,
+                            },
+                            {
+                                path: "requests", 
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <ChatRequestListPage />,
+                                    },
+                                    {
+                                        path: ":id",
+                                        element: <ChatRequestRoomPage />,
+                                    }
+                                ]
                             }
                         ]
                         

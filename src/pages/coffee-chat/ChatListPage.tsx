@@ -92,6 +92,10 @@ export const ChatListPage = () => {
     return result;
   }
 
+  const handleChatRoomClick = (roomId: string) => {
+    navigate(`/chat/${roomId}`);
+  };
+
   return (
     <FullLayout
       headerSlot={
@@ -140,9 +144,18 @@ export const ChatListPage = () => {
             // 검색어 여부로 분기 렌더링
             // todo 길게 클릭 후 삭제 기능 추가
             searchQuery ? searchFilteredChatRoomList(searchQuery).map((chatRoom) => (
-            <ChatList key={chatRoom.roomId} chatRoom={chatRoom} searchQuery={searchQuery} />
+            <ChatList 
+              key={chatRoom.roomId} 
+              chatRoom={chatRoom} 
+              searchQuery={searchQuery} 
+              onClick={() => handleChatRoomClick(chatRoom.roomId)}
+            />
           )) : filteredChatRoomList.map((chatRoom) => (
-            <ChatList key={chatRoom.roomId} chatRoom={chatRoom} />
+            <ChatList 
+              key={chatRoom.roomId} 
+              chatRoom={chatRoom} 
+              onClick={() => handleChatRoomClick(chatRoom.roomId)}
+            />
           ))}
         </ol>
       </Tabs>

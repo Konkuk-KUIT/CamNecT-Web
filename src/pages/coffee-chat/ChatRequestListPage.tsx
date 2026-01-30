@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs } from "../../components/Tabs";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
@@ -84,6 +85,7 @@ const mockChatRequestRoomList: ChatRoomListItem[] = [
 ];
 
 export const ChatRequestListPage = () => {
+  const navigate = useNavigate();
 
   const tabs = [
     { id: 'COFFEE_CHAT', label: '커피챗' },
@@ -135,7 +137,9 @@ export const ChatRequestListPage = () => {
     }
   };
 
-  
+  const handleChatRoomClick = (roomId: string) => {
+    navigate(`/chat/requests/${roomId}`);
+  };
 
   return (
     <HeaderLayout
@@ -169,7 +173,12 @@ export const ChatRequestListPage = () => {
                     {isOpen && (
                       <section>
                         {chatRoomList.map((chatRoom) => (
-                          <ChatList key={chatRoom.roomId} chatRoom={chatRoom} isFirstPaddingDisabled={false} />
+                          <ChatList 
+                            key={chatRoom.roomId} 
+                            chatRoom={chatRoom} 
+                            isFirstPaddingDisabled={false} 
+                            onClick={() => handleChatRoomClick(chatRoom.roomId)}
+                          />
                         ))}
                       </section>
                     )}
@@ -178,7 +187,12 @@ export const ChatRequestListPage = () => {
               })
             : 
               filteredChatRoomList.map((chatRoom) => (
-                <ChatList key={chatRoom.roomId} chatRoom={chatRoom} isFirstPaddingDisabled={false} />
+                <ChatList 
+                  key={chatRoom.roomId} 
+                  chatRoom={chatRoom} 
+                  isFirstPaddingDisabled={false} 
+                  onClick={() => handleChatRoomClick(chatRoom.roomId)}
+                />
               ))
           }
         </ol>
