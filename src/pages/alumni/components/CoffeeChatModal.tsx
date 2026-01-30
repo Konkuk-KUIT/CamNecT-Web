@@ -72,7 +72,7 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
                       type='button'
                       onClick={() => handleToggleCategory(category)}
                       onKeyDown={handleKeyDown}
-                      className='cursor-pointer'
+                      className='inline-flex h-[24px] items-center justify-center align-middle p-0'
                     >
                       <Category label={category} />
                     </button>
@@ -85,7 +85,7 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
                     type='button'
                     onClick={() => handleToggleCategory(category)}
                     onKeyDown={handleKeyDown}
-                    className='inline-flex items-center justify-center rounded-[3px] border border-[var(--ColorGray2,#A1A1A1)] bg-[var(--ColorGray1,#ECECEC)] px-[5px] py-[3px] text-[12px] font-normal leading-[100%] tracking-[-0.04em] text-[color:var(--ColorGray2,#A1A1A1)]'
+                    className='inline-flex h-[24px] items-center justify-center rounded-[5px] border border-[var(--ColorGray2,#A1A1A1)] bg-[var(--ColorGray1,#ECECEC)] px-[10px] text-r-12 font-normal leading-[24px] opacity-100 text-[color:var(--ColorGray2,#A1A1A1)] box-border'
                   >
                     {category}
                   </button>

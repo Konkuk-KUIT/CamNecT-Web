@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import AlumniSearchPage from './pages/Alumni/AlumniPage';
-import AlumniProfilePage from './pages/Alumni/ProfilePage';
+import AlumniSearchPage from './pages/alumni/AlumniPage';
+import AlumniProfilePage from './pages/alumni/ProfilePage';
 import './styles/global.css';
 
 const router = createBrowserRouter([
