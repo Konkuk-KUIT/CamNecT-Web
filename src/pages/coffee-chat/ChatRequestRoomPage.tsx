@@ -3,17 +3,19 @@ import PopUp from "../../components/Pop-up";
 import { useChatRequestRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import { ChatRequestButton } from "./components/ChatRequestButton";
+import { ChatRoomInfo } from "./components/ChatRoomInfo";
 
 export const ChatRequestRoomPage = () => {
     const { id } = useParams<{ id: string }>();
     const { data: requestInfo, isLoading } = useChatRequestRoom(id || "");
 
-    const searchMessage = () => {
-        console.log('search clicked');
+    const handleAcceptChatRequest = () => {
+        console.log('accept clicked');
     }
 
-    const optionMenu = () => {
-        console.log('option clicked');
+    const handleDeleteChatRequest = () => {
+        console.log('delete clicked');
     }
 
     if (isLoading) return <PopUp isOpen={true} type="loading" />;
@@ -24,21 +26,17 @@ export const ChatRequestRoomPage = () => {
             headerSlot={
                 <MainHeader
                     title={requestInfo.partner.name}
-                    rightActions={[
-                        { icon: 'search', onClick: searchMessage },
-                        { icon: 'mypageOption', onClick: optionMenu }
-                    ]}
                 />
             }
         >
-            <div className="p-4">
-                <h1 className="text-xl font-bold mb-4">{requestInfo.partner.name}님의 요청</h1>
-                <p className="text-gray-600">내용: {requestInfo.lastMessage}</p>
-                {requestInfo.requestPostTitle && (
-                    <p className="text-blue-500 mt-2 font-semibold">[{requestInfo.requestPostTitle}]</p>
-                )}
-                <p className="text-gray-400 text-sm mt-4">요청 ID: {id}</p>
+            {/* 75px : ChatRequestButton 높이, 20px : ChatRoomInfo 하단 여백, env(safe-area-inset-bottom) : 하단 안전영역 */}
+            <div className="flex flex-col min-h-[calc(100dvh-60px)] justify-end pb-[calc(75px+20px+env(safe-area-inset-bottom))]">
+                <ChatRoomInfo chatRoom={requestInfo} />
             </div>
+            <ChatRequestButton 
+                onAccept={handleAcceptChatRequest}
+                onDelete={handleDeleteChatRequest}
+            />
         </HeaderLayout>
     )
-}
+}   
