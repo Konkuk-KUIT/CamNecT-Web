@@ -18,6 +18,10 @@ export const ChatRoomPage = () => {
             headerSlot={
                 <MainHeader
                     title={roomInfo.partner.name}
+                    rightActions={[
+                        { icon: 'search', onClick: () => console.log('search clicked') },
+                        { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
+                    ]}
                 />
             }
         >
