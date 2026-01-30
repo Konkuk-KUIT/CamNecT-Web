@@ -1,4 +1,4 @@
-import type { CommentItem } from '../data';
+import type { CommentItem } from '../../../types/community';
 
 // 댓글 트리 탐색/수정/표시 포맷 유틸
 export const findCommentContent = (
@@ -32,6 +32,32 @@ export const updateCommentContent = (
     }
     return comment;
   });
+
+export const removeCommentById = (
+  comments: CommentItem[],
+  commentId: string,
+): CommentItem[] =>
+  comments
+    .filter((comment) => comment.id !== commentId)
+    .map((comment) =>
+      comment.replies
+        ? { ...comment, replies: removeCommentById(comment.replies, commentId) }
+        : comment,
+    );
+
+export const findCommentAuthorId = (
+  comments: CommentItem[],
+  commentId: string,
+): string | null => {
+  for (const comment of comments) {
+    if (comment.id === commentId) return comment.author.id;
+    if (comment.replies) {
+      const replyAuthorId = findCommentAuthorId(comment.replies, commentId);
+      if (replyAuthorId) return replyAuthorId;
+    }
+  }
+  return null;
+};
 
 export const formatCommentDate = (date: Date) => {
   const year = String(date.getFullYear()).slice(-2);

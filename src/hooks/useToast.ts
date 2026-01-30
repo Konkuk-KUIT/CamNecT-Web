@@ -11,6 +11,7 @@ export const useToast = ({
 }: UseToastOptions = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFading, setIsFading] = useState(false);
+  const [triggerKey, setTriggerKey] = useState(0);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -23,11 +24,12 @@ export const useToast = ({
       window.clearTimeout(fadeTimer);
       window.clearTimeout(closeTimer);
     };
-  }, [autoCloseMs, fadeDelayMs, isOpen]);
+  }, [autoCloseMs, fadeDelayMs, isOpen, triggerKey]);
 
   const openToast = () => {
     setIsFading(false);
     setIsOpen(true);
+    setTriggerKey((prev) => prev + 1);
   };
 
   return {

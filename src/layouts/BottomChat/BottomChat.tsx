@@ -5,6 +5,10 @@ import LikeToggle from './components/LikeToggle';
 
 type BottomChatProps = {
   likeCount?: number;
+  isLiked?: boolean;
+  onLikeChange?: (next: boolean) => void;
+  isSaved?: boolean;
+  onSaveChange?: (next: boolean) => void;
   placeholder?: string;
   content: string;
   onChange: (value: string) => void;
@@ -16,6 +20,10 @@ type BottomChatProps = {
 
 export const BottomChat = ({
   likeCount = 0,
+  isLiked,
+  onLikeChange,
+  isSaved,
+  onSaveChange,
   placeholder = '댓글을 입력해 주세요',
   content,
   onChange,
@@ -87,7 +95,10 @@ export const BottomChat = ({
           ) : null}
           <form
             className='flex min-w-0 flex-1 items-center gap-[clamp(8px,2.2vw,10px)] rounded-[30px] border border-[var(--ColorGray1,#ECECEC)] bg-[var(--Color_Gray_B,#FCFCFC)]'
-            onSubmit={onSubmit}
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSubmit(event);
+            }}
           >
             <textarea
               ref={textareaRef}
@@ -112,12 +123,12 @@ export const BottomChat = ({
         </div>
         <div className='flex shrink-0 items-center gap-[clamp(8px,3vw,13px)]'>
           <div className='flex items-center gap-[clamp(4px,1.5vw,5px)]'>
-            <LikeToggle width={24} height={24} />
+            <LikeToggle width={24} height={24} isActive={isLiked} onToggle={onLikeChange} />
             <span className='text-[16px] text-[var(--ColorGray2,#A1A1A1)]'>
               {likeCount}
             </span>
           </div>
-          <SaveToggle width={24} height={24} />
+          <SaveToggle width={24} height={24} isActive={isSaved} onToggle={onSaveChange} />
         </div>
       </div>
     </div>

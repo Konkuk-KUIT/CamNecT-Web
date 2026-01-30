@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import Icon from '../../../components/Icon';
-import type { InfoPost } from '../data';
+import type { InfoPost } from '../../../types/community';
 import { formatTimeAgo } from '../time';
 
 type MainBoxPost = InfoPost & {

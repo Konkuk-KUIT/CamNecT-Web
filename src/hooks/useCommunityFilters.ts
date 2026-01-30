@@ -7,13 +7,23 @@ type FilterablePost = {
   categories: string[];
 };
 
-const useCommunityFilters = <T extends FilterablePost>(posts: T[]) => {
+type InitialFilters = {
+  major: string | null;
+  interests: string[];
+};
+
+const useCommunityFilters = <T extends FilterablePost>(
+  posts: T[],
+  initialFilters?: InitialFilters,
+) => {
+  const initialMajor = initialFilters?.major ?? null;
+  const initialInterests = initialFilters?.interests ?? [];
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'major' | 'interest'>('major');
-  const [appliedMajor, setAppliedMajor] = useState<string | null>(null);
-  const [appliedInterests, setAppliedInterests] = useState<string[]>([]);
-  const [draftMajor, setDraftMajor] = useState<string | null>(null);
-  const [draftInterests, setDraftInterests] = useState<string[]>([]);
+  const [appliedMajor, setAppliedMajor] = useState<string | null>(initialMajor);
+  const [appliedInterests, setAppliedInterests] = useState<string[]>(initialInterests);
+  const [draftMajor, setDraftMajor] = useState<string | null>(initialMajor);
+  const [draftInterests, setDraftInterests] = useState<string[]>(initialInterests);
 
   const activeFilters = useMemo(() => {
     const filters: string[] = [];

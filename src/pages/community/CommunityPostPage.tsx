@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
@@ -13,12 +13,12 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useToast } from '../../hooks/useToast';
 import CommentListItem from './components/CommentItem';
 import LockedQuestionCard from './components/LockedQuestionCard';
-import {
-  loggedInUserProfile,
-  type CommentItem,
-} from './data';
+import type { CommentItem } from '../../types/community';
+import { loggedInUserProfile } from '../../mock/community';
 import { useCommentActions } from './hooks/useCommentActions';
 import { usePost } from './hooks/usePost';
+import { formatPostDisplayDate } from './utils/post';
+import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
 
 const CommunityPostPage = () => {
@@ -35,8 +35,15 @@ const CommunityPostPage = () => {
   const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
   const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isDeleteCommentPopupOpen, setIsDeleteCommentPopupOpen] = useState(false);
   const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
+  const [isInsufficientPointsPopupOpen, setIsInsufficientPointsPopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('URL 복사가 완료되었습니다');
+  const [accessStatusOverride, setAccessStatusOverride] = useState<
+    'GRANTED' | 'LOCKED' | null
+  >(null);
+  const [myPoints, setMyPoints] = useState(0);
   // 토스트 표시 제어
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
   // 게시글 파생 상태
@@ -47,16 +54,26 @@ const CommunityPostPage = () => {
     isPostMine,
     isAdopted,
     showAdoptButton,
-    isLockedQuestion,
     requiredPoints,
     textCount,
     imageCount,
-  } = usePost({ postId, currentUserName: currentUser.name });
+  } = usePost({ postId, currentUserId: currentUser.id });
+  const accessStatus = accessStatusOverride ?? selectedPost.accessStatus ?? 'GRANTED';
+  const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
+
+  useEffect(() => {
+    const resetTimer = window.setTimeout(() => {
+      setAccessStatusOverride(null);
+      setMyPoints(selectedPost.myPoints ?? 0);
+    }, 0);
+    return () => window.clearTimeout(resetTimer);
+  }, [selectedPost.id, selectedPost.myPoints]);
 
   // 댓글 상태/액션 묶음
   const {
     commentContent,
     setCommentContent,
+    commentList,
     commentCount,
     sortedComments,
     editingCommentId,
@@ -69,10 +86,12 @@ const CommunityPostPage = () => {
     handleSubmitComment,
     handleSaveEdit,
     handleCancelEdit,
+    deleteComment,
     startEditingComment,
     formatCommentDisplayDate,
   } = useCommentActions({
     currentUser,
+    resetKey: postId,
     isInfoPost,
     isLockedQuestion,
     isQuestionPost,
@@ -82,14 +101,14 @@ const CommunityPostPage = () => {
 
   // 게시글/댓글 옵션 열기
   const handleOpenCommentOptions = (comment: CommentItem) => {
-    setSelectedIsMine(comment.author.name === currentUser.name);
+    setSelectedIsMine(comment.author.id === currentUser.id);
     setSelectedTarget('comment');
     setSelectedCommentId(comment.id);
     setIsOptionOpen(true);
   };
 
   const handleOpenPostOptions = () => {
-    setSelectedIsMine(selectedPost.author.name === currentUser.name);
+    setSelectedIsMine(selectedPost.author.id === currentUser.id);
     setSelectedTarget('post');
     setSelectedCommentId(null);
     setIsOptionOpen(true);
@@ -102,7 +121,10 @@ const CommunityPostPage = () => {
     // TODO: 채택 이후 라우터 연결 예정
     setIsAdoptPopupOpen(false);
   };
-  const handleOpenPurchasePopup = () => setIsPurchasePopupOpen(true);
+  const handleOpenPurchasePopup = () => {
+    setMyPoints(selectedPost.myPoints ?? 0);
+    setIsPurchasePopupOpen(true);
+  };
   const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
 
   // URL 복사: 클립보드 실패 시 fallback 적용
@@ -110,6 +132,7 @@ const CommunityPostPage = () => {
     const postUrl = `${window.location.origin}/community/post/${selectedPost.id}`;
     try {
       await navigator.clipboard.writeText(postUrl);
+      setToastMessage('URL 복사가 완료되었습니다');
       openToast();
       return;
     } catch {
@@ -121,6 +144,7 @@ const CommunityPostPage = () => {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
+      setToastMessage('URL 복사가 완료되었습니다');
       openToast();
     }
   };
@@ -132,7 +156,12 @@ const CommunityPostPage = () => {
     },
     'report-post': () => setIsReportPopupOpen(true),
     'report-comment': () => setIsReportPopupOpen(true),
-    'view-author-profile': () => undefined,
+    'view-author-profile': () => {
+      if (!selectedCommentId) return;
+      const authorId = findCommentAuthorId(commentList, selectedCommentId);
+      if (!authorId) return;
+      navigate(`/alumni/profile/${authorId}`);
+    },
     'edit-post': () => {
       if (!selectedIsMine) return;
       navigate(`/community/edit/${selectedPost.id}`);
@@ -145,7 +174,10 @@ const CommunityPostPage = () => {
       if (!selectedIsMine) return;
       setIsDeletePopupOpen(true);
     },
-    'delete-comment': () => undefined,
+    'delete-comment': () => {
+      if (!selectedIsMine || !selectedCommentId) return;
+      setIsDeleteCommentPopupOpen(true);
+    },
   };
 
   // 옵션 선택 처리 (채택 완료 상태 예외 포함)
@@ -249,11 +281,11 @@ const CommunityPostPage = () => {
                     </div>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='comment' className='h-[14px] w-[14px]' />
-                      <span>{selectedPost.comments}</span>
+                      <span>{commentCount}</span>
                     </div>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>
-                    {selectedPost.createdAt}
+                    {formatPostDisplayDate(selectedPost.createdAt)}
                   </span>
                 </div>
               </div>
@@ -282,6 +314,7 @@ const CommunityPostPage = () => {
               <button
                 type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
+                onClick={() => navigate(`/alumni/profile/${selectedPost.author.id}`)}
               >
                 커피챗 보내기
               </button>
@@ -303,7 +336,7 @@ const CommunityPostPage = () => {
                   {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
                     <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
                       <div className='flex w-max gap-[5px] pr-[20px]'>
-                        {selectedPost.postImages.map((imageUrl, index) => {
+                        {selectedPost.postImages.map((imageUrl: string, index: number) => {
                           const imageKey = `${selectedPost.id}-image-${index + 1}`;
                           if (failedImages[imageKey]) {
                             return (
@@ -332,7 +365,7 @@ const CommunityPostPage = () => {
                 </>
               )}
               <div className='flex flex-wrap gap-[5px]'>
-                {selectedPost.categories.map((category) => (
+                {selectedPost.categories.map((category: string) => (
                   <Category key={category} label={category} />
                 ))}
               </div>
@@ -394,7 +427,7 @@ const CommunityPostPage = () => {
         type='confirm'
         title='이미 채택된 댓글입니다.'
         content={
-          '채택이 완료된 댓글의\n수정 및 삭제을 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
+          '채택이 완료된 댓글의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
         }
         onRightClick={() => setIsAdoptedCommentPopupOpen(false)}
       />
@@ -410,12 +443,50 @@ const CommunityPostPage = () => {
         onRightClick={() => setIsDeletePopupOpen(false)}
       />
       <PopUp
+        isOpen={isDeleteCommentPopupOpen}
+        type='warning'
+        title='정말 삭제하시겠습니까?'
+        content='삭제된 내용은 복구 불가능합니다.'
+        onLeftClick={() => {
+          if (selectedCommentId) {
+            deleteComment(selectedCommentId);
+          }
+          setIsDeleteCommentPopupOpen(false);
+        }}
+        onRightClick={() => setIsDeleteCommentPopupOpen(false)}
+      />
+      <PopUp
         isOpen={isPurchasePopupOpen}
         type='info'
         title='질문을 구매하시겠습니까?'
         content={'구매 시 포인트가 즉시 차감되며, \n결제 후에는 취소나 환불이 불가능합니다.'}
         onLeftClick={handleClosePurchasePopup}
-        onRightClick={handleClosePurchasePopup}
+        onRightClick={() => {
+          const currentPoints = selectedPost.myPoints ?? myPoints;
+          if (currentPoints < requiredPoints) {
+            setIsPurchasePopupOpen(false);
+            setIsInsufficientPointsPopupOpen(true);
+            return;
+          }
+          // TODO: 결제 및 포인트 차감 API 연동 필요
+          setMyPoints((prev) => {
+            const basePoints = selectedPost.myPoints ?? prev;
+            return basePoints - requiredPoints;
+          });
+          setAccessStatusOverride('GRANTED');
+          // TODO: 구매 API 성공 시 상세/리스트 재조회로 accessStatus 갱신 필요
+          // TODO: 서버 응답 remainingPoints로 전역 포인트 상태 동기화 필요
+          setIsPurchasePopupOpen(false);
+          setToastMessage('구매 성공! 이제 질문글을 열람할 수 있어요');
+          openToast();
+        }}
+      />
+      <PopUp
+        isOpen={isInsufficientPointsPopupOpen}
+        type='confirm'
+        title='앗, 포인트가 조금 부족하네요!'
+        content='다양한 활동으로 포인트를 채워보세요!'
+        onClick={() => setIsInsufficientPointsPopupOpen(false)}
       />
       <PopUp
         isOpen={isReportPopupOpen}
@@ -429,7 +500,7 @@ const CommunityPostPage = () => {
       <Toast
         isOpen={isToastOpen}
         isFading={isToastFading}
-        message='URL 복사가 완료되었습니다'
+        message={toastMessage}
       />
     </HeaderLayout>
   );

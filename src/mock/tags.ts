@@ -101,6 +101,28 @@ export const TAG_CATEGORIES = [
             { id: 'certificate_interest_14', name: '포토샵/일러', category: 'certificate_interest' },
             { id: 'certificate_interest_15', name: '파이썬', category: 'certificate_interest' }
         ] as Tag[]
+    },
+    {
+        id: 'community',
+        name: '커뮤니티',
+        tags: [
+            { id: 'community_1', name: '취업', category: 'community' },
+            { id: 'community_2', name: '이직', category: 'community' },
+            { id: 'community_3', name: '면접', category: 'community' },
+            { id: 'community_4', name: '포트폴리오', category: 'community' },
+            { id: 'community_5', name: '백엔드', category: 'community' },
+            { id: 'community_6', name: '교환학생', category: 'community' },
+            { id: 'community_7', name: '어학', category: 'community' },
+            { id: 'community_8', name: '코딩테스트', category: 'community' },
+            { id: 'community_9', name: '피드백', category: 'community' },
+            { id: 'community_10', name: '진로', category: 'community' },
+            { id: 'community_11', name: '멘토링', category: 'community' },
+            { id: 'community_12', name: '인턴', category: 'community' },
+            { id: 'community_13', name: '글로벌', category: 'community' },
+            { id: 'community_14', name: '프로젝트', category: 'community' },
+            { id: 'community_15', name: '연구실', category: 'community' },
+            { id: 'community_16', name: '디자인', category: 'community' }
+        ] as Tag[]
     }
 ];
 

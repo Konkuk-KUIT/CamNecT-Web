@@ -1,83 +1,21 @@
-// 커뮤니티 화면에서 사용하는 타입 정의
-export type AuthorProfile = {
-  name: string;
-  major: string;
-  studentId: string;
-  isAlumni?: boolean;
-};
-
-export type CommentAuthor = AuthorProfile & {
-  profileImageUrl?: string;
-};
-
-export type CommentItem = {
-  id: string;
-  author: CommentAuthor;
-  content: string;
-  createdAt: string;
-  replies?: CommentItem[];
-};
-
-export type InfoPost = {
-  id: string;
-  author: AuthorProfile;
-  categories: string[];
-  title: string;
-  content: string;
-  imageUrl?: string;
-  authorProfileImageUrl?: string;
-  postImageUrl?: string;
-  likes: number;
-  saveCount: number;
-  comments: number;
-  createdAt: string;
-};
-
-export type QuestionPost = {
-  id: string;
-  author: AuthorProfile;
-  categories: string[];
-  title: string;
-  content: string;
-  imageUrl?: string;
-  likes: number;
-  saveCount: number;
-  answers: number;
-  isAdopted: boolean;
-  createdAt: string;
-  accessStatus: 'GRANTED' | 'LOCKED';
-  requiredPoints: number;
-  myPoints: number;
-};
-
-export type CommunityPostDetail = {
-  id: string;
-  boardType: string;
-  title: string;
-  likes: number;
-  comments: number;
-  saveCount: number;
-  isAdopted: boolean;
-  adoptedCommentId?: string;
-  createdAt: string;
-  author: CommentAuthor;
-  content: string;
-  categories: string[];
-  postImages?: string[];
-  accessStatus?: 'GRANTED' | 'LOCKED';
-  requiredPoints?: number;
-  myPoints?: number;
-};
+import type {
+  CommentAuthor,
+  CommentItem,
+  CommunityPostDetail,
+  InfoPost,
+  QuestionPost,
+} from '../types/community';
 
 // 로그인 사용자 더미 데이터
 export const loggedInUserMajor = '컴퓨터공학부';
 export const loggedInUserProfile: CommentAuthor = {
+  id: 'user-park-wonbin-20',
   name: '박원빈',
   major: '컴퓨터공학부',
   studentId: '20',
   profileImageUrl: '',
 };
-//TODO: 나중에 랜덤 태그로 변경
+// TODO: 나중에 랜덤 태그로 변경
 
 const sampleProfileImage =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI0OCIgY3k9IjQ4IiByPSI0OCIgZmlsbD0iI0UwRThFNSIvPjxwYXRoIGQ9Ik00OCAyNEM1Ni4yODQgMjQgNjMgMzAuNzE2IDYzIDM5QzYzIDQ3LjI4NCA1Ni4yODQgNTQgNDggNTRDMzkuNzE2IDU0IDMzIDQ3LjI4NCAzMyAzOUMzMyAzMC43MTYgMzkuNzE2IDI0IDQ4IDI0WiIgZmlsbD0iI0I0QkJCRiIvPjxwYXRoIGQ9Ik0yOCA3NEMzMiA2NS4zMzMgNDEuMzMzIDYwIDQ4IDYwQzU0LjY2NyA2MCA2NCA2NS4zMzMgNjggNzRIMjhaIiBmaWxsPSIjQjRCQkJGIi8+PC9zdmc+';
@@ -100,6 +38,7 @@ export const communityPostData: CommunityPostDetail = {
   requiredPoints: 100,
   myPoints: 0,
   author: {
+    id: 'user-park-wonbin-20',
     name: '박원빈',
     major: '컴퓨터공학부',
     studentId: '20',
@@ -122,6 +61,7 @@ export const communityPostSamples: CommunityPostDetail[] = [
     isAdopted: false,
     createdAt: '25.02.03 10:20',
     author: {
+      id: 'user-seo-jiyoon-17',
       name: '서지윤',
       major: '컴퓨터공학부',
       studentId: '17',
@@ -146,6 +86,7 @@ export const communityPostSamples: CommunityPostDetail[] = [
     requiredPoints: 100,
     myPoints: 120,
     author: {
+      id: 'user-park-wonbin-20',
       name: '박원빈',
       major: '컴퓨터공학부',
       studentId: '20',
@@ -167,8 +108,9 @@ export const communityPostSamples: CommunityPostDetail[] = [
     createdAt: '25.02.06 09:40',
     accessStatus: 'LOCKED',
     requiredPoints: 100,
-    myPoints: 0,
+    myPoints: 120,
     author: {
+      id: 'user-kim-eunji-22',
       name: '김은지',
       major: '경영학부',
       studentId: '22',
@@ -184,6 +126,7 @@ export const communityCommentList: CommentItem[] = [
   {
     id: 'comment-1',
     author: {
+      id: 'user-kim-eunji-22',
       name: '김은지',
       major: '경영학부',
       studentId: '22',
@@ -194,6 +137,7 @@ export const communityCommentList: CommentItem[] = [
       {
         id: 'comment-1-1',
         author: {
+          id: 'user-park-wonbin-20',
           name: '박원빈',
           major: '컴퓨터공학부',
           studentId: '20',
@@ -206,6 +150,7 @@ export const communityCommentList: CommentItem[] = [
   {
     id: 'comment-2',
     author: {
+      id: 'user-jeong-gaeul-20',
       name: '정가을',
       major: '디자인컨버전스학부',
       studentId: '20',
@@ -218,7 +163,13 @@ export const communityCommentList: CommentItem[] = [
 export const infoPosts: InfoPost[] = [
   {
     id: 'info-1',
-    author: { name: '박원빈', major: '컴퓨터공학부', studentId: '20', isAlumni: true },
+    author: {
+      id: 'user-park-wonbin-20',
+      name: '박원빈',
+      major: '컴퓨터공학부',
+      studentId: '20',
+      isAlumni: true,
+    },
     categories: ['취업', '이직'],
     title: '올해 상반기 이직 준비 팁 모음',
     content:
@@ -232,7 +183,13 @@ export const infoPosts: InfoPost[] = [
   },
   {
     id: 'info-2',
-    author: { name: '김은지', major: '경영학부', studentId: '22', isAlumni: false },
+    author: {
+      id: 'user-kim-eunji-22',
+      name: '김은지',
+      major: '경영학부',
+      studentId: '22',
+      isAlumni: false,
+    },
     categories: ['인턴', '글로벌'],
     title: '글로벌 인턴십 Q&A 세션 자료 공유',
     content: '해외 인턴 준비 과정에서 정리한 자료와 발표 슬라이드를 업로드합니다.',
@@ -243,7 +200,13 @@ export const infoPosts: InfoPost[] = [
   },
   {
     id: 'info-4',
-    author: { name: '정태호', major: '컴퓨터공학부', studentId: '18', isAlumni: true },
+    author: {
+      id: 'user-jeong-taeho-18',
+      name: '정태호',
+      major: '컴퓨터공학부',
+      studentId: '18',
+      isAlumni: true,
+    },
     categories: ['취업', '면접'],
     title: '백엔드 면접 준비 체크리스트',
     content: '프로젝트 설명 구조, CS 질문 대비, 코드리뷰 준비 팁을 정리했습니다.',
@@ -256,7 +219,13 @@ export const infoPosts: InfoPost[] = [
   },
   {
     id: 'info-5',
-    author: { name: '서지윤', major: '컴퓨터공학부', studentId: '17', isAlumni: true },
+    author: {
+      id: 'user-seo-jiyoon-17',
+      name: '서지윤',
+      major: '컴퓨터공학부',
+      studentId: '17',
+      isAlumni: true,
+    },
     categories: ['포트폴리오', '프로젝트'],
     title: '졸업작품 발표 자료 구성법',
     content: '기획 의도와 핵심 기능을 전달하기 위한 슬라이드 구조를 공유합니다.',
@@ -268,7 +237,13 @@ export const infoPosts: InfoPost[] = [
   },
   {
     id: 'info-6',
-    author: { name: '남현우', major: '컴퓨터공학부', studentId: '16', isAlumni: true },
+    author: {
+      id: 'user-nam-hyunwoo-16',
+      name: '남현우',
+      major: '컴퓨터공학부',
+      studentId: '16',
+      isAlumni: true,
+    },
     categories: ['연구실', '진로'],
     title: '학부연구생 지원 과정 정리',
     content: '컨택 메일 작성, 교수님 인터뷰 준비, 필요한 역량을 정리했어요.',
@@ -281,7 +256,13 @@ export const infoPosts: InfoPost[] = [
   },
   {
     id: 'info-3',
-    author: { name: '이도윤', major: '미디어디자인학부', studentId: '19', isAlumni: true },
+    author: {
+      id: 'user-lee-doyoon-19',
+      name: '이도윤',
+      major: '미디어디자인학부',
+      studentId: '19',
+      isAlumni: true,
+    },
     categories: ['포트폴리오', '디자인'],
     title: '신입 디자이너 포트폴리오 구성법',
     content: '최근 제출했던 포폴 페이지 구성과 리뷰받은 피드백을 정리했습니다.',
@@ -296,7 +277,12 @@ export const infoPosts: InfoPost[] = [
 export const questionPosts: QuestionPost[] = [
   {
     id: 'question-1',
-    author: { name: '장유진', major: '컴퓨터공학부', studentId: '23' },
+    author: {
+      id: 'user-jang-yujin-23',
+      name: '장유진',
+      major: '컴퓨터공학부',
+      studentId: '23',
+    },
     categories: ['코딩테스트', '취업'],
     title: 'PS 기초 다질 때 추천하는 문제집이 있을까요?',
     content: '1학년인데 어느 사이트 문제부터 풀면 좋을지 고민입니다.',
@@ -307,11 +293,16 @@ export const questionPosts: QuestionPost[] = [
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     accessStatus: 'LOCKED',
     requiredPoints: 100,
-    myPoints: 0,
+    myPoints: 120,
   },
   {
     id: 'question-2',
-    author: { name: '박서준', major: '산업공학과', studentId: '21' },
+    author: {
+      id: 'user-park-seojun-21',
+      name: '박서준',
+      major: '산업공학과',
+      studentId: '21',
+    },
     categories: ['교환학생', '어학'],
     title: '교환학생 서류 준비 일정 공유 부탁드립니다.',
     content: '가을학기 지원 일정과 필요한 어학 점수 컷이 궁금합니다.',
@@ -326,7 +317,12 @@ export const questionPosts: QuestionPost[] = [
   },
   {
     id: 'question-3',
-    author: { name: '정가을', major: '디자인컨버전스학부', studentId: '20' },
+    author: {
+      id: 'user-jeong-gaeul-20',
+      name: '정가을',
+      major: '디자인컨버전스학부',
+      studentId: '20',
+    },
     categories: ['포트폴리오', '피드백'],
     title: '졸업전시 포트폴리오 피드백 받을 수 있을까요?',
     content: '레이아웃과 서체 선택 관련 의견을 듣고 싶습니다.',
@@ -337,6 +333,6 @@ export const questionPosts: QuestionPost[] = [
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     accessStatus: 'LOCKED',
     requiredPoints: 100,
-    myPoints: 0,
+    myPoints: 120,
   },
 ];

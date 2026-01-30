@@ -6,7 +6,7 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
-import { infoPosts, loggedInUserMajor, questionPosts } from './data';
+import { infoPosts, loggedInUserMajor, questionPosts } from '../../mock/community';
 
 const tabItems: TabItem[] = [
   { id: 'all', label: '전체' },
@@ -32,7 +32,7 @@ export const CommunityPage = () => {
       infoPosts.filter(
         (post) => post.author.isAlumni && post.author.major === loggedInUserMajor,
       ),
-    [loggedInUserMajor],
+    [],
   );
 
   const unansweredQuestions = useMemo(

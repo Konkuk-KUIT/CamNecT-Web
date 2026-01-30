@@ -4,13 +4,13 @@ import BottomSheetModal from '../../../components/BottomSheetModal';
 import BoardTypeToggle from '../components/BoardTypeToggle';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
-import FilterModal from '../../../components/FilterModal';
 import Icon from '../../../components/Icon';
 import Toggle from '../../../components/Toggle/Toggle';
 import WriteButton from '../components/WriteButton';
-import type { InfoPost } from '../data';
-import useCommunityFilters from '../../../hooks/useCommunityFilters';
+import type { InfoPost } from '../../../types/community';
 import { formatTimeAgo } from '../time';
+import TagsFilterModal from '../../../components/TagsFilterModal';
+import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 
 type InfoTabProps = {
   posts: InfoPost[];
@@ -27,24 +27,17 @@ const sortLabels: Record<SortKey, string> = {
 
 // 정보 탭: 필터 + 정렬 + 정보글 리스트
 const InfoTab = ({ posts }: InfoTabProps) => {
-  const {
-    activeFilters,
-    filteredPosts,
-    isFilterOpen,
-    activeTab,
-    setActiveTab,
-    openFilterModal,
-    handleCancel,
-    handleApply,
-    handleRemoveFilter,
-    draftMajor,
-    draftInterests,
-    toggleDraftMajor,
-    toggleDraftInterest,
-    hasDraftSelection,
-  } = useCommunityFilters(posts);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
+
+  const filteredPosts = useMemo(() => {
+    if (selectedTags.length === 0) return posts;
+    return posts.filter((post) =>
+      selectedTags.every((tag) => post.categories.includes(tag)),
+    );
+  }, [posts, selectedTags]);
 
   // 정렬 기준에 따른 목록 재계산
   const sortedPosts = useMemo(() => {
@@ -70,9 +63,11 @@ const InfoTab = ({ posts }: InfoTabProps) => {
       <div className='flex flex-wrap items-center gap-[12px]'>
         <div className='flex-1'>
           <FilterHeader
-            activeFilters={activeFilters}
-            onOpenFilter={openFilterModal}
-            onRemoveFilter={handleRemoveFilter}
+            activeFilters={selectedTags}
+            onOpenFilter={() => setIsFilterOpen(true)}
+            onRemoveFilter={(tag) =>
+              setSelectedTags((prev) => prev.filter((item) => item !== tag))
+            }
           />
         </div>
         <div className='flex items-center gap-[6px]'>
@@ -142,18 +137,16 @@ const InfoTab = ({ posts }: InfoTabProps) => {
         ))}
       </div>
 
-      {/* 필터 모달: 전공/관심사 선택 */}
-      <FilterModal
+      <TagsFilterModal
         isOpen={isFilterOpen}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        draftMajor={draftMajor}
-        draftInterests={draftInterests}
-        onToggleMajor={toggleDraftMajor}
-        onToggleInterest={toggleDraftInterest}
-        hasDraftSelection={hasDraftSelection}
-        onCancel={handleCancel}
-        onApply={handleApply}
+        tags={selectedTags}
+        onClose={() => setIsFilterOpen(false)}
+        onSave={(next) => {
+          setSelectedTags(next);
+          setIsFilterOpen(false);
+        }}
+        categories={TAG_CATEGORIES}
+        allTags={MOCK_ALL_TAGS}
       />
 
       <BottomSheetModal isOpen={isSortOpen} onClose={() => setIsSortOpen(false)}>

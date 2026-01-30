@@ -5,15 +5,16 @@ import PopUp from '../../components/Pop-up';
 import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from './components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
-import FilterModal from '../../components/FilterModal';
-import useCommunityFilters from '../../hooks/useCommunityFilters';
+import TagsFilterModal from '../../components/TagsFilterModal';
+import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
+import { useImageUpload } from '../../hooks/useImageUpload';
+import type { CommunityPostDetail } from '../../types/community';
 import {
     communityPostData,
     communityPostSamples,
     infoPosts,
     questionPosts,
-    type CommunityPostDetail,
-} from './data';
+} from '../../mock/community';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -23,76 +24,9 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
-    // 페이지 공통 상태: 게시판/입력/모달/미리보기
-    // 게시판 선택 모달 상태
-    const [isBoardOpen, setIsBoardOpen] = useState(false);
-    // 게시판 타입: 확정/임시 선택
-    const [boardType, setBoardType] = useState<BoardType | null>(null);
-    const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(null);
-    // 입력 폼 상태
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    // 키보드가 올라올 때 하단 사진 버튼 위치 보정
-    const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
-    // 완료 확인 모달 상태
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    // 작성 취소 경고 팝업 상태
-    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-    // 사진 미리보기 목록과 object URL 정리용 ref
-    const [photoPreviews, setPhotoPreviews] = useState<{ id: string; url: string }[]>([]);
-    const photoPreviewsRef = useRef<{ id: string; url: string }[]>([]);
-    // 숨김 파일 input 제어
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    // 필터 관련 상태/핸들러 (전공/관심분야)
-    const filterSource = useMemo(() => [], []);
-    const {
-        activeFilters,
-        isFilterOpen,
-        activeTab,
-        setActiveTab,
-        openFilterModal,
-        handleCancel,
-        handleApply,
-        handleRemoveFilter,
-        draftMajor,
-        draftInterests,
-        toggleDraftMajor,
-        toggleDraftInterest,
-        hasDraftSelection,
-        setFilters,
-    } = useCommunityFilters<{ author: { major: string }; categories: string[] }>(filterSource);
-
-    const openBoardSelector = () => {
-        setDraftBoardType(boardType);
-        setIsBoardOpen(true);
-    };
-
-    const closeBoardSelector = (shouldApply: boolean) => {
-        if (shouldApply && draftBoardType) {
-            setBoardType(draftBoardType);
-        }
-        setIsBoardOpen(false);
-    };
-
-    const boardLabel = boardType ?? '게시판';
-    const boardLabelColor = boardType
-        ? 'var(--ColorMain, #00C56C)'
-        : 'var(--ColorGray2, #A1A1A1)';
-    const isSubmitEnabled =
-        Boolean(boardType) &&
-        title.trim().length > 0 &&
-        content.trim().length > 0 &&
-        activeFilters.length > 0;
-    const hasDraftContent =
-        title.trim().length > 0 ||
-        content.trim().length > 0 ||
-        photoPreviews.length > 0 ||
-        Boolean(boardType) ||
-        activeFilters.length > 0;
-
+    // 편집 진입 시 기존 글 데이터 매핑
     const editPost = useMemo<CommunityPostDetail | null>(() => {
-        // 편집 진입 시 기존 글 데이터 매핑
         if (!postId) return null;
         if (communityPostData.id === postId) return communityPostData;
 
@@ -137,6 +71,80 @@ export const WritePage = () => {
         return null;
     }, [postId]);
 
+    const initialBoardType = (editPost?.boardType as BoardType | undefined) ?? null;
+    const initialTitle = editPost?.title ?? '';
+    const initialContent = editPost?.content ?? '';
+    const initialPhotos =
+        editPost?.postImages?.map((url, index) => ({
+            id: `edit-${editPost.id}-${index}`,
+            url,
+        })) ?? [];
+
+    // 페이지 공통 상태: 게시판/입력/모달/미리보기
+    // 게시판 선택 모달 상태
+    const [isBoardOpen, setIsBoardOpen] = useState(false);
+    // 게시판 타입: 확정/임시 선택
+    const [boardType, setBoardType] = useState<BoardType | null>(initialBoardType);
+    const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(initialBoardType);
+    // 입력 폼 상태
+    const [title, setTitle] = useState(initialTitle);
+    const [content, setContent] = useState(initialContent);
+    // 키보드가 올라올 때 하단 사진 버튼 위치 보정
+    const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
+    // 완료 확인 모달 상태
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    // 작성 취소 경고 팝업 상태
+    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
+    // 사진 미리보기 목록과 object URL 정리용 ref
+    const [photoPreviews, setPhotoPreviews] = useState<{ id: string; url: string }[]>(
+        initialPhotos,
+    );
+    // 숨김 파일 input 제어
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const { prepareImage } = useImageUpload();
+
+    const [selectedTags, setSelectedTags] = useState<string[]>(
+        editPost?.categories ?? [],
+    );
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const openBoardSelector = () => {
+        setDraftBoardType(boardType);
+        setIsBoardOpen(true);
+    };
+
+    const closeBoardSelector = (shouldApply: boolean) => {
+        if (shouldApply && draftBoardType) {
+            setBoardType(draftBoardType);
+        }
+        setIsBoardOpen(false);
+    };
+
+    const boardLabel = boardType ?? '게시판';
+    const boardLabelColor = boardType
+        ? 'var(--ColorMain, #00C56C)'
+        : 'var(--ColorGray2, #A1A1A1)';
+    const isQuestionBoard = boardType === '질문';
+    const confirmTitle = isEditMode
+        ? `${boardType ?? '게시글'}을 수정하시겠습니까?`
+        : '게시글을 등록하시겠습니까?';
+    const confirmContent = isQuestionBoard
+        ? '답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.'
+        : isEditMode
+            ? '수정된 내용으로 저장됩니다.'
+            : '등록 후에도 수정/삭제가 가능합니다.';
+    const isSubmitEnabled =
+        Boolean(boardType) &&
+        title.trim().length > 0 &&
+        content.trim().length > 0 &&
+        selectedTags.length > 0;
+    const hasDraftContent =
+        title.trim().length > 0 ||
+        content.trim().length > 0 ||
+        photoPreviews.length > 0 ||
+        Boolean(boardType) ||
+        selectedTags.length > 0;
+
     // 모바일 키보드 높이에 맞춰 하단 사진 영역 위치 업데이트
     useEffect(() => {
         const viewport = window.visualViewport;
@@ -162,47 +170,21 @@ export const WritePage = () => {
         };
     }, []);
 
-    // 현재 미리보기 URL 목록을 ref에 동기화
-    useEffect(() => {
-        photoPreviewsRef.current = photoPreviews;
-    }, [photoPreviews]);
-
-    // unmount 시 생성된 object URL 해제
-    useEffect(() => {
-        return () => {
-            photoPreviewsRef.current.forEach((preview) => URL.revokeObjectURL(preview.url));
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!isEditMode || !editPost) return;
-        // 편집 모드 초기값 주입
-        setBoardType(editPost.boardType as BoardType);
-        setDraftBoardType(editPost.boardType as BoardType);
-        setTitle(editPost.title);
-        setContent(editPost.content);
-        setFilters(null, editPost.categories);
-        if (editPost.postImages && editPost.postImages.length > 0) {
-            setPhotoPreviews(
-                editPost.postImages.map((url, index) => ({
-                    id: `edit-${editPost.id}-${index}`,
-                    url,
-                })),
-            );
-            return;
-        }
-        setPhotoPreviews([]);
-    }, [isEditMode, editPost, setFilters]);
-
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
     const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files || files.length === 0) return;
 
-        const nextPreviews = Array.from(files).map((file, index) => ({
-            id: `${file.name}-${file.lastModified}-${index}`,
-            url: URL.createObjectURL(file),
-        }));
+        const nextPreviews = Array.from(files)
+            .map((file, index) => {
+                const result = prepareImage(file);
+                if (!result) return null;
+                return {
+                    id: `${file.name}-${file.lastModified}-${index}`,
+                    url: result.previewUrl,
+                };
+            })
+            .filter((preview): preview is { id: string; url: string } => preview !== null);
 
         setPhotoPreviews((prev) => [...prev, ...nextPreviews]);
         event.target.value = '';
@@ -345,9 +327,11 @@ export const WritePage = () => {
                         }}
                     >
                         <FilterHeader
-                            activeFilters={activeFilters}
-                            onOpenFilter={openFilterModal}
-                            onRemoveFilter={handleRemoveFilter}
+                            activeFilters={selectedTags}
+                            onOpenFilter={() => setIsFilterOpen(true)}
+                            onRemoveFilter={(tag) =>
+                                setSelectedTags((prev) => prev.filter((item) => item !== tag))
+                            }
                         />
                     </div>
 
@@ -530,8 +514,8 @@ export const WritePage = () => {
             <PopUp
                 isOpen={isConfirmOpen}
                 type='info'
-                title={isEditMode ? '질문을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?'}
-                content={'답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.'}
+                title={confirmTitle}
+                content={confirmContent}
                 onLeftClick={() => setIsConfirmOpen(false)}
                 onRightClick={handleConfirm}
             />
@@ -545,18 +529,16 @@ export const WritePage = () => {
                 onRightClick={handleCancelDismiss}
             />
 
-            {/* 필터 모달 */}
-            <FilterModal
+            <TagsFilterModal
                 isOpen={isFilterOpen}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                draftMajor={draftMajor}
-                draftInterests={draftInterests}
-                onToggleMajor={toggleDraftMajor}
-                onToggleInterest={toggleDraftInterest}
-                hasDraftSelection={hasDraftSelection}
-                onCancel={handleCancel}
-                onApply={handleApply}
+                tags={selectedTags}
+                onClose={() => setIsFilterOpen(false)}
+                onSave={(next) => {
+                    setSelectedTags(next);
+                    setIsFilterOpen(false);
+                }}
+                categories={TAG_CATEGORIES}
+                allTags={MOCK_ALL_TAGS}
             />
         </EmptyLayout>
     );

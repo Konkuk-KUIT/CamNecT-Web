@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import BottomSheetModal from '../../../components/BottomSheetModal';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
-import FilterModal from '../../../components/FilterModal';
 import WriteButton from '../components/WriteButton';
 import BoardTypeToggle from '../components/BoardTypeToggle';
-import type { QuestionPost } from '../data';
+import type { QuestionPost } from '../../../types/community';
 import Toggle from '../../../components/Toggle/Toggle';
-import useCommunityFilters from '../../../hooks/useCommunityFilters';
 import { formatTimeAgo } from '../time';
+import TagsFilterModal from '../../../components/TagsFilterModal';
+import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 
 type QuestionTabProps = {
   posts: QuestionPost[];
@@ -26,24 +26,34 @@ const sortLabels: Record<SortKey, string> = {
 
 // 질문 탭: 필터 + 정렬 + 질문글 리스트
 const QuestionTab = ({ posts }: QuestionTabProps) => {
-  const {
-    activeFilters,
-    filteredPosts,
-    isFilterOpen,
-    activeTab,
-    setActiveTab,
-    openFilterModal,
-    handleCancel,
-    handleApply,
-    handleRemoveFilter,
-    draftMajor,
-    draftInterests,
-    toggleDraftMajor,
-    toggleDraftInterest,
-    hasDraftSelection,
-  } = useCommunityFilters(posts);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
+
+  const filteredPosts = useMemo(() => {
+    if (selectedTags.length === 0) return posts;
+    const adoptionTags = ['채택 전', '채택 완료'];
+    const selectedAdoptionTags = selectedTags.filter((tag) => adoptionTags.includes(tag));
+    const selectedCategoryTags = selectedTags.filter(
+      (tag) => !adoptionTags.includes(tag),
+    );
+    return posts.filter((post) => {
+      const matchesCategory =
+        selectedCategoryTags.length === 0
+          ? true
+          : selectedCategoryTags.every((tag) => post.categories.includes(tag));
+      const matchesAdoption =
+        selectedAdoptionTags.length === 0
+          ? true
+          : selectedAdoptionTags.length === 2
+            ? true
+            : selectedAdoptionTags[0] === '채택 완료'
+              ? post.isAdopted
+              : !post.isAdopted;
+      return matchesCategory && matchesAdoption;
+    });
+  }, [posts, selectedTags]);
 
   // 정렬 기준에 따른 목록 재계산
   const sortedPosts = useMemo(() => {
@@ -66,9 +76,11 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
       <div className='flex flex-wrap items-center gap-[12px]'>
         <div className='flex-1'>
           <FilterHeader
-            activeFilters={activeFilters}
-            onOpenFilter={openFilterModal}
-            onRemoveFilter={handleRemoveFilter}
+            activeFilters={selectedTags}
+            onOpenFilter={() => setIsFilterOpen(true)}
+            onRemoveFilter={(tag) =>
+              setSelectedTags((prev) => prev.filter((item) => item !== tag))
+            }
           />
         </div>
         <div className='flex items-center gap-[6px]'>
@@ -149,18 +161,26 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
         })}
       </div>
 
-      {/* 필터 모달: 전공/관심사 선택 */}
-      <FilterModal
+      <TagsFilterModal
         isOpen={isFilterOpen}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        draftMajor={draftMajor}
-        draftInterests={draftInterests}
-        onToggleMajor={toggleDraftMajor}
-        onToggleInterest={toggleDraftInterest}
-        hasDraftSelection={hasDraftSelection}
-        onCancel={handleCancel}
-        onApply={handleApply}
+        tags={selectedTags}
+        onClose={() => setIsFilterOpen(false)}
+        onSave={(next) => {
+          setSelectedTags(next);
+          setIsFilterOpen(false);
+        }}
+        categories={TAG_CATEGORIES}
+        allTags={MOCK_ALL_TAGS}
+        extraCategories={[
+          {
+            id: 'community-adoption',
+            name: '채택완료',
+            tags: [
+              { id: 'adopted-pending', name: '채택 전' },
+              { id: 'adopted-done', name: '채택 완료' },
+            ],
+          },
+        ]}
       />
 
       <BottomSheetModal isOpen={isSortOpen} onClose={() => setIsSortOpen(false)}>

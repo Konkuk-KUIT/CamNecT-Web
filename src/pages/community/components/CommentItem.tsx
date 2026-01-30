@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef } from 'react';
 import Icon from '../../../components/Icon';
-import type { CommentItem as CommentItemType } from '../data';
+import type { CommentItem as CommentItemType } from '../../../types/community';
 
 type CommentItemProps = {
   comment: CommentItemType;

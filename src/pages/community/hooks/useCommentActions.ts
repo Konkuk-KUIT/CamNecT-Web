@@ -5,23 +5,23 @@ import {
   useState,
   type SyntheticEvent,
 } from 'react';
-import {
-  communityCommentList,
-  type CommentAuthor,
-  type CommentItem,
-} from '../data';
+import type { CommentAuthor, CommentItem } from '../../../types/community';
+import { communityCommentList } from '../../../mock/community';
 import {
   findCommentContent,
   formatCommentDate,
   formatCommentDisplayDate,
+  removeCommentById,
   updateCommentContent,
 } from '../utils/comment';
+import { generateId } from '../../../utils/uuid';
 
 type ReplyTarget = { id: string; name: string };
 
 type UseCommentActionsParams = {
   currentUser: CommentAuthor;
   initialComments?: CommentItem[];
+  resetKey?: string;
   isInfoPost: boolean;
   isLockedQuestion: boolean;
   isQuestionPost: boolean;
@@ -33,6 +33,7 @@ type UseCommentActionsParams = {
 export const useCommentActions = ({
   currentUser,
   initialComments = communityCommentList,
+  resetKey,
   isInfoPost,
   isLockedQuestion,
   isQuestionPost,
@@ -95,7 +96,7 @@ export const useCommentActions = ({
     if (!trimmed) return;
     const now = new Date();
     const newComment: CommentItem = {
-      id: `comment-${Date.now()}`,
+      id: `comment-${generateId()}`,
       author: { ...currentUser },
       content: trimmed,
       createdAt: formatCommentDate(now),
@@ -133,6 +134,19 @@ export const useCommentActions = ({
     handleCancelEdit();
   };
 
+  // 댓글 삭제
+  const deleteComment = (commentId: string) => {
+    setCommentList((prev) => removeCommentById(prev, commentId));
+    if (editingCommentId === commentId) {
+      setEditingCommentId(null);
+      setEditingCommentContent('');
+    }
+    if (replyTarget?.id === commentId) {
+      setReplyTarget(null);
+      setHighlightedCommentId(null);
+    }
+  };
+
   // 편집 대상 댓글 본문 로드
   const startEditingComment = (commentId: string) => {
     const existingContent = findCommentContent(commentList, commentId);
@@ -152,6 +166,21 @@ export const useCommentActions = ({
     [],
   );
 
+  // 게시글 전환 시 댓글 상태 초기화
+  useEffect(() => {
+    if (!resetKey) return;
+    const resetTimer = window.setTimeout(() => {
+      setCommentList(initialComments);
+      setCommentContent('');
+      setEditingCommentId(null);
+      setEditingCommentContent('');
+      setReplyTarget(null);
+      setHighlightedCommentId(null);
+      setReplyFocusToken(0);
+    }, 0);
+    return () => window.clearTimeout(resetTimer);
+  }, [initialComments, resetKey]);
+
   return {
     commentContent,
     setCommentContent,
@@ -168,6 +197,7 @@ export const useCommentActions = ({
     handleSubmitComment,
     handleSaveEdit,
     handleCancelEdit,
+    deleteComment,
     startEditingComment,
     formatCommentDisplayDate,
   };

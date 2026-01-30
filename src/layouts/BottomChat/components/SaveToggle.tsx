@@ -3,11 +3,16 @@ import type { ChangeEvent, InputHTMLAttributes } from 'react';
 
 type Size = number | string;
 
-type SaveProps = {
+type SaveToggleProps = {
     width?: Size;
     height?: Size;
     className?: string;
-} & Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>;
+    isActive?: boolean;
+    onToggle?: (next: boolean) => void;
+} & Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'type' | 'checked' | 'defaultChecked' | 'onChange' | 'onToggle'
+>;
 
 const toCssSize = (value?: Size) =>
     value === undefined ? undefined : typeof value === 'number' ? `${value}px` : value;
@@ -17,18 +22,17 @@ const SaveToggle = ({
     height = 24,
     className = '',
     style,
-    checked,
-    defaultChecked,
-    onChange,
+    isActive,
+    onToggle,
     ...props
-}: SaveProps) => {
-    const [internalChecked, setInternalChecked] = useState(defaultChecked ?? false);
-    const isControlled = checked !== undefined;
-    const isOn = isControlled ? checked : internalChecked;
+}: SaveToggleProps) => {
+    const [internalChecked, setInternalChecked] = useState(isActive ?? false);
+    const isControlled = isActive !== undefined;
+    const isOn = isControlled ? isActive : internalChecked;
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (!isControlled) setInternalChecked(event.target.checked);
-        onChange?.(event);
+        onToggle?.(event.target.checked);
     };
 
     const dimensionStyle = {
@@ -44,8 +48,7 @@ const SaveToggle = ({
             <input
                 type='checkbox'
                 className='absolute opacity-0 w-0 h-0 pointer-events-none'
-                checked={checked}
-                defaultChecked={defaultChecked}
+                checked={isOn}
                 onChange={handleChange}
                 {...props}
             />
@@ -64,5 +67,5 @@ const SaveToggle = ({
     );
 };
 
-export type { SaveProps };
+export type { SaveToggleProps };
 export default SaveToggle;
