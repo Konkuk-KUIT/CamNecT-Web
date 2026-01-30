@@ -25,7 +25,7 @@ CamNecT는
 
 - 로그인 / 회원가입
 - 약관 동의
-- 휴대폰 본인인증
+- 이메일 본인인증
 - 인증번호 요청
 - 타이머 / 재전송
 - 관심 분야 선택
@@ -143,7 +143,7 @@ CamNecT는
 - TypeScript ESLint
 - Vite
 
-## 🗂️ 프로젝트 구조 (임시)
+## 🗂️ 프로젝트 구조
 
 ```
 src/
@@ -153,6 +153,10 @@ src/
 ┃ ┣ activity.ts
 ┃ ┣ portfolio.ts
 ┃ ┗ community.ts
+┃
+┣ mocks/ # API 개발 전 임시 데이터
+┃ ┣ activities.ts
+┃ ┗ ...
 ┃
 ┣ components/ # 공통 UI 컴포넌트
 ┃ ┣ Button.tsx
@@ -165,16 +169,37 @@ src/
 ┃ ┣ auth/ # 로그인 / 온보딩
 ┃ ┣ chat/ # 커피챗 / 채팅
 ┃ ┣ home/ # 홈
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ HomePage.tsx # xxxPage.ts로 통일
 ┃ ┣ community/ # 커뮤니티
 ┃ ┣ alumni/ # 동문찾기 / 동문프로필
 ┃ ┣ mypage/ # 마이페이지
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ hooks/ # 페이지 내부 훅 폴더
+┃ ┃ ┣ MypagePage.tsx # 마이페이지 메인 화면
+┃ ┃ ┣ MypageEditPage.tsx # 마이페이지 수정 화면
+┃ ┃ ┣ MypageFollowerPage.tsx # 팔로워 / 팔로잉 화면
 ┃ ┣ portfolio/ # 포트폴리오 편집
 ┃ ┗ activity/ # 대외활동 / 팀원모집
 ┃
+┣ utils/ # custom utils
 ┣ hooks/ # custom hooks
 ┣ store/ # 전역 상태 (auth 등)
 ┣ types/ # TS interface 정의
+┃ ┣ activity/
+┃ ┃ ┗ activityTypes.ts
+┃ ┗ ...
+┣ layouts/ # 조립식 레이아웃 폴더
+┃ ┣ FullLayout.tsx # Header + BottomNav
+┃ ┣ HeaderLayout.tsx
+┃ ┗ headers/
+┃   ┗ Header.tsx # Header 조립 부품
+┃ ┗ BottomNav/
+┃   ┗ BottomNav.tsx # BottomNav 조립 부품
+┃
 ┣ router/ # 라우팅 설정
+┃ ┣ Router.tsx # 전체 라우트 정의
+┃ ┗ AuthGuard.tsx # 로그인 방어막 (PrivateRoute)
 ┣ styles/ # 전역 스타일
 ┣ App.tsx
 ┗ main.tsx

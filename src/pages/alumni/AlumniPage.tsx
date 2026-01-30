@@ -4,13 +4,14 @@ import Card from '../../components/Card';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import Icon from '../../components/Icon';
-import MainLayout from '../../layouts/MainLayout';
+import {FullLayout} from '../../layouts/FullLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 import { alumniList } from './data';
 import FilterHeader from '../../components/FilterHeader';
 import FilterModal from '../../components/FilterModal';
 import useCommunityFilters from '../../hooks/useCommunityFilters';
 
-const AlumniSearchPage = () => {
+export const AlumniSearchPage = () => {
   const navigate = useNavigate();
   // 검색 입력값과 지연된 검색값으로 필터링 부담을 줄입니다.
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,7 +46,12 @@ const AlumniSearchPage = () => {
   }, [deferredSearchTerm, filteredPosts]);
 
   return (
-    <MainLayout title='동문 탐색'>
+    <FullLayout 
+      headerSlot={<MainHeader 
+        title='동문 찾기'
+        leftIcon='empty'
+         />}
+    >
       <div className='flex w-full flex-col bg-white [padding:clamp(16px,5cqw,20px)_clamp(18px,7cqw,25px)] [gap:clamp(14px,4cqw,20px)]'>
         {/* 검색 입력 영역 */}
         <div className='flex w-full items-center rounded-[30px] bg-[var(--ColorGray1,#ECECEC)] [padding:clamp(6px,2.2cqw,8px)_clamp(14px,5cqw,19px)] [gap:clamp(10px,3.2cqw,15px)]'>
@@ -118,14 +124,12 @@ const AlumniSearchPage = () => {
               role='button'
               tabIndex={0}
               onClick={() => {
-                // TODO: /alumni/:id 상세 라우터 연결 필요.
-                navigate(`/alumni/${alumni.id}`);
+                navigate(`/alumni/profile/${alumni.id}`);
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-                  // TODO: /alumni/:id 상세 라우터 연결 필요.
-                  navigate(`/alumni/${alumni.id}`);
+                  navigate(`/alumni/profile/${alumni.id}`);
                 }
               }}
             >
@@ -200,8 +204,6 @@ const AlumniSearchPage = () => {
         onCancel={handleCancel}
         onApply={handleApply}
       />
-    </MainLayout>
+    </FullLayout>
   );
 };
-
-export default AlumniSearchPage;

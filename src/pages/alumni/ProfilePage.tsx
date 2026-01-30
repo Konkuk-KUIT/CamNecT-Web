@@ -3,15 +3,16 @@ import { useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
-import MainLayout from '../../layouts/MainLayout';
+import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { alumniList } from './data';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
 const portfolioPlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='90'><rect width='160' height='90' fill='%23D5D5D5'/></svg>";
 
-const AlumniProfilePage = () => {
+export const AlumniProfilePage = () => {
   const { id } = useParams();
   // URL 파라미터를 기준으로 프로필을 찾고, 없으면 첫 번째 데이터를 사용합니다.
   const profile = useMemo(
@@ -43,7 +44,10 @@ const AlumniProfilePage = () => {
   };
 
   return (
-    <MainLayout title='프로필'>
+    <HeaderLayout headerSlot=
+      {
+        <MainHeader title='프로필' />
+      }>
       <div className='flex flex-col bg-white [gap:clamp(18px,6cqw,24px)]'>
         {/* 프로필 상단 영역 */}
         <section className='flex flex-col [padding:clamp(32px,10cqw,40px)_clamp(18px,7cqw,25px)_0] [gap:clamp(18px,6cqw,24px)]'>
@@ -81,9 +85,8 @@ const AlumniProfilePage = () => {
                 <button
                   type='button'
                   onClick={handleFollowToggle}
-                  className={`flex items-center justify-center border border-[var(--ColorMain,#00C56C)] [width:clamp(54px,18cqw,62px)] [height:clamp(22px,7cqw,25px)] [padding:clamp(2px,1cqw,3px)_clamp(5px,2cqw,7px)] [gap:clamp(3px,1.5cqw,5px)] rounded-[clamp(4px,1.6cqw,6px)] ${
-                    isFollowing ? 'bg-[var(--ColorMain,#00C56C)]' : 'bg-transparent'
-                  }`}
+                  className={`flex items-center justify-center border border-[var(--ColorMain,#00C56C)] [width:clamp(54px,18cqw,62px)] [height:clamp(22px,7cqw,25px)] [padding:clamp(2px,1cqw,3px)_clamp(5px,2cqw,7px)] [gap:clamp(3px,1.5cqw,5px)] rounded-[clamp(4px,1.6cqw,6px)] ${isFollowing ? 'bg-[var(--ColorMain,#00C56C)]' : 'bg-transparent'
+                    }`}
                 >
                   {isFollowing ? (
                     <svg
@@ -120,9 +123,8 @@ const AlumniProfilePage = () => {
                     </svg>
                   )}
                   <span
-                    className={`font-normal leading-normal [font-size:clamp(9px,2.8cqw,10px)] ${
-                      isFollowing ? 'text-[color:var(--ColorWhite,#FFF)]' : 'text-[color:var(--ColorMain,#00C56C)]'
-                    }`}
+                    className={`font-normal leading-normal [font-size:clamp(9px,2.8cqw,10px)] ${isFollowing ? 'text-[color:var(--ColorWhite,#FFF)]' : 'text-[color:var(--ColorMain,#00C56C)]'
+                      }`}
                   >
                     {isFollowing ? '팔로잉' : '팔로우'}
                   </span>
@@ -187,24 +189,22 @@ const AlumniProfilePage = () => {
         </section>
 
         {/* 구분선 */}
-        <div
-          className='[height:clamp(8px,2.5cqw,10px)] bg-[var(--ColorGray1,#D5D5D5)]'
-        />
+        <div className='h-[10px] bg-gray-150' />
 
-        <section className='flex flex-col [padding:clamp(24px,8cqw,30px)_clamp(18px,7cqw,25px)] [gap:clamp(32px,12cqw,50px)]'>
+        <section className='flex flex-col gap-[30px] px-[25px] py-[30px]'>
           {/* 포트폴리오 섹션 */}
           {profile.privacy.showPortfolio && (
-            <div className='flex flex-col [gap:clamp(8px,2.6cqw,10px)]'>
+            <div className='flex flex-col gap-[10px]'>
               <div className='flex items-center justify-between'>
-                <span className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>포트폴리오</span>
+                <span className='text-SB-18 text-gray-900'>포트폴리오</span>
                 <button
                   type='button'
-                  className='flex items-center [gap:clamp(4px,1.6cqw,6px)]'
+                  className='flex items-center gap-[2px] text-R-12-hn text-gray-650'
                   onClick={() => {
                     // TODO: 포트폴리오 전체보기 라우터 연결 필요.
                   }}
                 >
-                  <span className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>전체보기</span>
+                  전체보기
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width='4'
@@ -224,11 +224,12 @@ const AlumniProfilePage = () => {
                 </button>
               </div>
 
-              <div className='flex flex-col [padding-top:clamp(16px,5.5cqw,20px)] border-t border-[var(--ColorGray1,#ECECEC)]'>
-                <div className='flex overflow-x-auto [gap:clamp(4px,1.4cqw,5px)] [padding-bottom:clamp(4px,1.4cqw,6px)] [margin-right:calc(-1*clamp(18px,7cqw,25px))]'>
+              <div className='h-0 border border-gray-150' />
+
+              <div className='flex gap-[5px] overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
                   {profile.portfolioItems.map((item) => (
-                    <div key={item.id} className='flex flex-col [gap:clamp(4px,1.5cqw,5px)] flex-[0_0_auto]'>
-                      <div className='h-[clamp(68px,24cqw,90px)] w-[clamp(120px,42cqw,160px)] overflow-hidden rounded-[clamp(10px,3.5cqw,12px)] bg-[var(--ColorGray1,#D5D5D5)]'>
+                    <div key={item.id} className='flex flex-col gap-[5px] shrink-0'>
+                      <div className='h-[90px] w-[160px] overflow-hidden rounded-[12px] bg-[var(--ColorGray1,#D5D5D5)]'>
                         <img
                           src={item.image ?? portfolioPlaceholder}
                           alt={item.title}
@@ -239,27 +240,27 @@ const AlumniProfilePage = () => {
                           }}
                         />
                       </div>
-                      <div className='text-m-14 text-[color:var(--ColorGray3,#646464)] [padding:clamp(4px,1.6cqw,5px)_clamp(4px,1.6cqw,5px)_0]'>
+                      <div className='pl-[10px] text-M-14 text-gray-750'>
                         {item.title}
                       </div>
                     </div>
                   ))}
-                </div>
               </div>
             </div>
           )}
 
           {/* 학력 섹션 */}
           {profile.privacy.showEducation && (
-            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
-              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>학력</div>
-              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
+            <div className='flex flex-col gap-[10px]'>
+              <div className='text-SB-18 text-gray-900'>학력</div>
+              <div className='h-0 border border-gray-150' />
+              <div className='text-R-14 flex flex-col gap-[15px]'>
                 {profile.educationItems.map((item) => (
-                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
-                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.period}</div>
-                    <div className='flex flex-wrap items-baseline [gap:clamp(4px,1.6cqw,5px)]'>
-                      <span className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.school}</span>
-                      <span className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.status}</span>
+                  <div key={item.id} className='flex flex-col gap-[3px]'>
+                    <div className='text-r-12-hn text-gray-650'>{item.period}</div>
+                    <div className='flex items-center gap-[5px]'>
+                      <span className='text-r-16-hn text-gray-900'>{item.school}</span>
+                      <span className='text-r-14-hn text-gray-750'>{item.status}</span>
                     </div>
                   </div>
                 ))}
@@ -269,22 +270,20 @@ const AlumniProfilePage = () => {
 
           {/* 경력 섹션 */}
           {profile.privacy.showCareer && (
-            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
-              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>경력</div>
-              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
+            <div className='flex flex-col gap-[10px]'>
+              <div className='text-SB-18 text-gray-900'>경력</div>
+              <div className='h-0 border border-gray-150' />
+              <div className='text-R-14 flex flex-col gap-[15px]'>
                 {profile.careerItems.map((item) => (
-                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
-                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.period}</div>
-                    <div className='grid items-start [grid-template-columns:minmax(0,1fr)_minmax(0,1fr)] [column-gap:clamp(8px,3cqw,12px)] [row-gap:clamp(6px,2.2cqw,8px)]'>
-                      <span className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.company}</span>
-                      <div className='flex flex-col items-start text-left [gap:clamp(2px,1.6cqw,4px)]'>
+                  <div key={item.id} className='flex flex-col gap-[3px]'>
+                    <div className='text-r-12-hn text-gray-650'>{item.period}</div>
+                    <div className='flex gap-[5px]'>
+                      <div className='text-r-16-hn text-gray-900 w-[120px]'>{item.company}</div>
+                      <div className='flex flex-col gap-[3px]'>
                         {item.tasks.map((task, index) => (
-                          <span
-                            key={`${item.id}-${index}`}
-                            className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'
-                          >
+                          <div key={`${item.id}-${index}`} className='text-r-14-hn text-gray-750'>
                             - {task}
-                          </span>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -296,13 +295,14 @@ const AlumniProfilePage = () => {
 
           {/* 자격증 섹션 */}
           {profile.privacy.showCertificates && (
-            <div className='flex flex-col [gap:clamp(5px,2.3cqw,7px)]'>
-              <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>자격증</div>
-              <div className='flex flex-col [padding-top:clamp(8px,3.5cqw,10px)] [gap:clamp(8px,3.5cqw,10px)] border-t border-[var(--ColorGray1,#D5D5D5)]'>
+            <div className='flex flex-col gap-[10px]'>
+              <div className='text-SB-18 text-gray-900'>자격증</div>
+              <div className='h-0 border border-gray-150' />
+              <div className='text-R-14 flex flex-col gap-[15px]'>
                 {profile.certificateItems.map((item) => (
-                  <div key={item.id} className='flex flex-col [gap:clamp(4px,2cqw,6px)]'>
-                    <div className='text-r-12 text-[color:var(--ColorGray2,#A1A1A1)]'>{item.date}</div>
-                    <div className='text-m-16 text-[color:var(--ColorGray3,#646464)]'>{item.name}</div>
+                  <div key={item.id} className='flex flex-col gap-[3px]'>
+                    <div className='text-r-12-hn text-gray-650'>{item.date}</div>
+                    <div className='text-r-16-hn text-gray-900'>{item.name}</div>
                   </div>
                 ))}
               </div>
@@ -317,8 +317,6 @@ const AlumniProfilePage = () => {
         categories={profile.categories}
         onSubmit={handleCoffeeChatSubmit}
       />
-    </MainLayout>
+    </HeaderLayout>
   );
 };
-
-export default AlumniProfilePage;
