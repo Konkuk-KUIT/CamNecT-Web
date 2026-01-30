@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import BottomSheetModal from '../../../components/BottomSheetModal';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
 import WriteButton from '../components/WriteButton';
-import BoardTypeToggle from '../components/BoardTypeToggle';
 import type { QuestionPost } from '../../../types/community';
-import Toggle from '../../../components/Toggle/Toggle';
 import { formatTimeAgo } from '../time';
 import TagsFilterModal from '../../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
+import SortSelector from '../../../components/SortSelector';
 
 type QuestionTabProps = {
   posts: QuestionPost[];
@@ -28,7 +26,6 @@ const sortLabels: Record<SortKey, string> = {
 const QuestionTab = ({ posts }: QuestionTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
 
   const filteredPosts = useMemo(() => {
@@ -83,21 +80,7 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
             }
           />
         </div>
-        <div className='flex items-center gap-[6px]'>
-          <button
-            type='button'
-            onClick={() => setIsSortOpen(true)}
-            className='text-r-14 text-[var(--ColorGray2,#A1A1A1)]'
-          >
-            {sortLabels[sortKey]}
-          </button>
-          <Toggle
-            width={20}
-            height={20}
-            toggled={isSortOpen}
-            onToggle={(next) => setIsSortOpen(next)}
-          />
-        </div>
+        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} />
       </div>
 
       {/* 질문글 리스트 */}
@@ -182,36 +165,6 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
           },
         ]}
       />
-
-      <BottomSheetModal isOpen={isSortOpen} onClose={() => setIsSortOpen(false)}>
-        <div className='flex flex-col gap-[30px] px-[25px] pb-[50px] pt-[45px]'>
-          <div className='text-b-18 text-[var(--ColorBlack,#202023)]'>정렬</div>
-          <div className='flex flex-col gap-[20px] px-[7px]'>
-            {(Object.keys(sortLabels) as SortKey[]).map((key) => (
-              <div key={key} className='flex items-center justify-between'>
-                <button
-                  type='button'
-                  className='text-m-16 text-[var(--ColorGray3,#646464)]'
-                  onClick={() => {
-                    setSortKey(key);
-                    setIsSortOpen(false);
-                  }}
-                >
-                  {sortLabels[key]}
-                </button>
-                <BoardTypeToggle
-                  selected={sortKey === key}
-                  onClick={() => {
-                    setSortKey(key);
-                    setIsSortOpen(false);
-                  }}
-                  label={sortLabels[key]}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </BottomSheetModal>
 
       {/* TODO: 글쓰기 라우터 연결 (버튼 클릭) */}
       <WriteButton />

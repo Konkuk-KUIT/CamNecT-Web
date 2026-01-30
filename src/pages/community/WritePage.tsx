@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
 import { EmptyLayout } from '../../layouts/EmptyLayout';
-import BoardTypeToggle from './components/BoardTypeToggle';
+import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
