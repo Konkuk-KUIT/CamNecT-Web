@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import PopUp from "../../components/Pop-up";
 import { useChatRequestRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
@@ -10,12 +11,28 @@ export const ChatRequestRoomPage = () => {
     const { id } = useParams<{ id: string }>();
     const { data: requestInfo, isLoading } = useChatRequestRoom(id || "");
 
+    const navigate = useNavigate();
+
+    const [isAcceptPopUpOpen, setIsAcceptPopUpOpen] = useState(false);
+    const [isDeletePopUpOpen, setIsDeletePopUpOpen] = useState(false);
+
     const handleAcceptChatRequest = () => {
-        console.log('accept clicked');
+        setIsAcceptPopUpOpen(true);
     }
 
     const handleDeleteChatRequest = () => {
-        console.log('delete clicked');
+        setIsDeletePopUpOpen(true);
+    }
+
+    // todo API 연동 
+    const handleAcceptChatRequestConfirm = () => {
+        setIsAcceptPopUpOpen(false);
+        navigate(`/chat/${id}`);
+    }
+
+    const handleDeleteChatRequestConfirm = () => {
+        setIsDeletePopUpOpen(false);
+        navigate(`/chat/requests`);
     }
 
     if (isLoading) return <PopUp isOpen={true} type="loading" />;
@@ -37,6 +54,27 @@ export const ChatRequestRoomPage = () => {
                 onAccept={handleAcceptChatRequest}
                 onDelete={handleDeleteChatRequest}
             />
+
+            {/* 승인 팝업 */}
+            <PopUp 
+                isOpen={isAcceptPopUpOpen}
+                type="info"
+                title={`${requestInfo.partner.name}님의\n요청을 수락하시겠습니까?`}
+                content="수락 시 채팅방이 생성됩니다."
+                rightButtonText="수락하기"
+                onLeftClick={() => setIsAcceptPopUpOpen(false)}
+                onRightClick={handleAcceptChatRequestConfirm}
+            />
+
+            {/* 삭제 팝업 */}
+            <PopUp 
+                isOpen={isDeletePopUpOpen}
+                type="warning"
+                title={`${requestInfo.partner.name}님의\n요청을 삭제하시겠습니까?`}
+                content="삭제된 요청은 다시 확인할 수 없습니다."
+                onLeftClick={handleDeleteChatRequestConfirm}
+                onRightClick={() => setIsDeletePopUpOpen(false)}
+            />
         </HeaderLayout>
     )
-}   
+}
