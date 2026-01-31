@@ -48,15 +48,22 @@ export const ChatRoomPage = () => {
     // 1. 레이아웃 안정화 및 초기 스크롤
     // useLayoutEffect : 화면 렌더링 직전 실행
     useLayoutEffect(() => {
-        if (!isLoading && localMessages.length > 0 && !isReady) {
-            // 화면 그린 후 이동
-            window.scrollTo(0, document.documentElement.scrollHeight);
-            
-            // 이동 직후 즉시 공개 (애니메이션 프레임을 기다려 더 정확하게 처리)
-            requestAnimationFrame(() => {
+        if (!isLoading && !isReady) {
+            if (localMessages.length > 0) {
+                // 화면 그린 후 이동
                 window.scrollTo(0, document.documentElement.scrollHeight);
-                setIsReady(true); // 메시지들 visible 
-            });
+                
+                // 이동 직후 즉시 공개 (애니메이션 프레임을 기다려 더 정확하게 처리)
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, document.documentElement.scrollHeight);
+                    setIsReady(true); // 메시지들 visible 
+                });
+            } else {
+                // 메시지가 없을 때는 스크롤 없이 즉시 표시
+                requestAnimationFrame(() => {
+                    setIsReady(true);
+                });
+            }
         }
     }, [isLoading, localMessages.length, isReady]);
 
@@ -127,7 +134,7 @@ export const ChatRoomPage = () => {
             }
         >
             {/* invisible : 공간은 차지 하지만 보이지 않음*/}
-            <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'}`}>
+            <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
                 {/* 상단 정보 영역 */}
                 {roomInfo && <ChatRoomInfo chatRoom={roomInfo} />}
                 
