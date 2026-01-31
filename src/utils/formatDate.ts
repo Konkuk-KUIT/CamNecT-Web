@@ -21,9 +21,17 @@ export const formatDate = (isoDate: string) => {
   return target.format('YY.MM.DD'); // 이틀전부터는 YY.MM.DD 형식으로
 };
 
-/**
- * "1월 15일 수요일" 형식으로 반환
- */
+// "1월 15일 수요일" 형식으로 반환
 export const formatFullDateWithDay = (isoDate: string) => {
   return dayjs(isoDate).format('M월 D일 dddd');
+};
+
+// HH:mm 형식으로 반환
+export const formatTime = (isoDate: string) => {
+  return dayjs(isoDate).format('HH:mm');
+};
+
+// YY.MM.DD HH:mm 형식으로 반환
+export const formatFullDateWithTime = (isoDate: string) => {
+  return dayjs(isoDate).format('YY.MM.DD HH:mm');
 };

@@ -1,5 +1,5 @@
-import { mockChatRequestRoomList, mockChatRoomList } from "../mock/coffeeChatMocks";
-import type { ChatRoomListItem } from "../types/coffee-chat/coffeeChatTypes";
+import { mockChatRequestRoomList, mockChatRoomList, mockMessages } from "../mock/coffeeChatMocks";
+import type { ChatMessage, ChatRoomListItem } from "../types/coffee-chat/coffeeChatTypes";
 
 // 네트워크 지연 시뮬레이션 함수
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -17,6 +17,12 @@ export const getChatRoomDetail = async (roomId: string): Promise<ChatRoomListIte
     const room = mockChatRoomList.find(r => r.roomId === roomId);
     if (!room) throw new Error("Chat room not found");
     return room;
+};
+
+// 채팅방 메시지 목록 조회
+export const getChatMessages = async (roomId: string): Promise<ChatMessage[]> => {
+    await delay(300);
+    return mockMessages.filter(m => m.roomId === roomId);
 };
 
 // 커피챗/팀원모집 요청 목록 조회

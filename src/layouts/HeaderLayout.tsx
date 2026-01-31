@@ -10,7 +10,7 @@ type FullLayoutProps = {
 export const HeaderLayout = ({ headerSlot, children }: FullLayoutProps) => {
   return (
     <div
-      className="w-full min-h-[100dvh] relative bg-white"
+      className="w-full min-h-[100dvh] relative bg-white z-[100]"
       style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}
     >
       {headerSlot ?? null}

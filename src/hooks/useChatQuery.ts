@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getChatRequestDetail, getChatRequests, getChatRoomDetail, getChatRooms } from "../api/chat";
+import { getChatMessages, getChatRequestDetail, getChatRequests, getChatRoomDetail, getChatRooms } from "../api/chat";
 
 export const useChatRooms = () => {
     return useQuery({
@@ -13,6 +13,14 @@ export const useChatRoom = (roomId: string) => {
         queryKey: ['chatRoom', roomId],
         queryFn: () => getChatRoomDetail(roomId),
         enabled: !!roomId // roomId가 유효할 때만 실행
+    });
+};
+
+export const useChatMessages = (roomId: string) => {
+    return useQuery({
+        queryKey: ['chatMessages', roomId],
+        queryFn: () => getChatMessages(roomId),
+        enabled: !!roomId
     });
 };
 
