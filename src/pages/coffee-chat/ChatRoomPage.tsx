@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
 import { useChatMessages, useChatRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
@@ -17,15 +18,24 @@ export const ChatRoomPage = () => {
     const { data: remoteMessages = [], isLoading: isMessagesLoading } = useChatMessages(id || "");
     // 내가 보낸 임시 메시지
     const [sentMessages, setSentMessages] = useState<ChatMessage[]>([]);
+    
+    // 검색 관련 상태
+    const [isSearching, setIsSearching] = useState(false);
+    const [roomSearchQuery, setRoomSearchQuery] = useState("");
 
     const isLoading = isRoomLoading || isMessagesLoading;
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // API 데이터와 내가 보낸 임시 메시지를 합치는 작업
-    const localMessages = useMemo(
-        () => [...remoteMessages, ...sentMessages], 
-        [remoteMessages, sentMessages] // 의존성 : 서버 or 내가 보낸 메시지 
-    );
+    // API 데이터와 내가 보낸 임시 메시지를 합침
+    const allMessages = useMemo(() => [...remoteMessages, ...sentMessages], [remoteMessages, sentMessages]);
+
+    // 검색어 필터링 적용
+    const localMessages = useMemo(() => {
+        if (!isSearching || !roomSearchQuery.trim()) return allMessages;
+        return allMessages.filter(msg => 
+            msg.content.toLowerCase().includes(roomSearchQuery.toLowerCase())
+        );
+    }, [allMessages, isSearching, roomSearchQuery]);
 
     // 가장 아래로 스크롤하는 함수 (전체 문서 기준)
     const scrollToBottom = () => {
@@ -67,13 +77,46 @@ export const ChatRoomPage = () => {
     return (
         <HeaderLayout
             headerSlot={
-                <MainHeader
-                    title={roomInfo.partner.name}
-                    rightActions={[
-                        { icon: 'search', onClick: () => console.log('search clicked') },
-                        { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
-                    ]}
-                />
+                !isSearching ? (
+                    <MainHeader
+                        title={roomInfo.partner.name}
+                        rightActions={[
+                            { icon: 'search', onClick: () => setIsSearching(true) },
+                            { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
+                        ]}
+                    />
+                ) : (
+                    <header 
+                        className="fixed left-0 right-0 top-0 z-50 flex items-center bg-white px-[25px] py-[10px]"
+                        style={{
+                            paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
+                            top: 'env(safe-area-inset-top, 0px)',
+                        }}
+                    >
+                        <div className="flex items-center justify-center gap-[15px] w-full">
+                            <div className="flex items-center w-[282px] h-[40px] px-[15px] py-[8px] bg-gray-150 rounded-[10px]">
+                                <Icon name="search" style={{ width: '20px', height: '20px' }} />
+                                <input 
+                                    autoFocus
+                                    type="text"
+                                    value={roomSearchQuery}
+                                    onChange={(e) => setRoomSearchQuery(e.target.value)}
+                                    placeholder="채팅 내용 검색"
+                                    className="flex-1 ml-[15px] bg-transparent border-none outline-none text-gray-750 text-r-16 tracking-[-0.64px] placeholder:text-gray-400"
+                                />
+                            </div>
+                            <button 
+                                onClick={() => {
+                                    setIsSearching(false);
+                                    setRoomSearchQuery("");
+                                }}
+                                className="text-gray-650 text-B-16-hn tracking-[-0.4px] shrink-0"
+                            >
+                                취소
+                            </button>
+                        </div>
+                    </header>
+                )
             }
         >
             <div className="flex flex-col pt-[74px] pb-[100px]">

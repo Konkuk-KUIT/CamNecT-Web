@@ -76,7 +76,7 @@ export const ChatListPage = () => {
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
                   }}
-                  className="w-full h-[40px] pl-[52px] pr-[19px] py-[8px] rounded-[30px] bg-gray-150 text-gray-750 text-r-14 placeholder:text-gray-650 focus:outline-none"
+                  className="w-full h-[40px] pl-[52px] pr-[19px] py-[8px] rounded-[30px] bg-gray-150 text-gray-750 text-r-16 placeholder:text-gray-650 focus:outline-none"
               />
           </div>
         </section>
