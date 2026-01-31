@@ -5,7 +5,7 @@ import { axiosInstance } from "./axiosInstance";
 export const login = async (data: LoginRequest) => {
 
     const response = await axiosInstance.post<LoginResponse>("/api/auth/login", data);
-    return response.data;
+    return response.data; // todo response자체를 return해서 컴포넌트에서  dot operator로 접근해서 쓰자
 }
 
 // 2. 이메일 인증 번호 요청 API [POST] (/api/verification/email)
