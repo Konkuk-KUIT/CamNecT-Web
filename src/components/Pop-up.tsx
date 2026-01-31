@@ -35,7 +35,7 @@ const PopUp = ({
 
   // 유형별 텍스트 정렬
   const contentAlign =
-    type === 'warning' || type === 'confirm' ? 'text-center' : 'text-left';
+    type === 'warning' || type === 'confirm' || type === 'info' ? 'text-center' : 'text-left';
 
   const renderContent = (): ReactNode => {
     // 문자열 기반 줄바꿈(\n) 처리

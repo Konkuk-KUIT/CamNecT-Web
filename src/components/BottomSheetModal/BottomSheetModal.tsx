@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { type ReactNode } from 'react';
 
 type BottomSheetModalProps = {
@@ -13,42 +14,55 @@ const BottomSheetModal = ({
     height = 'auto',
     children,
 }: BottomSheetModalProps) => {
-    if (!isOpen) return null;
-
     return (
-        <div
-            // 오버레이: 시트 바깥 클릭 시 닫힘.
-            className='fixed inset-0 z-50 flex items-end justify-center'
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-            onClick={onClose}
-        >
-            <div
-                // 시트 컨테이너: 내부 클릭이 닫힘으로 전파되지 않도록 차단.
-                className='flex w-[clamp(320px,100vw,540px)] flex-col'
-                style={{
-                    height: height,
-                    borderRadius: '10px 10px 0 0',
-                    background: 'var(--Color_Gray_B, #FCFCFC)',
-                    boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
-                    gap: '20px',
-                }}
-                onClick={(event) => event.stopPropagation()}
-            >
-                {/* 드래그 핸들 시각적 표시 */}
-                <div className='flex justify-center pt-[17px]'>
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        width='78'
-                        height='5'
-                        viewBox='0 0 78 5'
-                        fill='none'
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center">
+                    {/* 배경 어둡게 처리 (단순 투명도 조절) */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="absolute inset-0 bg-black/30"
+                    />
+
+                    {/* 바텀 시트 본체 */}
+                    <motion.div
+                        drag="y" // 수직방향 드래그 
+                        dragConstraints={{ top: 0 }} // 윗쪽 방향 제한 
+                        dragElastic={0} // 저항 없이 손가락 따라 즉각 반응
+                        onDragEnd={(_, info) => {
+                            // 80px 이상 내리면 닫힘 (반응 감도 상향)
+                            if (info.offset.y > 60) {
+                                onClose();
+                            }
+                        }}
+                        initial={{ y: "100%" }}
+                        animate={{ y: 0 }}
+                        exit={{ y: "100%" }}
+                        transition={{ duration: 0.2 }} // 애니메이션 속도 빠르게 (0.2초)
+                        className="relative flex w-full max-w-[430px] flex-col bg-white"
+                        style={{
+                            height: height,
+                            borderRadius: "20px 20px 0 0",
+                            boxShadow: "0 -4px 10px rgba(0,0,0,0.1)",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <path d='M2.5 2.5H75.5' stroke='#A1A1A1' strokeWidth='5' strokeLinecap='round' />
-                    </svg>
+                        {/* 상단 핸들 (잡는 곳) */}
+                        <div className="flex justify-center pt-[17px] pb-[10px] cursor-grab">
+                            <div className="w-[73px] h-[5px] bg-gray-650 rounded-full" />
+                        </div>
+
+                        {/* 내용물 */}
+                        <div className="pb-[40px]">
+                            {children}
+                        </div>
+                    </motion.div>
                 </div>
-                {children}
-            </div>
-        </div>
+            )}
+        </AnimatePresence>
     );
 };
 
