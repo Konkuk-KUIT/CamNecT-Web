@@ -22,6 +22,9 @@ export const ChatRoomPage = () => {
     // 검색 관련 상태
     const [isSearching, setIsSearching] = useState(false);
     const [roomSearchQuery, setRoomSearchQuery] = useState("");
+    
+    // 초기 진입 시 깜빡임 방지를 위한 상태
+    const [isReady, setIsReady] = useState(false);
 
     const isLoading = isRoomLoading || isMessagesLoading;
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -42,20 +45,27 @@ export const ChatRoomPage = () => {
         window.scrollTo(0, document.documentElement.scrollHeight);
     };
 
-    // 1. 레이아웃이 잡히기 직전에 즉시 이동 (깜빡임 방지)
+    // 1. 레이아웃 안정화 및 초기 스크롤
+    // useLayoutEffect : 화면 렌더링 직전 실행
     useLayoutEffect(() => {
-        if (!isLoading && localMessages.length > 0) {
+        if (!isLoading && localMessages.length > 0 && !isReady) {
+            // 화면 그린 후 이동
+            window.scrollTo(0, document.documentElement.scrollHeight);
+            
+            // 이동 직후 즉시 공개 (애니메이션 프레임을 기다려 더 정확하게 처리)
+            requestAnimationFrame(() => {
+                window.scrollTo(0, document.documentElement.scrollHeight);
+                setIsReady(true); // 메시지들 visible 
+            });
+        }
+    }, [isLoading, localMessages.length, isReady]);
+
+    // 2. 메시지가 추가될 때 부드럽게 스크롤
+    useEffect(() => {
+        if (isReady && localMessages.length > 0) {
             scrollToBottom();
         }
-    }, [isLoading, localMessages.length]);
-
-    // 2. 화면이 완전히 그려진 후 한 번 더 보정 (확실한 이동)
-    useEffect(() => {
-        if (!isLoading && localMessages.length > 0) {
-            const timer = setTimeout(scrollToBottom, 50);
-            return () => clearTimeout(timer);
-        }
-    }, [isLoading, localMessages.length]);
+    }, [localMessages.length, isReady]);
 
     // 메시지 전송 함수
     const handleSendMessage = (text: string) => {
@@ -71,15 +81,12 @@ export const ChatRoomPage = () => {
         setSentMessages((prev) => [...prev, newMessage]);
     }
 
-    if (isLoading) return <PopUp isOpen={true} type="loading" />;
-    if (!roomInfo) return <div className="flex justify-center items-center h-screen text-gray-400">채팅방 정보를 찾을 수 없습니다.</div>;
-
     return (
         <HeaderLayout
             headerSlot={
                 !isSearching ? (
                     <MainHeader
-                        title={roomInfo.partner.name}
+                        title={roomInfo?.partner.name}
                         rightActions={[
                             { icon: 'search', onClick: () => setIsSearching(true) },
                             { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
@@ -119,9 +126,10 @@ export const ChatRoomPage = () => {
                 )
             }
         >
-            <div className="flex flex-col pt-[74px] pb-[100px]">
+            {/* invisible : 공간은 차지 하지만 보이지 않음*/}
+            <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'}`}>
                 {/* 상단 정보 영역 */}
-                <ChatRoomInfo chatRoom={roomInfo} />
+                {roomInfo && <ChatRoomInfo chatRoom={roomInfo} />}
                 
                 {/* 메시지 리스트 영역 */}
                 <div className="flex flex-col mt-[40px] px-[25px]">
@@ -164,16 +172,16 @@ export const ChatRoomPage = () => {
                                         {!isMe && (
                                             <div className="w-[32px] mr-[4px] flex-shrink-0 self-start">
                                                 {!isSameAsPrev && (
-                                                    roomInfo.partner.profileImg ? (
+                                                    roomInfo?.partner.profileImg ? (
                                                         <img 
-                                                            src={roomInfo.partner.profileImg} 
-                                                            alt={`${roomInfo.partner.name} 프로필`} 
+                                                            src={roomInfo?.partner.profileImg} 
+                                                            alt={`${roomInfo?.partner.name} 프로필`} 
                                                             className="w-[32px] h-[32px] rounded-full object-cover shrink-0" 
                                                         />
                                                     ) : (
                                                         <div className="w-[32px] h-[32px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                                                             <span className="text-[12px] font-bold text-gray-600">
-                                                                {roomInfo.partner.name.charAt(0)}
+                                                                {roomInfo?.partner.name.charAt(0)}
                                                             </span>
                                                         </div>
                                                     )
@@ -183,7 +191,7 @@ export const ChatRoomPage = () => {
 
                                         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} pt-[3px] gap-[7px]`}>
                                             {!isMe && !isSameAsPrev && (
-                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo.partner.name}</span>
+                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo?.partner.name}</span>
                                             )}
                                             <div className={`px-[13px] py-[7px] text-r-16 tracking-[-0.64px] ${bubbleRounding} ${
                                                 isMe ? 'bg-primary text-white' : 'bg-gray-150 text-gray-750'
@@ -209,6 +217,13 @@ export const ChatRoomPage = () => {
 
             {/* 고정된 입력창 */}
             <TypingArea onSend={handleSendMessage} />
+            
+            <PopUp isOpen={isLoading} type="loading" />
+            {!isLoading && !roomInfo && (
+                <div className="fixed inset-0 flex justify-center items-center bg-white z-[60] text-gray-400">
+                    채팅방 정보를 찾을 수 없습니다.
+                </div>
+            )}
         </HeaderLayout>
     )
 }
