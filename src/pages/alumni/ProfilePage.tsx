@@ -21,8 +21,9 @@ export const AlumniProfilePage = ({
 }: AlumniProfilePageProps) => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  // URL 파라미터를 기준으로 프로필을 찾고, 없으면 첫 번째 데이터를 사용합니다.
+  // URL 파라미터를 기준으로 프로필을 찾습니다.
   const profile = useMemo(() => alumniList.find((item) => item.id === id), [id]);
+  // 잘못된 id 접근 시 목록으로 리다이렉트합니다.
   if (!profile) {
     return <Navigate to='/alumni' replace />;
   }
@@ -53,6 +54,7 @@ const AlumniProfileContent = ({
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
+  // 쿼리 파라미터에 따라 커피챗 모달을 초기 상태로 열 수 있습니다.
   const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(
     enableCoffeeChatModal && shouldOpenCoffeeChat,
   );
@@ -76,6 +78,7 @@ const AlumniProfileContent = ({
       {
         <MainHeader title='프로필' />
       }>
+      {/* 프로필 본문 영역 */}
       <div className='flex flex-col bg-white [gap:clamp(18px,6cqw,24px)]'>
         {/* 프로필 상단 영역 */}
         <section className='flex flex-col [padding:clamp(32px,10cqw,40px)_clamp(18px,7cqw,25px)_0] [gap:clamp(18px,6cqw,24px)]'>
@@ -110,6 +113,7 @@ const AlumniProfileContent = ({
                   </div>
                 </div>
 
+                {/* 팔로우 토글 버튼 */}
                 <button
                   type='button'
                   onClick={handleFollowToggle}
@@ -212,6 +216,7 @@ const AlumniProfileContent = ({
           </div>
         </section>
 
+        {/* 커피챗 요청 버튼 영역 */}
         <section className='flex [padding:0_clamp(18px,7cqw,25px)_clamp(24px,8cqw,30px)]'>
           <CoffeeChatButton
             onClick={() => {
@@ -224,6 +229,7 @@ const AlumniProfileContent = ({
         {/* 구분선 */}
         <div className='h-[10px] bg-gray-150' />
 
+        {/* 포트폴리오/학력/경력/자격증 영역 */}
         <section className='flex flex-col gap-[30px] px-[25px] py-[30px]'>
           {/* 포트폴리오 섹션 */}
           {profile.privacy.showPortfolio && (

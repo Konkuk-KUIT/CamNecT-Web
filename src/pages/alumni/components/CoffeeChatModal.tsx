@@ -12,11 +12,14 @@ type CoffeeChatModalProps = {
 
 // 커피챗 요청을 작성하는 바텀시트 모달.
 const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatModalProps) => {
+  // 선택된 카테고리와 메시지는 로컬 상태로 관리합니다.
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [message, setMessage] = useState('');
+  // 모바일 키보드가 열릴 때 바텀 인셋을 보정합니다.
   const [keyboardInset, setKeyboardInset] = useState(0);
   const maxLength = 100;
 
+  // visualViewport 변화를 구독해 키보드 인셋을 계산합니다.
   useEffect(() => {
     if (!isOpen) return;
     const viewport = window.visualViewport;

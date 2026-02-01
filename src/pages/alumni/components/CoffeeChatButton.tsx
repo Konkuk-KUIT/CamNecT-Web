@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react';
 
+// 공통 버튼 스타일만 제공하고 실제 동작은 부모에서 주입합니다.
 type CoffeeChatButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 // 커피챗 요청 버튼 공통 스타일 컴포넌트.

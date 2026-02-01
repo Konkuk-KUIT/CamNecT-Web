@@ -18,6 +18,7 @@ export const AlumniSearchPage = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // 선택된 태그만 만족하는 동문만 추립니다.
   const filteredList = useMemo(() => {
     if (selectedTags.length === 0) return alumniList;
     return alumniList.filter((alumni) =>
@@ -44,6 +45,7 @@ export const AlumniSearchPage = () => {
         leftIcon='empty'
          />}
     >
+      {/* 검색/필터/카드 리스트 영역 */}
       <div
         className='flex w-full flex-col bg-white [padding:clamp(16px,5cqw,20px)_clamp(18px,7cqw,25px)] [gap:clamp(14px,4cqw,20px)]'
         style={
@@ -90,12 +92,14 @@ export const AlumniSearchPage = () => {
           />
         </div>
 
+        {/* 동문 카드 리스트 */}
         <div className='flex flex-col gap-[5px]'>
           {visibleList.map((alumni) => (
             <div
               key={alumni.id}
               className='flex min-h-[161px] flex-col gap-[20px] bg-white border border-gray-150 rounded-[12px] opacity-100 [padding:clamp(12px,4cqw,15px)]'
             >
+              {/* 카드 본문은 상세 페이지로 이동하는 링크 */}
               <Link to={`/alumni/profile/${alumni.id}`} className='flex flex-col gap-[20px]'>
                 {/* 1그룹: 프로필/이름/학과/학번 + 더보기 아이콘 */}
                 <section className='flex justify-between'>
