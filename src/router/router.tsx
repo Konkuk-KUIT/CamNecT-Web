@@ -19,6 +19,7 @@ import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
 import { ProfilePage } from "../pages/alumni/ProfilePage";
+import { MyPostsPage } from "../pages/my-page/MyPostPage";
 
 export const router = createBrowserRouter([
 
@@ -108,6 +109,10 @@ export const router = createBrowserRouter([
                                         element: <PortfolioDetailPage />
                                     },
                                 ]
+                            },
+                            {
+                                path: "posts",
+                                element: <MyPostsPage />
                             },
                         ]
                     },
