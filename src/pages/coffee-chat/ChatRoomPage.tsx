@@ -116,6 +116,7 @@ export const ChatRoomPage = () => {
                                     value={roomSearchQuery}
                                     onChange={(e) => setRoomSearchQuery(e.target.value)}
                                     placeholder="채팅 내용 검색"
+                                    aria-label="채팅 내용 검색"
                                     className="flex-1 ml-[15px] bg-transparent border-none outline-none text-gray-750 text-r-16 tracking-[-0.64px] placeholder:text-gray-400"
                                 />
                             </div>
