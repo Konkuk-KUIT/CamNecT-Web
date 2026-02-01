@@ -99,6 +99,10 @@
     --text-SB-16-hn--line-height: normal;
     --text-SB-16-hn--font-weight: 600;
 
+    --text-SB-16: 16px;
+    --text-SB-16--line-height: 22.4px;
+    --text-SB-16--font-weight: 600;
+
     --text-SB-14: 14px;
     --text-SB-14--line-height: 19.6px;
     --text-SB-14--font-weight: 600;
@@ -242,6 +246,11 @@
         font-size: var(--text-SB-16-hn);
         line-height: var(--text-SB-16-hn--line-height);
         font-weight: var(--text-SB-16-hn--font-weight);
+    }
+    .text-sb-16 {
+        font-size: var(--text-SB-16);
+        line-height: var(--text-SB-16--line-height);
+        font-weight: var(--text-SB-16--font-weight);
     }
     .text-sb-14 {
         font-size: var(--text-SB-14);
