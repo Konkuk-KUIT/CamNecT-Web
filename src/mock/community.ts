@@ -276,6 +276,26 @@ export const infoPosts: InfoPost[] = [
 
 export const questionPosts: QuestionPost[] = [
   {
+    id: 'question-mine-2',
+    author: {
+      id: 'user-park-wonbin-20',
+      name: '박원빈',
+      major: '컴퓨터공학부',
+      studentId: '20',
+    },
+    categories: ['면접', '포트폴리오'],
+    title: '백엔드 면접에서 프로젝트 설명 순서가 고민입니다.',
+    content: '문제 정의부터 시작하는 게 좋은지, 성과 중심으로 풀어내는 게 좋은지 조언 부탁드립니다.',
+    likes: 6,
+    saveCount: 3,
+    answers: 1,
+    isAdopted: false,
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    accessStatus: 'GRANTED',
+    requiredPoints: 100,
+    myPoints: 120,
+  },
+  {
     id: 'question-1',
     author: {
       id: 'user-jang-yujin-23',
