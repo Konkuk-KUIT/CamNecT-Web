@@ -11,6 +11,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       name: "박익명",
       profileImg: "https://picsum.photos/seed/user_001/100/100",
 
+      univ: "세종대학교",
       major: "컴퓨터공학과",
       gradeNumber: "23",
       introduction: "프론트엔드로 UI 구현 중입니다.",
@@ -59,6 +60,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       name: "박원빈",
       profileImg: "https://picsum.photos/seed/user_002/100/100",
 
+      univ: "건국대학교",
       major: "시각디자인학과",
       gradeNumber: "19",
       introduction: "현재 UX&UI 분야에서 일하고있습니다!\n관심있으신분들은 커피챗 주세요!",
@@ -121,6 +123,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       name: "김익명",
       profileImg: "https://picsum.photos/seed/user_003/100/100",
 
+      univ: "한양대학교",
       major: "산업디자인학과",
       gradeNumber: "20",
       introduction: "브랜딩과 서비스 디자인에 관심이 많아요.",
