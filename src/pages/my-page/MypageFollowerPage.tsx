@@ -3,10 +3,13 @@ import { useParams } from "react-router-dom";
 import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import PopUp from "../../components/Pop-up";
+import { useNavigate } from "react-router-dom";
 
 type TabType = "follower" | "following";
 
 export const FollowerPage = () => {
+    const navigate = useNavigate();
     const { userId } = useParams<{ userId: string }>();
     const targetUserId = userId || MOCK_SESSION.meUid;
     
@@ -16,7 +19,16 @@ export const FollowerPage = () => {
     const userDetail = MOCK_PROFILE_DETAIL_BY_UID[targetUserId];
 
     if (!userDetail) {
-        return <div className="p-6">유저 정보를 찾을 수 없습니다.</div>;
+        return (
+            <PopUp
+                type="error"
+                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
+                titleSecondary='잠시 후 다시 시도해주세요'
+                isOpen={true}
+                rightButtonText='확인'
+                onClick={() => navigate(-1)}
+            />
+        );
     }
 
     const { user } = userDetail;

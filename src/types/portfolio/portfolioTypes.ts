@@ -2,24 +2,32 @@ import { type User } from "../user/userTypes";
 
 export type UserId = Pick<User, "id">;
 
-export interface PortfolioImage {
-    portfolioImgId: string;
-    url: string;
-}
+export type Media = string | File;
 
 export interface Portfolio extends UserId {
     portfolioId: string;
 
     title: string;
-    thumbnailUrl?: string;
+    portfolioThumbnail: Media;
 
-    content: string;
-    images: PortfolioImage[];
-
-    viewCount: number;
-
-    createdAt: string;
-    updatedAt?: string;
-
+    updatedAt: string;
     portfolioVisibility: boolean;
+
+    isImportant: boolean;
+}
+
+export interface PortfolioDetail extends Portfolio {
+    content: string;
+    startYear: number;
+    startMonth: number;
+    endYear: number;
+    endMonth: number;
+    role: string;
+    skills: string;
+
+    portfolioImage?: Media[];
+    portfolioPdf?: Media[];
+    portfolioLink?: string[];
+
+    problemSolution?: string;
 }

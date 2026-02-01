@@ -11,12 +11,14 @@ type FullLayoutProps = {
 // todo main태그 감싸기
 export const FullLayout = ({ headerSlot, children }: FullLayoutProps) => {
   return (
-    <div
-      className="w-full min-h-full relative bg-white"
-      style={{ paddingBottom: 'calc(76px + env(safe-area-inset-bottom))' }}
-    >
+    <div className="w-full min-h-[100dvh] relative bg-white">
       {headerSlot ?? null}
-      {children ?? <Outlet />}
+      
+      {/* 컨텐츠 하단이 BottomNav에 가려지지 않도록 패딩 추가 */}
+      <main className="w-full" style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}>
+        {children ?? <Outlet />}
+      </main>
+      
       <BottomNav />
     </div>
   );

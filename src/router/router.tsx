@@ -1,14 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
+
+import { AlumniPage } from "../pages/alumni/AlumniPage";
+import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
+import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
 import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
 import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
-import { AlumniPage } from "../pages/alumni/AlumniPage";
 import { ProfilePage } from "../pages/alumni/ProfilePage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
-import { CoffeeChatRequest } from "../pages/coffee-chat/CoffeeChat-request";
-import { CoffeeChatPage } from "../pages/coffee-chat/CoffeeChatPage";
 import { CommunityPage } from "../pages/community/CommunityPage";
 import { HomePage } from "../pages/home/HomePage";
 import { NotificationPage } from "../pages/home/NotificationPage";
@@ -16,9 +17,13 @@ import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
+import { AuthGuard } from "./AuthGuard";
+import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
+import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
-import { AuthGuard } from "./AuthGuard";
+import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
+import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
 
 export const router = createBrowserRouter([
 
@@ -80,14 +85,35 @@ export const router = createBrowserRouter([
                         path: "alumni/profile/:id",
                         element: <ProfilePage />,
                     },
+
                     {
                         path: "chat",
-                        element: <CoffeeChatPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ChatListPage />,
+                            },
+                            {
+                                path: ":id",
+                                element: <ChatRoomPage />,
+                            },
+                            {
+                                path: "requests", 
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <ChatRequestListPage />,
+                                    },
+                                    {
+                                        path: ":id",
+                                        element: <ChatRequestRoomPage />,
+                                    }
+                                ]
+                            }
+                        ]
+                        
                     },
-                    {
-                        path: "chat/requests",
-                        element: <CoffeeChatRequest />,
-                    },
+
                     {
                         path: "activity",
                         element: <ActivityPage />,
@@ -98,16 +124,33 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "me",
-                        element: <MypagePage />,
-
-                    },
-                    {
-                        path: "me/edit",
-                        element: <MypageEditPage />
-                    },
-                    {
-                        path: "me/follower",
-                        element: <FollowerPage />
+                        children: [
+                            {
+                                index: true,
+                                element: <MypagePage />
+                            },
+                            {
+                                path: "edit",
+                                element: <MypageEditPage />
+                            },
+                            {
+                                path: "follower",
+                                element: <FollowerPage />
+                            },
+                            {
+                                path: "portfolio",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <PortfolioListPage />
+                                    },
+                                    {
+                                        path: ":portfolioId",
+                                        element: <PortfolioDetailPage />
+                                    },
+                                ]
+                            },
+                        ]
                     },
                     {
                         path: "community",
@@ -116,6 +159,7 @@ export const router = createBrowserRouter([
                     {
                         path: "shop",
                         element: <ShopPage />,
+
                     },
                 ]
             },
