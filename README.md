@@ -180,6 +180,9 @@ src/
 ┃ ┃ ┣ MypageEditPage.tsx # 마이페이지 수정 화면
 ┃ ┃ ┣ MypageFollowerPage.tsx # 팔로워 / 팔로잉 화면
 ┃ ┣ portfolio/ # 포트폴리오 편집
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ PortfolioListPage.tsx # 포트폴리오 리스트 화면
+┃ ┃ ┣ PortfolioDetailPage.tsx # 포트폴리오 상세 화면
 ┃ ┗ activity/ # 대외활동 / 팀원모집
 ┃
 ┣ utils/ # custom utils

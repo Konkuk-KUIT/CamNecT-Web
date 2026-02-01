@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
+import { useState } from 'react';
 
 type Size = number | string;
 
@@ -9,6 +9,7 @@ type ToggleProps = {
   onToggle?: (next: boolean) => void;
   width?: Size;
   height?: Size;
+  strokeColor?: string;
   className?: string;
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'onToggle'>;
 
@@ -21,6 +22,7 @@ const Toggle = ({
   onToggle,
   width = 24,
   height = 24,
+  strokeColor = '#202023',
   className = '',
   style,
   ...props
