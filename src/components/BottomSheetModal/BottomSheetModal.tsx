@@ -33,7 +33,7 @@ const BottomSheetModal = ({
                         dragConstraints={{ top: 0 }} // 윗쪽 방향 제한 
                         dragElastic={0} // 저항 없이 손가락 따라 즉각 반응
                         onDragEnd={(_, info) => {
-                            // 80px 이상 내리면 닫힘 (반응 감도 상향)
+                            // 60px 이상 내리면 닫힘 (반응 감도 상향)
                             if (info.offset.y > 60) {
                                 onClose();
                             }

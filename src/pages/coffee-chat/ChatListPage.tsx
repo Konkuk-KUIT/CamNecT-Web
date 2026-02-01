@@ -27,12 +27,21 @@ export const ChatListPage = () => {
 
   // 채팅방 리스트 검색 함수
   const searchFilteredChatRoomList = (searchQuery: string) => {
-    const result = filteredChatRoomList.filter((chatRoom) => {
-      return chatRoom.partner.name.includes(searchQuery) || chatRoom.partner.major.includes(searchQuery)
-        || chatRoom.partner.studentId.includes(searchQuery) || chatRoom.lastMessage.includes(searchQuery)
-    })
-    return result;
-  }
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return filteredChatRoomList;
+
+    return filteredChatRoomList.filter((chatRoom) => {
+      const { partner, lastMessage } = chatRoom;
+
+      return (
+        partner.name.toLowerCase().includes(query) ||
+        partner.major.toLowerCase().includes(query) ||
+        partner.studentId.toLowerCase().includes(query) ||
+        (lastMessage?.toLowerCase().includes(query) ?? false)
+      );
+    });
+  };
+
 
   const handleChatRoomClick = (roomId: string) => {
     navigate(`/chat/${roomId}`);
@@ -72,6 +81,7 @@ export const ChatListPage = () => {
                   type="text"
                   name="searchTags"
                   placeholder="채팅방, 대화 내용 검색"
+                  aria-label="채팅방 또는 대화 내용 검색"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)

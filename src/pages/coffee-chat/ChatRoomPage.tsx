@@ -155,8 +155,8 @@ export const ChatRoomPage = () => {
                         
                         // 말풍선 곡률: 중간 메시지는 둥글게, 마지막 메시지만 꼬리 노출
                         const bubbleRounding = isMe 
-                            ? (isSameAsNext ? 'rounded-[20px]' : 'rounded-l-[20px] rounded-br-[20px] rounded-tr-0')
-                            : (isSameAsNext ? 'rounded-[20px]' : 'rounded-t-[20px] rounded-br-[20px] rounded-bl-0');
+                            ? (isSameAsNext ? 'rounded-[20px]' : 'rounded-l-[20px] rounded-br-[20px] rounded-tr-none')
+                            : (isSameAsNext ? 'rounded-[20px]' : 'rounded-t-[20px] rounded-br-[20px] rounded-bl-none');
 
                         return (
                             <React.Fragment key={msg.id}>

@@ -12,9 +12,12 @@ interface ChatListProps {
 export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true, onClick }: ChatListProps) => {
     return (
         <li 
-            onClick={onClick}
-            className={`flex gap-[12px] px-[25px] py-[15px] border-b border-gray-150 cursor-pointer active:bg-gray-100 transition-colors ${isFirstPaddingDisabled ? 'first:pt-0' : ''}`}
+            className={`border-b border-gray-150 py-[15px] ${isFirstPaddingDisabled ? 'first:pt-0' : ''}`}
         >
+            <button
+                onClick={onClick}
+                className="flex gap-[12px] px-[25px] w-full text-left cursor-pointer active:bg-gray-100 transition-colors"
+            >
             {/* 프로필 이미지 영역 */}
             <div className="shrink-0">
                 {chatRoom.partner.profileImg ? (
@@ -59,6 +62,7 @@ export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true, onClick }: C
                     )}
                 </div>
             </div>
+            </button>
         </li>
     );
 };

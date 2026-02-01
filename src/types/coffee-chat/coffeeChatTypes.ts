@@ -71,5 +71,5 @@ export interface CoffeeChatRequest {
   requestTags: string[]; // ["태그1", "태그2"] (요청 분야)
   message: string;       // "커피챗을 요청하는 이유와 궁금한 점..."
   
-  createdAt: string;     // "1월 15일 수요일"
+  createdAt: string;      // ISO 8601 (e.g., "2026-01-15T09:00:00Z")
 }

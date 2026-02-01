@@ -89,7 +89,7 @@ export const ChatRequestListPage = () => {
                 const requestCount = chatRoomList.length;
                 
                 return (
-                  <div className="flex flex-col">
+                  <div key={key} className="flex flex-col">
                     <ChatPostAccordian
                       title={key}
                       isOpen={isOpen}
@@ -97,7 +97,7 @@ export const ChatRequestListPage = () => {
                       onClick={() => togglePostTitle(key)}
                     />
                     {isOpen && (
-                      <section>
+                      <ol>
                         {chatRoomList.map((chatRoom) => (
                           <ChatList 
                             key={chatRoom.roomId} 
@@ -106,7 +106,7 @@ export const ChatRequestListPage = () => {
                             onClick={() => handleChatRoomClick(chatRoom.roomId)}
                           />
                         ))}
-                      </section>
+                      </ol>
                     )}
                   </div>
                 )
