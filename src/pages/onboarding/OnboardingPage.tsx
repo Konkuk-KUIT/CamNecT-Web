@@ -54,9 +54,9 @@ export const OnboardingPage = () => {
   }
 
   return (
-    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center overflow-hidden">
+    <div className="absolute inset-0 bg-white overflow-hidden">
       {/* 텍스트 영역 */}
-      <div className="mt-[100px] w-full text-left transition-all duration-500">
+      <div className="absolute top-[60px] w-full px-[25px] text-left transition-all duration-500 z-10">
         <h1 className="text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-gray-900 whitespace-pre-line">
           {ONBOARDING_DATA[currentIndex].title}
         </h1>
@@ -66,34 +66,37 @@ export const OnboardingPage = () => {
       </div>
 
       {/* 이미지/SVG 영역 */}
-      <div className="flex-1 flex items-center justify-center w-full transition-opacity duration-500">
+      <div className="absolute top-[160px] bottom-[240px] left-0 right-0 flex items-center justify-center transition-opacity duration-500 z-0">
         {ONBOARDING_DATA[currentIndex].icon}
       </div>
 
-      {/* 페이지네이션 도트 */}
-      <div className="flex gap-[8px] mb-[40px]">
-        {ONBOARDING_DATA.map((_, index) => (
-          <div
-            key={index}
-            className={`w-[8px] h-[8px] rounded-full transition-colors duration-300 ${
-              index === currentIndex ? "bg-primary" : "bg-gray-200"
-            }`}
-          />
-        ))}
-      </div>
+      {/* 하단 영역 (페이지네이션 + 버튼) */}
+      <div className="absolute bottom-[60px] w-full px-[25px] flex flex-col items-center z-10">
+        {/* 페이지네이션 도트 */}
+        <div className="flex gap-[8px] mb-[40px]">
+          {ONBOARDING_DATA.map((_, index) => (
+            <div
+              key={index}
+              className={`w-[8px] h-[8px] rounded-full transition-colors duration-300 ${
+                index === currentIndex ? "bg-primary" : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
 
-      {/* 버튼 영역 */}
-      <div className="w-full max-w-[430px] flex flex-col gap-[12px] mb-[60px] relative z-10 px-6">
-        <Button
-          className="!h-[50px] w-full"
-          onClick={() => navigate("/login")}
-          label="로그인" 
-        />
-        <ButtonWhite
-          className="!h-[50px] w-full"
-          onClick={() => navigate("/signup")}
-          label="회원가입" 
-        />
+        {/* 버튼 영역 */}
+        <div className="w-full flex flex-col gap-[12px] items-center">
+          <Button
+            className="!h-[50px] w-full max-w-[430px]"
+            onClick={() => navigate("/login")}
+            label="로그인" 
+          />
+          <ButtonWhite
+            className="!h-[50px] w-full max-w-[430px]"
+            onClick={() => navigate("/signup")}
+            label="회원가입" 
+          />
+        </div>
       </div>
     </div>
   );
