@@ -3,7 +3,7 @@
 export interface Tag {
     id: string;
     name: string;
-    category: 'field_major' | 'job_skill' | 'activity_spec' | 'certificate_interest';
+    category: 'field_major' | 'job_skill' | 'activity_spec' | 'certificate_interest' | 'community';
 }
 
 // 태그 카테고리
