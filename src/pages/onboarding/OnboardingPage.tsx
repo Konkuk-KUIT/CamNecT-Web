@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import graphic1 from '../../assets/image/onboarding1.png';
+import graphic2 from '../../assets/image/onboarding2.png';
+import graphic3 from '../../assets/image/onboarding3.png';
 import Button from '../../components/Button';
 import ButtonWhite from '../../components/ButtonWhite';
 import { FirstSplashPage } from './FirstSplashPage';
 
-import { Graphic1, Graphic2, Graphic3 } from './Graphics';
 
 const ONBOARDING_DATA = [
   {
     title: "동문과의 커피챗",
     description: "동기부터 선배까지\n관심사로 연결된 동문들과 바로 시작하는 커피챗",
-    icon: <Graphic1 />,
+    icon: graphic1,
   },
   {
     title: "대외활동 탐색",
     description: "복잡한 검색은 그만\n대외활동 찾기와 팀 매칭까지 한 번에",
-    icon: <Graphic2 />,
+    icon: graphic2,
   },
   {
     title: "검증된 커뮤니티",
     description: "인증된 동문 정보,\n확인부터 질문까지 간편하게",
-    icon: <Graphic3 />,
+    icon: graphic3,
   },
 ];
 
@@ -56,18 +58,22 @@ export const OnboardingPage = () => {
   return (
     <div className="absolute inset-0 bg-white overflow-hidden">
       {/* 텍스트 영역 */}
-      <div className="absolute top-[60px] w-full px-[25px] text-left transition-all duration-500 z-10">
-        <h1 className="text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-gray-900 whitespace-pre-line">
+      <div className="absolute top-[60px] w-full px-[25px] text-center transition-all duration-500 z-10">
+        <h1 className="text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-[#202023] whitespace-pre-line">
           {ONBOARDING_DATA[currentIndex].title}
         </h1>
-        <p className="mt-[10px] text-m-14 text-gray-650 tracking-[-0.56px] leading-[140%] whitespace-pre-line">
+        <p className="mt-[10px] text-[16px] font-medium text-[#A1A1A1] tracking-[-0.4px] leading-[140%] whitespace-pre-line">
           {ONBOARDING_DATA[currentIndex].description}
         </p>
       </div>
 
       {/* 이미지/SVG 영역 */}
       <div className="absolute top-[160px] bottom-[240px] left-0 right-0 flex items-center justify-center transition-opacity duration-500 z-0">
-        {ONBOARDING_DATA[currentIndex].icon}
+        <img 
+          src={ONBOARDING_DATA[currentIndex].icon} 
+          alt="온보딩 설명 아이콘 이미지" 
+          className="w-[70%] h-[70%] object-contain"
+        />
       </div>
 
       {/* 하단 영역 (페이지네이션 + 버튼) */}
