@@ -31,6 +31,7 @@ const BottomSheetModal = ({
                     background: 'var(--Color_Gray_B, #FCFCFC)',
                     boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
                     gap: '20px',
+                    paddingBottom: 'var(--bottom-sheet-safe-padding, 0px)',
                 }}
                 onClick={(event) => event.stopPropagation()}
             >

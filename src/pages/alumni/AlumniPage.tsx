@@ -8,42 +8,35 @@ import {FullLayout} from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { alumniList } from './data';
 import FilterHeader from '../../components/FilterHeader';
-import FilterModal from '../../components/FilterModal';
-import useCommunityFilters from '../../hooks/useCommunityFilters';
+import TagsFilterModal from '../../components/TagsFilterModal';
+import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
   // 검색 입력값과 지연된 검색값으로 필터링 부담을 줄입니다.
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  // 커뮤니티 필터 로직을 재사용해 동문 리스트를 필터링합니다.
-  const {
-    activeFilters,
-    filteredPosts,
-    isFilterOpen,
-    activeTab,
-    setActiveTab,
-    openFilterModal,
-    handleCancel,
-    handleApply,
-    handleRemoveFilter,
-    draftMajor,
-    draftInterests,
-    toggleDraftMajor,
-    toggleDraftInterest,
-    hasDraftSelection,
-  } = useCommunityFilters(alumniList);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const filteredList = useMemo(() => {
+    if (selectedTags.length === 0) return alumniList;
+    return alumniList.filter((alumni) =>
+      selectedTags.every((tag) => alumni.categories.includes(tag)),
+    );
+  }, [selectedTags]);
 
   // 검색어와 필터 결과를 조합해 최종 리스트를 생성합니다.
   const visibleList = useMemo(() => {
     const keyword = deferredSearchTerm.trim();
-    if (!keyword) return filteredPosts;
-    return filteredPosts.filter((alumni) => {
+    if (!keyword) return filteredList;
+    return filteredList.filter((alumni) => {
       const nameMatch = alumni.author.name.includes(keyword);
       const tagMatch = alumni.categories.some((category) => category.includes(keyword));
       return nameMatch || tagMatch;
     });
-  }, [deferredSearchTerm, filteredPosts]);
+  }, [deferredSearchTerm, filteredList]);
+
 
   return (
     <FullLayout 
@@ -52,7 +45,14 @@ export const AlumniSearchPage = () => {
         leftIcon='empty'
          />}
     >
-      <div className='flex w-full flex-col bg-white [padding:clamp(16px,5cqw,20px)_clamp(18px,7cqw,25px)] [gap:clamp(14px,4cqw,20px)]'>
+      <div
+        className='flex w-full flex-col bg-white [padding:clamp(16px,5cqw,20px)_clamp(18px,7cqw,25px)] [gap:clamp(14px,4cqw,20px)]'
+        style={
+          {
+            '--bottom-sheet-safe-padding': 'calc(50px + env(safe-area-inset-bottom))',
+          } as React.CSSProperties
+        }
+      >
         {/* 검색 입력 영역 */}
         <div className='flex w-full items-center rounded-[30px] bg-[var(--ColorGray1,#ECECEC)] [padding:clamp(6px,2.2cqw,8px)_clamp(14px,5cqw,19px)] [gap:clamp(10px,3.2cqw,15px)]'>
           <svg
@@ -81,36 +81,13 @@ export const AlumniSearchPage = () => {
         </div>
 
         {/* 필터/정렬 컨트롤 영역 */}
-        <div className='flex flex-wrap items-center [gap:clamp(9px,3cqw,13px)]'>
-          <button
-            type='button'
-            className='inline-flex items-center gap-[3px] rounded-[20px] border border-[var(--ColorGray2,#A1A1A1)] px-[13px] py-[5px]'
-          >
-            <span className='font-[Pretendard] text-[clamp(12px,3.2cqw,14px)] font-medium leading-[140%] tracking-[-0.56px] text-[color:var(--ColorGray3,#646464)]'>
-              추천순
-            </span>
-            <svg
-              width='20'
-              height='20'
-              viewBox='0 0 20 20'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-              aria-hidden
-            >
-              <path
-                d='M6 8L10 12L14 8'
-                stroke='#646464'
-                strokeWidth='1.5'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-              />
-            </svg>
-          </button>
-
+        <div className='flex w-full flex-wrap items-center justify-between [gap:clamp(9px,3cqw,13px)]'>
           <FilterHeader
-            activeFilters={activeFilters}
-            onOpenFilter={openFilterModal}
-            onRemoveFilter={handleRemoveFilter}
+            activeFilters={selectedTags}
+            onOpenFilter={() => setIsFilterOpen(true)}
+            onRemoveFilter={(tag) =>
+              setSelectedTags((prev) => prev.filter((item) => item !== tag))
+            }
           />
         </div>
 
@@ -182,7 +159,7 @@ export const AlumniSearchPage = () => {
               <CoffeeChatButton
                 onClick={(event) => {
                   event.stopPropagation();
-                  // TODO: 동문 리스트에서 커피챗 요청 모달/라우터 연결 필요.
+                  navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
                 }}
                 aria-label={`${alumni.author.name} 커피챗 요청하기`}
               />
@@ -192,17 +169,16 @@ export const AlumniSearchPage = () => {
       </div>
 
       {/* 필터 모달 */}
-      <FilterModal
+      <TagsFilterModal
         isOpen={isFilterOpen}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        draftMajor={draftMajor}
-        draftInterests={draftInterests}
-        onToggleMajor={toggleDraftMajor}
-        onToggleInterest={toggleDraftInterest}
-        hasDraftSelection={hasDraftSelection}
-        onCancel={handleCancel}
-        onApply={handleApply}
+        tags={selectedTags}
+        onClose={() => setIsFilterOpen(false)}
+        onSave={(next) => {
+          setSelectedTags(next);
+          setIsFilterOpen(false);
+        }}
+        categories={TAG_CATEGORIES}
+        allTags={MOCK_ALL_TAGS}
       />
     </FullLayout>
   );

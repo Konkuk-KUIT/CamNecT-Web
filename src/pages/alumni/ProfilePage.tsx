@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
@@ -12,8 +12,15 @@ const profilePlaceholder =
 const portfolioPlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='90'><rect width='160' height='90' fill='%23D5D5D5'/></svg>";
 
-export const AlumniProfilePage = () => {
+type AlumniProfilePageProps = {
+  enableCoffeeChatModal?: boolean;
+};
+
+export const AlumniProfilePage = ({
+  enableCoffeeChatModal = true,
+}: AlumniProfilePageProps) => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   // URL 파라미터를 기준으로 프로필을 찾고, 없으면 첫 번째 데이터를 사용합니다.
   const profile = useMemo(
     () => alumniList.find((item) => item.id === id) ?? alumniList[0],
@@ -22,12 +29,21 @@ export const AlumniProfilePage = () => {
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
-  const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(false);
+  const shouldOpenCoffeeChat = searchParams.get('coffeeChat') === '1';
+  const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(
+    enableCoffeeChatModal && shouldOpenCoffeeChat,
+  );
 
   useEffect(() => {
     setIsFollowing(profile.isFollowing);
     setFollowerCount(profile.followerCount);
   }, [profile.isFollowing, profile.followerCount]);
+
+  useEffect(() => {
+    if (enableCoffeeChatModal && shouldOpenCoffeeChat) {
+      setIsCoffeeChatOpen(true);
+    }
+  }, [enableCoffeeChatModal, shouldOpenCoffeeChat]);
 
   // 팔로우/언팔로우 토글과 카운트 반영.
   const handleFollowToggle = () => {
@@ -185,7 +201,12 @@ export const AlumniProfilePage = () => {
         </section>
 
         <section className='flex [padding:0_clamp(18px,7cqw,25px)_clamp(24px,8cqw,30px)]'>
-          <CoffeeChatButton onClick={() => setIsCoffeeChatOpen(true)} />
+          <CoffeeChatButton
+            onClick={() => {
+              if (!enableCoffeeChatModal) return;
+              setIsCoffeeChatOpen(true);
+            }}
+          />
         </section>
 
         {/* 구분선 */}
@@ -311,12 +332,14 @@ export const AlumniProfilePage = () => {
         </section>
       </div>
 
-      <CoffeeChatModal
-        isOpen={isCoffeeChatOpen}
-        onClose={() => setIsCoffeeChatOpen(false)}
-        categories={profile.categories}
-        onSubmit={handleCoffeeChatSubmit}
-      />
+      {enableCoffeeChatModal && (
+        <CoffeeChatModal
+          isOpen={isCoffeeChatOpen}
+          onClose={() => setIsCoffeeChatOpen(false)}
+          categories={profile.categories}
+          onSubmit={handleCoffeeChatSubmit}
+        />
+      )}
     </HeaderLayout>
   );
 };

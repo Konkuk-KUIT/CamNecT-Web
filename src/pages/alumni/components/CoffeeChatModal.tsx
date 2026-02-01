@@ -14,6 +14,7 @@ type CoffeeChatModalProps = {
 const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatModalProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [message, setMessage] = useState('');
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const maxLength = 100;
 
   useEffect(() => {
@@ -22,6 +23,26 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
       setSelectedCategories([]);
       setMessage('');
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const updateInset = () => {
+      const inset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      setKeyboardInset(inset);
+    };
+
+    updateInset();
+    viewport.addEventListener('resize', updateInset);
+    viewport.addEventListener('scroll', updateInset);
+
+    return () => {
+      viewport.removeEventListener('resize', updateInset);
+      viewport.removeEventListener('scroll', updateInset);
+    };
   }, [isOpen]);
 
   // 최소 조건 충족 여부 및 글자수 표시.
@@ -50,7 +71,15 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
 
   return (
     <BottomSheetModal isOpen={isOpen} onClose={onClose}>
-      <div className='flex flex-col [padding:clamp(36px,11cqw,45px)_clamp(18px,7cqw,25px)_clamp(40px,12cqw,50px)] [gap:clamp(24px,8cqw,36px)]'>
+      <div
+        className='flex flex-col [gap:clamp(24px,8cqw,36px)]'
+        style={{
+          paddingTop: 'clamp(36px,11cqw,45px)',
+          paddingLeft: 'clamp(18px,7cqw,25px)',
+          paddingRight: 'clamp(18px,7cqw,25px)',
+          paddingBottom: `calc(clamp(40px,12cqw,50px) + ${keyboardInset}px)`,
+        }}
+      >
         {/* 요청 분야 + 요청 내용 영역 */}
         <div className='flex flex-col gap-[20px]'>
           <div className='flex flex-col gap-[15px]'>

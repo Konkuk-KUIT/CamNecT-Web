@@ -68,6 +68,9 @@ export const HomePage = () => {
                                         studentId={recommand.studentId}
                                         intro={recommand.intro}
                                         categories={recommand.categories}
+                                        onRequestChat={() =>
+                                            navigate(`/alumni/profile/${recommand.userId}?coffeeChat=1`)
+                                        }
                                     />
                                 ))}
                             </div>
