@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
@@ -22,10 +22,10 @@ export const AlumniProfilePage = ({
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   // URL 파라미터를 기준으로 프로필을 찾고, 없으면 첫 번째 데이터를 사용합니다.
-  const profile = useMemo(
-    () => alumniList.find((item) => item.id === id) ?? alumniList[0],
-    [id],
-  );
+  const profile = useMemo(() => alumniList.find((item) => item.id === id), [id]);
+  if (!profile) {
+    return <Navigate to='/alumni' replace />;
+  }
   const shouldOpenCoffeeChat = searchParams.get('coffeeChat') === '1';
   const modalKey = `${profile.id}-${enableCoffeeChatModal ? '1' : '0'}-${shouldOpenCoffeeChat ? '1' : '0'}`;
 

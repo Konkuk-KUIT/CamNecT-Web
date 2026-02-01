@@ -1,6 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Card from '../../components/Card';
+import { Link, useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import Icon from '../../components/Icon';
@@ -93,77 +92,72 @@ export const AlumniSearchPage = () => {
 
         <div className='flex flex-col gap-[5px]'>
           {visibleList.map((alumni) => (
-            <Card
+            <div
               key={alumni.id}
-              width='100%'
-              height='auto'
-              className='flex min-h-[161px] cursor-pointer flex-col [padding:clamp(12px,4cqw,15px)] gap-[20px]'
-              role='button'
-              tabIndex={0}
-              onClick={() => {
-                navigate(`/alumni/profile/${alumni.id}`);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  navigate(`/alumni/profile/${alumni.id}`);
-                }
-              }}
+              className='flex min-h-[161px] flex-col gap-[20px] bg-white border border-gray-150 rounded-[12px] opacity-100 [padding:clamp(12px,4cqw,15px)]'
             >
-              {/* 1그룹: 프로필/이름/학과/학번 + 더보기 아이콘 */}
-              <section className='flex justify-between'>
-                <div className='flex items-center'>
-                  <div className='flex items-center gap-[13px]'>
-                    {alumni.profileImage ? (
-                      <img
-                        src={alumni.profileImage}
-                        alt={`${alumni.author.name} 프로필`}
-                        className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
-                      />
-                    ) : (
-                      <div
-                        className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full bg-[#D5D5D5]'
-                        aria-hidden
-                      />
-                    )}
+              <Link to={`/alumni/profile/${alumni.id}`} className='flex flex-col gap-[20px]'>
+                {/* 1그룹: 프로필/이름/학과/학번 + 더보기 아이콘 */}
+                <section className='flex justify-between'>
+                  <div className='flex items-center'>
+                    <div className='flex items-center gap-[13px]'>
+                      {alumni.profileImage ? (
+                        <img
+                          src={alumni.profileImage}
+                          alt={`${alumni.author.name} 프로필`}
+                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
+                        />
+                      ) : (
+                        <div
+                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full bg-[#D5D5D5]'
+                          aria-hidden
+                        />
+                      )}
 
-                    <div className='flex min-w-0 flex-col gap-[3px]'>
-                      <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>
-                        {alumni.author.name}
-                      </div>
-                      <div className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>
-                        {alumni.author.major} {alumni.author.studentId}학번
+                      <div className='flex min-w-0 flex-col gap-[3px]'>
+                        <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>
+                          {alumni.author.name}
+                        </div>
+                        <div className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>
+                          {alumni.author.major} {alumni.author.studentId}학번
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className='py-[9px]'><Icon name='more' className='h-6 w-6' /></div> 
-              </section>
+                  <div className='py-[9px]'><Icon name='more' className='h-6 w-6' /></div> 
+                </section>
 
-              {/* 2그룹: 카테고리와 소개글 */}
-              <div
-                className='flex min-w-0 flex-col gap-[10px] pl-[7px]'
-              >
-                <div className='flex flex-wrap gap-[5px]'>
-                  {alumni.categories.map((category) => (
-                    <Category key={`${alumni.id}-${category}`} label={category} />
-                  ))}
-                </div>
+                {/* 2그룹: 카테고리와 소개글 */}
+                <div
+                  className='flex min-w-0 flex-col gap-[10px] pl-[7px]'
+                >
+                  <div className='flex flex-wrap gap-[5px]'>
+                    {alumni.categories.map((category) => (
+                      <Category key={`${alumni.id}-${category}`} label={category} />
+                    ))}
+                  </div>
 
-                <p className='line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
-                  {alumni.intro}
-                </p>
-              </div>
+                  <p className='line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
+                    {alumni.intro}
+                  </p>
+                </div>
+              </Link>
 
               {/* 3그룹: 커피챗 요청 버튼 */}
               <CoffeeChatButton
                 onClick={(event) => {
-                  event.stopPropagation();
+                  event.preventDefault();
                   navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
+                  }
                 }}
                 aria-label={`${alumni.author.name} 커피챗 요청하기`}
               />
-            </Card>
+            </div>
           ))}
         </div>
       </div>
