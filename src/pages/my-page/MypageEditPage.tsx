@@ -13,7 +13,7 @@ import CareerEditModal from "./components/CareerEditModal";
 import CertificateEditModal from "./components/CertificateEditModal";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
-import defaultProfileImg from "../../assets/image/defaultProfileImg.jpg"
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
 import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
 import { useImageUpload } from "../../hooks/useImageUpload";
@@ -26,7 +26,7 @@ export const MypageEditPage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
     const imageFileRef = useRef<File | null>(null);
 
-    const { data, setData, hasChanges, meDetail } = useProfileEdit(userId);
+    const { data, setData, hasChanges } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
 
     const [confirm, setConfirm] = useState(false);
@@ -74,7 +74,7 @@ export const MypageEditPage = () => {
         closeModal();
         };
 
-    if (!meDetail) 
+    if (!data) 
         return (
         <PopUp
             type="error"
@@ -165,7 +165,7 @@ export const MypageEditPage = () => {
                                             <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
                                         </button>
                                     </div>
-                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep">
+                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep [overflow-wrap:anywhere]">
                                         {user.introduction}
                                     </div>
                                 </div>

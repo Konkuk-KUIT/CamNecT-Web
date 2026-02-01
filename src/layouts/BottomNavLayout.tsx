@@ -4,7 +4,7 @@ import { BottomNav } from "../layouts/BottomNav/BottomNav";
 
 // Header (X) BottomNav (O) 레이아웃
 export const BottomNavLayout = () => {
-    const layoutStyle: CSSProperties = {
+    const layoutStyle: CSSProperties & { '--bottom-sheet-safe-padding': string } = {
         paddingBottom: 'calc(76px + env(safe-area-inset-bottom))',
         '--bottom-sheet-safe-padding': 'calc(50px + env(safe-area-inset-bottom))',
     };

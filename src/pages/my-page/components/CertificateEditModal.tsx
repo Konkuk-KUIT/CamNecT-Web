@@ -3,7 +3,7 @@ import Icon from "../../../components/Icon";
 import { type CertificateItem } from "../../../types/mypage/mypageTypes";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
-import { useModalHistory } from "../hooks/useModalHistory";
+import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 import { generateId } from "../../../utils/uuid";
 
@@ -287,7 +287,7 @@ export default function CertificateModal({ certificates, initialShowPublic, onCl
                     }
                 >
                     {/* 수정/삭제 */}
-                    <div className="w-full flex-1 overflow-y-auto px-[25px] pt-[20px] pb-[240px] border-t border-gray-150">
+                    <div className="w-full h-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
                         <div className="flex flex-col gap-[17px]">
                             {/* 자격증 */}
                             <div className="flex flex-col gap-[10px]">

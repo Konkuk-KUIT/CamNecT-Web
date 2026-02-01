@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
@@ -26,24 +26,36 @@ export const AlumniProfilePage = ({
     () => alumniList.find((item) => item.id === id) ?? alumniList[0],
     [id],
   );
+  const shouldOpenCoffeeChat = searchParams.get('coffeeChat') === '1';
+  const modalKey = `${profile.id}-${enableCoffeeChatModal ? '1' : '0'}-${shouldOpenCoffeeChat ? '1' : '0'}`;
+
+  return (
+    <AlumniProfileContent
+      key={modalKey}
+      profile={profile}
+      enableCoffeeChatModal={enableCoffeeChatModal}
+      shouldOpenCoffeeChat={shouldOpenCoffeeChat}
+    />
+  );
+};
+
+type AlumniProfileContentProps = {
+  profile: (typeof alumniList)[number];
+  enableCoffeeChatModal: boolean;
+  shouldOpenCoffeeChat: boolean;
+};
+
+const AlumniProfileContent = ({
+  profile,
+  enableCoffeeChatModal,
+  shouldOpenCoffeeChat,
+}: AlumniProfileContentProps) => {
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
-  const shouldOpenCoffeeChat = searchParams.get('coffeeChat') === '1';
   const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(
     enableCoffeeChatModal && shouldOpenCoffeeChat,
   );
-
-  useEffect(() => {
-    setIsFollowing(profile.isFollowing);
-    setFollowerCount(profile.followerCount);
-  }, [profile.isFollowing, profile.followerCount]);
-
-  useEffect(() => {
-    if (enableCoffeeChatModal && shouldOpenCoffeeChat) {
-      setIsCoffeeChatOpen(true);
-    }
-  }, [enableCoffeeChatModal, shouldOpenCoffeeChat]);
 
   // 팔로우/언팔로우 토글과 카운트 반영.
   const handleFollowToggle = () => {
@@ -334,6 +346,7 @@ export const AlumniProfilePage = ({
 
       {enableCoffeeChatModal && (
         <CoffeeChatModal
+          key={isCoffeeChatOpen ? 'open' : 'closed'}
           isOpen={isCoffeeChatOpen}
           onClose={() => setIsCoffeeChatOpen(false)}
           categories={profile.categories}

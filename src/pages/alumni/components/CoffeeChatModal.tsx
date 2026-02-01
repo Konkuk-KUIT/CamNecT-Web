@@ -18,14 +18,6 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
   const maxLength = 100;
 
   useEffect(() => {
-    if (isOpen) {
-      // 모달을 열 때마다 입력 상태를 초기화합니다.
-      setSelectedCategories([]);
-      setMessage('');
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
     if (!isOpen) return;
     const viewport = window.visualViewport;
     if (!viewport) return;

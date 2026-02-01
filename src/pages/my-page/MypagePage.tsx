@@ -5,13 +5,25 @@ import PortfolioSection from "./components/PortfolioSection";
 import { useNavigate } from "react-router-dom";
 import { FullLayout } from "../../layouts/FullLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import PopUp from "../../components/Pop-up";
 
 export const MypagePage = () => {
     const navigate = useNavigate();
     const meUid: string = MOCK_SESSION.meUid;
     const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
 
-    if (!meDetail) return <div className="p-6">내 프로필 데이터를 찾을 수 없어요.</div>;
+    if (!meDetail) {
+        return (
+            <PopUp
+                type="error"
+                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
+                titleSecondary='잠시 후 다시 시도해주세요'
+                isOpen={true}
+                rightButtonText='확인'
+                onClick={() => navigate(-1)}
+            />
+        );
+    }
 
     const { user, educations, careers, certificates } = meDetail;
 
@@ -72,7 +84,7 @@ export const MypagePage = () => {
                                 </div>
                             </button>
 
-                            <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750">
+                            <p className="mt-[11px] min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750 [overflow-wrap:anywhere]">
                                 {user.introduction}
                             </p>
                         </div>
