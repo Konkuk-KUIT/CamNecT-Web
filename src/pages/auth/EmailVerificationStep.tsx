@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import type { ButtonHTMLAttributes } from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,33 +9,7 @@ import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import PopUp from '../../components/Pop-up';
 import { useSignupStore } from '../../store/useSignupStore';
-
-type SmallButtonProps = {
-  label: string;
-} & ButtonHTMLAttributes<HTMLButtonElement>;
-
-const SmallButton = ({ label, className = '', disabled, type, ...props }: SmallButtonProps) => {
-  return (
-    <button
-      disabled={disabled}
-      type={type}
-      className={`
-        w-[74px] h-[48px] rounded-[5px] flex items-center justify-center 
-        text-white text-r-14 transition-colors
-        ${disabled 
-          ? 'bg-gray-150 text-gray-400 cursor-not-allowed' 
-          : 'bg-primary cursor-pointer hover:bg-green-100'
-        }
-        ${className}
-      `}
-      {...props}
-    >
-      {label}
-    </button>
-  );
-};
-
-export default SmallButton;
+import SmallButton from './components/SmallButton';
 
 interface EmailVerificationStepProps {
     onNext: () => void;

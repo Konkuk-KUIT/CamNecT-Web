@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { SchoolInfoResponse } from "../../api-types/authApiTypes";
 import Button from "../../components/Button";
-import ButtonWhite from "../../components/ButtonWhite";
 
 // 학교 인증 정보 표시 컴포넌트
 const InfoItem = ({ label, value }: { label: string; value: string }) => (
@@ -14,7 +13,6 @@ const InfoItem = ({ label, value }: { label: string; value: string }) => (
 );
 
 // 학교 인증 완료 화면 
-// todo 인증 거부 화면 / 재인증은 추후에 구현
 export const SchoolCompletion = () => {
     const navigate = useNavigate();
 
@@ -48,7 +46,7 @@ export const SchoolCompletion = () => {
             
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
-                    <ButtonWhite label = "재인증" />
+                    {/* <ButtonWhite label = "재인증" /> */}
                     <Button 
                         label="시작하기"
                         onClick={() => navigate('/home')}
