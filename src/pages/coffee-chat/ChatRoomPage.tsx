@@ -13,9 +13,14 @@ import { TypingArea } from "./components/TypingArea";
 
 export const ChatRoomPage = () => {
     const { id } = useParams<{ id: string }>();
-    const { data: roomInfo, isLoading: isRoomLoading } = useChatRoom(id || "");
+    
+    return <ChatRoomContent key={id} roomId={id || ""} />;
+};
+
+const ChatRoomContent = ({ roomId }: { roomId: string }) => {
+    const { data: roomInfo, isLoading: isRoomLoading } = useChatRoom(roomId);
     // 서버에서 가져온 채팅 데이터
-    const { data: remoteMessages = [], isLoading: isMessagesLoading } = useChatMessages(id || "");
+    const { data: remoteMessages = [], isLoading: isMessagesLoading } = useChatMessages(roomId);
     // 내가 보낸 임시 메시지
     const [sentMessages, setSentMessages] = useState<ChatMessage[]>([]);
     
@@ -78,7 +83,7 @@ export const ChatRoomPage = () => {
     const handleSendMessage = (text: string) => {
         const newMessage: ChatMessage = {
             id: Date.now().toString(),
-            roomId: id || "",
+            roomId: roomId,
             senderId: 'me',
             type: "TEXT",
             content: text,
