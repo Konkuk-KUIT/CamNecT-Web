@@ -40,13 +40,13 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
     const left = labelRect.left - parentRect.left + scrollLeft;
     const width = labelRect.width;
 
-    indicator.style.left = `${left}px`;
-    indicator.style.width = `${width}px`;
+    indicator.style.left = `${left-10}px`;
+    indicator.style.width = `${width+20}px`;
   }, [activeId, tabs]);
 
   return (
     <div className={`w-full ${className}`}>
-      <div className='relative flex w-full justify-evenly px-6 pb-2.5'>
+      <div className='relative flex w-full justify-evenly px-6 py-[15px]'>
         {tabs.map((tab, idx) => (
           <button
             key={tab.id}
@@ -54,7 +54,7 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
             ref={(el) => {
               tabRefs.current[idx] = el;
             }}
-            className={`relative px-3 py-2 text-[18px] leading-[140%] tracking-[-0.04em] font-normal text-gray-650 transition-colors duration-150 whitespace-nowrap shrink-0 bg-transparent cursor-pointer ${
+            className={`relative text-sb-16 text-gray-650 transition-colors duration-150 whitespace-nowrap shrink-0 bg-transparent cursor-pointer ${
               activeId === tab.id ? 'text-gray-900 font-bold tracking-[-0.02em]' : ''
             }`}
             onClick={() => onChange(tab.id)}
@@ -65,7 +65,7 @@ export function Tabs({ tabs, activeId, onChange, children, className = '' }: Tab
         <span className='absolute left-6 right-6 bottom-0 h-0.5 bg-gray-650 opacity-50' />
         <span
           ref={indicatorRef}
-          className='absolute bottom-0 h-0.5 bg-gray-900 transition-[left,width] duration-200 ease-out'
+          className='absolute bottom-0 h-[3px] bg-primary transition-[left,width] duration-200 ease-out'
         />
       </div>
       {children && <div className='mt-3 px-6'>{children}</div>}
