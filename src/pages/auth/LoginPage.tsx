@@ -1,13 +1,13 @@
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../../components/Button";
-import { LastSplashPage } from "../onboarding/LastSplashPage";
-import { AxiosError } from "axios";
-import { useMutation } from "@tanstack/react-query";
-import { login } from "../../api/auth";
-import { useAuthStore } from "../../store/useAuthStore";
 import { useShallow } from "zustand/react/shallow";
+import { login } from "../../api/auth";
+import Button from "../../components/Button";
 import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
+import { LastSplashPage } from "../onboarding/LastSplashPage";
 
 const Logo = ({ className }: { className?: string }) => {
     return (
@@ -97,9 +97,14 @@ export const LoginPage = () => {
       return;
     }
 
+    const trimmedId = id.trim();
+    const trimmedPassword = password.trim();
+
+    console.log("Login Attempt:", { username: trimmedId, password: trimmedPassword });
+
     // 서버에 요청
     // 브라우저에서 입력한 값을 props에 전송 -> TanStackQuery가 login 함수에 props 전달
-    loginMutation.mutate({ username: id, password });
+    loginMutation.mutate({ username: trimmedId, password: trimmedPassword });
   }
 
   useEffect(() => {
@@ -118,9 +123,9 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center pb-[145px] overflow-hidden">
+    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center pb-[105px] overflow-hidden">
       {/* 상단 로고 */}
-      <Logo className="mt-[194.54px] max-w-[300px] w-full flex-none" />
+      <Logo className="mt-[160px] max-w-[300px] w-full flex-none" />
 
       <div className="flex-1" />
 
