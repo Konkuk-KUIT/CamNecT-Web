@@ -243,7 +243,7 @@ export default function PortfolioEditModal({
                 }
             });
         };
-    }, []);
+    }, [portfolioImages, thumbnailImage?.previewUrl]);
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);

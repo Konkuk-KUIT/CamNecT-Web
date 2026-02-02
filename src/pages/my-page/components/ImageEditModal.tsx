@@ -1,6 +1,6 @@
 import Icon from "../../../components/BottomSheetModal/Icon";
 import { useRef } from "react";
-import BottomSheetModal from "../../../components/BottomSheetModal";
+import BottomSheetModal from "../../../components/BottomSheetModal/BottomSheetModal";
 
 interface ProfileImageModalProps {
     isOpen: boolean;
