@@ -1,14 +1,21 @@
-import type { EmailVerificationRequest, LoginRequest, LoginResponse, SchoolVerificationRequest, SchoolVerificationResponse, SchoolVerificationStatusRequest, SchoolVerificationStatusResponse } from "../api-types/authApiTypes";
+import type { EmailRequest, EmailVerificationRequest, LoginRequest, LoginResponse, SchoolVerificationRequest, SchoolVerificationResponse, SchoolVerificationStatusRequest, SchoolVerificationStatusResponse } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // 1. 로그인 API [POST] (/api/auth/login)
 export const login = async (data: LoginRequest) => {
 
     const response = await axiosInstance.post<LoginResponse>("/api/auth/login", data);
-    return response.data; // todo response자체를 return해서 컴포넌트에서  dot operator로 접근해서 쓰자
+    return response.data; // todo response자체를 return해서 컴포넌트에서  dot operator로 접근해서 쓰자 (고민 필요)
 }
 
-// 2. 이메일 인증 번호 요청 API [POST] (/api/verification/email)
+// todo 아이디 중복확인 API 필요
+
+// 2. 이메일 인증 번호 요청 API [POST] (/api/auth/signup) -> 추후 이름 변경 필요
+export const requestEmailCode = async (data: EmailRequest) => {
+    
+    const response = await axiosInstance.post<void>("/api/auth/signup", data);
+    return response.data;
+}
 
 // 3. 이메일 인증 번호 검증 API [POST] (/api/verification/email/verify-code)
 export const verifyEmailCode = async (data: EmailVerificationRequest) => {

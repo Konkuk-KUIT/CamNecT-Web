@@ -18,14 +18,14 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     const [isUserNameChecked, setIsUserNameChecked] = useState(false);  // 아이디 중복확인 여부
 
      const { 
-        userName, setUserName, 
+        username, setUsername, 
         password, setPassword, 
         name, setName, 
         phoneNum, setPhoneNum 
     } = useSignupStore(
         useShallow((state) => ({
-            userName: state.userName,
-            setUserName: state.setUserName,
+            username: state.username,
+            setUsername: state.setUsername,
             password: state.password,
             setPassword: state.setPassword,
             name: state.name,
@@ -49,7 +49,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         phoneNum: z
             .string() 
             .regex(/^01[0-9]\d{8}$/, "전화번호 형식이 올바르지 않습니다"),
-        userName: z.string().min(1, "아이디를 입력해 주세요"),
+        username: z.string().min(1, "아이디를 입력해 주세요"),
         password: z
             .string()
             .regex(
@@ -74,14 +74,14 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         defaultValues: {  
         name: name,
         phoneNum: phoneNum,
-        userName: userName,
+        username: username,
         password: password,
         confirmPassword: ""
     }
     });
 
     // SingleInput에 입력되는 아이디 값 실시간 감지
-    const userNameValue = watch("userName");
+    const userNameValue = watch("username");
 
     // 아이디 중복확인 함수 (TODO: API 연동)
     const handleCheckUserName = () => {
@@ -94,7 +94,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
 
         setName(data.name);
         setPhoneNum(data.phoneNum);
-        setUserName(data.userName);
+        setUsername(data.username);
         setPassword(data.password);
         onNext();
     };
@@ -118,15 +118,15 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             className="flex-1"
                             label='아이디' 
                             placeholder='아이디를 입력해 주세요' 
-                            {...register("userName")} 
-                            error={errors.userName?.message}
+                            {...register("username")} 
+                            error={errors.username?.message}
                             successMessage={isUserNameChecked ? "사용 가능한 아이디입니다" : ""}
                         />
                         <SmallButton 
                             label="중복확인" 
                             type="button"
                             className="mt-[36px]"
-                            disabled={!userNameValue || !!errors.userName}
+                            disabled={!userNameValue || !!errors.username}
                             onClick={handleCheckUserName}
                         />
                     </div> 

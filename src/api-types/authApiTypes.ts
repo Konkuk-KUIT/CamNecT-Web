@@ -18,6 +18,24 @@ export interface LoginResponse {
   status: string;
 }
 
+// 이메일 인증번호 요청 DTO (/api/auth/signup) -> user가계정 생성
+export interface EmailRequest {
+  email: string;
+  username: string;
+  password: string;
+  name: string;
+  phoneNum: string;
+  agreements: {
+    serviceTerms: boolean;
+    privacyTerms: boolean;
+  };
+}
+
+export interface EmailResponse {
+  userId: number; // userId 처음 생성
+  status: string;
+}
+
 // 이메일 인증 번호 검증 DTO (/api/verification/email/verify-code)
 export interface EmailVerificationRequest {
   email: string;
@@ -57,17 +75,7 @@ export interface SchoolVerificationStatusItem {
 
 export type SchoolVerificationStatusResponse = SchoolVerificationStatusItem[];
 
-export interface SignupRequestBody {
-  email: string;
-  userName: string;
-  password: string;
-  name: string;
-  phoneNum: string;
-  agreements: {
-    serviceTerms: boolean;
-    privacyTerms: boolean;
-  };
-}
+
 
 export interface SchoolInfoResponse {
     name: string;
