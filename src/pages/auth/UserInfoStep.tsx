@@ -1,17 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import { useSignupStore } from "../../store/useSignupStore";
+import SmallButton from './components/SmallButton';
 
 interface UserInfoStepProps {
     onNext: () => void;
 }
 
-// 가입자 정보 입력 단계 (이름 / 전화번호 / 아이디 / 비밀번호)
+// 가입자 정보 입력 단계 (아이디 / 비밀번호 / 이름 / 전화번호)
 export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
+
+    const [isUserNameChecked, setIsUserNameChecked] = useState(false);  // 아이디 중복확인 여부
 
      const { 
         userName, setUserName, 
@@ -64,7 +68,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
 
     // React Hook Form : 여러개의 input 값 관리 (유효성 검사, 에러처리, submit처리)
     // isValid : 입력된 데이터들 유효확인
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+    const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(userInfoSchema), // 검증은 zod로
         mode: "onChange", // 입력될 때 마다 검사
         defaultValues: {  
@@ -75,6 +79,16 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         confirmPassword: ""
     }
     });
+
+    // SingleInput에 입력되는 아이디 값 실시간 감지
+    const userNameValue = watch("userName");
+
+    // 아이디 중복확인 함수 (TODO: API 연동)
+    const handleCheckUserName = () => {
+        // TODO: 아이디 중복확인 API 호출
+        console.log("아이디 중복확인 요청:", userNameValue);
+        setIsUserNameChecked(true);
+    };
 
     const onSubmit = (data : UserInfoFormData) => {
 
@@ -99,17 +113,23 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                 {/* 2. 입력 섹션 (스크롤 가능) */}
                 {/* overflow-y-auto : 넘치면 스크롤, flex-1 : 남은 공간 차지 (유동적) */}
                 <div className="flex-1 overflow-y-auto space-y-[30px] pt-[40px] scrollbar-hide">
-                    <SingleInput label='이름' placeholder='이름을 입력해 주세요' {...register("name")} error={errors.name?.message} /> 
-
-                    <SingleInput 
-                        label='전화번호' 
-                        helperText='하이픈(-) 없이 숫자만 입력해주세요' 
-                        placeholder='전화번호를 입력해 주세요' 
-                        {...register("phoneNum")}
-                        error={errors.phoneNum?.message}
-                    /> 
-
-                    <SingleInput label='아이디' placeholder='아이디를 입력해 주세요' {...register("userName")} error={errors.userName?.message} /> 
+                    <div className='flex items-start gap-[10px]'>
+                        <SingleInput 
+                            className="flex-1"
+                            label='아이디' 
+                            placeholder='아이디를 입력해 주세요' 
+                            {...register("userName")} 
+                            error={errors.userName?.message}
+                            successMessage={isUserNameChecked ? "사용 가능한 아이디입니다" : ""}
+                        />
+                        <SmallButton 
+                            label="중복확인" 
+                            type="button"
+                            className="mt-[36px]"
+                            disabled={!userNameValue || !!errors.userName}
+                            onClick={handleCheckUserName}
+                        />
+                    </div> 
 
                     {/* 비밀번호 그룹: 라벨 하나에 인풋 두 개가 '긴밀하게' 붙어있는 구조 */}
                     <div className="space-y-[12px]">
@@ -129,6 +149,16 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             error={errors.confirmPassword?.message}
                         /> 
                     </div>
+
+                    <SingleInput label='이름' placeholder='이름을 입력해 주세요' {...register("name")} error={errors.name?.message} /> 
+
+                    <SingleInput 
+                        label='전화번호' 
+                        helperText='하이픈(-) 없이 숫자만 입력해주세요' 
+                        placeholder='전화번호를 입력해 주세요' 
+                        {...register("phoneNum")}
+                        error={errors.phoneNum?.message}
+                    /> 
                 </div>
 
                 {/* 3. 하단 버튼 구역 (고정) */}
