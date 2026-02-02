@@ -56,7 +56,7 @@ interface RecruitPostType {
     contestName: string;
     bookmarkCount: number;
     recruitNow: boolean;
-    createdAt: string; //나중에 변환 예정
+    createdAt: string;
 }
 
 // Mock data
@@ -69,17 +69,18 @@ const MOCK_COMMUNITY_POSTS: CommunityPostType[] = [
         likeCount: 27,
         commentCount: 3,
         tags: ['디자인컴버전스학부', '공부'],
-        createdAt: '2일 전'
+        createdAt: '2026-01-21T00:00:00.000Z',
     },
     {
         postId: '2',
         authorInfo: {id: "user_002", name: "박원빈", major: "시각디자인학과", gradeNumber: "19"},
         title: '좋은 사이트 v.2',
-        preview: '사이트 링크들 기타 등등',
+        preview: '사이트 링크들 기타 등등 사이트 링크들 기타 등등 사이트 링크들 기타 등등',
         likeCount: 27,
         commentCount: 3,
         tags: ['디자인컴버전스학부', '공부'],
-        createdAt: '2일 전'
+        createdAt: '2025-01-31T00:00:00.000Z',
+        thumbnailUrl: "https://picsum.photos/seed/post_002/900/700",
     }
 ];
 
@@ -121,7 +122,7 @@ const MOCK_RECRUIT_POSTS: RecruitPostType[] = [
         contestName: '나라사랑 공모전',
         bookmarkCount: 12,
         recruitNow: true,
-        createdAt: '2일 전',
+        createdAt: '2026-01-31T00:00:00.000Z',
     },
     {
         postId: '6',
@@ -131,7 +132,7 @@ const MOCK_RECRUIT_POSTS: RecruitPostType[] = [
         contestName: '서울시 공모전',
         bookmarkCount: 8,
         recruitNow: false,
-        createdAt: '2일 전',
+        createdAt: '2026-02-01T00:00:00.000Z',
     }
 ];
 
@@ -206,7 +207,7 @@ export const MyPostsPage = () => {
                             <span className="text-R-14-hn text-gray-500">작성한 글이 없습니다</span>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-[20px]">
+                        <div className="flex flex-col">
                             {/* Community Posts */}
                             {activeTab === 'community' && filteredCommunityPosts.map((post) => (
                                 <CommunityPost

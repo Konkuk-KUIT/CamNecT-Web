@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { formatDaysAgo } from "../../../../utils/formatDate";
 
 interface RecruitPostProps {
     postId: string;
@@ -23,12 +24,12 @@ export const RecruitPost = ({
     const navigate = useNavigate();
     return (
         <div
-            className="flex flex-col items-start gap-[8px] px-[25px] py-[20px] border-b border-gray-150"
+            className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
             onClick={() => navigate(`/recruit/post/${postId}`)}
         >
             {/* Tag */}
             <span
-                className={`flex justify-center items-center px-[10px] py-[3px] rounded-[5px] text-r-12-hn border ${
+                className={`flex justify-center items-center px-[10px] py-[4px] rounded-[5px] text-r-12-hn border ${
                     recruitNow ? 'text-primary border-primary' : 'text-gray-650 border-gray-650'
                 }`}
             >
@@ -59,7 +60,7 @@ export const RecruitPost = ({
                     <span>{bookmarkCount}</span>
                 </div>
                 <span>|</span>
-                <span>{createdAt}</span>
+                <span>{formatDaysAgo(createdAt)}</span>
             </div>
         </div>
     );

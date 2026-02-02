@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { type UserMini } from "../../../../types/mypage/mypageTypes";
+import { formatDaysAgo } from "../../../../utils/formatDate";
 
 interface CommunityPostType {
     postId: string;
@@ -27,7 +28,7 @@ export const CommunityPost = ({
     const navigate = useNavigate();
     return (
         <div
-            className="flex flex-col gap-[5px] px-[25px] pb-[20px] border-b border-gray-150 cursor-pointer"
+            className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150 cursor-pointer"
             onClick={() => navigate(`/community/post/${postId}`)}
         >
             {/* Tags */}
@@ -42,39 +43,39 @@ export const CommunityPost = ({
                 ))}
             </div>
 
-            <div className="">
-                <span className="h-[22px] text-sb-16-hn text-gray-900 truncate">
-                    {title}
-                </span>
-            </div>
-
             <div className="flex gap-[20px]">
                 <div className="flex-1 flex flex-col gap-[7px]">
-                    {/* Title & Content */}
-                    <div className="flex flex-col gap-[5px]">
-                        <div className="h-[45px] text-r-16 text-gray-750 whitespace-pre-line break-keep line-clamp-2">
+                    <div className="flex flex-col gap-[7px]">
+                        <div className="flex items-center gap-[3px]">
+                            <span className="text-sb-14-hn text-gray-900">{authorInfo.name}</span>
+                            <span className="text-r-12-hn text-gray-750">· {authorInfo.major} {authorInfo.gradeNumber}학번</span>
+                        </div>
+                        <span className="text-sb-16-hn text-gray-900 truncate">
+                            {title}
+                        </span>
+                        <div className="text-r-16 text-gray-750 whitespace-pre-line break-keep line-clamp-2 [overflow-wrap:anywhere]">
                             {preview}
                         </div>
                     </div>
 
                     {/* Meta Info */}
-                    <div className="flex items-center gap-[12px] text-R-12-hn text-gray-500">
-                        <div className="flex items-center gap-[4px]">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M11.3333 14V12.6667C11.3333 11.9594 11.0524 11.2811 10.5523 10.781C10.0522 10.281 9.37391 10 8.66667 10H4C3.29276 10 2.61448 10.281 2.11438 10.781C1.61429 11.2811 1.33333 11.9594 1.33333 12.6667V14" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M6.33333 7.33333C7.80609 7.33333 9 6.13943 9 4.66667C9 3.19391 7.80609 2 6.33333 2C4.86057 2 3.66667 3.19391 3.66667 4.66667C3.66667 6.13943 4.86057 7.33333 6.33333 7.33333Z" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            <span>{likeCount}</span>
+                    <div className="flex items-center gap-[7px] text-r-12-hn text-gray-650">
+                        <div className="flex items-center gap-[5px]">
+                            <div className="flex items-center gap-[3px]">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3.5 5.5L5.5 1C5.89782 1 6.27936 1.15804 6.56066 1.43934C6.84196 1.72064 7 2.10218 7 2.5V4.5H9.83C9.97495 4.49836 10.1185 4.52825 10.2508 4.58761C10.383 4.64697 10.5008 4.73437 10.5959 4.84376C10.6911 4.95315 10.7613 5.08191 10.8017 5.22113C10.8421 5.36034 10.8518 5.50668 10.83 5.65L10.14 10.15C10.1038 10.3885 9.98272 10.6058 9.79895 10.762C9.61519 10.9182 9.38116 11.0027 9.14 11H3.5M3.5 5.5V11M3.5 5.5H2C1.73478 5.5 1.48043 5.60536 1.29289 5.79289C1.10536 5.98043 1 6.23478 1 6.5V10C1 10.2652 1.10536 10.5196 1.29289 10.7071C1.48043 10.8946 1.73478 11 2 11H3.5" stroke="#A1A1A1" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span>{likeCount}</span>
+                            </div>
+                            <div className="flex items-center gap-[3px]">
+                                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.5 5.22223C10.5019 5.95549 10.3306 6.67883 9.99999 7.33334C9.608 8.11764 9.0054 8.77732 8.25968 9.23849C7.51396 9.69966 6.65457 9.94411 5.77777 9.94445C5.04451 9.94636 4.32117 9.77504 3.66666 9.44445L0.5 10.5L1.55555 7.33334C1.22496 6.67883 1.05364 5.95549 1.05555 5.22223C1.05589 4.34543 1.30034 3.48604 1.76151 2.74032C2.22268 1.9946 2.88236 1.392 3.66666 1.00002C4.32117 0.669422 5.04451 0.498104 5.77777 0.500016H6.05555C7.21352 0.5639 8.30723 1.05266 9.12729 1.87271C9.94734 2.69277 10.4361 3.78648 10.5 4.94445V5.22223Z" stroke="#A1A1A1" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span>{commentCount}</span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-[4px]">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M14.6667 10C14.6667 10.3536 14.5262 10.6928 14.2761 10.9428C14.0261 11.1929 13.687 11.3333 13.3333 11.3333H4.66667L2 14V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H13.3333C13.687 2 14.0261 2.14048 14.2761 2.39052C14.5262 2.64057 14.6667 2.97971 14.6667 3.33333V10Z" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            <span>{commentCount}</span>
-                        </div>
-                        {createdAt && (
-                            <span>| {createdAt}</span>
-                        )}
+                        <span>|</span>
+                        <span>{formatDaysAgo(createdAt)}</span>
                     </div>
                 </div>
 
