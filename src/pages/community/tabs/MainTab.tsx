@@ -62,16 +62,16 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
           </svg>
         </div>
 
-        <Card
-          width="100%"
-          height="flex"
-          className="flex flex-col"
-        >
-          {/* TODO: 미답변 질문 리스트 API 연결 */}
-          {unansweredQuestions.length > 0 ? (
-            unansweredQuestions.map((question, index) => {
-              const isLast = index === unansweredQuestions.length - 1;
-              return (
+        {/* TODO: 미답변 질문 리스트 API 연결 */}
+        {unansweredQuestions.length > 0 ? (
+          unansweredQuestions.map((question, index) => {
+            const isLast = index === unansweredQuestions.length - 1;
+            return (
+              <Card
+                width="100%"
+                height="flex"
+                className="flex flex-col"
+              >
                 <Link key={question.id} to={`/community/post/${question.id}`} className='block'>
                   <div
                     className='flex flex-col'
@@ -103,22 +103,23 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
                     </div>
                   </div>
                 </Link>
-              );
-            })
-          ) : (
-            <div
-              className='flex flex-col items-center justify-center text-center'
-              style={{ gap: '30px', height: 'clamp(120px, 25vw, 165px)' }}
-            >
-              <div className='text-sb-18' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                모든 질문의 궁금증이 풀렸어요
-              </div>
-              <div className='text-m-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
-                동문들의 지혜가 필요한 새로운 질문을 등록해 보세요
-              </div>
+              </Card>
+            );
+          })
+        ) : (
+          <div
+            className='flex flex-col items-center justify-center text-center'
+            style={{ gap: '30px', height: 'clamp(120px, 25vw, 165px)' }}
+          >
+            <div className='text-sb-18' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+              모든 질문의 궁금증이 풀렸어요
             </div>
-          )}
-        </Card>
+            <div className='text-m-14' style={{ color: 'var(--ColorGray2, #A1A1A1)' }}>
+              동문들의 지혜가 필요한 새로운 질문을 등록해 보세요
+            </div>
+          </div>
+        )}
+
       </section>
     </div>
   );
