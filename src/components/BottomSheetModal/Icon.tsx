@@ -27,7 +27,7 @@ type IconProps = {
 
 type IconDefinition = JSX.Element;
 
-const iconPaths: Partial<Record<IconName, IconDefinition>> = {
+const iconPaths: Record<IconName, IconDefinition> = {
     //게시글 수정 및 신고 아이콘
     url: (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">

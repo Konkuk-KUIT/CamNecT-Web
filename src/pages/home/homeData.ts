@@ -48,6 +48,7 @@ export const coffeeChatRequests: CoffeeChatRequest[] = [
 
 export const contests: Contest[] = [
     {
+        id: 'external-1',
         title: '캠퍼스 친환경 아이디어 공모전',
         posterImgUrl: posterPlaceholder,
         organizer: '총학생회',
@@ -59,6 +60,7 @@ export const contests: Contest[] = [
         isClosingSoon: false,
     },
     {
+        id: 'external-2',
         title: 'AI 해커톤 with 스타트업',
         posterImgUrl: posterPlaceholder,
         organizer: '컴공학부 X 산학협력단',
@@ -70,6 +72,7 @@ export const contests: Contest[] = [
         isClosingSoon: true,
     },
     {
+        id: 'external-3',
         title: '로컬 브랜드 디자인 챌린지',
         posterImgUrl: posterPlaceholder,
         organizer: '디자인학부',

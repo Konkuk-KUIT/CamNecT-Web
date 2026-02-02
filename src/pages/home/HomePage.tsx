@@ -91,7 +91,11 @@ export const HomePage = () => {
 
                 {/* 홈 3번 영역: 주목받은 공모전 리스트 */}
                 <section className="flex w-full flex-col gap-[10px] bg-white p-[25px]">
-                    <ContestBox contests={contests} onTitleClick={() => navigate('/activity')} />
+                    <ContestBox
+                        contests={contests}
+                        onTitleClick={() => navigate('/activity?tab=external')}
+                        onItemClick={(contest) => navigate(`/activity/post/${contest.id}`)}
+                    />
                 </section>
             </div>
         </FullLayout>

@@ -4,6 +4,7 @@ import { AlumniPage } from "../pages/alumni/AlumniPage";
 import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
 import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
+import ActivityPostPage from "../pages/activity/ActivityPostPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
@@ -15,12 +16,14 @@ import { AuthGuard } from "./AuthGuard";
 import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
 import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
 import { CommunityPage } from "../pages/community/CommunityPage";
+import CommunityPostPage from "../pages/community/CommunityPostPage";
 import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
 import { ProfilePage } from "../pages/alumni/ProfilePage";
 import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
+import { ActivityWritePage } from "../pages/activity/WritePage";
 
 export const router = createBrowserRouter([
 
@@ -101,6 +104,18 @@ export const router = createBrowserRouter([
                         element: <ActivityPage />,
                     },
                     {
+                        path: "activity/write",
+                        element: <ActivityWritePage />,
+                    },
+                    {
+                        path: "activity/edit/:postId",
+                        element: <ActivityWritePage />,
+                    },
+                    {
+                        path: "activity/post/:postId",
+                        element: <ActivityPostPage />,
+                    },
+                    {
                         path: "schedule",
                         element: <Schedule />,
                     },
@@ -137,6 +152,10 @@ export const router = createBrowserRouter([
                     {
                         path: "community",
                         element: <CommunityPage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
                     },
                     {
                         path: "shop",
