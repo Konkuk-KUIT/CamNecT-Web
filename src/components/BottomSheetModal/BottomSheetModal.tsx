@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 
 type BottomSheetModalProps = {
     isOpen: boolean;
@@ -14,10 +14,29 @@ const BottomSheetModal = ({
     height = 'auto',
     children,
 }: BottomSheetModalProps) => {
+    // 모달이 열려있을 때 body 스크롤 방지 (브라우저 주소창 이동 방지)
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            // 모바일 사파리 등에서 터치 스크롤이 body로 전파되는 것 방지
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+        };
+    }, [isOpen]);
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end justify-center">
+                <div className="fixed inset-0 z-[1001] flex items-end justify-center">
                     {/* 배경 어둡게 처리 (단순 투명도 조절) */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -42,21 +61,25 @@ const BottomSheetModal = ({
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ duration: 0.2 }} // 애니메이션 속도 빠르게 (0.2초)
-                        className="relative flex w-full max-w-[430px] flex-col bg-white"
+                        className="relative flex w-full max-w-[430px] flex-col bg-white overflow-hidden"
                         style={{
                             height: height,
+                            // 화면 높이에서 BottomNav(약 56px) + 여유분을 뺀 높이로 제한
+                            maxHeight: 'calc(100dvh - 56px - env(safe-area-inset-bottom))',
                             borderRadius: "20px 20px 0 0",
                             boxShadow: "0 -4px 10px rgba(0,0,0,0.1)",
+                            // 모달 자체가 BottomNav 위에 위치하도록 마진 추가
+                            marginBottom: 'calc(56px + env(safe-area-inset-bottom))',
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* 상단 핸들 (잡는 곳) */}
-                        <div className="flex justify-center pt-[17px] pb-[10px] cursor-grab">
+                        <div className="flex justify-center pt-[17px] pb-[10px] cursor-grab shrink-0">
                             <div className="w-[73px] h-[5px] bg-gray-650 rounded-full" />
                         </div>
 
                         {/* 내용물 */}
-                        <div className="pb-[40px]">
+                        <div className="flex-1 min-h-0">
                             {children}
                         </div>
                     </motion.div>

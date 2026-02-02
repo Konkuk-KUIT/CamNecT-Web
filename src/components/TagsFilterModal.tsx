@@ -150,7 +150,7 @@ const TagsFilterModal = ({
           </section>
 
           {selectedTags.length < maxSelected && (
-            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px]'>
+            <section className='min-h-0 flex-1 overflow-y-auto pb-[120px] overscroll-contain'>
               <div className='flex w-full flex-col'>
                 {filteredExtraCategories.map((category) => (
                   <div
