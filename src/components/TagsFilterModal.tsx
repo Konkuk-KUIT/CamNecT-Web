@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import BottomSheetModal from './BottomSheetModal';
+import BottomSheetModal from '../components/BottomSheetModal/BottomSheetModal';
 
 type TagItem = {
   id: string;
@@ -150,7 +150,7 @@ const TagsFilterModal = ({
           </section>
 
           {selectedTags.length < maxSelected && (
-            <section className='min-h-0 flex-1 overflow-y-auto pb-[120px] overscroll-contain'>
+            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px]'>
               <div className='flex w-full flex-col'>
                 {filteredExtraCategories.map((category) => (
                   <div

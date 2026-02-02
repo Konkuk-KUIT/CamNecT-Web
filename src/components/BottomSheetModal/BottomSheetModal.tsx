@@ -14,11 +14,10 @@ const BottomSheetModal = ({
     height = 'auto',
     children,
 }: BottomSheetModalProps) => {
-    // 모달이 열려있을 때 body 스크롤 방지 (브라우저 주소창 이동 방지)
+    // 모달이 열려있을 때 body 스크롤 방지 (브라우저 스크롤 막기)
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            // 모바일 사파리 등에서 터치 스크롤이 body로 전파되는 것 방지
             document.body.style.position = 'fixed';
             document.body.style.width = '100%';
         } else {
@@ -64,12 +63,8 @@ const BottomSheetModal = ({
                         className="relative flex w-full max-w-[430px] flex-col bg-white overflow-hidden"
                         style={{
                             height: height,
-                            // 화면 높이에서 BottomNav(약 56px) + 여유분을 뺀 높이로 제한
-                            maxHeight: 'calc(100dvh - 56px - env(safe-area-inset-bottom))',
                             borderRadius: "20px 20px 0 0",
                             boxShadow: "0 -4px 10px rgba(0,0,0,0.1)",
-                            // 모달 자체가 BottomNav 위에 위치하도록 마진 추가
-                            marginBottom: 'calc(56px + env(safe-area-inset-bottom))',
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -78,7 +73,7 @@ const BottomSheetModal = ({
                             <div className="w-[73px] h-[5px] bg-gray-650 rounded-full" />
                         </div>
 
-                        {/* 내용물 */}
+                        {/* 내용물 - flex-1 min-h-0 필수 */}
                         <div className="flex-1 min-h-0">
                             {children}
                         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import BottomSheetModal from '../../../components/BottomSheetModal/BottomSheetModal';
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
-import BottomSheetModal from '../../../components/BottomSheetModal';
 
 type CoffeeChatModalProps = {
   isOpen: boolean;
@@ -67,12 +67,12 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
   return (
     <BottomSheetModal isOpen={isOpen} onClose={onClose}>
       <div
-        className='flex flex-col [gap:clamp(24px,8cqw,36px)]'
+        className='flex flex-col [gap:clamp(24px,8cqw,36px)] overflow-y-auto h-full'
         style={{
           paddingTop: 'clamp(36px,11cqw,45px)',
           paddingLeft: 'clamp(18px,7cqw,25px)',
           paddingRight: 'clamp(18px,7cqw,25px)',
-          paddingBottom: `calc(clamp(40px,12cqw,50px) + ${keyboardInset}px)`,
+          paddingBottom: `calc(50px + ${keyboardInset}px)`,
         }}
       >
         {/* 요청 분야 + 요청 내용 영역 */}
