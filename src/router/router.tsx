@@ -11,6 +11,9 @@ import { HomePage }  from "../pages/home/HomePage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
+import { WritePage } from "../pages/community/WritePage";
+import CommunityPostPage from "../pages/community/CommunityPostPage";
+
 import { AuthGuard } from "./AuthGuard";
 import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
 import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
@@ -147,6 +150,23 @@ export const router = createBrowserRouter([
                         path: "shop",
                         element: <ShopPage />,
 
+                    },
+                    {
+                        path: "community",
+                        element: <CommunityPage />,
+                        
+                    },
+                    {
+                        path: "community/write",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/edit/:postId",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
                     },
                 ]
             },
