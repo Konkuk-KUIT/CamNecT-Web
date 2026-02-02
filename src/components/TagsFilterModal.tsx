@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import BottomSheetModal from './BottomSheetModal';
+import BottomSheetModal from './BottomSheetModal/BottomSheetModal';
 
 type TagItem = {
   id: string;

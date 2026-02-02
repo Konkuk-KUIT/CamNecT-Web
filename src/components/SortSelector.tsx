@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import BottomSheetModal from './BottomSheetModal';
+import BottomSheetModal from './BottomSheetModal/BottomSheetModal';
 import BoardTypeToggle from './BoardTypeToggle';
 import Toggle from './Toggle/Toggle';
 
