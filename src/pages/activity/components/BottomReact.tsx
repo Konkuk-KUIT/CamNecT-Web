@@ -18,8 +18,11 @@ const BottomReact = ({
   const isClosed = status === 'CLOSED';
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 z-40 w-full border-t border-[#ECECEC] bg-white px-[20px] py-[12px]'>
-      <div className='mx-auto flex w-full max-w-[720px] items-center justify-between gap-[12px]'>
+    <div className='fixed bottom-0 left-0 right-0 z-50 bg-white'>
+      <div
+        className='mx-auto flex w-full max-w-[720px] items-center gap-[clamp(8px,2.2vw,10px)] px-[clamp(16px,6vw,25px)] py-[6px] box-border'
+        style={{ paddingBottom: 'calc(6px + env(safe-area-inset-bottom))' }}
+      >
         <div className='flex flex-1 items-center'>
           {isMine ? (
             <button
@@ -36,12 +39,14 @@ const BottomReact = ({
             </div>
           )}
         </div>
-        <div className='flex items-center gap-[12px]'>
-          <div className='flex items-center gap-[6px] text-r-12 text-[var(--ColorGray3,#646464)]'>
-            <LikeToggle aria-label='좋아요' />
-            <span>{likeCount}</span>
+        <div className='flex shrink-0 items-center gap-[clamp(8px,3vw,13px)]'>
+          <div className='flex items-center gap-[clamp(4px,1.5vw,5px)]'>
+            <LikeToggle width={24} height={24} aria-label='좋아요' />
+            <span className='text-[16px] text-[var(--ColorGray2,#A1A1A1)]'>
+              {likeCount}
+            </span>
           </div>
-          <SaveToggle aria-label='저장' />
+          <SaveToggle width={24} height={24} aria-label='저장' />
         </div>
       </div>
     </div>
