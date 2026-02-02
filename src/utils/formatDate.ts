@@ -35,3 +35,23 @@ export const formatTime = (isoDate: string) => {
 export const formatFullDateWithTime = (isoDate: string) => {
   return dayjs(isoDate).format('YY.MM.DD HH:mm');
 };
+
+//community/recruit 용
+export const formatDaysAgo = (isoDate: string) => {
+  const target = dayjs(isoDate);
+  const now = dayjs();
+
+  const diffDays = now.startOf('day').diff(target.startOf('day'), 'day');
+
+  // 오늘 ~ 7일 전
+  if (diffDays === 0) return '오늘';
+  if (diffDays === 1) return '어제';
+  if (diffDays >= 2 && diffDays <= 7) return `${diffDays}일 전`;
+
+  // 1년 이상이면 n년 전
+  const diffYears = now.startOf('day').diff(target.startOf('day'), 'year');
+  if (diffYears >= 1) return `${diffYears}년 전`;
+
+  // 그 외(8일 전 ~ 1년 미만): MM.DD
+  return target.format('MM.DD');
+};
