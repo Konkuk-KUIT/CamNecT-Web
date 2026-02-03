@@ -100,8 +100,6 @@ export const LoginPage = () => {
     const trimmedId = id.trim();
     const trimmedPassword = password.trim();
 
-    console.log("Login Attempt:", { username: trimmedId, password: trimmedPassword });
-
     // 서버에 요청
     // 브라우저에서 입력한 값을 props에 전송 -> TanStackQuery가 login 함수에 props 전달
     loginMutation.mutate({ username: trimmedId, password: trimmedPassword });

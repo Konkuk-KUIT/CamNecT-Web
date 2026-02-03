@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
+import { checkIdDuplicate } from '../../api/auth';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import { useSignupStore } from "../../store/useSignupStore";
@@ -68,7 +70,8 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
 
     // React Hook Form : 여러개의 input 값 관리 (유효성 검사, 에러처리, submit처리)
     // isValid : 입력된 데이터들 유효확인
-    const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm({
+    const { register, handleSubmit, watch,
+        setError, clearErrors, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(userInfoSchema), // 검증은 zod로
         mode: "onChange", // 입력될 때 마다 검사
         defaultValues: {  
@@ -83,11 +86,35 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     // SingleInput에 입력되는 아이디 값 실시간 감지
     const userNameValue = watch("username");
 
-    // 아이디 중복확인 함수 (TODO: API 연동)
+    const idCheckMutation = useMutation({
+        mutationFn: checkIdDuplicate,
+
+        onSuccess: (isAvailable) => {
+            if (isAvailable) {
+                clearErrors("username");
+                setIsUserNameChecked(true);
+            } else {
+                setError("username", {
+                    type: "manual",
+                    message: "이미 사용 중인 아이디입니다",
+                });
+                setIsUserNameChecked(false);
+            }
+        },
+
+        onError: () => {
+            setError("username", {
+                type: "manual",
+                message: "중복 확인 중 오류가 발생했습니다",
+            });
+            setIsUserNameChecked(false);
+        }
+    })
+
+    // 아이디 중복확인 함수 
     const handleCheckUserName = () => {
-        // TODO: 아이디 중복확인 API 호출
-        console.log("아이디 중복확인 요청:", userNameValue);
-        setIsUserNameChecked(true);
+
+        idCheckMutation.mutate({ username: userNameValue });
     };
 
     const onSubmit = (data : UserInfoFormData) => {

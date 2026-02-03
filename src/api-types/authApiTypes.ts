@@ -18,6 +18,13 @@ export interface LoginResponse {
   status: string;
 }
 
+// 아이디 중복확인 DTO (/api/auth/{username}/available)
+export interface IdDuplicateCheckRequest {
+  username: string;
+}
+
+export type IdDuplicateCheckResponse = boolean;
+
 // 이메일 인증번호 요청 DTO (/api/auth/signup) -> user가계정 생성
 export interface EmailRequest {
   email: string;
