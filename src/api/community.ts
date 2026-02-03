@@ -2,8 +2,13 @@ import { axiosInstance } from "./axiosInstance";
 import type {
   ApiResponse,
   CommunityPostItem,
+  CommunityHomeData,
   CursorPage,
+  GetCommunityHomeParams,
   GetCommunityPostsParams,
+  CreateCommunityPostBody,
+  CreateCommunityPostParams,
+  CreateCommunityPostResult,
 } from "../api-types/communityApiTypes";
 
 const DEFAULT_TAB = "ALL";
@@ -36,6 +41,30 @@ export const getCommunityPosts = async (
   const response = await axiosInstance.get<
     ApiResponse<CursorPage<CommunityPostItem>>
   >("/api/community/posts", { params: queryParams });
+
+  return response.data;
+};
+
+export const getCommunityHome = async (
+  params: GetCommunityHomeParams = {}
+): Promise<ApiResponse<CommunityHomeData>> => {
+  const response = await axiosInstance.get<ApiResponse<CommunityHomeData>>(
+    "/api/community/home",
+    { params }
+  );
+
+  return response.data;
+};
+
+export const createCommunityPost = async (
+  params: CreateCommunityPostParams,
+  body: CreateCommunityPostBody
+): Promise<ApiResponse<CreateCommunityPostResult>> => {
+  const response = await axiosInstance.post<ApiResponse<CreateCommunityPostResult>>(
+    "/api/community/posts",
+    body,
+    { params }
+  );
 
   return response.data;
 };

@@ -8,6 +8,8 @@ import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import { useAuthStore } from '../../store/useAuthStore';
+import { createCommunityPost } from '../../api/community';
 import type { CommunityPostDetail } from '../../types/community';
 import {
     communityPostData,
@@ -93,6 +95,7 @@ export const WritePage = () => {
     const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
     // 완료 확인 모달 상태
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     // 작성 취소 경고 팝업 상태
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
     // 사진 미리보기 목록과 object URL 정리용 ref
@@ -102,6 +105,7 @@ export const WritePage = () => {
     // 숨김 파일 input 제어
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const { prepareImage } = useImageUpload();
+    const userId = useAuthStore((state) => state.user?.id);
 
     const [selectedTags, setSelectedTags] = useState<string[]>(
         editPost?.categories ?? [],
@@ -208,13 +212,52 @@ export const WritePage = () => {
 
     // 확인 모달에서 "네" 클릭 시 메인으로 이동
     const handleConfirm = () => {
-        // TODO: api 전송(게시판 종류, 제목, 필터 배열, 내용, 사진), 글쓰기 완료 팝업 추가
         // TODO: 수정 모드인 경우 변경된 데이터만 전송
         if (isEditMode && postId) {
             navigate(`/community/post/${postId}`);
             return;
         }
-        navigate('/community');
+        if (!userId) {
+            alert('로그인 정보가 없습니다. 다시 로그인해 주세요.');
+            return;
+        }
+        if (isSubmitting) return;
+
+        const boardCode = boardType === '질문' ? 'QUESTION' : 'INFO';
+        const tagIds = selectedTags
+            .map((tagName) => MOCK_ALL_TAGS.find((tag) => tag.name === tagName)?.id)
+            .map((tagId) => {
+                if (!tagId) return null;
+                const match = /_(\d+)$/.exec(tagId);
+                return match ? Number(match[1]) : null;
+            })
+            .filter((tagId): tagId is number => Number.isFinite(tagId));
+
+        setIsSubmitting(true);
+        createCommunityPost(
+            { userId },
+            {
+                boardCode,
+                title: title.trim(),
+                content: content.trim(),
+                anonymous: false,
+                tagIds,
+                attachments: [],
+                accessType: 'FREE',
+                requiredPoints: 0,
+            },
+        )
+            .then((response) => {
+                const nextPostId = response.data.postId;
+                navigate(`/community/post/${nextPostId}`);
+            })
+            .catch(() => {
+                alert('게시글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+                setIsConfirmOpen(false);
+            });
     };
 
     const handleCancelClick = () => {

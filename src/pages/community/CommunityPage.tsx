@@ -8,7 +8,7 @@ import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
 import { loggedInUserMajor } from '../../mock/community';
-import { getCommunityPosts } from '../../api/community';
+import { getCommunityHome, getCommunityPosts } from '../../api/community';
 import type { CommunityPostItem, Tab } from '../../api-types/communityApiTypes';
 import type { InfoPost, QuestionPost } from '../../types/community';
 
@@ -98,6 +98,17 @@ export const CommunityPage = () => {
   const [questionState, setQuestionState] = useState<CommunityListState>(() =>
     createInitialState(),
   );
+  const [mainState, setMainState] = useState<{
+    recommendedByInterest: CommunityPostItem[];
+    waitingQuestions: CommunityPostItem[];
+    isLoading: boolean;
+    error: string | null;
+  }>({
+    recommendedByInterest: [],
+    waitingQuestions: [],
+    isLoading: false,
+    error: null,
+  });
   const requestSeq = useRef({ INFO: 0, QUESTION: 0 });
   const lastQueryRef = useRef({ INFO: '', QUESTION: '' });
   const infoStateRef = useRef(infoState);
@@ -204,19 +215,33 @@ export const CommunityPage = () => {
       questionState.items.map((post) => mapToQuestionPost(post, loggedInUserMajor)),
     [questionState.items],
   );
+  const recommendedPostsFromApi = useMemo(
+    () =>
+      mainState.recommendedByInterest.map((post) =>
+        mapToInfoPost(post, loggedInUserMajor),
+      ),
+    [mainState.recommendedByInterest],
+  );
+  const waitingQuestionsFromApi = useMemo(
+    () =>
+      mainState.waitingQuestions.map((post) =>
+        mapToQuestionPost(post, loggedInUserMajor),
+      ),
+    [mainState.waitingQuestions],
+  );
 
   // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈
   const alumniInfos = useMemo(
     () =>
-      infoPostsFromApi.filter(
+      recommendedPostsFromApi.filter(
         (post) => post.author.isAlumni && post.author.major === loggedInUserMajor,
       ),
-    [infoPostsFromApi],
+    [recommendedPostsFromApi],
   );
 
   const unansweredQuestions = useMemo(
-    () => questionPostsFromApi.filter((post) => post.answers === 0),
-    [questionPostsFromApi],
+    () => waitingQuestionsFromApi.filter((post) => post.answers === 0),
+    [waitingQuestionsFromApi],
   );
 
   useEffect(() => {
@@ -239,24 +264,38 @@ export const CommunityPage = () => {
       }
     }
     if (activeTab === 'all') {
-      const infoStateCurrent = infoStateRef.current;
-      const questionStateCurrent = questionStateRef.current;
       if (
-        !infoStateCurrent.isLoading &&
-        infoStateCurrent.items.length === 0 &&
-        !infoStateCurrent.error
+        !mainState.isLoading &&
+        mainState.recommendedByInterest.length === 0 &&
+        !mainState.error
       ) {
-        fetchCommunityPosts('INFO');
-      }
-      if (
-        !questionStateCurrent.isLoading &&
-        questionStateCurrent.items.length === 0 &&
-        !questionStateCurrent.error
-      ) {
-        fetchCommunityPosts('QUESTION');
+        setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
+        getCommunityHome()
+          .then((response) => {
+            setMainState({
+              recommendedByInterest: response.data.recommendedByInterest,
+              waitingQuestions: response.data.waitingQuestions,
+              isLoading: false,
+              error: null,
+            });
+          })
+          .catch(() => {
+            setMainState((previous) => ({
+              ...previous,
+              isLoading: false,
+              error: '커뮤니티 메인 정보를 불러오지 못했어요.',
+            }));
+          });
       }
     }
-  }, [activeTab, normalizedQuery, fetchCommunityPosts]);
+  }, [
+    activeTab,
+    normalizedQuery,
+    fetchCommunityPosts,
+    mainState.isLoading,
+    mainState.recommendedByInterest.length,
+    mainState.error,
+  ]);
 
   // 현재 탭에 맞는 화면 반환
   const renderTab = () => {

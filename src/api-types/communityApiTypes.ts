@@ -39,3 +39,40 @@ export type GetCommunityPostsParams = {
   cursorValue?: number;
   size?: number;
 };
+
+export type CommunityHomeData = {
+  interestTagId: number;
+  recommendedByInterest: CommunityPostItem[];
+  waitingQuestions: CommunityPostItem[];
+};
+
+export type GetCommunityHomeParams = {
+  interestTagId?: number;
+};
+
+export type CommunityAttachment = {
+  fileKey: string;
+  thumbnailKey: string;
+  width: number;
+  height: number;
+  fileSize: number;
+};
+
+export type CreateCommunityPostBody = {
+  boardCode: "INFO" | "QUESTION";
+  title: string;
+  content: string;
+  anonymous: boolean;
+  tagIds: number[];
+  attachments: CommunityAttachment[];
+  accessType: "FREE" | "PAID";
+  requiredPoints: number;
+};
+
+export type CreateCommunityPostParams = {
+  userId: string | number;
+};
+
+export type CreateCommunityPostResult = {
+  postId: number;
+};
