@@ -1,8 +1,8 @@
-import type { User } from "../user/userTypes";
-
 // 로그인 전역상태의 인터페이스
-
-export type AuthUser = Pick<User, 'id' | 'name'>;
+export type AuthUser = {
+    id: string;
+    name?: string;
+}
 
 export interface AuthState {
     accessToken: string | null;

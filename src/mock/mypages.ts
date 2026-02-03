@@ -156,4 +156,31 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
     careers: [],
     certificates: [{ id: "cert_003_1", name: "컴활 1급", acquiredYear: 2021, acquiredMonth: 6 }],
   },
+
+  user_004: {
+    user: {
+      id: "user_004",
+      name: "정민호",
+      profileImg: "https://picsum.photos/seed/user_004/100/100",
+      major: "미디어디자인학부",
+      gradeNumber: "15",
+      introduction: "영상 콘텐츠 기획과 연출을 담당하고 있습니다.",
+      userTags: ["영상", "콘텐츠", "기획"],
+      follower: [],
+      following: [],
+      isFollowCountPublic: true,
+      point: 420,
+    },
+    visibility: {
+      portfolioVisibility: true,
+      educationVisibility: false,
+      careerVisibility: true,
+      certificateVisibility: false,
+    },
+    educations: [{ id: "edu_004_1", school: "건국대학교", status: "GRADUATED", startYear: 2012, endYear: 2016 }],
+    careers: [
+      { id: "car_004_1", organization: "비주얼하우스", positions: ["영상 기획", "콘텐츠 연출"], startYear: 2016, startMonth: 2, endYear: 2019, endMonth: 12 }
+    ],
+    certificates: [{ id: "cert_004_1", name: "영상편집 전문가", acquiredYear: 2016, acquiredMonth: 7 }],
+  },
 };
