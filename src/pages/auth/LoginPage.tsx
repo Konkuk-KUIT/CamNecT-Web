@@ -1,7 +1,13 @@
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import Button from "../../components/Button";
-import { LastSplashPage } from "../onboarding/LastSplashPage";
 import { useNavigate } from "react-router-dom";
+import { useShallow } from "zustand/react/shallow";
+import { login } from "../../api/auth";
+import Button from "../../components/Button";
+import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
+import { LastSplashPage } from "../onboarding/LastSplashPage";
 
 const Logo = ({ className }: { className?: string }) => {
     return (
@@ -42,18 +48,62 @@ const Divider = () => {
   )
 }
 
-// todo 로그인 버튼 API 연동 
 export const LoginPage = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  // const [id, setId] = useState("");
-  // const [password, setPassword] = useState("");
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
+
+  const { setLogin } = useAuthStore(
+    useShallow((state) => ({
+      setLogin: state.setLogin
+    }))
+  );
 
   const [showSplash, setShowSplash] = useState(false);
 
+  const loginMutation = useMutation({
+    mutationFn: login, // .mutate시에 실행 할 함수
+
+    // data : 서버의 response (response.data)
+    onSuccess: (data) => {
+      
+      // todo RefreshToken을 어떻게 관리할지
+      setLogin(data.accessToken, {
+        id: String(data.userId)
+      })
+      setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
+    },
+    onError: (error: AxiosError) => {
+      const status = error.response?.status;
+      
+      if (status === 401) {
+        setPopUpConfig({ title: "로그인 실패", content: "아이디 또는 비밀번호가 일치하지 않습니다." });
+      }
+      else if (status === 404) {
+        setPopUpConfig({ title: "로그인 실패", content: "아이디가 존재하지 않습니다." });
+      }
+      else {
+        setPopUpConfig({ title: "오류", content: "문제가 발생했습니다." });
+      }
+    }
+  })
+
   const handleLogin = () => {
-    setShowSplash(true);
+    if(!(id && password)) {
+      setPopUpConfig({ title: "아이디와 비밀번호를 입력해주세요", content: "" });
+      return;
+    }
+
+    const trimmedId = id.trim();
+    const trimmedPassword = password.trim();
+
+    // 서버에 요청
+    // 브라우저에서 입력한 값을 props에 전송 -> TanStackQuery가 login 함수에 props 전달
+    loginMutation.mutate({ username: trimmedId, password: trimmedPassword });
   }
 
   useEffect(() => {
@@ -72,32 +122,41 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <Logo className="mt-[194.54px]" />
+    <div className="absolute inset-0 bg-white px-[25px] flex flex-col items-center pb-[105px] overflow-hidden">
+      {/* 상단 로고 */}
+      <Logo className="mt-[160px] max-w-[300px] w-full flex-none" />
 
-      <div className="flex flex-col gap-[20px] mt-[41.39px]">
+      <div className="flex-1" />
+
+      <div className="flex flex-col max-w-[335px] w-full gap-[20px] mb-[40px] flex-none">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
-          className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
-          placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"/>
+          className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
+          placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[15px] pt-[14px] pb-[14px] outline-none"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+        />
 
         {/* 비밀번호 입력 */}
-        <div className="relative w-[335px] h-[48px]">
+        <div className="relative w-full h-[48px]">
           <input type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력해주세요" aria-label="비밀번호"
-            className="w-[335px] h-[48px] rounded-[5px] border-[1px] border-gray-150 
-            placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"/>
+            className="w-full h-[48px] rounded-[5px] border-[1px] border-gray-150 
+            placeholder:text-gray-650 placeholder:text-r-14 placeholder:tracking-[-0.56px] pl-[15px] pr-[50px] pt-[14px] pb-[14px] outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           
           <button type="button"
               onClick={() => setShowPassword(!showPassword)} aria-label="비밀번호 표시/숨김" aria-pressed={showPassword}
-              className="absolute left-[295px] top-[12px] right-[16px] bottom-[10px]"
+              className="absolute right-[16px] top-1/2 -translate-y-1/2 flex items-center justify-center"
             >
               {showPassword ? <EyeOpenIcon /> : <EyeCloedIcon />} 
           </button>
         </div>
-      </div>  
+      </div>
 
-      <Button label="로그인" className = "mt-[40px]" onClick={handleLogin} />
+      <Button label="로그인" className="w-full mb-[60px] flex-none" onClick={handleLogin} />
       
-      <div className="w-[201px] h-[17px] flex justify-between items-center mt-[18px]">
+      <div className="max-w-[201px] w-full h-[17px] flex justify-between items-center flex-none">
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">아이디 찾기</button>
         <Divider/>
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]">비밀번호 찾기</button>
@@ -105,7 +164,16 @@ export const LoginPage = () => {
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
-      {/* todo 추후 소셜 로그인 구현 */}
+      {popUpConfig && (
+        <PopUp
+          isOpen={true}
+          type="confirm"
+          title={popUpConfig.title}
+          content={popUpConfig.content}
+          onClick={() => setPopUpConfig(null)}
+        />
+      )}
+
     </div>
   );
 };
