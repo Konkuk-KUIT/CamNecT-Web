@@ -145,6 +145,22 @@ export const EditPasswordPage = () => {
                    !newPasswordError &&
                    !confirmPasswordError;
 
+    const EyeClosedIcon = () => {
+        return (
+            <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.78269 5.973C1.85323 7.07718 1.16112 8.3632 0.75 9.75C2.03359 14.088 6.02545 17.25 10.7505 17.25C11.737 17.25 12.6908 17.112 13.5949 16.855M5.01606 3.978C6.71756 2.84786 8.71193 2.24688 10.7505 2.25C15.4755 2.25 19.4664 5.412 20.75 9.748C20.0466 12.1173 18.5365 14.1616 16.4849 15.522M5.01606 3.978L1.80906 0.75M5.01606 3.978L8.64231 7.628M16.4849 15.522L19.6919 18.75M16.4849 15.522L12.8587 11.872C13.1355 11.5934 13.355 11.2627 13.5048 10.8986C13.6546 10.5346 13.7317 10.1445 13.7317 9.7505C13.7317 9.3565 13.6546 8.96636 13.5048 8.60235C13.355 8.23834 13.1355 7.9076 12.8587 7.629C12.5819 7.3504 12.2533 7.1294 11.8917 6.97863C11.53 6.82785 11.1424 6.75025 10.751 6.75025C10.3596 6.75025 9.97196 6.82785 9.61032 6.97863C9.24868 7.1294 8.92008 7.3504 8.6433 7.629M12.8577 11.871L8.64429 7.63" stroke="#A1A1A1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+        )
+    }
+
+    const EyeOpenIcon = () => {
+        return (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#A1A1A1"/>
+            </svg>
+        )
+    }
+
     return (
         <>
             <HeaderLayout
@@ -183,15 +199,9 @@ export const EditPasswordPage = () => {
                                     className="absolute right-[16px] top-1/2 -translate-y-1/2"
                                 >
                                     {showCurrentPassword ? (
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M1 10C1 10 4 4 10 4C16 4 19 10 19 10C19 10 16 16 10 16C4 16 1 10 1 10Z" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <circle cx="10" cy="10" r="3" stroke="#999999" strokeWidth="1.5"/>
-                                        </svg>
+                                        <EyeOpenIcon/>
                                     ) : (
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M14.95 14.95C13.5255 16.0358 11.7909 16.619 10 16.6C4 16.6 1 10 1 10C2.24389 7.68394 4.02903 5.73932 6.18 4.34M8.25 3.53C8.82186 3.37837 9.40986 3.30134 10 3.3C16 3.3 19 10 19 10C18.393 11.1356 17.6691 12.2048 16.84 13.19M11.88 11.88C11.6328 12.1481 11.3318 12.3627 10.9964 12.5104C10.6609 12.6581 10.2982 12.7357 9.931 12.7384C9.56387 12.741 9.19991 12.6686 8.86232 12.5255C8.52473 12.3824 8.22068 12.1716 7.96968 11.9061C7.71867 11.6406 7.52608 11.3257 7.40334 10.9815C7.28059 10.6373 7.23032 10.2707 7.25574 9.90444C7.28116 9.53821 7.38171 9.18083 7.55095 8.85452C7.72019 8.52822 7.95463 8.23982 8.24 8.01" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M1 1L19 19" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
+                                        <EyeClosedIcon/>
                                     )}
                                 </button>
                             </div>
@@ -233,15 +243,9 @@ export const EditPasswordPage = () => {
                                         className="absolute right-[16px] top-1/2 -translate-y-1/2"
                                     >
                                         {showNewPassword ? (
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                <path d="M1 10C1 10 4 4 10 4C16 4 19 10 19 10C19 10 16 16 10 16C4 16 1 10 1 10Z" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <circle cx="10" cy="10" r="3" stroke="#999999" strokeWidth="1.5"/>
-                                            </svg>
+                                            <EyeOpenIcon/>
                                         ) : (
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                <path d="M14.95 14.95C13.5255 16.0358 11.7909 16.619 10 16.6C4 16.6 1 10 1 10C2.24389 7.68394 4.02903 5.73932 6.18 4.34M8.25 3.53C8.82186 3.37837 9.40986 3.30134 10 3.3C16 3.3 19 10 19 10C18.393 11.1356 17.6691 12.2048 16.84 13.19M11.88 11.88C11.6328 12.1481 11.3318 12.3627 10.9964 12.5104C10.6609 12.6581 10.2982 12.7357 9.931 12.7384C9.56387 12.741 9.19991 12.6686 8.86232 12.5255C8.52473 12.3824 8.22068 12.1716 7.96968 11.9061C7.71867 11.6406 7.52608 11.3257 7.40334 10.9815C7.28059 10.6373 7.23032 10.2707 7.25574 9.90444C7.28116 9.53821 7.38171 9.18083 7.55095 8.85452C7.72019 8.52822 7.95463 8.23982 8.24 8.01" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M1 1L19 19" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
+                                            <EyeClosedIcon/>
                                         )}
                                     </button>
                                 </div>
@@ -281,15 +285,9 @@ export const EditPasswordPage = () => {
                                         className="absolute right-[16px] top-1/2 -translate-y-1/2"
                                     >
                                         {showConfirmPassword ? (
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                <path d="M1 10C1 10 4 4 10 4C16 4 19 10 19 10C19 10 16 16 10 16C4 16 1 10 1 10Z" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <circle cx="10" cy="10" r="3" stroke="#999999" strokeWidth="1.5"/>
-                                            </svg>
+                                            <EyeOpenIcon/>
                                         ) : (
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                <path d="M14.95 14.95C13.5255 16.0358 11.7909 16.619 10 16.6C4 16.6 1 10 1 10C2.24389 7.68394 4.02903 5.73932 6.18 4.34M8.25 3.53C8.82186 3.37837 9.40986 3.30134 10 3.3C16 3.3 19 10 19 10C18.393 11.1356 17.6691 12.2048 16.84 13.19M11.88 11.88C11.6328 12.1481 11.3318 12.3627 10.9964 12.5104C10.6609 12.6581 10.2982 12.7357 9.931 12.7384C9.56387 12.741 9.19991 12.6686 8.86232 12.5255C8.52473 12.3824 8.22068 12.1716 7.96968 11.9061C7.71867 11.6406 7.52608 11.3257 7.40334 10.9815C7.28059 10.6373 7.23032 10.2707 7.25574 9.90444C7.28116 9.53821 7.38171 9.18083 7.55095 8.85452C7.72019 8.52822 7.95463 8.23982 8.24 8.01" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M1 1L19 19" stroke="#999999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
+                                            <EyeClosedIcon/>
                                         )}
                                     </button>
                                 </div>

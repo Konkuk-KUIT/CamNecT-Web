@@ -162,6 +162,7 @@ export const MOCK_PROFILE_DETAIL_BY_UID: Record<string, UserProfileDetail> = {
       id: "user_004",
       name: "정민호",
       profileImg: "https://picsum.photos/seed/user_004/100/100",
+      univ: "한양대학교",
       major: "미디어디자인학부",
       gradeNumber: "15",
       introduction: "영상 콘텐츠 기획과 연출을 담당하고 있습니다.",
