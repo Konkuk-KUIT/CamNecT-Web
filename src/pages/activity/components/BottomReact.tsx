@@ -35,7 +35,7 @@ const BottomReact = ({
             </button>
           ) : (
             <div className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorSub2,#F2FCF8)] text-[var(--ColorMain,#00C56C)]'>
-              {isClosed ? '모집 완료' : '모집 전'}
+              {isClosed ? '모집 완료' : '모집 중'}
             </div>
           )}
         </div>

@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
 import SortSelector from '../../../components/SortSelector';
 import TagsFilterModal from '../../../components/TagsFilterModal';
-import Icon from '../../../components/Icon';
 import WriteButton from '../components/WriteButton';
+import DefaultPost from '../components/DefaultPost';
+import ContestPost from '../components/ContestPost';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 import type { ActivityPost } from '../../../types/activityPost';
-import { formatTimeAgo } from '../time';
 
 type ActivityListTabProps = {
   posts: ActivityPost[];
@@ -95,59 +94,11 @@ const ActivityListTab = ({
 
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {sortedPosts.map((post) => {
-          const content = (
-            <article
-              className='flex flex-col'
-              style={{
-                gap: '10px',
-                paddingBottom: '10px',
-                borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
-              }}
-            >
-              <div className='flex flex-wrap items-center' style={{ gap: '5px' }}>
-                {showRecruitStatus ? (
-                  <span
-                    className={`inline-flex h-[22px] items-center justify-center rounded-[5px] border px-[10px] text-r-12 ${
-                      post.status === 'CLOSED'
-                        ? 'border-[var(--ColorGray2,#A1A1A1)] text-[var(--ColorGray2,#A1A1A1)]'
-                        : 'border-[var(--ColorMain,#00C56C)] text-[var(--ColorMain,#00C56C)]'
-                    }`}
-                  >
-                    {post.status === 'CLOSED' ? '모집 완료' : '모집 중'}
-                  </span>
-                ) : null}
-                {post.categories.map((category) => (
-                  <Category key={category} label={category} className='h-[20px] px-[6px]' />
-                ))}
-              </div>
-
-              <div className='flex flex-col' style={{ gap: '7px' }}>
-                <div className='flex items-center gap-[6px]'>
-                  <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
-                  <span className='text-r-12 text-gray-750'>
-                    · {post.author.major} {post.author.studentId}학번
-                  </span>
-                </div>
-
-                <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
-
-                <div className='line-clamp-2 text-r-16 text-gray-750'>
-                  {post.content}
-                </div>
-
-                <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
-                  <span className='flex items-center gap-[4px]'>
-                    <Icon name='like' className='h-[12px] w-[12px]' />
-                    {post.likes}
-                  </span>
-                  <span className='flex items-center gap-[4px]'>
-                    <Icon name='comment' className='h-[12px] w-[12px]' />
-                    {post.comments}
-                  </span>
-                  <span>{formatTimeAgo(post.createdAt)}</span>
-                </div>
-              </div>
-            </article>
+          const isContestPost = post.tab === 'external' || post.tab === 'job';
+          const content = isContestPost ? (
+            <ContestPost post={post} />
+          ) : (
+            <DefaultPost post={post} showRecruitStatus={showRecruitStatus} />
           );
 
           if (linkToPost) {

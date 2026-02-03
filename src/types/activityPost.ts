@@ -22,6 +22,7 @@ export type ActivityPost = {
   author: ActivityPostAuthor;
   status?: ActivityPostStatus;
   postImages?: string[];
+  thumbnailUrl?: string;
 };
 
 export type ActivityComment = {
