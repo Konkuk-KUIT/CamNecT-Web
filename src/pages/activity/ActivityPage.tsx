@@ -45,11 +45,7 @@ export const ActivityPage = () => {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const [posts, setPosts] = useState<ActivityPost[]>(() => getActivityPosts());
-
-  useEffect(() => {
-    setPosts(getActivityPosts());
-  }, []);
+  const [posts] = useState<ActivityPost[]>(() => getActivityPosts());
 
   const postsByTab = useMemo(() => {
     return posts.reduce<Record<ActivityPostTab, ActivityPost[]>>(
@@ -84,13 +80,8 @@ export const ActivityPage = () => {
   );
 
   useEffect(() => {
-    const queryTab = searchParams.get('tab') as ActivityPostTab | null;
-    if (queryTab && ['club', 'study', 'external', 'job'].includes(queryTab)) {
-      setActiveTab(queryTab);
-      return;
-    }
     sessionStorage.setItem('activityActiveTab', activeTab);
-  }, [activeTab, searchParams]);
+  }, [activeTab]);
 
   const renderTab = () => {
     if (activeTab === 'club') return <ClubTab posts={filteredClubPosts} />;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import Icon from '../../components/Icon';
@@ -26,20 +26,25 @@ type OptionItem = {
 
 const ActivityPostPage = () => {
   const { postId } = useParams();
+  const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
+
+  return <ActivityPostContent key={selectedPost.id} selectedPost={selectedPost} />;
+};
+
+type ActivityPostContentProps = {
+  selectedPost: ReturnType<typeof mapToActivityPost>;
+};
+
+const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
   const navigate = useNavigate();
   const currentUser = activityLoggedInUser;
 
-  const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
   const [status, setStatus] = useState<ActivityPostStatus>(selectedPost.status ?? 'OPEN');
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
-
-  useEffect(() => {
-    setStatus(selectedPost.status ?? 'OPEN');
-  }, [selectedPost.id, selectedPost.status]);
 
   const commentCount = selectedPost.comments ?? 0;
 

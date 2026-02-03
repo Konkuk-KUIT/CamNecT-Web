@@ -483,6 +483,3 @@ export const ActivityWritePage = () => {
     </EmptyLayout>
   );
 };
-
-export const mapBoardTypeToTab = (value: BoardType | null) =>
-  value ? tabByBoardType[value] : null;
