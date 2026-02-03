@@ -15,16 +15,16 @@ const Category = ({
 
   return (
     <div
-      className={`inline-flex items-center h-[22px] justify-center opacity-100 text-primary text-r-12-hn ${className}`}
+      className={`inline-flex h-[24px] items-center justify-center px-[10px] text-r-12 leading-[24px] opacity-100 text-primary box-border ${className}`}
       style={{
         display: 'inline-flex',
-        padding: '4px 10px',
         justifyContent: 'center',
         alignItems: 'center',
         gap: '8px',
         borderRadius: '5px',
         border: '1px solid var(--ColorMain, #00C56C)',
         background: 'var(--ColorSub2, #F2FCF8)',
+        boxSizing: 'border-box',
         ...style,
       }}
       {...props}
