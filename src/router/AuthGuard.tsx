@@ -1,18 +1,28 @@
-// import { useAuthStore } from "../store/useAuthStore"
-// import { Navigate } from "react-router-dom"
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import PopUp from "../components/Pop-up";
+import { useAuthStore } from "../store/useAuthStore";
 
 // 로그인 여부에 따른 라우팅 보호 컴포넌트
-// todo 로그인 기능 구현 시 토큰 검사 예정 (현재는 UI 테스트 목적으로 주석 처리)
 export const AuthGuard = () => {
-    // const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const navigate = useNavigate();
 
-    // if (!isAuthenticated) {
-    //     alert("로그인을 해주세요"); // todo 팝업창 디자인 받고 구현해야 함
-
-    //     // 랜더링 순간 로그인 페이지로 이동
-    //     return <Navigate to="/login" />;
-    // }
+    if (!isAuthenticated) {
+        return (
+            <div className="fixed inset-0 bg-white z-[9999]">
+                <PopUp 
+                    isOpen={true}
+                    type="confirm"
+                    title="로그인이 필요합니다"
+                    content="서비스를 이용하시려면 로그인을 해주세요."
+                    buttonText="로그인하러 가기"
+                    onClick={() => {
+                        navigate("/login", { replace: true });
+                    }}
+                />
+            </div>
+        );
+    }
 
     return <Outlet />;
 }

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
@@ -126,6 +126,11 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         onNext();
     };
 
+    //
+    useEffect(() => {
+        setIsUserNameChecked(false);
+    }, [userNameValue])
+
 
     // handleSubmit : 모든 input값을 zod로 검증한 후 onSubmit 실행
     return (
@@ -193,7 +198,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                 
                 <div className="flex-none pb-[60px] relative z-10 w-full flex justify-center">
                     <Button 
-                        disabled={!isValid}
+                        disabled={!isValid || !isUserNameChecked}
                         label="다음" 
                         type = "submit"
                     />

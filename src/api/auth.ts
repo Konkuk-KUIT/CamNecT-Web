@@ -43,9 +43,6 @@ export const verifySchoolDocument = async (data: SchoolVerificationRequest) => {
             email: data.email,
             docType: data.docType,
         },
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
     });
     return response.data;
 }

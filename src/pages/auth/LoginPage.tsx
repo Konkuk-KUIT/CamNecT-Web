@@ -76,8 +76,6 @@ export const LoginPage = () => {
         id: String(data.userId)
       })
       setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
-
-      navigate("/home");
     },
     onError: (error: AxiosError) => {
       const status = error.response?.status;
@@ -87,7 +85,10 @@ export const LoginPage = () => {
       }
       else if (status === 404) {
         setPopUpConfig({ title: "로그인 실패", content: "아이디가 존재하지 않습니다." });
-      }      
+      }
+      else {
+        setPopUpConfig({ title: "오류", content: "문제가 발생했습니다." });
+      }
     }
   })
 
