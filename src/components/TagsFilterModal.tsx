@@ -1,4 +1,10 @@
-import { useMemo, useState } from 'react';
+import {
+  type MutableRefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import BottomSheetModal from './BottomSheetModal/BottomSheetModal';
 
 type TagItem = {
@@ -35,8 +41,57 @@ const TagsFilterModal = ({
   extraCategories = [],
   maxSelected = 5,
 }: TagsFilterModalProps) => {
+  const onCloseRef = useRef<() => void>(() => onClose);
+  const handleBottomSheetClose = () => onCloseRef.current();
+
+  return (
+    <BottomSheetModal
+      isOpen={isOpen}
+      onClose={handleBottomSheetClose}
+      height='86dvh'
+    >
+      <TagsFilterModalContent
+        tags={tags}
+        onClose={onClose}
+        onSave={onSave}
+        categories={categories}
+        allTags={allTags}
+        extraCategories={extraCategories}
+        maxSelected={maxSelected}
+        onCloseRef={onCloseRef}
+      />
+    </BottomSheetModal>
+  );
+};
+
+type TagsFilterModalContentProps = Omit<TagsFilterModalProps, 'isOpen'> & {
+  onCloseRef: MutableRefObject<() => void>;
+};
+
+const TagsFilterModalContent = ({
+  tags,
+  onClose,
+  onSave,
+  categories,
+  allTags,
+  extraCategories = [],
+  maxSelected = 5,
+  onCloseRef,
+}: TagsFilterModalContentProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(tags);
   const [searchQuery, setSearchQuery] = useState('');
+  const selectedTagsRef = useRef<string[]>(selectedTags);
+
+  useEffect(() => {
+    selectedTagsRef.current = selectedTags;
+  }, [selectedTags]);
+
+  useEffect(() => {
+    onCloseRef.current = () => {
+      onSave(selectedTagsRef.current);
+      onClose();
+    };
+  }, [onClose, onSave, onCloseRef]);
 
   const toggleTag = (tagName: string) => {
     if (selectedTags.includes(tagName)) {
@@ -77,14 +132,8 @@ const TagsFilterModal = ({
       .filter((category) => category.tags.length > 0);
   }, [extraCategories, searchQuery]);
 
-  const handleClose = () => {
-    onSave(selectedTags);
-    onClose();
-  };
-
   return (
-    <BottomSheetModal isOpen={isOpen} onClose={handleClose} height='86dvh'>
-      <div className='flex h-full w-full flex-col'>
+    <div className='flex h-full w-full min-h-0 flex-col overflow-hidden'>
 
 
         <section className='flex w-full flex-col gap-[13px] border-b border-gray-150 px-[25px] pb-[20px] pt-[30px]'>
@@ -144,13 +193,13 @@ const TagsFilterModal = ({
                 placeholder='태그 검색'
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className='h-[40px] w-full rounded-[30px] bg-gray-150 py-[8px] pl-[52px] pr-[19px] text-r-14 text-gray-750 placeholder:text-gray-650 focus:outline-none'
+                className='h-[40px] w-full rounded-[30px] bg-gray-150 py-[8px] pl-[52px] pr-[19px] text-r-16 text-gray-750 placeholder:text-gray-650 focus:outline-none'
               />
             </div>
           </section>
 
           {selectedTags.length < maxSelected && (
-            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px]'>
+            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
               <div className='flex w-full flex-col'>
                 {filteredExtraCategories.map((category) => (
                   <div
@@ -204,8 +253,7 @@ const TagsFilterModal = ({
             </section>
           )}
         </section>
-      </div>
-    </BottomSheetModal>
+    </div>
   );
 };
 
