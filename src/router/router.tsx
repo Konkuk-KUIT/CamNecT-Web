@@ -24,6 +24,8 @@ import { ShopPage } from "../pages/shop/ShopPage";
 import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
 import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
+import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
+import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
 
 export const router = createBrowserRouter([
 
@@ -69,6 +71,14 @@ export const router = createBrowserRouter([
                     {
                         path: "alumni/profile/:id",
                         element: <AlumniProfilePage />,
+                    },
+                    {
+                        path: "alumni/profile/:id/portfolio",
+                        element: <AlumniPortfolioListPage />,
+                    },
+                    {
+                        path: "alumni/profile/:id/portfolio/:portfolioId",
+                        element: <AlumniPortfolioDetailPage />,
                     },
 
                     {

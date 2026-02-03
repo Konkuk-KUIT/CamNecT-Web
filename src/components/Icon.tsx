@@ -382,12 +382,10 @@ const iconPaths: Record<IconName, IconDefinition> = {
   reply: {
     viewBox: '0 0 24 24',
     content: (
-      <path
-        d='M0.75 7.97222L6.75 13.75L15.75 0.75'
-        stroke='#A1A1A1'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
+      <path d="M16.4902 12L20.2402 15.75M20.2402 15.75L16.4902 19.5M20.2402 15.75H3.74023V4.49902" 
+      stroke="#A1A1A1" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"/>
     ),
   },
   alumni: {

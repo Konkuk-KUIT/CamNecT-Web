@@ -1,6 +1,7 @@
 // 동문 프로필 데이터 구조.
 export type AlumniProfile = {
   id: string;
+  userId: string;
   author: {
     name: string;
     major: string;
@@ -51,6 +52,7 @@ const profilePlaceholder =
 export const alumniList: AlumniProfile[] = [
   {
     id: 'alumni-1',
+    userId: 'user_001',
     author: { name: '김아린', major: '컴퓨터공학부', studentId: '18' },
     profileImage: profilePlaceholder,
     privacy: {
@@ -61,9 +63,8 @@ export const alumniList: AlumniProfile[] = [
       showCertificates: true,
     },
     portfolioItems: [
-      { id: 'portfolio-1', title: '캡스톤 프로젝트', image: undefined },
-      { id: 'portfolio-2', title: '백엔드 아키텍처 리빌드', image: undefined },
-      { id: 'portfolio-3', title: '서비스 모니터링 대시보드', image: undefined },
+      { id: 'pf_001_1', title: '나의 프로젝트 1', image: undefined },
+      { id: 'pf_001_2', title: '서비스 모니터링 대시보드', image: undefined },
     ],
     educationItems: [
       { id: 'education-1', period: '2017~2019', school: '건국대학교', status: '졸업' },
@@ -96,6 +97,7 @@ export const alumniList: AlumniProfile[] = [
   },
   {
     id: 'alumni-2',
+    userId: 'user_002',
     author: { name: '박지훈', major: '경영학부', studentId: '16' },
     privacy: {
       showFollowStats: true,
@@ -105,9 +107,9 @@ export const alumniList: AlumniProfile[] = [
       showCertificates: true,
     },
     portfolioItems: [
-      { id: 'portfolio-1', title: '브랜드 리뉴얼 캠페인', image: undefined },
-      { id: 'portfolio-2', title: 'SNS 성장 전략', image: undefined },
-      { id: 'portfolio-3', title: 'IMC 프로젝트', image: undefined },
+      { id: 'pf_002_1', title: '프로젝트 11111111111111111', image: undefined },
+      { id: 'pf_002_2', title: '프로젝트 2', image: undefined },
+      { id: 'pf_002_3', title: '프로젝트 3', image: undefined },
     ],
     educationItems: [
       { id: 'education-1', period: '2014~2018', school: '건국대학교', status: '졸업' },
@@ -131,6 +133,7 @@ export const alumniList: AlumniProfile[] = [
   },
   {
     id: 'alumni-3',
+    userId: 'user_003',
     author: { name: '이서연', major: '디자인학부', studentId: '17' },
     profileImage: profilePlaceholder,
     privacy: {
@@ -141,9 +144,8 @@ export const alumniList: AlumniProfile[] = [
       showCertificates: true,
     },
     portfolioItems: [
-      { id: 'portfolio-1', title: '모바일 앱 리디자인', image: undefined },
-      { id: 'portfolio-2', title: 'UX 리서치 리포트', image: undefined },
-      { id: 'portfolio-3', title: '디자인 시스템 구축', image: undefined },
+      { id: 'pf_003_1', title: '모바일 앱 리디자인', image: undefined },
+      { id: 'pf_003_2', title: 'UX 리서치 리포트', image: undefined },
     ],
     educationItems: [
       { id: 'education-1', period: '2015~2019', school: '건국대학교', status: '졸업' },
@@ -165,6 +167,7 @@ export const alumniList: AlumniProfile[] = [
   },
   {
     id: 'alumni-4',
+    userId: 'user_004',
     author: { name: '정민호', major: '미디어디자인학부', studentId: '15' },
     privacy: {
       showFollowStats: true,
@@ -174,9 +177,8 @@ export const alumniList: AlumniProfile[] = [
       showCertificates: false,
     },
     portfolioItems: [
-      { id: 'portfolio-1', title: '브랜드 필름 제작', image: undefined },
-      { id: 'portfolio-2', title: '다큐멘터리 기획', image: undefined },
-      { id: 'portfolio-3', title: '콘텐츠 시리즈 연출', image: undefined },
+      { id: 'pf_004_1', title: '브랜드 필름 제작', image: undefined },
+      { id: 'pf_004_2', title: '콘텐츠 시리즈 연출', image: undefined },
     ],
     educationItems: [
       { id: 'education-1', period: '2012~2016', school: '건국대학교', status: '졸업' },

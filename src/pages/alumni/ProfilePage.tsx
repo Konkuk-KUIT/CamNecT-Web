@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { alumniList } from './data';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
+import { MOCK_SESSION } from '../../mock/mypages';
 
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
@@ -51,6 +53,9 @@ const AlumniProfileContent = ({
   enableCoffeeChatModal,
   shouldOpenCoffeeChat,
 }: AlumniProfileContentProps) => {
+  const navigate = useNavigate();
+  const meUid = MOCK_SESSION.meUid;
+  const isMine = profile.userId === meUid;
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
@@ -72,6 +77,17 @@ const AlumniProfileContent = ({
     // TODO: send selected categories and message to coffee chat request API.
     void payload;
   };
+
+  const portfolioItems = useMemo(() => {
+    const items = MOCK_PORTFOLIOS_BY_OWNER_ID[profile.userId] ?? [];
+    return items
+      .filter((item) => item.portfolioVisibility)
+      .map((item) => ({
+        id: item.portfolioId,
+        title: item.title,
+        image: typeof item.portfolioThumbnail === 'string' ? item.portfolioThumbnail : undefined,
+      }));
+  }, [profile.userId]);
 
   return (
     <HeaderLayout headerSlot=
@@ -240,7 +256,7 @@ const AlumniProfileContent = ({
                   type='button'
                   className='flex items-center gap-[2px] text-R-12-hn text-gray-650'
                   onClick={() => {
-                    // TODO: 포트폴리오 전체보기 라우터 연결 필요.
+                    navigate(`/alumni/profile/${profile.id}/portfolio`);
                   }}
                 >
                   전체보기
@@ -266,8 +282,15 @@ const AlumniProfileContent = ({
               <div className='h-0 border border-gray-150' />
 
               <div className='flex gap-[5px] overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-                  {profile.portfolioItems.map((item) => (
-                    <div key={item.id} className='flex flex-col gap-[5px] shrink-0'>
+                  {portfolioItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type='button'
+                      className='flex flex-col gap-[5px] shrink-0 text-left'
+                      onClick={() => {
+                        navigate(`/alumni/profile/${profile.id}/portfolio/${item.id}`);
+                      }}
+                    >
                       <div className='h-[90px] w-[160px] overflow-hidden rounded-[12px] bg-[var(--ColorGray1,#D5D5D5)]'>
                         <img
                           src={item.image ?? portfolioPlaceholder}
@@ -282,7 +305,7 @@ const AlumniProfileContent = ({
                       <div className='pl-[10px] text-M-14 text-gray-750'>
                         {item.title}
                       </div>
-                    </div>
+                    </button>
                   ))}
               </div>
             </div>

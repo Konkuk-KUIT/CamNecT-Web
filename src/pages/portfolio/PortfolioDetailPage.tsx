@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PortfolioEditModal from './components/PortfolioEditModal';
 import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
@@ -10,13 +10,28 @@ import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 
-export const PortfolioDetailPage = () => {
-    const userId = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
-    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[userId];
+type PortfolioDetailPageProps = {
+    ownerId?: string;
+    isMine?: boolean;
+    portfolioId?: string;
+};
+
+export const PortfolioDetailPage = ({
+    ownerId: ownerIdProp,
+    isMine: isMineProp,
+    portfolioId: portfolioIdProp,
+}: PortfolioDetailPageProps) => {
+    const meUid = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
+    const [searchParams] = useSearchParams();
+    const ownerId = ownerIdProp ?? searchParams.get('ownerId') ?? meUid;
+    const isMineParam = searchParams.get('isMine');
+    const isMine = isMineProp ?? (isMineParam ? isMineParam === 'true' : ownerId === meUid);
+    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[ownerId];
     const user = userDetail?.user;
 
     const navigate = useNavigate();
-    const { portfolioId } = useParams();
+    const { portfolioId: portfolioIdParam } = useParams();
+    const portfolioId = portfolioIdProp ?? portfolioIdParam;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
@@ -29,12 +44,12 @@ export const PortfolioDetailPage = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const shouldEdit = urlParams.get('edit') === 'true';
         
-        if (shouldEdit && portfolio) {
+        if (shouldEdit && portfolio && isMine) {
             setIsModalOpen(true);
             // URL에서 edit 파라미터 제거
             window.history.replaceState({}, '', window.location.pathname);
         }
-    }, [portfolio]);
+    }, [portfolio, isMine]);
 
     // Mock 데이터에서 포트폴리오 가져오기
     useEffect(() => {
@@ -50,7 +65,7 @@ export const PortfolioDetailPage = () => {
                 // Mock 데이터 시뮬레이션 (약간의 지연)
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
-                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[userId] || [];
+                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[ownerId] || [];
                 const found = userPortfolios.find(p => p.portfolioId === portfolioId);
                 
                 if (!found) {
@@ -70,7 +85,7 @@ export const PortfolioDetailPage = () => {
         };
 
         fetchData();
-    }, [portfolioId, userId]);
+    }, [portfolioId, ownerId]);
 
     const handleEdit = () => {
         setIsMenuOpen(false);
@@ -168,13 +183,30 @@ export const PortfolioDetailPage = () => {
         );
     }
 
+    if (!isMine && !portfolio.portfolioVisibility) {
+        return (
+            <PopUp
+                type="confirm"
+                title='이 포트폴리오는 비공개로 설정되어 있습니다'
+                content='작성자가 내용을 수정 중이거나\n비공개로 설정하여 상세 내용을 보실 수 없습니다.'
+                isOpen={true}
+                buttonText='확인'
+                onClick={() => navigate(-1)}
+            />
+        );
+    }
+
     return (
         <div className="min-h-dvh bg-white">
             <HeaderLayout
                 headerSlot = {
                     <MainHeader
                         title={portfolio.title}
-                        rightActions={[{icon: "menu", onClick: () => setIsMenuOpen(true), style: { width: 18, height: 18 },}]}
+                        rightActions={
+                            isMine
+                                ? [{icon: "menu", onClick: () => setIsMenuOpen(true), style: { width: 18, height: 18 },}]
+                                : []
+                        }
                     />
                 }
             >
@@ -317,78 +349,82 @@ export const PortfolioDetailPage = () => {
             </HeaderLayout>
 
             {/* 수정 모달 */}
-            {isModalOpen && (
+            {isMine && isModalOpen && (
                 <PortfolioEditModal
                     key={`edit-${portfolioId}`}
                     isOpen={true}
                     onClose={() => setIsModalOpen(false)}
-                    userId={userId}
+                    userId={ownerId}
                     initialData={portfolio}
                     onSave={handleSave}
                 />
             )}
 
             {/* 메뉴 BottomModal */}
-            <BottomSheetModal
-                isOpen={isMenuOpen}
-                onClose={() => setIsMenuOpen(false)}
-                height="auto"
-            >
-                <div className="px-[25px] pb-[40px]">
-                    {/* 프로젝트 수정 */}
-                    <button
-                        onClick={handleEdit}
-                        className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-200"
+            {isMine && (
+                <>
+                    <BottomSheetModal
+                        isOpen={isMenuOpen}
+                        onClose={() => setIsMenuOpen(false)}
+                        height="auto"
                     >
-                        <ModalIcon name='edit'/>
-                        <span className="text-m-16-hn text-gray-750">프로젝트 수정</span>
-                    </button>
+                        <div className="px-[25px] pb-[40px]">
+                            {/* 프로젝트 수정 */}
+                            <button
+                                onClick={handleEdit}
+                                className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-200"
+                            >
+                                <ModalIcon name='edit'/>
+                                <span className="text-m-16-hn text-gray-750">프로젝트 수정</span>
+                            </button>
 
-                    {/* 프로젝트 비공개 */}
-                    <button
-                        onClick={toggleVisibility}
-                        className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
-                        >
-                            <ModalIcon name={portfolio?.portfolioVisibility ? "private" : "public"} />
-                            <span className="text-m-16-hn text-gray-750">
-                                {portfolio?.portfolioVisibility ? "프로젝트 비공개" : "프로젝트 공개"}
-                            </span>
-                    </button>
+                            {/* 프로젝트 비공개 */}
+                            <button
+                                onClick={toggleVisibility}
+                                className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
+                                >
+                                    <ModalIcon name={portfolio?.portfolioVisibility ? "private" : "public"} />
+                                    <span className="text-m-16-hn text-gray-750">
+                                        {portfolio?.portfolioVisibility ? "프로젝트 비공개" : "프로젝트 공개"}
+                                    </span>
+                            </button>
 
 
-                    {/* 주요 프로젝트 지정 및 해제 */}
-                    <button
-                        onClick={toggleImportant}
-                        className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
-                    >
-                        <ModalIcon name='favorite'/>
-                        <span className="text-m-16-hn text-gray-750">{portfolio.isImportant ? "주요 프로젝트 지정 해제" : "주요 프로젝트로 지정"}</span>
-                    </button>
+                            {/* 주요 프로젝트 지정 및 해제 */}
+                            <button
+                                onClick={toggleImportant}
+                                className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
+                            >
+                                <ModalIcon name='favorite'/>
+                                <span className="text-m-16-hn text-gray-750">{portfolio.isImportant ? "주요 프로젝트 지정 해제" : "주요 프로젝트로 지정"}</span>
+                            </button>
 
-                    {/* 삭제 */}
-                    <button
-                        onClick={handleDelete}
-                        className="w-full flex items-center gap-[17px] pl-[12px] py-[15px]"
-                    >
-                        <ModalIcon name='delete' className='w-[20px] h-[20px]'/>
-                        <span className="text-m-16-hn text-red">삭제</span>
-                    </button>
-                </div>
-            </BottomSheetModal>
-            {showDeleteWarning && (<PopUp
-                type="warning"
-                title='포트폴리오를 삭제하시겠습니까?'
-                content='삭제할 시 복구할 수 없습니다.'
-                isOpen={true}
-                leftButtonText='삭제하기'
-                onLeftClick={() => {
-                    setShowDeleteWarning(false);
-                    // TODO: API 호출
-                    console.log('포트폴리오 삭제:', portfolioId);
-                    navigate(-1); 
-                }}
-                onRightClick={() => setShowDeleteWarning(false)}
-            />)}
+                            {/* 삭제 */}
+                            <button
+                                onClick={handleDelete}
+                                className="w-full flex items-center gap-[17px] pl-[12px] py-[15px]"
+                            >
+                                <ModalIcon name='delete' className='w-[20px] h-[20px]'/>
+                                <span className="text-m-16-hn text-red">삭제</span>
+                            </button>
+                        </div>
+                    </BottomSheetModal>
+                    {showDeleteWarning && (<PopUp
+                        type="warning"
+                        title='포트폴리오를 삭제하시겠습니까?'
+                        content='삭제할 시 복구할 수 없습니다.'
+                        isOpen={true}
+                        leftButtonText='삭제하기'
+                        onLeftClick={() => {
+                            setShowDeleteWarning(false);
+                            // TODO: API 호출
+                            console.log('포트폴리오 삭제:', portfolioId);
+                            navigate(-1); 
+                        }}
+                        onRightClick={() => setShowDeleteWarning(false)}
+                    />)}
+                </>
+            )}
         </div>
     );
 }
