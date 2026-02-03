@@ -193,7 +193,7 @@ const TagsFilterModalContent = ({
                 placeholder='태그 검색'
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className='h-[40px] w-full rounded-[30px] bg-gray-150 py-[8px] pl-[52px] pr-[19px] text-r-14 text-gray-750 placeholder:text-gray-650 focus:outline-none'
+                className='h-[40px] w-full rounded-[30px] bg-gray-150 py-[8px] pl-[52px] pr-[19px] text-r-16 text-gray-750 placeholder:text-gray-650 focus:outline-none'
               />
             </div>
           </section>
