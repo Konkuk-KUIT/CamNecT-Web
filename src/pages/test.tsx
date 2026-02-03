@@ -13,6 +13,7 @@ import Toggle from '../components/Toggle/Toggle';
 import Card from '../components/Card';
 import { Tabs } from '../components/Tabs';
 
+// 공통컴포넌트 사용 테스트 페이지
 function TestPage() {
 
   const tabs = [

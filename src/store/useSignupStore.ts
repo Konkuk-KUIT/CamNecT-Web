@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import type { SignupRequestBody } from "../api-types/authApiTypes";
+import type { EmailRequest } from "../api-types/authApiTypes";
 
 // Store 상태 타입 정의
 interface SignupStore {
     // API 필수 필드
     email: string;
-    userName: string;
+    username: string;
     password: string;
     name: string;
     phoneNum: string;
@@ -27,7 +27,7 @@ interface SignupStore {
 
     // 상태 변경 함수들 
     setEmail: (email: string) => void;
-    setUserName: (userName: string) => void;
+    setUsername: (username: string) => void;
     setPassword: (password: string) => void;
     setName: (name: string) => void;
     setPhoneNum: (phoneNum: string) => void;
@@ -42,14 +42,14 @@ interface SignupStore {
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
-    getSignupData: () => SignupRequestBody;
+    getSignupData: () => EmailRequest;
     reset: () => void;
 }
 
 // 초기 상태 (데이터만)
 const initialState = {
     email: '',
-    userName: '',
+    username: '',
     password: '',
     name: '',
     phoneNum: '',
@@ -73,7 +73,7 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
 
     // 상태 변경 함수들 구현
     setEmail: (email: string) => set({ email }),
-    setUserName: (userName: string) => set({ userName }),
+    setUsername: (username: string) => set({ username }),
     setPassword: (password: string) => set({ password }),
     setName: (name: string) => set({ name }),
     setPhoneNum: (phoneNum: string) => set({ phoneNum }),
@@ -88,11 +88,11 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setTags: (tags: string[]) => set({ tags }),
 
     // API 요청 시 필요한 필드만 추출
-    getSignupData: (): SignupRequestBody => {
+    getSignupData: (): EmailRequest => {
         const state = get();
         return {
             email: state.email,
-            userName: state.userName,
+            username: state.username,
             password: state.password,
             name: state.name,
             phoneNum: state.phoneNum,

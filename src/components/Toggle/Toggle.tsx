@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
+import { useState } from 'react';
 
 type Size = number | string;
 
@@ -9,8 +9,9 @@ type ToggleProps = {
   onToggle?: (next: boolean) => void;
   width?: Size;
   height?: Size;
+  strokeColor?: string;
   className?: string;
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'onToggle'>;
 
 const toCssSize = (value?: Size) =>
   value === undefined ? undefined : typeof value === 'number' ? `${value}px` : value;
@@ -21,6 +22,7 @@ const Toggle = ({
   onToggle,
   width = 24,
   height = 24,
+  strokeColor = '#202023',
   className = '',
   style,
   ...props
@@ -50,12 +52,12 @@ const Toggle = ({
       {...props}
     >
       {isOn ? (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4.5 15.75L12 8.25L19.5 15.75" stroke="#202023" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
-        </svg>
+        <svg className='rotate-180' xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M16.25 6.875L10 13.125L3.75 6.875" stroke={strokeColor} strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
       ) : (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4.5 8.25L12 15.75L19.5 8.25" stroke="#202023" strokeWidth="1.5" strokeLinecap="round" stroke-linejoin="round" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M16.25 6.875L10 13.125L3.75 6.875" stroke={strokeColor} strokeLinecap="round" strokeLinejoin="round" />
         </svg>
 
       )}
