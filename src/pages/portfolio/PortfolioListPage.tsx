@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
 import PortfolioEditModal from './components/PortfolioEditModal';
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
@@ -9,8 +9,22 @@ import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
 
 
-export const  PortfolioListPage = () => {
-    const userId = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
+type PortfolioListPageProps = {
+    ownerId?: string;
+    isMine?: boolean;
+    basePath?: string;
+};
+
+export const  PortfolioListPage = ({
+    ownerId: ownerIdProp,
+    isMine: isMineProp,
+    basePath = "/me/portfolio",
+}: PortfolioListPageProps) => {
+    const meUid = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
+    const [searchParams] = useSearchParams();
+    const ownerId = ownerIdProp ?? searchParams.get('ownerId') ?? meUid;
+    const isMineParam = searchParams.get('isMine');
+    const isMine = isMineProp ?? (isMineParam ? isMineParam === 'true' : ownerId === meUid);
     const navigate = useNavigate();
     const [showPublic, setShowPublic] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,7 +46,7 @@ export const  PortfolioListPage = () => {
                 // Mock 데이터 시뮬레이션 (약간의 지연)
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
-                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[userId] || [];
+                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[ownerId] || [];
                 
                 setPortfolios(userPortfolios);
             } catch (err) {
@@ -44,10 +58,14 @@ export const  PortfolioListPage = () => {
         };
 
         fetchData();
-    }, [userId]);
+    }, [ownerId]);
 
     const handlePortfolioClick = (portfolioId: string) => {
-        navigate(`/me/portfolio/${portfolioId}`);
+        if (basePath === "/me/portfolio") {
+            navigate(`${basePath}/${portfolioId}?ownerId=${ownerId}&isMine=${String(isMine)}`);
+            return;
+        }
+        navigate(`${basePath}/${portfolioId}`);
     };
 
     const handleAddPortfolio = () => {
@@ -61,8 +79,8 @@ export const  PortfolioListPage = () => {
         if (!data.portfolioId || !portfolios.find(p => p.portfolioId === data.portfolioId)) {
             const newPortfolio: PortfolioDetail = {
                 ...data,
-                portfolioId: `pf_${userId}_${Date.now()}`,
-                id: userId,
+                portfolioId: `pf_${ownerId}_${Date.now()}`,
+                id: ownerId,
                 updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
             };
             setPortfolios([...portfolios, newPortfolio]);
@@ -91,6 +109,11 @@ export const  PortfolioListPage = () => {
         // await updateAllPortfoliosPrivacy(!newPrivacyState)
     };
 
+    const visiblePortfolios = useMemo(() => {
+        if (isMine) return portfolios;
+        return portfolios.filter((portfolio) => portfolio.portfolioVisibility);
+    }, [isMine, portfolios]);
+ 
     if (isLoading) {
         return (
             <PopUp
@@ -126,25 +149,27 @@ export const  PortfolioListPage = () => {
                     {/* 콘텐츠 */}
                     <div className="">
                         {/* 전체 비공개 토글 */}
-                        <div className="flex items-center justify-between px-[25px] py-[15px] border-t border-b border-gray-150">
-                            <div className="text-sb-14-hn text-gray-900">포트폴리오 전체 비공개</div>
-                            <button
-                            onClick={togglePrivacy}
-                            className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                showPublic ? "bg-gray-300" : "bg-primary"
-                            }`}
-                            >
-                            <div
-                                className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                showPublic ? "translate-x-[2px]" : "translate-x-[28px]"
+                        {isMine && (
+                            <div className="flex items-center justify-between px-[25px] py-[15px] border-t border-b border-gray-150">
+                                <div className="text-sb-14-hn text-gray-900">포트폴리오 전체 비공개</div>
+                                <button
+                                onClick={togglePrivacy}
+                                className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
+                                    showPublic ? "bg-gray-300" : "bg-primary"
                                 }`}
-                            />
-                            </button>
-                        </div>
+                                >
+                                <div
+                                    className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
+                                    showPublic ? "translate-x-[2px]" : "translate-x-[28px]"
+                                    }`}
+                                />
+                                </button>
+                            </div>
+                        )}
 
                         {/* 포트폴리오 그리드 */}
                         <div className="px-[25px] py-[20px] grid grid-cols-2 gap-[10px]">
-                            {portfolios.map((portfolio) => (
+                            {visiblePortfolios.map((portfolio) => (
                             <button
                                 key={portfolio.portfolioId}
                                 onClick={() => handlePortfolioClick(portfolio.portfolioId)}
@@ -185,26 +210,28 @@ export const  PortfolioListPage = () => {
                             ))}
 
                             {/* 추가하기 버튼 */}
-                            <button
-                            onClick={handleAddPortfolio}
-                            className="relative flex flex-col items-center justify-center gap-[8px] w-full h-[200px] bg-gray-750 rounded-[12px] active:bg-gray-700 transition-colors"
-                            >
-                                <svg viewBox="0 0 48 48" fill="none" className="w-[48px] h-[48px] block shrink-0">
-                                    <path d="M24.5 8V39M40 23.5H9" stroke="#ECECEC" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span className="text-sb-16-hn text-gray-150">포트폴리오 추가</span>
-                            </button>
+                            {isMine && (
+                                <button
+                                onClick={handleAddPortfolio}
+                                className="relative flex flex-col items-center justify-center gap-[8px] w-full h-[200px] bg-gray-750 rounded-[12px] active:bg-gray-700 transition-colors"
+                                >
+                                    <svg viewBox="0 0 48 48" fill="none" className="w-[48px] h-[48px] block shrink-0">
+                                        <path d="M24.5 8V39M40 23.5H9" stroke="#ECECEC" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span className="text-sb-16-hn text-gray-150">포트폴리오 추가</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
             </HeaderLayout>
 
             {/* 포트폴리오 추가/수정 모달 */}
-            {isModalOpen && (
+            {isMine && isModalOpen && (
                 <PortfolioEditModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    userId={userId}
+                    userId={ownerId}
                     onSave={handleSavePortfolio}
                 />
             )}
