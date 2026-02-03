@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AdminFullLayout } from "../../layouts/AdminFullLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import { VerificationItem } from "./components/VerificationItem";
 
@@ -107,33 +108,38 @@ export const AdminVerificationList = () => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <MainHeader title="재학증명서 승인 리스트" />
-            
-            {/* 큰 틀: 버튼(탭) 섹션 */}
-            <div className="flex pt-[5px] px-5 py-4 gap-2 overflow-x-auto no-scrollbar">
-                {[
-                    { id: 'PENDING', label: '승인필요' },
-                    { id: 'APPROVED', label: '승인완료' },
-                    { id: 'REJECTED', label: '승인거부' }
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setCurrentStatus(tab.id as VerificationStatus)}
-                        className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors tracking-[-0.56px]
-                            ${currentStatus === tab.id 
-                                ? 'bg-primary text-white text-sb-14' 
-                                : 'bg-gray-100 text-gray-650 text-m-14 border border-gray-200'}`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+        <AdminFullLayout
+            headerSlot={
+                <MainHeader title="재학증명서 승인 리스트" />
+            }
+        >
+            <div className="flex flex-col h-full bg-white">
+                
+                    {/* 큰 틀: 버튼(탭) 섹션 */}
+                <div className="flex pt-[5px] px-5 py-4 gap-2 overflow-x-auto no-scrollbar">
+                    {[
+                        { id: 'PENDING', label: '승인필요' },
+                        { id: 'APPROVED', label: '승인완료' },
+                        { id: 'REJECTED', label: '승인거부' }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setCurrentStatus(tab.id as VerificationStatus)}
+                            className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors tracking-[-0.56px]
+                                ${currentStatus === tab.id 
+                                    ? 'bg-primary text-white text-sb-14' 
+                                    : 'bg-gray-100 text-gray-650 text-m-14 border border-gray-200'}`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-            {/* 큰 틀: 내용 섹션 */}
-            <div className="flex-1 pb-10">
-                {renderContent()}
+                {/* 큰 틀: 내용 섹션 */}
+                <div className="flex-1 pb-10">
+                    {renderContent()}
+                </div>
             </div>
-        </div>
+        </AdminFullLayout>
     );
 };

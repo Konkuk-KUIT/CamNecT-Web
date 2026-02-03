@@ -28,6 +28,7 @@ import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
 import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
+import { AdminActivityRegistrationPage } from "../pages/admin/AdminActivityRegistrationPage";
 
 export const router = createBrowserRouter([
 
@@ -66,8 +67,11 @@ export const router = createBrowserRouter([
                             {
                                 path: "school-verification/:id",
                                 element: <AdminVerificationDetail />,
+                            },
+                            {
+                                path: "activity-registration",
+                                element: <AdminActivityRegistrationPage />,
                             }
-                            // todo 관리자 대외활동 등록 페이지도 추가
                         ]
                     },
                 
