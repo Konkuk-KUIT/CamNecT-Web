@@ -69,7 +69,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                                     <span className="text-r-16-hn text-gray-750">작성한 글</span>
                                 </button>
                                 <button
-                                    onClick={() => handleNavigation("/me/bookmarks")}
+                                    onClick={() => handleNavigation("bookmarks")}
                                     className="inline-flex items-center gap-[15px] p-[10px]"
                                 >
                                     <svg viewBox="0 0 20 20" fill="none" className="w-[20px] h-[20px] block shrink-0">
@@ -93,22 +93,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                             </div>
                             <div className="flex flex-col justify-center items-start">
                                 <button
-                                    onClick={() => handleNavigation("/me/personal-settings")}
-                                    className="inline-flex items-center gap-[15px] p-[10px]"
-                                >
-                                    <svg viewBox="0 0 20 20" fill="none" className="w-[20px] h-[20px] block shrink-0">
-                                        <path 
-                                        d="M14.985 15.6042C14.4027 14.8332 13.6494 14.208 12.7843 13.7778C11.9193 13.3476 10.9661 13.1241 10 13.125C9.03388 13.1241 8.08074 13.3476 7.21569 13.7778C6.35063 14.208 5.59729 14.8332 5.01501 15.6042M14.985 15.6042C16.1213 14.5935 16.9226 13.2613 17.2843 11.7842C17.646 10.3072 17.5502 8.75507 17.0096 7.33373C16.4689 5.91239 15.5089 4.68898 14.257 3.82575C13.0051 2.96251 11.5203 2.50024 9.99959 2.50024C8.47889 2.50024 6.99412 2.96251 5.74218 3.82575C4.49024 4.68898 3.53028 5.91239 2.98962 7.33373C2.44896 8.75507 2.35313 10.3072 2.71485 11.7842C3.07658 13.2613 3.87876 14.5935 5.01501 15.6042M14.985 15.6042C13.6134 16.8276 11.838 17.5026 10 17.5C8.1617 17.5028 6.38687 16.8278 5.01501 15.6042M12.5 8.125C12.5 8.78804 12.2366 9.42393 11.7678 9.89277C11.2989 10.3616 10.663 10.625 10 10.625C9.33696 10.625 8.70108 10.3616 8.23224 9.89277C7.7634 9.42393 7.50001 8.78804 7.50001 8.125C7.50001 7.46196 7.7634 6.82607 8.23224 6.35723C8.70108 5.88839 9.33696 5.625 10 5.625C10.663 5.625 11.2989 5.88839 11.7678 6.35723C12.2366 6.82607 12.5 7.46196 12.5 8.125Z" 
-                                        stroke="#646464" 
-                                        strokeWidth="1.5" 
-                                        strokeLinecap="round" 
-                                        strokeLinejoin="round"/>
-                                    </svg>
-
-                                    <span className="text-r-16-hn text-gray-750">개인 정보 설정</span>
-                                </button>
-                                <button
-                                    onClick={() => handleNavigation("/me/environment-settings")}
+                                    onClick={() => handleNavigation("settings")}
                                     className="inline-flex items-center gap-[15px] p-[10px]"
                                 >
                                     <svg viewBox="0 0 24 24" fill="none"  className="w-[20px] h-[20px] block shrink-0">
