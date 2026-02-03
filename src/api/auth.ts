@@ -1,4 +1,4 @@
-import type { EmailRequest, EmailVerificationRequest, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationRequest, SchoolVerificationResponse, SchoolVerificationStatusRequest, SchoolVerificationStatusResponse } from "../api-types/authApiTypes";
+import type { EmailRequest, EmailResponse, EmailVerificationRequest, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationRequest, SchoolVerificationResponse, SchoolVerificationStatusRequest, SchoolVerificationStatusResponse } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // 1. 로그인 API [POST] (/api/auth/login)
@@ -18,7 +18,7 @@ export const checkIdDuplicate = async (data: IdDuplicateCheckRequest) => {
 // 2. 이메일 인증 번호 요청 API [POST] (/api/auth/signup) -> 추후 이름 변경 필요
 export const requestEmailCode = async (data: EmailRequest) => {
     
-    const response = await axiosInstance.post<void>("/api/auth/signup", data);
+    const response = await axiosInstance.post<EmailResponse>("/api/auth/signup", data);
     return response.data;
 }
 

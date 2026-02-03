@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
-import { verifyEmailCode } from '../../api/auth';
+import { requestEmailCode, verifyEmailCode } from '../../api/auth';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import PopUp from '../../components/Pop-up';
@@ -23,11 +24,14 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const [emailSent, setEmailSent] = useState(false);  // 이메일 전송 여부
     const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
-    // 이메일 전역상태 
-    const {email, setEmail} = useSignupStore(
+    // 이메일 전역상태 및 가입 정보
+    const { email, setEmail, getSignupData, setUserId, userId } = useSignupStore(
         useShallow((state) => ({
             email: state.email,
-            setEmail: state.setEmail
+            setEmail: state.setEmail,
+            getSignupData: state.getSignupData,
+            setUserId: state.setUserId,
+            userId: state.userId
         }))
     );
 
@@ -61,6 +65,29 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const emailValue = watch("email");
     const codeValue = watch("verificationCode");
 
+    // todo 여러번 요청 가능한지 확인
+    const emailRequestMutation = useMutation({
+        mutationFn: requestEmailCode,
+        onSuccess: (data) => {
+            if(data.userId) {
+                setUserId(data.userId);
+            }
+            setEmailSent(true);
+        },
+        onError: (error: AxiosError) => {
+            const status = error.response?.status;
+            
+            if (status === 409) {
+                // 전화번호 or 이메일 
+                setPopUpConfig({ title: "이미 가입된 이메일 입니다", content: "다른 이메일로 요청해주세요" });
+            } else {
+                setPopUpConfig({ title: "인증번호 발송 실패", content: "다시 요청해주세요" });
+            }
+
+            setEmailSent(false);
+        }
+    });
+
     // 이메일 인증번호 검증 mutation
     const emailVerifyMutation = useMutation({
         mutationFn: verifyEmailCode,
@@ -72,6 +99,22 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
             setPopUpConfig({ title: "인증번호 불일치", content: "다시 요청해주세요" });
         }
     });
+
+    // 인증요청 클릭 시
+    const handleEmailRequest = () => {
+        setEmail(emailValue);
+        emailRequestMutation.mutate({ ...getSignupData(), email: emailValue });
+    };
+
+    // 인증하기 버튼 클릭 시 
+    const handleEmailVerify = () => {
+        // userId null 방지
+        if (!userId) {
+            setPopUpConfig({ title: "인증 오류", content: "먼저 인증 요청을 클릭하여 이메일을 전송해 주세요." });
+            return;
+        }
+        emailVerifyMutation.mutate({ userId, code: codeValue });
+    }
 
     // '다음'버튼 클릭 시
     const onSubmit = (data : EmailFormData) => {
@@ -105,12 +148,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                             type="button"
                             className="mt-[36px]"
                             disabled={!emailValue || !!errors.email}
-                            onClick={() => {
-                                // TODO: 이메일 전송 API 호출
-                                console.log("이메일 전송 요청");
-                                setEmail(emailValue);
-                                setEmailSent(true);  // 이메일 전송 완료
-                            }}
+                            onClick={handleEmailRequest}
                         />
                     </div>
                     
@@ -122,12 +160,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                             error={errors.verificationCode?.message}
                         />
                         <SmallButton 
-                            onClick={() => {
-                                emailVerifyMutation.mutate({
-                                    email: email, // 이메일 전역상태
-                                    code: codeValue
-                                });
-                            }}
+                            onClick={handleEmailVerify}
                             label="인증하기" 
                             type="button"
                             className="mt-[6px]"
@@ -156,7 +189,6 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                     content={popUpConfig.content}
                     onClick={() => {
                         setPopUpConfig(null);
-                        setEmailSent(false); // 인증버튼 재활성화
                     }}
                 />
             )}

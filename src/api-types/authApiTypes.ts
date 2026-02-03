@@ -45,9 +45,11 @@ export interface EmailResponse {
 
 // 이메일 인증 번호 검증 DTO (/api/verification/email/verify-code)
 export interface EmailVerificationRequest {
-  email: string;
+  userId: number;
   code: string;
 }
+
+export type EmailVerificationResponse = boolean
 
 // 학교 인증서 인증 요청 DTO (/api/verification/documents)
 // 학교 인증서 종류 타입 추출

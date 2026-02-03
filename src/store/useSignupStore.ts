@@ -13,6 +13,7 @@ interface SignupStore {
         serviceTerms: boolean;
         privacyTerms: boolean;
     };
+    userId: number | null; // 가입 과정에서 발급받는 ID
     // todo 태그 및 소개글 
     selfIntroduction: string;
     profileImage: File | null; 
@@ -32,6 +33,7 @@ interface SignupStore {
     setName: (name: string) => void;
     setPhoneNum: (phoneNum: string) => void;
     setAgreements: (agreements: {serviceTerms: boolean, privacyTerms: boolean}) => void;
+    setUserId: (userId: number | null) => void;
     setVerificationType: (verificationType: 'email' | 'phone') => void;
     setEmailVerified: (emailVerified: boolean) => void;
     setSelfIntroduction: (selfIntroduction: string) => void;
@@ -57,6 +59,7 @@ const initialState = {
         serviceTerms: false,
         privacyTerms: false,
     },
+    userId: null,
     verificationType: 'email' as const,
     emailVerified: false,
     // phoneVerified: false,
@@ -78,6 +81,7 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setName: (name: string) => set({ name }),
     setPhoneNum: (phoneNum: string) => set({ phoneNum }),
     setAgreements: (agreements: {serviceTerms: boolean, privacyTerms: boolean}) => set({ agreements }),
+    setUserId: (userId: number | null) => set({ userId }),
     setVerificationType: (verificationType: 'email' | 'phone') => set({ verificationType }),
     setEmailVerified: (emailVerified: boolean) => set({ emailVerified }),
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),
@@ -89,7 +93,7 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
 
     // API 요청 시 필요한 필드만 추출
     getSignupData: (): EmailRequest => {
-        const state = get();
+        const state = get(); // 현재 전역상태에 저장된 모든 값들 불러오는 함수
         return {
             email: state.email,
             username: state.username,
