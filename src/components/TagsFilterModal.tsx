@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import BottomSheetModal from './BottomSheetModal/BottomSheetModal';
 
 type TagItem = {
@@ -37,6 +37,12 @@ const TagsFilterModal = ({
 }: TagsFilterModalProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(tags);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedTags(tags);
+    setSearchQuery('');
+  }, [isOpen, tags]);
 
   const toggleTag = (tagName: string) => {
     if (selectedTags.includes(tagName)) {

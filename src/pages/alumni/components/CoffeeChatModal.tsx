@@ -7,7 +7,7 @@ type CoffeeChatModalProps = {
   isOpen: boolean;
   onClose: () => void;
   categories: string[];
-  onSubmit?: (payload: { categories: string[]; message: string }) => void;
+  onSubmit?: (payload: { categories: string[]; message: string }) => Promise<boolean | void> | boolean | void;
 };
 
 // 커피챗 요청을 작성하는 바텀시트 모달.
@@ -58,10 +58,15 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
   };
 
   // 제출 시 부모로 선택 정보 전달.
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isSubmitEnabled) return;
-    onSubmit?.({ categories: selectedCategories, message });
-    onClose();
+    try {
+      const result = await onSubmit?.({ categories: selectedCategories, message });
+      if (result === false) return;
+      onClose();
+    } catch {
+      // keep modal open on error
+    }
   };
 
   return (

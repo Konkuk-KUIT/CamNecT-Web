@@ -7,7 +7,6 @@ import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { alumniList } from './data';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
-import { MOCK_SESSION } from '../../mock/mypages';
 
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
@@ -54,8 +53,6 @@ const AlumniProfileContent = ({
   shouldOpenCoffeeChat,
 }: AlumniProfileContentProps) => {
   const navigate = useNavigate();
-  const meUid = MOCK_SESSION.meUid;
-  const isMine = profile.userId === meUid;
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
@@ -73,9 +70,10 @@ const AlumniProfileContent = ({
   };
 
   // 커피챗 요청 모달 제출 처리.
-  const handleCoffeeChatSubmit = (payload: { categories: string[]; message: string }) => {
+  const handleCoffeeChatSubmit = async (payload: { categories: string[]; message: string }) => {
     // TODO: send selected categories and message to coffee chat request API.
     void payload;
+    return true;
   };
 
   const portfolioItems = useMemo(() => {
