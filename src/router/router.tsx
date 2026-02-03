@@ -56,29 +56,42 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         path: "home",
-                        element: <HomePage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <HomePage />,
+                            },
+                            {
+                                path: "notices",
+                                element: <NotificationPage />,
+                            },
+                        ]
                     },
                     {
-                        path: "home/notices",
-                        element: <NotificationPage />,
-                    },
-                    {
-
-
                         path: "alumni",
-                        element: <AlumniSearchPage />,
-                    },
-                    {
-                        path: "alumni/profile/:id",
-                        element: <AlumniProfilePage />,
-                    },
-                    {
-                        path: "alumni/profile/:id/portfolio",
-                        element: <AlumniPortfolioListPage />,
-                    },
-                    {
-                        path: "alumni/profile/:id/portfolio/:portfolioId",
-                        element: <AlumniPortfolioDetailPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <AlumniSearchPage />,
+                            },
+                            {
+                                path: "profile",
+                                children: [
+                                    {
+                                        path: ":id",
+                                        element: <AlumniProfilePage />,
+                                    },
+                                    {
+                                        path: ":id/portfolio",
+                                        element: <AlumniPortfolioListPage />,
+                                    },
+                                    {
+                                        path: ":id/portfolio/:portfolioId",
+                                        element: <AlumniPortfolioDetailPage />,
+                                    }
+                                ]
+                            },
+                        ]
                     },
 
                     {
@@ -148,30 +161,30 @@ export const router = createBrowserRouter([
                         ]
                     },
                     {
-                        path: "community",
-                        element: <CommunityPage />,
-                    },
-                    {
                         path: "shop",
                         element: <ShopPage />,
 
                     },
                     {
                         path: "community",
-                        element: <CommunityPage />,
-                        
-                    },
-                    {
-                        path: "community/write",
-                        element: <WritePage />,
-                    },
-                    {
-                        path: "community/edit/:postId",
-                        element: <WritePage />,
-                    },
-                    {
-                        path: "community/post/:postId",
-                        element: <CommunityPostPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <CommunityPage />,
+                            },
+                            {
+                                path: "write",
+                                element: <WritePage />,
+                            },
+                            {
+                                path: "edit/:postId",
+                                element: <WritePage />,
+                            },
+                            {
+                                path: "post/:postId",
+                                element: <CommunityPostPage />,
+                            },
+                        ]
                     },
                 ]
             },

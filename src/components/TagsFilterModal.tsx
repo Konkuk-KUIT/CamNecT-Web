@@ -133,7 +133,7 @@ const TagsFilterModalContent = ({
   }, [extraCategories, searchQuery]);
 
   return (
-    <div className='flex h-full w-full flex-col'>
+    <div className='flex h-full w-full min-h-0 flex-col overflow-hidden'>
 
 
         <section className='flex w-full flex-col gap-[13px] border-b border-gray-150 px-[25px] pb-[20px] pt-[30px]'>
@@ -199,7 +199,7 @@ const TagsFilterModalContent = ({
           </section>
 
           {selectedTags.length < maxSelected && (
-            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px]'>
+            <section className='min-h-0 flex-1 overflow-y-auto pb-[40px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
               <div className='flex w-full flex-col'>
                 {filteredExtraCategories.map((category) => (
                   <div
