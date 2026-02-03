@@ -1,33 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import type { ActivityListItem } from '../../../../types/activityPage/activityPageTypes';
 
-interface InternalActivityPostType {
-    postId: string;
-    authorId: string;
-    title: string;
-    preview: string;
-    bookmarkCount: number;
-    tags: string[];
-    createdAt: string;
-    thumbnailUrl?: string;
-}
-
-export const InternalActivityPost = ({
-    postId,
-    title,
-    preview,
-    tags,
-    bookmarkCount,
-    thumbnailUrl,
-}: InternalActivityPostType) => {
+export const InternalActivityPost = (post: ActivityListItem) => {
     const navigate = useNavigate();
     return (
         <div
             className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
-            onClick={() => navigate(`/activity/post/${postId}`)}
+            onClick={() => navigate(`/activity/post/${post.id}`)}
         >
             {/* Tags */}
             <div className="flex flex-wrap gap-[5px]">
-                {tags.map((tag) => (
+                {post.tags.map((tag) => (
                     <span
                         key={tag}
                         className={`flex justify-center items-center px-[10px] py-[4px] rounded-[5px] text-r-12-hn border ${
@@ -46,10 +29,10 @@ export const InternalActivityPost = ({
                     {/* Title & Content */}
                     <div className="flex flex-col gap-[5px]">
                         <span className="text-sb-16-hn text-gray-900 truncate">
-                            {title}
+                            {post.title}
                         </span>
                         <div className="text-r-16 text-gray-750 whitespace-pre-line break-keep line-clamp-2 [overflow-wrap:anywhere]">
-                            {preview}
+                            {post.content}
                         </div>
                     </div>
 
@@ -63,15 +46,15 @@ export const InternalActivityPost = ({
                                 strokeLinejoin="round"
                             />
                         </svg>
-                        <span className="text-r-12-hn text-gray-650">{bookmarkCount}</span>
+                        <span className="text-r-12-hn text-gray-650">{post.bookmarkCount}</span>
                     </div>
                 </div>
 
                 {/* Thumbnail (optional) */}
-                {thumbnailUrl && (
+                {post.posterImg && (
                     <img
-                        src={thumbnailUrl}
-                        alt={title}
+                        src={post.posterImg}
+                        alt={post.title}
                         className="w-[95px] h-[95px] rounded-[5px] object-cover flex-shrink-0"
                     />
                 )}

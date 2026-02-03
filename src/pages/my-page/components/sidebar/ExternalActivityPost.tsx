@@ -1,39 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import type { ActivityListItem } from '../../../../types/activityPage/activityPageTypes';
+import { getDDay } from "../../../../utils/formatDate";
 
-interface ExternalActivityPostType {
-    postId: string;
-    authorId: string;
-    title: string;
-    location: string;
-    bookmarkCount: number;
-    tags: string[];
-    dDay: number;
-    deadline: string;
-    createdAt: string;
-    posterImg?: string;
-    isBookmarked: boolean;
-}
-
-export const ExternalActivityPost = ({
-    postId,
-    title,
-    location,
-    tags,
-    deadline,
-    dDay,
-    bookmarkCount,
-    posterImg,
-    isBookmarked,
-}: ExternalActivityPostType) => {
+export const ExternalActivityPost = (post: ActivityListItem) => {
     const navigate = useNavigate();
     return (
         <div
             className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
-            onClick={() => navigate(`/activity/post/${postId}`)}
+            onClick={() => navigate(`/activity/post/${post.id}`)}
         >
             {/* Tags */}
             <div className="flex flex-wrap gap-[5px]">
-                {tags.map((tag) => (
+                {post.tags.map((tag) => (
                     <span
                         key={tag}
                         className="flex justify-center items-center px-[10px] py-[4px] rounded-[5px] text-r-12-hn border bg-green-50 text-primary border-primary"
@@ -48,7 +26,7 @@ export const ExternalActivityPost = ({
                     {/* Title & Content */}
                     <div className="flex gap-[8px] items-center">
                         <span className="text-b-20-hn text-gray-900 line-clamp-2">
-                            {title}
+                            {post.title}
                         </span>
                         <div className="flex items-center gap-[3px]">
                             <svg viewBox="0 0 11 12" fill="none" className="w-[11px] h-[12px] block shrink-0">
@@ -59,25 +37,25 @@ export const ExternalActivityPost = ({
                                     strokeLinejoin="round"
                                 />
                             </svg>
-                            <span className="text-r-12-hn text-gray-650">{bookmarkCount}</span>
+                            <span className="text-r-12-hn text-gray-650">{post.bookmarkCount}</span>
                         </div>
                     </div>
 
                     <div className="flex flex-col gap-[30px] items-start">
                         <div className="flex flex-col gap-[5px] text-r-14-hn text-gray-750">
-                            <span>{location}</span>
-                            <span>접수 기간 : {deadline}</span>
+                            <span>{post.location}</span>
+                            <span>접수 기간 : {post.deadline}</span>
                         </div>
-                        <div className="flex justify-center items-center px-[12px] py-[6px] rounded-[20px] bg-primary text-b-14-hn text-white">D-{dDay}</div>
+                        <div className="flex justify-center items-center px-[12px] py-[6px] rounded-[20px] bg-primary text-b-14-hn text-white">{post.deadline ? `D-${getDDay(post.deadline)}`: "D-n"}</div>
                     </div>
                 </div>
 
                 {/* Thumbnail (optional) */}
-                {posterImg && (
+                {post.posterImg && (
                     <div className="relative">
                         <img
-                            src={posterImg}
-                            alt={title}
+                            src={post.posterImg}
+                            alt={post.title}
                             className="w-[94px] h-[134px] object-cover flex-shrink-0"
                         />
                         <svg
@@ -86,8 +64,8 @@ export const ExternalActivityPost = ({
                         >
                             <path
                                 d="M23.75 26.25L15 20L6.25 26.25V6.25C6.25 5.58696 6.51339 4.95107 6.98223 4.48223C7.45107 4.01339 8.08696 3.75 8.75 3.75H21.25C21.913 3.75 22.5489 4.01339 23.0178 4.48223C23.4866 4.95107 23.75 5.58696 23.75 6.25V26.25Z"
-                                fill={isBookmarked ? "#00C56C" : "#000000"}
-                                fillOpacity={isBookmarked ? 1 : 0.2}
+                                fill={post.isBookmarked ? "#00C56C" : "#000000"}
+                                fillOpacity={post.isBookmarked ? 1 : 0.2}
                                 stroke="white"
                                 strokeWidth={1.5}
                                 strokeLinecap="round"

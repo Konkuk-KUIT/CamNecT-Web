@@ -1,48 +1,30 @@
 import { useNavigate } from "react-router-dom";
-import { formatDaysAgo } from "../../../../utils/formatDate";
+import { formatTimeAgo } from "../../../../utils/formatDate";
+import type { TeamRecruitPost } from '../../../../types/activityPage/activityPageTypes';
 
-interface RecruitPostProps {
-    postId: string;
-    authorId: string;
-    authorName: string;
-    title: string;
-    contestName: string;
-    bookmarkCount: number;
-    recruitNow: boolean;
-    createdAt: string;
-}
-
-export const RecruitPost = ({
-    postId,
-    authorName,
-    title,
-    contestName,
-    recruitNow,
-    bookmarkCount,
-    createdAt,
-}: RecruitPostProps) => {
+export const RecruitPost = (post: TeamRecruitPost) => {
     const navigate = useNavigate();
     return (
         <div
             className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
-            onClick={() => navigate(`/recruit/post/${postId}`)}
+            onClick={() => navigate(`/recruit/post/${post.id}`)}
         >
             {/* Tag */}
             <span
                 className={`flex justify-center items-center px-[10px] py-[4px] rounded-[5px] text-r-12-hn border ${
-                    recruitNow ? 'text-primary border-primary' : 'text-gray-650 border-gray-650'
+                    post.recruitNow ? 'text-primary border-primary' : 'text-gray-650 border-gray-650'
                 }`}
             >
-                {recruitNow ? "모집 중" : "완료"}
+                {post.recruitNow ? "모집 중" : "완료"}
             </span>
 
             {/* Title & Content */}
             <div className="flex flex-col gap-[5px]">
                 <span className="text-b-16-hn text-gray-900 truncate">
-                    {title}
+                    {post.title}
                 </span>
                 <div className="text-r-14-hn text-gray-750">
-                    {authorName} | {contestName}
+                    {post.authorName} | {post.contestName}
                 </div>
             </div>
 
@@ -57,10 +39,10 @@ export const RecruitPost = ({
                             strokeLinejoin="round"
                         />
                     </svg>
-                    <span>{bookmarkCount}</span>
+                    <span>{post.bookmarkCount}</span>
                 </div>
                 <span>|</span>
-                <span>{formatDaysAgo(createdAt)}</span>
+                <span>{formatTimeAgo(post.createdAt)}</span>
             </div>
         </div>
     );
