@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { ActivityListItem } from '../../../../types/activityPage/activityPageTypes';
-import { getDDay } from "../../../../utils/formatDate";
+import { formatOnlyDate, getDDay } from "../../../../utils/formatDate";
 
 export const ExternalActivityPost = (post: ActivityListItem) => {
     const navigate = useNavigate();
@@ -43,8 +43,14 @@ export const ExternalActivityPost = (post: ActivityListItem) => {
 
                     <div className="flex flex-col gap-[30px] items-start">
                         <div className="flex flex-col gap-[5px] text-r-14-hn text-gray-750">
-                            <span>{post.location}</span>
-                            <span>접수 기간 : {post.deadline}</span>
+                            {post.tab == "job" ? (
+                                <span className="text-r-14 min-h-[42px] line-clamp-2">{post.content}</span>
+                            ):(
+                                <>
+                                    <span>{post.organizer}</span>
+                                    {post.deadline && <span>접수 기간 : {formatOnlyDate(post.deadline)}</span>}
+                                </>
+                            )}
                         </div>
                         <div className="flex justify-center items-center px-[12px] py-[6px] rounded-[20px] bg-primary text-b-14-hn text-white">{post.deadline ? `D-${getDDay(post.deadline)}`: "D-n"}</div>
                     </div>

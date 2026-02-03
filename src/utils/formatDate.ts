@@ -36,6 +36,11 @@ export const formatFullDateWithTime = (isoDate: string) => {
   return dayjs(isoDate).format('YY.MM.DD HH:mm');
 };
 
+// YY.MM.DD 형식으로 반환
+export const formatOnlyDate = (isoDate: string) => {
+  return dayjs(isoDate).format('YY.MM.DD');
+};
+
 //community/recruit 용
 export const formatTimeAgo = (dateInput: string | number | Date) => {
   const targetDate = new Date(dateInput);

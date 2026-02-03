@@ -14,17 +14,25 @@ import { type TeamPost } from "../team/teamTypes";
 // }
 
 //대외활동 데이터
+export interface userInfo {
+    authorProfile:string;
+    authorName:string;
+    authorMajor:string;
+    authorGrade: string;
+}
 
 export interface ActivityListItem extends Activity{
     authorId: string;
+    authorInfo?: userInfo;
+    tab: string;
     content?: string;
     tags: string[];
     createdAt: string;
-    isBookmarked?: boolean;
+    isBookmarked: boolean;
 }
 
 export interface ActivityDetail extends ActivityListItem {
-
+  images?: string[];
   target: string; //모집대상
   applyPeriod: { 
     start: string; 
@@ -60,6 +68,7 @@ export interface TeamRecruitPost extends TeamPost{
 }
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
+    isBookmarked: boolean;
     activityTitle: string;
     activityUrl: string;
 
@@ -68,24 +77,9 @@ export interface TeamRecruitDetail extends TeamRecruitPost{
 
     recruitDeadline: string;
     recruitTeamNumber: number;
-    genderLimit: string;
 
     description: string;
-
-    comments: TeamRecruitComment[];
 }
-
-export interface TeamRecruitComment {
-    id: string;
-    postId: string;
-
-    authorName: string;
-    content: string;
-    createdAt: string;
-
-    replies?: TeamRecruitComment[];
-}
-
 
 
 

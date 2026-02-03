@@ -19,7 +19,7 @@ export const RecruitPost = (post: TeamRecruitPost) => {
             </span>
 
             {/* Title & Content */}
-            <div className="flex flex-col gap-[5px]">
+            <div className="w-full flex flex-col gap-[5px]">
                 <span className="text-b-16-hn text-gray-900 truncate">
                     {post.title}
                 </span>
