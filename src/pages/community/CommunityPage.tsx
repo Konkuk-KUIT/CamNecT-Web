@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
@@ -6,7 +7,7 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 import InfoTab from './tabs/InfoTab';
 import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
-import { infoPosts, loggedInUserMajor, questionPosts } from '../../mock/community'
+import { infoPosts, loggedInUserMajor, questionPosts } from '../../mock/community';
 
 const tabItems: TabItem[] = [
   { id: 'all', label: '전체' },
@@ -15,6 +16,7 @@ const tabItems: TabItem[] = [
 ];
 
 export const CommunityPage = () => {
+  const navigate = useNavigate();
   // 탭 선택 및 검색 UI 상태
   const [activeTab, setActiveTab] = useState<string>(() => {
     const stored = sessionStorage.getItem('communityActiveTab');
@@ -45,7 +47,7 @@ export const CommunityPage = () => {
     return infoPosts.filter((post) => {
       const title = post.title.toLowerCase();
       const content = post.content.toLowerCase();
-      const categories = post.categories.some((category: string) =>
+      const categories = post.categories.some((category) =>
         category.toLowerCase().includes(normalizedQuery),
       );
       return (
@@ -61,7 +63,7 @@ export const CommunityPage = () => {
     return questionPosts.filter((post) => {
       const title = post.title.toLowerCase();
       const content = post.content.toLowerCase();
-      const categories = post.categories.some((category: string) =>
+      const categories = post.categories.some((category) =>
         category.toLowerCase().includes(normalizedQuery),
       );
       return (
@@ -119,6 +121,10 @@ export const CommunityPage = () => {
         ) : (
           <MainHeader
             title='커뮤니티'
+            leftAction={{
+              onClick: () => navigate('/home', { replace: true }),
+              ariaLabel: '홈으로 이동',
+            }}
             rightActions={
               activeTab === 'all'
                 ? []

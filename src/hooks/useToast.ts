@@ -1,53 +1,40 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type UseToastOptions = {
-  duration?: number;
-  fadeOutMs?: number;
+  fadeDelayMs?: number;
+  autoCloseMs?: number;
 };
 
-export const useToast = (options: UseToastOptions = {}) => {
-  const { duration = 2000, fadeOutMs = 300 } = options;
+export const useToast = ({
+  fadeDelayMs = 1500,
+  autoCloseMs = 3500,
+}: UseToastOptions = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFading, setIsFading] = useState(false);
-  const timerRef = useRef<number | null>(null);
-  const fadeTimerRef = useRef<number | null>(null);
+  const [triggerKey, setTriggerKey] = useState(0);
 
-  const clearTimers = () => {
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    if (fadeTimerRef.current !== null) {
-      window.clearTimeout(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
-  };
-
-  const closeToast = useCallback(() => {
-    setIsFading(true);
-    fadeTimerRef.current = window.setTimeout(() => {
-      setIsOpen(false);
+  useEffect(() => {
+    if (!isOpen) return;
+    const fadeTimer = window.setTimeout(() => setIsFading(true), fadeDelayMs);
+    const closeTimer = window.setTimeout(() => {
       setIsFading(false);
-    }, fadeOutMs);
-  }, [fadeOutMs]);
+      setIsOpen(false);
+    }, autoCloseMs);
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(closeTimer);
+    };
+  }, [autoCloseMs, fadeDelayMs, isOpen, triggerKey]);
 
-  const openToast = useCallback(() => {
-    clearTimers();
-    setIsOpen(true);
+  const openToast = () => {
     setIsFading(false);
-    timerRef.current = window.setTimeout(() => {
-      closeToast();
-    }, duration);
-  }, [closeToast, duration]);
-
-  useEffect(() => () => clearTimers(), []);
+    setIsOpen(true);
+    setTriggerKey((prev) => prev + 1);
+  };
 
   return {
     isOpen,
     isFading,
     openToast,
-    closeToast,
   };
 };
-
-export default useToast;
