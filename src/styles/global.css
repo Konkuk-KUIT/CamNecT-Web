@@ -62,6 +62,10 @@
     --text-B-20--line-height: 28px;
     --text-B-20--font-weight: 700;
 
+    --text-B-20-hn: 20px;
+    --text-B-20-hn--line-height: normal;
+    --text-B-20-hn--font-weight: 700;
+
     --text-B-18: 18px;
     --text-B-18--line-height: 25.2px;
     --text-B-18--font-weight: 700;
@@ -195,6 +199,11 @@
         font-size: var(--text-B-20);
         line-height: var(--text-B-20--line-height);
         font-weight: var(--text-B-20--font-weight);
+    }
+    .text-b-20-hn {
+        font-size: var(--text-B-20-hn);
+        line-height: var(--text-B-20-hn--line-height);
+        font-weight: var(--text-B-20-hn--font-weight);
     }
     .text-b-18 {
         font-size: var(--text-B-18);
