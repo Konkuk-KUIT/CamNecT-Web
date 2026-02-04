@@ -63,8 +63,8 @@ export const MyPostsPage = () => {
     // 탭별 필터링된 게시물
     const filteredCommunityPosts = sortPosts(MOCK_COMMUNITY_POSTS.filter(post => post.author.id === "user-park-wonbin-20"));
     const filteredActivityPosts: ActivityPost[] = sortPosts([
-        ...MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'internal' as const })),
-        ...MOCK_EXTERNAL_ACTIVITY_DETAIL.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'external' as const })),
+        ...MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.authorId === userId).map(p => ({ ...p, postType: 'internal' as const })),
+        ...MOCK_EXTERNAL_ACTIVITY_DETAIL.filter(post => post.authorId === userId).map(p => ({ ...p, postType: 'external' as const })),
     ])
     const filteredRecruitPosts = sortPosts(MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.authorId === userId));
 
