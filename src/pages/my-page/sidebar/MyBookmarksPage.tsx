@@ -55,7 +55,7 @@ export const MyBookmarksPage = () => {
 
     const MOCK_COMMUNITY_POSTS:(InfoPost|QuestionPost)[] = [...infoPosts, ...questionPosts];
     // 탭별 필터링된 게시물
-    const filteredCommunityPosts = sortPosts(MOCK_COMMUNITY_POSTS);
+    const filteredCommunityPosts = sortPosts(MOCK_COMMUNITY_POSTS); //TODO: api 연동 후 필터링 추가
     const filteredInternalActivityPosts = sortPosts(MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.isBookmarked === true));
     const filteredExternalActivityPosts = sortPosts(MOCK_ACTIVITY_DETAIL_BY_ID.filter(post => post.isBookmarked === true));
     const filteredRecruitPosts = sortPosts(MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.isBookmarked === true));

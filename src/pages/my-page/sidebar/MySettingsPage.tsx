@@ -17,7 +17,7 @@ export const MySettingsPage = () => {
 
     const tempInfo: tempInfoType = {
         phoneNumber: "010-1234-1234",
-        email: "temp@gmail.com",
+        email: "temp@konkuk.ac.kr"
     }
 
     const menuItems = [
@@ -60,6 +60,11 @@ export const MySettingsPage = () => {
         }
     ];
 
+    const handleLogout = (userId: string) => {
+        alert(`${userId} 로그아웃 로직 실행`); //TODO: 로그아웃 api 연결
+        navigate("/");
+    }
+
     if (!meDetail) {
         return (
             <PopUp
@@ -88,30 +93,30 @@ export const MySettingsPage = () => {
                 {/* Profile Section */}
                 <div className="flex flex-col gap-[20px] px-[25px] pt-[25px] pb-[20px] border-b border-gray-150">
                     <div className="flex gap-[25px]">
-                        <div className="w-[65px] h-[65px] rounded-full overflow-hidden">
+                        <div className="min-w-[55px] h-[55px] rounded-full overflow-hidden">
                             <img 
                                 src={user.profileImg}
                                 alt="프로필 사진" 
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        <div className="flex flex-col gap-[8px] pt-[6px]">
+                        <div className="flex flex-col gap-[8px]">
                             <span className="text-sb-18 text-gray-900">{user.name}</span>
                             <div className="flex gap-[15px]">
-                                <div className="flex flex-col gap-[5px] text-m-16-hn text-gray-650">
+                                <div className="min-w-[56px] flex flex-col gap-[5px] text-m-16-hn text-gray-650">
                                     <span>전화번호</span>
                                     <span>이메일</span>
                                 </div>
-                                <div className="flex flex-col gap-[5px] text-m-16-hn text-gray-750">
+                                <div className="w-full min-w-0 flex flex-col gap-[5px] text-m-16-hn text-gray-750 ">
                                     <span>{tempInfo.phoneNumber}</span>
-                                    <span>{tempInfo.email}</span>
+                                    <div className="w-full min-w-0 break-all whitespace-normal">{tempInfo.email}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <button 
                         className="w-full py-[10px] rounded-[6px] bg-gray-150 flex items-center justify-center"
-                        onClick={() => alert('로그아웃 로직 실행')}
+                        onClick={() => handleLogout(user.id)}
                     >
                         <span className="text-sb-14-hn text-gray-650">로그아웃</span>
                     </button>
