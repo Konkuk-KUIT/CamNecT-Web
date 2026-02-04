@@ -12,7 +12,6 @@ export type UserRole = 'USER' | 'ADMIN';
 
 export type NextStepType = 
   | 'HOME'
-  | 'EMAIL_REVERIFY'
   | 'DOCUMENT_REQUIRED'
   | 'ONBOARDING_REQUIRED'
   | 'DOCUMENT_REVIEW_WAITING'
@@ -38,9 +37,20 @@ export interface IdDuplicateCheckRequest {
 
 export type IdDuplicateCheckResponse = boolean;
 
-// 이메일 인증번호 요청 DTO (/api/auth/signup) -> user가계정 생성
+// 이메일 인증번호 요청 DTO (api/auth/signup/email/send)
 export interface EmailRequest {
   email: string;
+}
+
+export interface EmailResponse {
+  email: string;
+  expiresMinutes: number;
+}
+
+// 이메일 인증 및 가계정 회원가입 DTO (api/auth/signup/email/verify)
+export interface EmailVerificationRequest {
+  email: string;
+  code: string;
   username: string;
   password: string;
   name: string;
@@ -51,18 +61,11 @@ export interface EmailRequest {
   };
 }
 
-export interface EmailResponse {
-  userId: number; // userId 처음 생성
-  status: string;
-}
-
-// 이메일 인증 번호 검증 DTO (/api/verification/email/verify-code)
-export interface EmailVerificationRequest {
+export interface EmailVerificationResponse {
   userId: number;
-  code: string;
+  verificationToken: string;
+  expiresMinutes: number;
 }
-
-export type EmailVerificationResponse = boolean
 
 // 학교 인증서 인증 요청 DTO (/api/verification/documents)
 // 학교 인증서 종류 타입 추출

@@ -25,13 +25,12 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
     // 이메일 전역상태 및 가입 정보
-    const { email, setEmail, getSignupData, setUserId, userId } = useSignupStore(
+    const { email, setEmail, getEmailVerificationData, setUserId } = useSignupStore(
         useShallow((state) => ({
             email: state.email,
             setEmail: state.setEmail,
-            getSignupData: state.getSignupData,
+            getEmailVerificationData: state.getEmailVerificationData,
             setUserId: state.setUserId,
-            userId: state.userId
         }))
     );
 
@@ -65,13 +64,10 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const emailValue = watch("email");
     const codeValue = watch("verificationCode");
 
-    // todo 여러번 요청 가능한지 확인
+    // 이메일 인증번호 요청
     const emailRequestMutation = useMutation({
         mutationFn: requestEmailCode,
-        onSuccess: (data) => {
-            if(data.userId) {
-                setUserId(data.userId);
-            }
+        onSuccess: () => {
             setEmailSent(true);
         },
         onError: (error: AxiosError) => {
@@ -84,12 +80,12 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                 // 서버에서 온 메시지가 있으면 그걸 보여주고, 없으면 기본 메시지 표시
                 setPopUpConfig({ 
                     title: "중복된 가입정보", 
-                    content: serverMessage || "이미 가입된 이메일 또는 전화번호입니다." 
+                    content: "이미 가입된 이메일입니다" 
                 });
             } else {
                 setPopUpConfig({ 
                     title: "인증번호 발송 실패", 
-                    content: serverMessage || "다시 요청해 주세요." 
+                    content: serverMessage || "다시 요청해 주세요" 
                 });
             }
 
@@ -100,29 +96,49 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     // 이메일 인증번호 검증 mutation
     const emailVerifyMutation = useMutation({
         mutationFn: verifyEmailCode,
-        onSuccess: () => {
+        onSuccess: (data) => {
+            if(data.userId) {
+                setUserId(data.userId);
+            }
             setPopUpConfig({ title: "인증완료", content: "" });
             setIsEmailVerificated(true);
         },
-        onError: () => {
-            setPopUpConfig({ title: "인증번호 불일치", content: "다시 요청해주세요" });
+        onError: (error: AxiosError) => {
+            const status = error.response?.status;
+            // 서버에서 내려주는 에러 객체의 구조에 따라 접근 (data.message)
+            const errorData = error.response?.data as { message?: string };
+            const serverMessage = errorData?.message;
+            
+            if (status === 409) {
+                // 서버에서 온 메시지가 있으면 그걸 보여주고, 없으면 기본 메시지 표시
+                setPopUpConfig({ 
+                    title: "중복된 가입정보", 
+                    content: serverMessage || "이미 가입된 전화번호입니다." 
+                });
+            } else {
+                setPopUpConfig({ 
+                    title: "인증번호 불일치", 
+                    content: serverMessage || "인증번호가 일치하지 않습니다." 
+                });
+            }
         }
     });
 
     // 인증요청 클릭 시
     const handleEmailRequest = () => {
         setEmail(emailValue);
-        emailRequestMutation.mutate({ ...getSignupData(), email: emailValue });
+        emailRequestMutation.mutate({ email: emailValue });
     };
 
     // 인증하기 버튼 클릭 시 
     const handleEmailVerify = () => {
-        // userId null 방지
-        if (!userId) {
+        // 이메일 전송 여부 확인
+        if (!emailSent) {
             setPopUpConfig({ title: "인증 오류", content: "먼저 인증 요청을 클릭하여 이메일을 전송해 주세요." });
             return;
         }
-        emailVerifyMutation.mutate({ userId, code: codeValue });
+
+        emailVerifyMutation.mutate({ ...getEmailVerificationData(), code: codeValue });
     }
 
     // '다음'버튼 클릭 시

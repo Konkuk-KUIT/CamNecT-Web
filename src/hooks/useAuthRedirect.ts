@@ -13,9 +13,6 @@ export const useAuthRedirect = () => {
 
         // 2. 일반 유저인 경우 nextStep에 따라 분기
         switch (nextStep) {
-            case 'EMAIL_REVERIFY':
-                navigate('/signup?step=3'); // 이메일 인증부터 다시
-                break;
             case 'DOCUMENT_REQUIRED':
                 navigate('/signup?step=4'); // 인증 서류 제출
                 break;

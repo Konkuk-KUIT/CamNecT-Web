@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { EmailRequest } from "../api-types/authApiTypes";
+import type { EmailVerificationRequest } from "../api-types/authApiTypes";
 
 // Store 상태 타입 정의
 interface SignupStore {
@@ -44,7 +44,7 @@ interface SignupStore {
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
-    getSignupData: () => EmailRequest;
+    getEmailVerificationData: () => Omit<EmailVerificationRequest, 'code'>;
     reset: () => void;
 }
 
@@ -52,7 +52,7 @@ interface SignupStore {
 const initialState = {
     email: '',
     username: '',
-    password: '',
+    password: '',   
     name: '',
     phoneNum: '',
     agreements: {
@@ -91,8 +91,8 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => set({ isVerificationSubmitted }),
     setTags: (tags: string[]) => set({ tags }),
 
-    // API 요청 시 필요한 필드만 추출
-    getSignupData: (): EmailRequest => {
+    // 이메일 인증번호 검증 API 요청시 필요한 필드만 추출
+    getEmailVerificationData: (): Omit<EmailVerificationRequest, 'code'> => {
         const state = get(); // 현재 전역상태에 저장된 모든 값들 불러오는 함수
         return {
             email: state.email,
