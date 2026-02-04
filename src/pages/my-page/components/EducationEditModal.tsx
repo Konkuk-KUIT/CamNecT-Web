@@ -189,7 +189,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     if (currentView === 'list') {
         return (
             <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
-                <div className="w-full max-w-[430px] h-full bg-white flex flex-col"> 
+                <div className="w-full max-w-[430px] h-full min-h-0 bg-white flex flex-col"> 
                     <HeaderLayout
                         headerSlot = {
                             <EditHeader
@@ -209,7 +209,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                             />
                         }
                     >
-                        <div className="flex flex-col flex-1 overflow-y-auto border-t border-gray-150">
+                        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto border-t border-gray-150">
                             {/* 학력 비공개 토글 */}
                             <div className="flex items-center justify-between px-[25px] py-[15px] border-b border-gray-150">
                                 <span className="text-sb-14-hn text-gray-900">학력 비공개</span>
