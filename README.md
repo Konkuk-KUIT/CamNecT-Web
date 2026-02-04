@@ -176,6 +176,7 @@ src/
 ┃ ┣ mypage/ # 마이페이지
 ┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
 ┃ ┃ ┣ hooks/ # 페이지 내부 훅 폴더
+┃ ┃ ┣ sidebar/ # 사이드바 관련 화면 폴더
 ┃ ┃ ┣ MypagePage.tsx # 마이페이지 메인 화면
 ┃ ┃ ┣ MypageEditPage.tsx # 마이페이지 수정 화면
 ┃ ┃ ┣ MypageFollowerPage.tsx # 팔로워 / 팔로잉 화면

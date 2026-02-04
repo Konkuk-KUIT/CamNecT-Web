@@ -26,6 +26,12 @@ import { ShopPage } from "../pages/shop/ShopPage";
 import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
 import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
+import { MyPostsPage } from "../pages/my-page/sidebar/MyPostPage";
+import { MyBookmarksPage } from "../pages/my-page/sidebar/MyBookmarksPage";
+import { MySettingsPage } from "../pages/my-page/sidebar/MySettingsPage";
+import { AccountSettingsPage } from "../pages/my-page/sidebar/AccountSettingsPage";
+import { TermsPage } from "../pages/my-page/sidebar/TermsPage";
+import { EditPasswordPage } from "../pages/my-page/sidebar/EditPasswordPage";
 import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
 import { AdminActivityRegistrationPage } from "../pages/admin/AdminActivityRegistrationPage";
@@ -177,6 +183,40 @@ export const router = createBrowserRouter([
                                         path: ":portfolioId",
                                         element: <PortfolioDetailPage />
                                     },
+                                ]
+                            },
+                            {
+                                path: "posts",
+                                element: <MyPostsPage />
+                            },
+                            {
+                                path: "bookmarks",
+                                element: <MyBookmarksPage />
+                            },
+                            {
+                                path: "settings",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <MySettingsPage/>
+                                    },
+                                    {
+                                        path: "account",
+                                        children: [
+                                            {
+                                                index: true,
+                                                element: <AccountSettingsPage/>
+                                            },
+                                            {
+                                                path: "password",
+                                                element: <EditPasswordPage/>
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        path: "terms",
+                                        element: <TermsPage/>
+                                    }
                                 ]
                             },
                         ]
