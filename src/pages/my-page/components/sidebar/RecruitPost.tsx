@@ -6,7 +6,7 @@ export const RecruitPost = (post: TeamRecruitPost) => {
     const navigate = useNavigate();
     return (
         <button
-            className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
+            className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150 text-left"
             onClick={() => navigate(`/recruit/post/${post.id}`)}
         >
             {/* Tag */}

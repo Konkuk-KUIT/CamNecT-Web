@@ -9,7 +9,7 @@ export const CommunityPost = (post: CommunityPostProps) => {
     const isQuestionPost = 'answers' in post;
     return (
         <button
-            className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150 cursor-pointer"
+            className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150 text-left"
             onClick={() => navigate(`/community/post/${post.id}`)}
         >
             {/* Tags */}

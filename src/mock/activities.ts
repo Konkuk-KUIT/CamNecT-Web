@@ -24,8 +24,8 @@ export const MOCK_INTERNAL_ACTIVITY_POSTS: ActivityListItem[] = [
     }
 ];
 
-//activity 세부사항 데이터
-export const MOCK_ACTIVITY_DETAIL_BY_ID: ActivityDetail[] = [
+//대외활동 및 취업 activity 세부사항 데이터
+export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
   {
     id: "act_001",
     tab: "external",

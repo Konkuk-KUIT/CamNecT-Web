@@ -11,7 +11,7 @@ import { RecruitPost } from "../components/sidebar/RecruitPost";
 import SortSelector from "../../../components/SortSelector";
 import type { InfoPost, QuestionPost } from "../../../types/community";
 import { infoPosts, questionPosts } from "../../../mock/community";
-import { MOCK_ACTIVITY_DETAIL_BY_ID, MOCK_TEAM_RECRUIT_DETAILS, MOCK_INTERNAL_ACTIVITY_POSTS } from "../../../mock/activities";
+import { MOCK_EXTERNAL_ACTIVITY_DETAIL, MOCK_TEAM_RECRUIT_DETAILS, MOCK_INTERNAL_ACTIVITY_POSTS } from "../../../mock/activities";
 
 type TabType = 'community' | 'activity' | 'recruit';
 type SortType = 'latest' | 'oldest';
@@ -55,17 +55,23 @@ export const MyPostsPage = () => {
         });
     };
 
+    type ActivityPost = 
+    | (typeof MOCK_INTERNAL_ACTIVITY_POSTS[number] & { postType: 'internal' })
+    | (typeof MOCK_EXTERNAL_ACTIVITY_DETAIL[number] & { postType: 'external' });
+
     const MOCK_COMMUNITY_POSTS:(InfoPost|QuestionPost)[] = [...infoPosts, ...questionPosts];
     // 탭별 필터링된 게시물
     const filteredCommunityPosts = sortPosts(MOCK_COMMUNITY_POSTS.filter(post => post.author.id === "user-park-wonbin-20"));
-    const filteredInternalActivityPosts = sortPosts(MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.authorId === userId));
-    const filteredExternalActivityPosts = sortPosts(MOCK_ACTIVITY_DETAIL_BY_ID.filter(post => post.authorId === userId));
+    const filteredActivityPosts: ActivityPost[] = sortPosts([
+        ...MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'internal' as const })),
+        ...MOCK_EXTERNAL_ACTIVITY_DETAIL.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'external' as const })),
+    ])
     const filteredRecruitPosts = sortPosts(MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.authorId === userId));
 
     // 현재 탭에 따른 게시물 개수
     const getPostCount = () => {
         if (activeTab === 'community') return filteredCommunityPosts.length;
-        if (activeTab === 'activity') return filteredInternalActivityPosts.length + filteredExternalActivityPosts.length;
+        if (activeTab === 'activity') return filteredActivityPosts.length;
         return filteredRecruitPosts.length;
     };
 
@@ -116,20 +122,13 @@ export const MyPostsPage = () => {
 
                                 {/* Activity Posts (Internal + External) */}
                                 {activeTab === 'activity' && (
-                                    <>
-                                        {filteredInternalActivityPosts.map((post) => (
-                                            <InternalActivityPost
-                                                key={post.id}
-                                                    {...post}
-                                            />
-                                        ))}
-                                        {filteredExternalActivityPosts.map((post) => (
-                                            <ExternalActivityPost
-                                                key={post.id}
-                                                {...post}
-                                            />
-                                        ))}
-                                    </>
+                                    filteredActivityPosts.map((post) => (
+                                        post.postType === 'internal' ? (
+                                            <InternalActivityPost key={`internal-${post.id}`} {...post} />
+                                        ) : (
+                                            <ExternalActivityPost key={`external-${post.id}`} {...post} />
+                                        )
+                                    ))
                                 )}
 
                                 {/* Recruit Posts */}
