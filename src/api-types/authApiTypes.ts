@@ -8,6 +8,17 @@ export interface LoginRequest {
   password: string;
 }
 
+export type UserRole = 'USER' | 'ADMIN';
+
+export type NextStepType = 
+  | 'HOME'
+  | 'EMAIL_REVERIFY'
+  | 'DOCUMENT_REQUIRED'
+  | 'ONBOARDING_REQUIRED'
+  | 'DOCUMENT_REVIEW_WAITING'
+  | 'VERIFICATION_COMPLETE'
+  | 'ADMIN_DASHBOARD';
+
 export interface LoginResponse {
   tokenType: string;
   accessToken: string;
@@ -16,6 +27,8 @@ export interface LoginResponse {
   refreshTokenExpiresInMs: number;
   userId: number;
   status: string;
+  role: UserRole;
+  nextStep: NextStepType;
 }
 
 // 아이디 중복확인 DTO (/api/auth/{username}/available)
@@ -56,9 +69,9 @@ export type EmailVerificationResponse = boolean
 export type SchoolDocType = 'ENROLLMENT_CERTIFICATE' | 'GRADUATION_CERTIFICATE';
 
 export interface SchoolVerificationRequest {
-  email: string;        
+  userId: number;
   docType: SchoolDocType; 
-  documents: File[];     // 파일 객체 배열
+  documentKey: string;
 }
 
 export type SchoolVerificationStatusType = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED';

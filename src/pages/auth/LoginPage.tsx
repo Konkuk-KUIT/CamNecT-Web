@@ -2,10 +2,10 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useShallow } from "zustand/react/shallow";
 import { login } from "../../api/auth";
 import Button from "../../components/Button";
 import PopUp from "../../components/Pop-up";
+import { useAuthRedirect } from "../../hooks/useAuthRedirect";
 import { useAuthStore } from "../../store/useAuthStore";
 import { LastSplashPage } from "../onboarding/LastSplashPage";
 
@@ -50,6 +50,8 @@ const Divider = () => {
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const setLogin = useAuthStore((state) => state.setLogin);
+  const { handleRedirect } = useAuthRedirect(); // 리다이렉트 훅 추가
 
   const [showPassword, setShowPassword] = useState(false);
   const [id, setId] = useState("");
@@ -57,25 +59,27 @@ export const LoginPage = () => {
 
   const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
-  const { setLogin } = useAuthStore(
-    useShallow((state) => ({
-      setLogin: state.setLogin
-    }))
-  );
-
   const [showSplash, setShowSplash] = useState(false);
 
   const loginMutation = useMutation({
     mutationFn: login, // .mutate시에 실행 할 함수
 
-    // data : 서버의 response (response.data)
+    // data : 서버의 response (AxiosResponse)
     onSuccess: (data) => {
+      const { accessToken, userId, role, nextStep } = data;
       
-      // todo RefreshToken을 어떻게 관리할지
-      setLogin(data.accessToken, {
-        id: String(data.userId)
-      })
-      setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
+      if (nextStep === 'HOME') {
+        // todo RefreshToken을 어떻게 관리할지
+        setLogin(accessToken, {
+          id: String(userId),
+          role,
+          nextStep
+        });
+        setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
+      } else {
+        // HOME이 아닌 경우 각 단계에 맞는 페이지로 리다이렉트
+        handleRedirect(role, nextStep);
+      }
     },
     onError: (error: AxiosError) => {
       const status = error.response?.status;

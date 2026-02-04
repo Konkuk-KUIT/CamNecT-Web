@@ -1,7 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { verifySchoolDocument } from "../../api/auth";
+// import { verifySchoolDocument } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
@@ -30,6 +29,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         } )
     );
 
+    /* 
     const mutation = useMutation({
         mutationFn: verifySchoolDocument,
         onSuccess: () => {
@@ -42,6 +42,8 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             alert("인증 요청 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
     });
+    */
+    const mutation = { isPending: false }; // 임시 객체 추가 (에러 방지용)
 
     // selectedFile 변경 시 previewUrl 생성 
     // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
@@ -92,14 +94,20 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     };
 
     const handleVerificationSubmit = () => {
-        // if (!verificationFile || !email) return;
+        if (!verificationFile || !email) return;
         if (!verificationFile) return;
 
+        /*
         mutation.mutate({
             email,
             docType: 'ENROLLMENT_CERTIFICATE',
             documents: [verificationFile]
         });
+        */
+        // 임시로 성공 처리 (UI 확인용)
+        setShowPopUp(false);
+        setShowConfirmPopUp(true);
+        setIsVerificationSubmitted(true);
     };
 
     return (
