@@ -7,20 +7,21 @@ import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
 import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
 import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
+import ActivityPostPage from "../pages/activity/ActivityPostPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
-import { CommunityPage } from "../pages/community/CommunityPage";
 import { HomePage } from "../pages/home/HomePage";
-import { NotificationPage } from "../pages/home/NotificationPage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { WritePage } from "../pages/community/WritePage";
-import CommunityPostPage from "../pages/community/CommunityPostPage";
 import { AuthGuard } from "./AuthGuard";
 import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
 import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
+import { CommunityPage } from "../pages/community/CommunityPage";
+import  CommunityPostPage  from "../pages/community/CommunityPostPage";
+import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
 import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
@@ -28,6 +29,7 @@ import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
 import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
+import { ActivityWritePage } from "../pages/activity/WritePage";
 
 export const router = createBrowserRouter([
 
@@ -144,6 +146,18 @@ export const router = createBrowserRouter([
                         element: <ActivityPage />,
                     },
                     {
+                        path: "activity/write",
+                        element: <ActivityWritePage />,
+                    },
+                    {
+                        path: "activity/edit/:postId",
+                        element: <ActivityWritePage />,
+                    },
+                    {
+                        path: "activity/post/:postId",
+                        element: <ActivityPostPage />,
+                    },
+                    {
                         path: "schedule",
                         element: <Schedule />,
                     },
@@ -178,6 +192,14 @@ export const router = createBrowserRouter([
                         ]
                     },
                     {
+                        path: "community",
+                        element: <CommunityPage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
+                    },
+                    {
                         path: "shop",
                         element: <ShopPage />,
 
@@ -202,6 +224,14 @@ export const router = createBrowserRouter([
                                 element: <CommunityPostPage />,
                             },
                         ]
+                    },
+                    {
+                        path: "community/write",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/edit/:postId",
+                        element: <WritePage />,
                     },
                 ]
             },
