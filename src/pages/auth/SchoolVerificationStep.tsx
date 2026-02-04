@@ -1,11 +1,14 @@
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import type { SchoolDocType } from "../../api-types/authApiTypes";
+import { requestSchoolVerification, requestSchoolVerificationPresign } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
 import { useSignupStore } from "../../store/useSignupStore";
+import { uploadFileToS3 } from "../../utils/s3Upload";
 
 interface SchoolVerificationStepProps {
     onNext: () => void;
@@ -17,12 +20,14 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const [showPopUp, setShowPopUp] = useState(false);
     const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
     const [showMountPopUp, setShowMountPopUp] = useState(true);
-    const [docType, setDocType] = useState<SchoolDocType | null>(null);
+    const [showErrorPopUp, setShowErrorPopUp] = useState(false);
+    const [docType, setDocType] = useState<SchoolDocType>('ENROLLMENT_CERTIFICATE');
+    const [isSubmitting, setIsSubmitting] = useState(false); // 전체 제출 상태 관리
 
-    const { email, verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
+    const { userId, verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
         useShallow((state) => {
             return {
-                email: state.email,
+                userId: state.userId,
                 verificationFile: state.verificationFile,
                 setVerificationFile: state.setVerificationFile,
                 isVerificationSubmitted: state.isVerificationSubmitted,
@@ -31,8 +36,6 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         } )
     );
 
-    // 실제 API 연동 전 임시 객체
-    const mutation = { isPending: false }; 
 
     // selectedFile 변경 시 previewUrl 생성 
     const previewUrl = useMemo(() => {
@@ -79,22 +82,54 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         setShowConfirmPopUp(false);
     };
 
-    const handleVerificationSubmit = () => {
-        if (!verificationFile || !email) return;
+    // presign api 연동
+    const presignMutation = useMutation({
+        mutationFn: requestSchoolVerificationPresign,
+    });
 
-        // todo: 실제 API 연동 시 mutation.mutate 사용
-        /*
-        mutation.mutate({
-            email,
-            docType: docType || 'ENROLLMENT_CERTIFICATE',
-            documents: [verificationFile]
-        });
-        */
+    // 인증서 제출 api 연동 
+    const verifyRequestMutation = useMutation({
+        mutationFn: requestSchoolVerification,
+    });
 
-        // 임시로 성공 처리 (UI 확인용)
+    // 인증서 제출 함수 
+    const handleVerificationSubmit = async () => {
+        if (!verificationFile || !userId) return;
+
+        setIsSubmitting(true);
         setShowPopUp(false);
-        setShowConfirmPopUp(true);
-        setIsVerificationSubmitted(true);
+
+        try {
+            // Step 1: Presigned URL 발급 요청
+            const presignData = await presignMutation.mutateAsync({
+                userId,
+                contentType: verificationFile.type,
+                size: verificationFile.size,
+                originalFilename: verificationFile.name
+            });
+
+            // Step 2: S3에 파일 직접 업로드
+            await uploadFileToS3(
+                presignData.uploadUrl,
+                verificationFile,
+                presignData.requiredHeaders
+            );
+
+            // Step 3: 백엔드에 업로드 완료 및 검증 요청
+            await verifyRequestMutation.mutateAsync({
+                userId,
+                docType: docType,
+                documentKey: presignData.fileKey
+            });
+
+            // 모든 단계 성공 시
+            setShowConfirmPopUp(true);
+            setIsVerificationSubmitted(true);
+        } catch {
+            setShowErrorPopUp(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -164,12 +199,12 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
                     <ButtonWhite 
-                        label={mutation.isPending ? "제출 중..." : "인증 요청"} 
+                        label={isSubmitting ? "제출 중..." : "인증 요청"} 
                         onClick={handleShowPopup} 
-                        disabled={(!verificationFile) || isVerificationSubmitted}
+                        disabled={(!verificationFile) || isVerificationSubmitted || isSubmitting}
                     />
                     <Button 
-                        disabled={!isVerificationSubmitted}
+                        disabled={!isVerificationSubmitted || isSubmitting}
                         label="다음"
                         onClick={onNext}
                         className="mx-auto"
@@ -197,6 +232,17 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     title="제출 완료 되었습니다"
                     buttonText="확인"
                     onClick={handleConfirmPopUpClose}
+                />
+            )}
+
+            {showErrorPopUp && (
+                <PopUp
+                    isOpen={showErrorPopUp}
+                    type="error"
+                    title="제출 실패"
+                    content="인증 파일 제출 중 오류가 발생했습니다\n다시 시도해 주세요"
+                    buttonText="확인"
+                    onClick={() => setShowErrorPopUp(false)}
                 />
             )}
 

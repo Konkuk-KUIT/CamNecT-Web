@@ -1,4 +1,4 @@
-import type { EmailRequest, EmailResponse, EmailVerificationRequest, EmailVerificationResponse, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse } from "../api-types/authApiTypes";
+import type { EmailRequest, EmailResponse, EmailVerificationRequest, EmailVerificationResponse, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationPresignRequest, SchoolVerificationPresignResponse, SchoolVerificationUploadRequest, SchoolVerificationUploadResponse } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // 1. 로그인 API [POST] (/api/auth/login)
@@ -29,15 +29,28 @@ export const verifyEmailCode = async (data: EmailVerificationRequest) => {
     return response.data;
 }
 
-// 5. 학교 인증서 인증 요청 API [POST] (/api/verification/documents)
+// 5. 학교 인증서 업로드용 presign 발급 API [POST] (/api/verification/documents/uploads/presign)
+export const requestSchoolVerificationPresign = async (data: SchoolVerificationPresignRequest) => {
+    
+    const response = await axiosInstance.post<SchoolVerificationPresignResponse>("/api/verification/documents/uploads/presign", data);
+    return response.data;
+}
+
+// 6. 학교 인증서 인증 요청 API [POST] (/api/verification/documents)
+export const requestSchoolVerification = async (data: SchoolVerificationUploadRequest) => {
+    
+    const response = await axiosInstance.post<SchoolVerificationUploadResponse>("/api/verification/documents", data);
+    return response.data;
+}
+
 // todo useImageUpload 수정해야되는지 알아보기
 
 
-// 5. 관심태그 리스트 조회 API [GET] 
+// 7. 관심태그 리스트 조회 API [GET] 
 
-// 6. 학교 인증서 인증 대기화면 조회 API [GET] (/api/verification/documents/me)
+// 8. 학교 인증서 인증 대기화면 조회 API [GET] (/api/verification/documents/me)
 
-// 7. (관리자) 인증 요청 리스트 확인 API (전체조회)
+// 9. (관리자) 인증 요청 리스트 확인 API (전체조회)
 
 // 8. (관리자) 인증 요청 승인 API
 

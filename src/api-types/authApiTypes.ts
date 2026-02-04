@@ -67,21 +67,34 @@ export interface EmailVerificationResponse {
   expiresMinutes: number;
 }
 
-// 학교 인증서 인증 요청 DTO (/api/verification/documents)
-// 학교 인증서 종류 타입 추출
-export type SchoolDocType = 'ENROLLMENT_CERTIFICATE' | 'GRADUATION_CERTIFICATE';
-
-export interface SchoolVerificationRequest {
+// 학교 인증서 업로드용 presign 발급 API DTO (/api/verification/documents/uploads/presign)
+export interface SchoolVerificationPresignRequest {
   userId: number;
-  docType: SchoolDocType; 
+  contentType: string;
+  size: number;
+  originalFilename: string;
+}
+
+export interface SchoolVerificationPresignResponse {
+  fileKey: string;
+  uploadUrl: string;
+  expiresAt: string;
+  requiredHeaders: Record<string, string>;  
+}
+
+// 학교 인증서 업로드 제출 API DTO (/api/verification/documents)
+export type SchoolDocType = 'ENROLLMENT_CERTIFICATE' | 'GRADUATION_CERTIFICATE';
+export type SchoolVerificationStatusType = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED';
+
+export interface SchoolVerificationUploadRequest {
+  userId: number;
+  docType: SchoolDocType;
   documentKey: string;
 }
 
-export type SchoolVerificationStatusType = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELED';
-
-export interface SchoolVerificationResponse {
+export interface SchoolVerificationUploadResponse {
   submissionId: number;
-  status: SchoolVerificationStatusType; 
+  status: SchoolVerificationStatusType;
   submittedAt: string;
 }
 
