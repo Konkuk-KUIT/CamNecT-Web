@@ -76,12 +76,21 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         },
         onError: (error: AxiosError) => {
             const status = error.response?.status;
+            // 서버에서 내려주는 에러 객체의 구조에 따라 접근 (data.message)
+            const errorData = error.response?.data as { message?: string };
+            const serverMessage = errorData?.message;
             
             if (status === 409) {
-                // 전화번호 or 이메일 
-                setPopUpConfig({ title: "이미 가입된 이메일 입니다", content: "다른 이메일로 요청해주세요" });
+                // 서버에서 온 메시지가 있으면 그걸 보여주고, 없으면 기본 메시지 표시
+                setPopUpConfig({ 
+                    title: "중복된 가입정보", 
+                    content: serverMessage || "이미 가입된 이메일 또는 전화번호입니다." 
+                });
             } else {
-                setPopUpConfig({ title: "인증번호 발송 실패", content: "다시 요청해주세요" });
+                setPopUpConfig({ 
+                    title: "인증번호 발송 실패", 
+                    content: serverMessage || "다시 요청해 주세요." 
+                });
             }
 
             setEmailSent(false);
@@ -122,7 +131,6 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         onNext();
     };
     
-    // todo 인증하기 누르면 이메일로 발송됐다는 팝업 (merge 이후...)
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             
