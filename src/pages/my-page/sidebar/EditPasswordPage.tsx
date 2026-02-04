@@ -4,7 +4,7 @@ import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
 import PopUp from "../../../components/Pop-up";
 
-// 임시 저장된 비밀번호
+// TODO: 임시 저장된 비밀번호 지우기
 const TEMP_CURRENT_PASSWORD = "test1234";
 
 // 비밀번호 정규식 패턴
@@ -150,7 +150,6 @@ export const EditPasswordPage = () => {
         }
 
         // TODO: 비밀번호 변경 API 호출
-        console.log('비밀번호 변경:', { currentPassword, newPassword });
         setConfirm(true);
     };
 
@@ -171,7 +170,7 @@ export const EditPasswordPage = () => {
                     />
                 }
             >
-                <div className="w-full h-full bg-white flex flex-col px-[25px] pt-[30px] pb-[20px]">
+                <div className="w-full h-full bg-white flex flex-col px-[25px] pt-[30px] pb-[20px] justify-between">
                     <div className="flex-1 flex flex-col gap-[25px]">
 
                         {/* 현재 비밀번호 확인 */}
@@ -300,15 +299,13 @@ export const EditPasswordPage = () => {
                         </div>
                     </div>
 
-                    <div className="px-[25px] pb-[30px]">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={!isValid}
-                            className="w-full h-[52px] rounded-[8px] bg-primary disabled:bg-gray-300 flex items-center justify-center transition-colors"
-                        >
-                            <span className="text-SB-16-hn text-white">비밀번호 변경하기</span>
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={!isValid}
+                        className="w-full py-[12px] rounded-full bg-primary disabled:bg-gray-300 flex items-center justify-center transition-colors"
+                    >
+                        <span className="text-sb-16-hn text-white">비밀번호 변경하기</span>
+                    </button>
                 </div>
             </HeaderLayout>
             <PopUp

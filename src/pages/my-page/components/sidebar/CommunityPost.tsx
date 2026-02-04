@@ -8,7 +8,7 @@ export const CommunityPost = (post: CommunityPostProps) => {
     const navigate = useNavigate();
     const isQuestionPost = 'answers' in post;
     return (
-        <div
+        <button
             className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150 cursor-pointer"
             onClick={() => navigate(`/community/post/${post.id}`)}
         >
@@ -69,6 +69,6 @@ export const CommunityPost = (post: CommunityPostProps) => {
                     />
                 )}
             </div>
-        </div>
+        </button>
     );
 };

@@ -4,7 +4,7 @@ import type { ActivityListItem } from '../../../../types/activityPage/activityPa
 export const InternalActivityPost = (post: ActivityListItem) => {
     const navigate = useNavigate();
     return (
-        <div
+        <button
             className="flex flex-col gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
             onClick={() => navigate(`/activity/post/${post.id}`)}
         >
@@ -59,6 +59,6 @@ export const InternalActivityPost = (post: ActivityListItem) => {
                     />
                 )}
             </div>
-        </div>
+        </button>
     );
 };

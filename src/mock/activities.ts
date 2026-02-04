@@ -103,7 +103,7 @@ export const MOCK_ACTIVITY_DETAIL_BY_ID: ActivityDetail[] = [
         location: "부산",
         tags: ["광고/마케팅", "기획/아이디어"],
         posterImg: "https://picsum.photos/seed/act_001/94/134",
-        deadline: "2025.10.30",
+        deadline: "2026-09-30T00:00:00.000Z",
         bookmarkCount: 12,
         isBookmarked: false,
         createdAt: "2025-10-01T00:00:00.000Z",

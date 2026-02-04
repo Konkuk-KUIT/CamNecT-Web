@@ -41,7 +41,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                         </div>
                         <div className="flex items-center gap-[7px]">
                             <span className="text-m-16-hn text-gray-650">보유 포인트 : </span>
-                            <span className="text-sb-16-hn text-primary">{user.point.toLocaleString()} P</span>
+                            <span className="text-sb-16-hn text-primary">{(user.point ?? 0).toLocaleString()} P</span>
                         </div>
                     </div>
 

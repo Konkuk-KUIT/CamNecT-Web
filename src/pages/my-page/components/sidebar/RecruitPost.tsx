@@ -5,7 +5,7 @@ import type { TeamRecruitPost } from '../../../../types/activityPage/activityPag
 export const RecruitPost = (post: TeamRecruitPost) => {
     const navigate = useNavigate();
     return (
-        <div
+        <button
             className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150"
             onClick={() => navigate(`/recruit/post/${post.id}`)}
         >
@@ -24,7 +24,9 @@ export const RecruitPost = (post: TeamRecruitPost) => {
                     {post.title}
                 </span>
                 <div className="text-r-14-hn text-gray-750">
-                    {post.authorName} | {post.contestName}
+                    {post.authorName}
+                    {post.authorName}
++                    {post.contestName ? ` | ${post.contestName}` : ""}
                 </div>
             </div>
 
@@ -44,6 +46,6 @@ export const RecruitPost = (post: TeamRecruitPost) => {
                 <span>|</span>
                 <span>{formatTimeAgo(post.createdAt)}</span>
             </div>
-        </div>
+        </button>
     );
 };

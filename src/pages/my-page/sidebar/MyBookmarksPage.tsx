@@ -99,7 +99,7 @@ export const MyBookmarksPage = () => {
                     <div className="flex flex-col">
                         {getPostCount() === 0 ? (
                             <div className="flex items-center justify-center py-[80px]">
-                                <span className="text-r-14-hn text-gray-650">작성한 글이 없습니다</span>
+                                <span className="text-r-14-hn text-gray-650">북마크한 글이 없습니다</span>
                             </div>
                         ) : (
                             <div className="flex flex-col">
