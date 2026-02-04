@@ -170,7 +170,7 @@ export const EditPasswordPage = () => {
                     />
                 }
             >
-                <div className="w-full h-full bg-white flex flex-col px-[25px] pt-[30px] pb-[20px] justify-between">
+                <div className="w-full h-full bg-white flex flex-col px-[25px] pt-[30px] pb-[20px] justify-between flex-1">
                     <div className="flex-1 flex flex-col gap-[25px]">
 
                         {/* 현재 비밀번호 확인 */}
@@ -275,7 +275,7 @@ export const EditPasswordPage = () => {
                                         disabled={!isCurrentPasswordVerified}
                                         className={`w-full p-[15px] rounded-[5px] border bg-gray-100 ${
                                             confirmPasswordError ? 'border-red' : 'border-gray-150'
-                                        } text-r-14-hn text-gray-750 focus:outline-none focus:border-primary disabled:bg-gray-100`}
+                                        } text-sb-16-hn text-gray-750 focus:outline-none focus:border-primary disabled:bg-gray-100`}
                                     />
                                     <button
                                         type="button"
