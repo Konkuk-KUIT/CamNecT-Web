@@ -9,7 +9,7 @@ import ClubTab from './tabs/ClubTab';
 import ExternalTab from './tabs/ExternalTab';
 import JobTab from './tabs/JobTab';
 import StudyTab from './tabs/StudyTab';
-import type { ActivityPost, ActivityPostTab } from '../../types/activityPost';
+import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
 
 const tabItems: TabItem[] = [
   { id: 'club', label: '동아리' },
