@@ -4,11 +4,6 @@ import type {
   ActivityListItem
 } from "../types/activityPage/activityPageTypes";
 
-// export const MOCK_ACTIVITY_FILTERS = {
-//   host: ["전체", "공공기관", "기업", "학교", "동아리/커뮤니티", "기타"] as const,
-//   region: ["전체", "서울", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "부산"] as const,
-// };
-
 export const MOCK_INTERNAL_ACTIVITY_POSTS: ActivityListItem[] = [
     {
         id: '3',

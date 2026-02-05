@@ -1,6 +1,80 @@
 import { type Activity } from "../activity/activityTypes";
 import { type TeamPost } from "../team/teamTypes";
 
+export type ActivityPostTab = 'club' | 'study' | 'external' | 'job';
+export type ActivityPostStatus = 'OPEN' | 'CLOSED';
+
+export type ActivityPostAuthor = {
+  id: string;
+  name: string;
+  major: string;
+  studentId: string;
+  profileImageUrl?: string;
+};
+
+// 공통 기본 타입
+export type ActivityPost = {
+  id: string;
+  tab: ActivityPostTab;
+  title: string;
+  content: string;
+  categories: string[];
+  likes: number;
+  saveCount: number;
+  createdAt: string;
+  author: ActivityPostAuthor;
+  status?: ActivityPostStatus;
+  postImages?: string[];
+  thumbnailUrl?: string;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  organizer?: string;
+  deadline?: string;
+};
+
+// 대외활동 상세 정보 포함 타입
+export type ActivityPostDetail = ActivityPost & {
+  // 대외활동/취업정보에만 있는 필드들
+  location?: string;
+  target?: string;
+  applyPeriod?: {
+    start: string;
+    end: string;
+  };
+  announceDate?: string;
+  applyUrl?: string;
+  descriptionBlocks?: Array<{
+    title: string;
+    body: string;
+  }>;
+};
+
+// export type ActivityPost = {
+//   id: string;
+//   tab: ActivityPostTab;
+//   title: string;
+//   content: string;
+//   categories: string[];
+//   likes: number;
+//   comments: number;
+//   saveCount: number;
+//   createdAt: string;
+//   author: ActivityPostAuthor;
+//   status?: ActivityPostStatus;
+//   postImages?: string[];
+//   thumbnailUrl?: string;
+// };
+
+// export type ActivityComment = {
+//   id: string;
+//   author: ActivityPostAuthor;
+//   content: string;
+//   createdAt: string;
+//   replies?: ActivityComment[];
+// };
+
+
+
 // // 공모전 공통 인터페이스
 // export interface Activity {
 //   id: string;          
@@ -48,8 +122,6 @@ export interface ActivityDetail extends ActivityListItem {
 }
 
 
-//팀원 공고 데이터
-
 
 // // 팀원 모집 인터페이스
 // export interface TeamPost {
@@ -80,12 +152,3 @@ export interface TeamRecruitDetail extends TeamRecruitPost{
 
     description: string;
 }
-
-
-
-// 기본 UI
-export interface ActivityListUiState {
-  selectedHost: "전체" | "공공기관" | "기업" | "학교" | "동아리/커뮤니티" | "기타";
-  selectedRegion: "전체"|"서울"|"경기"|"강원"|"충북"|"충남"|"전북"|"전남"|"경북"|"경남"|"부산";
-}
-
