@@ -181,7 +181,7 @@ export const CommunityPage = () => {
           isLoadingMore: false,
           error: null,
         }));
-      } catch (error) {
+      } catch {
         if (requestId !== requestSeq.current[tab]) return;
         setTabState(tab, (previous) => ({
           ...previous,
@@ -237,6 +237,7 @@ export const CommunityPage = () => {
       const isNewRequest =
         lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
       if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchCommunityPosts('INFO', { keyword: debouncedQuery, sort: apiSort });
       }
     }
@@ -247,6 +248,7 @@ export const CommunityPage = () => {
       const isNewRequest =
         lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
       if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchCommunityPosts('QUESTION', { keyword: debouncedQuery, sort: apiSort });
       }
     }
@@ -283,6 +285,7 @@ export const CommunityPage = () => {
     infoSortKey,
     questionSortKey,
     fetchCommunityPosts,
+    getTabState,
     mainState.isLoading,
     mainState.error,
     mainState.hasFetched,

@@ -21,7 +21,7 @@ import { formatPostDisplayDate } from './utils/post';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
 import { useAuthStore } from '../../store/useAuthStore';
-import { createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, updateCommunityComment } from '../../api/community';
+import { acceptCommunityComment, createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, purchaseCommunityPostAccess, updateCommunityComment } from '../../api/community';
 import { mapFlatCommentsToTree } from '../../utils/communityMapper';
 
 const CommunityPostPage = () => {
@@ -71,6 +71,7 @@ const CommunityPostPage = () => {
     imageCount,
     likedByMe,
     detailError,
+    refetchPost,
   } = usePost({ postId, currentUserId: currentUserIdForOwnership });
   const accessStatus = accessStatusOverride ?? selectedPost.accessStatus ?? 'GRANTED';
   const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
@@ -198,11 +199,34 @@ const CommunityPostPage = () => {
   };
 
   // 채택/구매 팝업 제어
-  const handleOpenAdoptPopup = () => setIsAdoptPopupOpen(true);
+  const handleOpenAdoptPopup = (comment: CommentItem) => {
+    setSelectedCommentId(comment.id);
+    setIsAdoptPopupOpen(true);
+  };
   const handleCloseAdoptPopup = () => setIsAdoptPopupOpen(false);
-  const handleConfirmAdopt = () => {
-    // TODO: 채택 이후 라우터 연결 예정
-    setIsAdoptPopupOpen(false);
+  const handleConfirmAdopt = async () => {
+    if (!userId || !postId || !selectedCommentId) {
+      setIsAdoptPopupOpen(false);
+      return;
+    }
+    const numericUserId = Number(userId);
+    const numericCommentId = Number(selectedCommentId);
+    if (!Number.isFinite(numericUserId) || !Number.isFinite(numericCommentId)) {
+      setIsAdoptPopupOpen(false);
+      return;
+    }
+    try {
+      await acceptCommunityComment({
+        postId,
+        commentId: numericCommentId,
+        params: { userId: numericUserId },
+      });
+      refetchPost();
+      const response = await getCommunityPostComments(postId);
+      setCommentListFromApi(mapFlatCommentsToTree(response.data));
+    } finally {
+      setIsAdoptPopupOpen(false);
+    }
   };
   const handleOpenPurchasePopup = () => {
     setMyPoints(selectedPost.myPoints ?? 0);
@@ -610,24 +634,30 @@ const CommunityPostPage = () => {
         title='질문을 구매하시겠습니까?'
         content={'구매 시 포인트가 즉시 차감되며, \n결제 후에는 취소나 환불이 불가능합니다.'}
         onLeftClick={handleClosePurchasePopup}
-        onRightClick={() => {
+        onRightClick={async () => {
+          if (!userId || !postId) return;
+          const numericUserId = Number(userId);
+          if (!Number.isFinite(numericUserId)) return;
           const currentPoints = selectedPost.myPoints ?? myPoints;
           if (currentPoints < requiredPoints) {
             setIsPurchasePopupOpen(false);
             setIsInsufficientPointsPopupOpen(true);
             return;
           }
-          // TODO: 결제 및 포인트 차감 API 연동 필요
-          setMyPoints((prev) => {
-            const basePoints = selectedPost.myPoints ?? prev;
-            return basePoints - requiredPoints;
-          });
-          setAccessStatusOverride('GRANTED');
-          // TODO: 구매 API 성공 시 상세/리스트 재조회로 accessStatus 갱신 필요
-          // TODO: 서버 응답 remainingPoints로 전역 포인트 상태 동기화 필요
-          setIsPurchasePopupOpen(false);
-          setToastMessage('구매 성공! 이제 질문글을 열람할 수 있어요');
-          openToast();
+          try {
+            const response = await purchaseCommunityPostAccess({
+              postId,
+              params: { userId: numericUserId },
+            });
+            setMyPoints(response.data.remainingPoints);
+            setAccessStatusOverride(response.data.accessStatus);
+            refetchPost();
+            setIsPurchasePopupOpen(false);
+            setToastMessage('구매 성공! 이제 질문글을 열람할 수 있어요');
+            openToast();
+          } catch {
+            setIsPurchasePopupOpen(false);
+          }
         }}
       />
       <PopUp

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { AxiosError } from 'axios';
 import { mapToCommunityPost } from '../utils/post';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -20,7 +20,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
   const [likedByMe, setLikedByMe] = useState(false);
   const [detailError, setDetailError] = useState(false);
 
-  useEffect(() => {
+  const refetchPost = useCallback(() => {
     if (!postId) return;
     const numericUserId = Number(userId);
     if (!Number.isFinite(numericUserId)) return;
@@ -44,6 +44,10 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
         setLikedByMe(false);
       });
   }, [postId, userId]);
+
+  useEffect(() => {
+    refetchPost();
+  }, [refetchPost]);
 
   const isQuestionPost = selectedPost.boardType === '질문';
   const isInfoPost = !isQuestionPost;
@@ -69,5 +73,6 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     imageCount,
     likedByMe,
     detailError,
+    refetchPost,
   };
 };

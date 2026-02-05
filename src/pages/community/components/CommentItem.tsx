@@ -17,7 +17,7 @@ type CommentItemProps = {
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onOpenCommentOptions: (comment: CommentItemType) => void;
-  onOpenAdoptPopup: () => void;
+  onOpenAdoptPopup: (comment: CommentItemType) => void;
   onReplyClick: (comment: CommentItemType) => void;
   formatDate: (value: string) => string;
   renderReply: (comment: CommentItemType) => React.ReactNode;
@@ -176,7 +176,7 @@ const CommentItem = ({
                       <button
                         type='button'
                         className='inline-flex items-center justify-center gap-[7px] rounded-[5px] border border-[var(--ColorMain,#00C56C)] px-[8px] py-[4px] text-m-14 text-[var(--ColorMain,#00C56C)]'
-                        onClick={onOpenAdoptPopup}
+                        onClick={() => onOpenAdoptPopup(comment)}
                       >
                         <Icon name='checkCircle' className='h-5 w-5' />
                         채택하기

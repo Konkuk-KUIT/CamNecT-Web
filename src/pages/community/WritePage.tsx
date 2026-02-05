@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
@@ -129,6 +129,7 @@ export const WritePage = () => {
 
     useEffect(() => {
         didInitEditRef.current = false;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEditPost(null);
     }, [postId]);
 
@@ -148,11 +149,17 @@ export const WritePage = () => {
     useEffect(() => {
         if (!isEditMode || !editPost || didInitEditRef.current) return;
         const nextBoardType = editPost.boardType as BoardType;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setBoardType(nextBoardType);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraftBoardType(nextBoardType);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTitle(editPost.title);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setContent(editPost.content);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedTags(editPost.categories ?? []);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhotoPreviews(
             editPost.postImages?.map((url, index) => ({
                 id: `edit-${editPost.id}-${index}`,
@@ -213,6 +220,7 @@ export const WritePage = () => {
         }
 
         const boardCode = boardType === '질문' ? 'QUESTION' : 'INFO';
+        const requiredPoints = boardType === '질문' ? 100 : 0;
         const tagIds = selectedTags
             .map((tagName) => MOCK_ALL_TAGS.find((tag) => tag.name === tagName)?.id)
             .map((tagId) => {
@@ -257,7 +265,7 @@ export const WritePage = () => {
                 tagIds,
                 attachments: [],
                 accessType: 'FREE',
-                requiredPoints: 0,
+                requiredPoints,
             },
         })
             .then((response) => {

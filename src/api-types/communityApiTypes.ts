@@ -165,3 +165,19 @@ export type UpdateCommunityCommentBody = {
 };
 
 export type UpdateCommunityCommentResult = string;
+
+export type AcceptCommunityCommentParams = {
+  userId: number | string;
+};
+
+export type AcceptCommunityCommentResult = string;
+
+export type PurchasePostAccessParams = {
+  userId: number | string;
+};
+
+export type PurchasePostAccessResult = {
+  postId: number;
+  accessStatus: "GRANTED" | "LOCKED";
+  remainingPoints: number;
+};

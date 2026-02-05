@@ -129,8 +129,7 @@ export const handlers = [
     );
   }),
 
-  http.get("*/api/community/posts/:postId", ({ request, params }) => {
-    const url = new URL(request.url);
+  http.get("*/api/community/posts/:postId", ({ params }) => {
     const postId = parseIdParam(params.postId as string | undefined);
     if (!postId) {
       return HttpResponse.json(
@@ -302,6 +301,10 @@ export const handlers = [
         { status: 400 },
       );
     }
+    return HttpResponse.json(buildOk("ok"));
+  }),
+
+  http.post("*/api/community/posts/:postId/comments/:commentId/accept", () => {
     return HttpResponse.json(buildOk("ok"));
   }),
 ];

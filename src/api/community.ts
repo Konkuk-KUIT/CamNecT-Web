@@ -22,6 +22,10 @@ import type {
   UpdateCommunityCommentParams,
   UpdateCommunityCommentBody,
   UpdateCommunityCommentResult,
+  AcceptCommunityCommentParams,
+  AcceptCommunityCommentResult,
+  PurchasePostAccessParams,
+  PurchasePostAccessResult,
   DeleteCommunityPostParams,
   DeleteCommunityPostResult,
   UpdateCommunityPostBody,
@@ -159,6 +163,33 @@ export const updateCommunityComment = async (data: {
   const response = await axiosInstance.patch<ApiResponse<UpdateCommunityCommentResult>>(
     `/api/community/comments/${data.commentId}`,
     data.body,
+    { params: data.params }
+  );
+
+  return response.data;
+};
+
+export const acceptCommunityComment = async (data: {
+  postId: number | string;
+  commentId: number | string;
+  params: AcceptCommunityCommentParams;
+}) => {
+  const response = await axiosInstance.post<ApiResponse<AcceptCommunityCommentResult>>(
+    `/api/community/posts/${data.postId}/comments/${data.commentId}/accept`,
+    null,
+    { params: data.params }
+  );
+
+  return response.data;
+};
+
+export const purchaseCommunityPostAccess = async (data: {
+  postId: number | string;
+  params: PurchasePostAccessParams;
+}) => {
+  const response = await axiosInstance.post<ApiResponse<PurchasePostAccessResult>>(
+    `/api/community/posts/${data.postId}/access/purchase`,
+    null,
     { params: data.params }
   );
 

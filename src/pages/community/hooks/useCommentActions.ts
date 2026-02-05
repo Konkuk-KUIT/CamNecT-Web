@@ -6,7 +6,6 @@ import {
   type SyntheticEvent,
 } from 'react';
 import type { CommentAuthor, CommentItem } from '../../../types/community';
-import { communityCommentList } from '../../../mock/community';
 import {
   findCommentContent,
   formatCommentDate,
@@ -38,7 +37,7 @@ type UseCommentActionsParams = {
 // 댓글 작성/편집/답글/정렬에 필요한 상태와 핸들러 제공
 export const useCommentActions = ({
   currentUser,
-  initialComments = communityCommentList,
+  initialComments = [],
   resetKey,
   isInfoPost,
   isLockedQuestion,
@@ -59,6 +58,7 @@ export const useCommentActions = ({
   const highlightTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCommentList(initialComments);
   }, [initialComments, resetKey]);
 
@@ -167,6 +167,14 @@ export const useCommentActions = ({
   const deleteComment = (commentId: string) => {
     if (onDeleteCommentApi) {
       onDeleteCommentApi(commentId);
+      if (editingCommentId === commentId) {
+        setEditingCommentId(null);
+        setEditingCommentContent('');
+      }
+      if (replyTarget?.id === commentId) {
+        setReplyTarget(null);
+        setHighlightedCommentId(null);
+      }
       return;
     }
     setCommentList((prev) => removeCommentById(prev, commentId));
