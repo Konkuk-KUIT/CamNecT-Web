@@ -1,13 +1,16 @@
 import { useLocation } from "react-router-dom";
 import Icon from "../../components/Icon";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-// import ButtonWhite from "../../components/ButtonWhite";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { requestAdminVerificationDownloadUrl } from "../../api/auth";
 import BottomSheetModal from "../../components/BottomSheetModal/BottomSheetModal";
 import Button from "../../components/Button";
 import SingleInput from "../../components/common/SingleInput";
+import PopUp from "../../components/Pop-up";
 
-// todo useQuery로 유저아이디, 폰번호, 제출 파일 조회
+// todo 2. 승인 모달 호출 (이때 verificationList 초기화)
+// todo 3. 거절 모달 호출 (이때 verificationList 초기화)
 export const AdminVerificationDetail = () => {
 
     const location = useLocation();
@@ -16,17 +19,44 @@ export const AdminVerificationDetail = () => {
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
+    const [isErrorDismissed, setIsErrorDismissed] = useState(false);
 
     // 승인 모달 입력 데이터 상태 (객체로 통합 관리)
     const [approveForm, setApproveForm] = useState({
         userName: "",
-        univ: "",
         studentId: "",
-        major: ""
+        majorId: ""
     });
 
+    // 학번 유효성 검사 (9자리 숫자, 첫 4자리가 현재 년도 이하)
+    const isStudentIdValid = (id: string) => {
+        if (!/^\d{9}$/.test(id)) return false;
+        const entryYear = parseInt(id.substring(0, 4), 10);
+        const currentYear = new Date().getFullYear();
+        return entryYear <= currentYear;
+    };
+
+    // 전체 승인 폼 유효성 검사
+    const isApproveFormValid = 
+        approveForm.userName.trim() !== "" && 
+        isStudentIdValid(approveForm.studentId) && 
+        approveForm.majorId !== "";
+    
+    // 인증서 파일 다운로드 URL 호출
+    const { data: verificationFile, isLoading, isError } = useQuery({
+        queryKey: ['verificationFile', item?.id],
+        queryFn: () => requestAdminVerificationDownloadUrl({ submissionId: Number(item?.id) }),
+        enabled: !!item?.id, // id(pathparameter)가 있어야 실행
+    })
+
+    // 인증서 파일 새 창에서 보기
+    const handlePreviewClick = () => {
+        if (verificationFile?.downloadUrl) {
+            window.open(verificationFile.downloadUrl, '_blank');
+        }
+    };
+
     // 승인 폼 입력 핸들러
-    // 각 상태에 맞게 수정
     const handleApproveFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -37,7 +67,12 @@ export const AdminVerificationDetail = () => {
     };
 
     const handleApproveSubmit = () => {
-        // todo API 연동: 승인 처리 (approveForm 데이터 포함)
+        // todo API 연동: 승인 처리 (id 변환 등 처리)
+        const submitData = {
+            ...approveForm,
+            majorId: Number(approveForm.majorId)
+        };
+        console.log("승인 데이터:", submitData);
         setIsApproveModalOpen(false);
     }
 
@@ -64,13 +99,13 @@ export const AdminVerificationDetail = () => {
                             className="text-gray-900 text-b-20"
                             style={{ letterSpacing: '-0.8px' }}
                         >
-                            {item.userId}
+                            {item?.userId || "Unknown"}
                         </span>
                         <span 
                             className="text-gray-750 text-m-16 font-medium"
                             style={{ letterSpacing: '-0.4px' }}
                         >
-                            {item.phoneNum}
+                            {item?.phoneNum || "010-0000-0000"}
                         </span>
                     </div>
                     </div>
@@ -80,11 +115,13 @@ export const AdminVerificationDetail = () => {
                     <div className="p-[15px] flex items-center justify-between w-full gap-[15px]">
                         <Icon name="folder" className="flex-none"/>
                         <div className="flex-1 min-w-0">
-                            <p className="text-r-14 text-gray-900 break-all">파일이름</p>
+                            <p className="text-r-14 text-gray-900 break-all">
+                                {item?.originalFilename || "인증서 파일"}
+                            </p>
                         </div>
                         <button
                             type="button"
-                            // onClick={handlePreviewClick}
+                            onClick={handlePreviewClick}
                             className="w-[60px] flex-none py-[6px] bg-gray-350 text-white text-r-12 rounded-[5px] cursor-pointer active:opacity-80"
                         >
                             보기
@@ -123,36 +160,29 @@ export const AdminVerificationDetail = () => {
                             className="w-full" 
                         />
                         <SingleInput 
-                            label="학교" 
-                            name="univ"
-                            value={approveForm.univ} 
-                            onChange={handleApproveFormChange} 
-                            placeholder="학교 입력"
-                            className="w-full" 
-                        />
-                        <SingleInput 
-                            label="학번" 
+                            label="학번 (9자리)" 
                             name="studentId"
                             value={approveForm.studentId} 
                             onChange={handleApproveFormChange} 
-                            placeholder="학번 입력"
+                            placeholder="학번 9자리 입력"
                             className="w-full" 
                         />
                         <SingleInput 
-                            label="학과" 
-                            name="major"
-                            value={approveForm.major} 
+                            label="학과 ID" 
+                            name="majorId"
+                            value={approveForm.majorId} 
                             onChange={handleApproveFormChange} 
-                            placeholder="학과 입력"
+                            placeholder="학과 ID(숫자) 입력"
                             className="w-full" 
+                            type="number"
                         />
                     </div>
                     <Button 
                         label="승인하기" 
                         onClick={handleApproveSubmit}
-                        disabled={!approveForm.userName || !approveForm.univ || !approveForm.studentId || !approveForm.major}
+                        disabled={!isApproveFormValid}
                         className={`w-full !max-w-none !text-white !h-[50px] !rounded-[27px] 
-                            ${(!approveForm.userName || !approveForm.univ || !approveForm.studentId || !approveForm.major) 
+                            ${!isApproveFormValid 
                                 ? '!bg-gray-150' 
                                 : 'bg-primary'
                             }`}
@@ -183,6 +213,22 @@ export const AdminVerificationDetail = () => {
                     />
                 </div>
             </BottomSheetModal>
+
+            <PopUp 
+                isOpen={isLoading} 
+                type="loading" 
+                title="데이터를 불러오는 중입니다..." 
+            />
+
+            {/* 에러 팝업 (에러가 발생했고 + 아직 닫지 않았을 때만 노출) */}
+            <PopUp 
+                isOpen={isError && !isErrorDismissed} 
+                type="error" 
+                title="오류 발생" 
+                content="데이터를 불러오는 중 문제가 발생했습니다" 
+                buttonText="닫기"
+                onClick={() => setIsErrorDismissed(true)}
+            />
         </div>
     );
 };

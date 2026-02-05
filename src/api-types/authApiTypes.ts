@@ -1,7 +1,4 @@
-// API Request Body 타입 정의
-
 // 로그인 DTO (/api/auth/login)
-// todo 정해지는대로 수정
 export type LoginStatusType = 'SUCCESS' | 'FAILED';
 export interface LoginRequest {
   username: string; // 아이디
@@ -181,31 +178,6 @@ export interface AdminVerificationListResponse {
   empty: boolean;
 }
 
-// 관리자 인증서 리스트 상세 조회 DTO (/api/admin/verification/documents/{submissionId})
-export interface AdminVerificationDetailRequest {
-  submissionId: number;
-}
-
-export interface AdminVerificationDetailResponse {
-  submissionId: number;
-  status: SchoolVerificationStatusType;
-  docType: SchoolDocType;
-  submittedAt: string;
-  reviewedAt: string | null;
-  rejectReason: string | null;
-  userId: number;
-  username: string;
-  phoneNum: string;
-  name: string;
-  studentNo: string;
-  yearLevel: number;
-  institutionId: number;
-  majorId: number;
-  originalFilename: string;
-  contentType: string;
-  size: number;
-}
-
 // 관리자 인증서 문서 다운로드 URL 발급 DTO (/api/admin/verification/documents/{submissionId}/download-url)
 export interface AdminVerificationDownloadUrlRequest {
   submissionId: number;
@@ -221,16 +193,23 @@ export interface AdminVerificationDownloadUrlResponse {
 // todo REJECT 인지는 확인 
 export type AdminVerificationDecisionType = 'APPROVE' | 'REJECT';
 
-export interface AdminVerificationProcessRequest {
+export type AdminVerificationProcessRequest = {
   adminId: number;
   submissionId: number;
-  decision: AdminVerificationDecisionType;
-  reason?: string | null; // todo nullable인지 확인 
-  studentNo: string;
-  yearLevel: number;
-  institutionId: number;
-  majorId: number;
-}
+  // todo DTO 수정 되야 함
+} & (
+    {
+      decision: 'APPROVE';
+      studentNo: string;    // 학번
+      yearLevel: number;    // 학년
+      institutionId: number;// 학교
+      majorId: number;       // 학과
+    }
+  | {
+      decision: 'REJECT';
+      reason: string;       // 거절 시 사유 필수
+    }
+);
 
 export type AdminVerificationProcessResponse = void;
 

@@ -1,5 +1,4 @@
 import type {
-    AdminVerificationDetailRequest, AdminVerificationDetailResponse,
     AdminVerificationDownloadUrlRequest, AdminVerificationDownloadUrlResponse,
     AdminVerificationListRequest, AdminVerificationListResponse,
     AdminVerificationProcessRequest, AdminVerificationProcessResponse,
@@ -80,21 +79,14 @@ export const requestAdminVerificationList = async (data: AdminVerificationListRe
     return response.data;
 }
 
-// 10. (관리자) 인증 리스트 상세확인 API [GET]
-export const requestAdminVerificationDetail = async (data: AdminVerificationDetailRequest) => {
-    
-    const response = await axiosInstance.get<AdminVerificationDetailResponse>(`/api/admin/verification/documents/${data.submissionId}`);
-    return response.data;
-}
-
-// 11. (관리자) 인증 리스트 문서 다운로드 URL 발급 API [GET] (/api/admin/verification/documents/{submissionId}/download-url)
+// 10. (관리자) 인증 리스트 문서 다운로드 URL 발급 API [GET] (/api/admin/verification/documents/{submissionId}/download-url)
 export const requestAdminVerificationDownloadUrl = async (data: AdminVerificationDownloadUrlRequest) => {
     
     const response = await axiosInstance.get<AdminVerificationDownloadUrlResponse>(`/api/admin/verification/documents/${data.submissionId}/download-url`);
     return response.data;
 }
 
-// 12. (관리자) 인증 요청 심사 API [PATCH] (/api/admin/verification/documents/{submissionId})
+// 11. (관리자) 인증 요청 심사 API [PATCH] (/api/admin/verification/documents/{submissionId})
 export const requestAdminVerificationProcess = async (data: AdminVerificationProcessRequest) => {
     // URL에는 ID를 넣고, 나머지 데이터는 Request Body로 보냄
     const response = await axiosInstance.patch<AdminVerificationProcessResponse>(

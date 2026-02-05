@@ -37,7 +37,6 @@ export const AdminVerificationList = () => {
         queryFn: () => requestAdminVerificationList({ status: currentStatus, size:1000 }),
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
     });
-    // 관리자 상세 페이지 조회 useMutation
 
     const renderContent = () => {
         const realDataList = verificationList?.content || []; // 화면에 렌더링 되는 content 프로퍼티만 가져옴
