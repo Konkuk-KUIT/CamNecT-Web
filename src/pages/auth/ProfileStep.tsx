@@ -7,6 +7,7 @@ import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import Input from "../../components/Input";
 import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
 import { uploadFileToS3 } from "../../utils/s3Upload";
 
@@ -15,9 +16,8 @@ interface ProfileStepProps {
 }
 
 export const ProfileStep = ({ onNext }: ProfileStepProps) => {
-  const { userId, storedIntroduction, storedProfileImage, setProfileImage, setSelfIntroduction, setProfileImageKey } = useSignupStore(
+  const { storedIntroduction, storedProfileImage, setProfileImage, setSelfIntroduction, setProfileImageKey } = useSignupStore(
     useShallow((state) => ({
-      userId: state.userId,
       storedIntroduction: state.selfIntroduction,
       storedProfileImage: state.profileImage,
       setProfileImage: state.setProfileImage,
@@ -25,6 +25,8 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
       setProfileImageKey: state.setProfileImageKey,
     }))
   );
+
+  const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -99,14 +101,18 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
         setProfileImageKey(presignResponse.data.fileKey);
 
         onNext();
-      } catch {
+      } catch (error) {
+        console.error("프로필 업로드 에러:", error);
         setShowErrorPopUp(true);
       } finally {
         setIsSubmitting(false);
       }
     } else {
-      // 사진이 없는 경우 (건너뛰기 처리는 Button에서 따로 함, 여기선 '다음' 버튼인 경우)
-      setProfileImageKey(null); // 확실하게 null 처리
+      // 사진이 없거나 유저 ID가 없는 경우
+      if (selectedFile && !userId) {
+        console.error("유저 ID가 없어 업로드를 중단합니다.");
+      }
+      setProfileImageKey(null); 
       onNext();
     }
   };

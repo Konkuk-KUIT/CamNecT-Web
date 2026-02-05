@@ -13,7 +13,6 @@ interface SignupStore {
         serviceTerms: boolean;
         privacyTerms: boolean;
     };
-    userId: number | null; // 가입 과정에서 발급받는 ID
     selfIntroduction: string | null;
     profileImage: File | null; 
     profileImageKey: string | null;
@@ -33,7 +32,6 @@ interface SignupStore {
     setName: (name: string) => void;
     setPhoneNum: (phoneNum: string) => void;
     setAgreements: (agreements: {serviceTerms: boolean, privacyTerms: boolean}) => void;
-    setUserId: (userId: number | null) => void;
     setVerificationType: (verificationType: 'email' | 'phone') => void;
     setEmailVerified: (emailVerified: boolean) => void;
     setSelfIntroduction: (selfIntroduction: string | null) => void;
@@ -60,7 +58,6 @@ const initialState = {
         serviceTerms: false,
         privacyTerms: false,
     },
-    userId: null,
     verificationType: 'email' as const,
     emailVerified: false,
     // phoneVerified: false,
@@ -83,7 +80,6 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setName: (name: string) => set({ name }),
     setPhoneNum: (phoneNum: string) => set({ phoneNum }),
     setAgreements: (agreements: {serviceTerms: boolean, privacyTerms: boolean}) => set({ agreements }),
-    setUserId: (userId: number | null) => set({ userId }),
     setVerificationType: (verificationType: 'email' | 'phone') => set({ verificationType }),
     setEmailVerified: (emailVerified: boolean) => set({ emailVerified }),
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),

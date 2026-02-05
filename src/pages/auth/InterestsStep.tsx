@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import PopUp from "../../components/Pop-up";
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../mock/tags";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
 import TagsChooseModal from "./components/TagsChooseModal";
 
@@ -16,15 +17,16 @@ interface InterestsStepProps {
 // todo useEffect로 실제 서버에서 태그들 불러오기
 export const InterestsStep = ({ onNext }: InterestsStepProps) => {
 
-    const { tags, setTags, profileImageKey, selfIntroduction, userId } = useSignupStore(
+    const { tags, setTags, profileImageKey, selfIntroduction } = useSignupStore(
         useShallow((state) => ({
             tags: state.tags,
             setTags: state.setTags,
             profileImageKey: state.profileImageKey,
             selfIntroduction: state.selfIntroduction,
-            userId: state.userId,
         }))
     );
+
+    const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
 
     const [selectedTags, setSelectedTags] = useState<string[]>(tags || []);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +57,7 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
                 userId: userId || 0,
                 profileImageKey,
                 bio: selfIntroduction,
-                tagIds: [],
+                tagIds: null, // [] 대신 null로 전송하여 백엔드 500 에러 방지 시도
             });
 
             // 전송 성공 시에만 전역 상태 업데이트 및 이동

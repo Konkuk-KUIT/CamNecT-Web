@@ -7,6 +7,7 @@ import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
 import { uploadFileToS3 } from "../../utils/s3Upload";
 
@@ -24,10 +25,9 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const [docType, setDocType] = useState<SchoolDocType>('ENROLLMENT_CERTIFICATE');
     const [isSubmitting, setIsSubmitting] = useState(false); // 전체 제출 상태 관리
 
-    const { userId, verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
+    const { verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
         useShallow((state) => {
             return {
-                userId: state.userId,
                 verificationFile: state.verificationFile,
                 setVerificationFile: state.setVerificationFile,
                 isVerificationSubmitted: state.isVerificationSubmitted,
@@ -36,6 +36,8 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         } )
     );
 
+    // 로그인/가입 세션에서 유저 ID 가져오기
+    const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
 
     // selectedFile 변경 시 previewUrl 생성 
     const previewUrl = useMemo(() => {
@@ -94,7 +96,10 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
 
     // 인증서 제출 함수 
     const handleVerificationSubmit = async () => {
-        if (!verificationFile || !userId) return;
+        if (!verificationFile || !userId) {
+            console.error("제출 실패: 파일 또는 유저 ID가 없습니다.", { verificationFile, userId });
+            return;
+        }
 
         setIsSubmitting(true);
         setShowPopUp(false);

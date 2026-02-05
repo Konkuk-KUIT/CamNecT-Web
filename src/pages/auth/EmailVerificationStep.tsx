@@ -9,6 +9,7 @@ import { requestEmailCode, verifyEmailCode } from '../../api/auth';
 import Button from '../../components/Button';
 import SingleInput from '../../components/common/SingleInput';
 import PopUp from '../../components/Pop-up';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useSignupStore } from '../../store/useSignupStore';
 import SmallButton from './components/SmallButton';
 
@@ -25,14 +26,15 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
 
     // 이메일 전역상태 및 가입 정보
-    const { email, setEmail, getEmailVerificationData, setUserId } = useSignupStore(
+    const { email, setEmail, getEmailVerificationData } = useSignupStore(
         useShallow((state) => ({
             email: state.email,
             setEmail: state.setEmail,
             getEmailVerificationData: state.getEmailVerificationData,
-            setUserId: state.setUserId,
         }))
     );
+
+    const setAuthUserId = useAuthStore((state) => state.setUserId);
 
     // 이메일 인증 폼 검증 (zod)
     const emailSchema = z.object({
@@ -98,7 +100,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         mutationFn: verifyEmailCode,
         onSuccess: (data) => {
             if(data.userId) {
-                setUserId(data.userId);
+                setAuthUserId(String(data.userId));
             }
             setPopUpConfig({ title: "인증완료", content: "" });
             setIsEmailVerificated(true);
