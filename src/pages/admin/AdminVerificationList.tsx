@@ -1,6 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { requestAdminVerificationList } from "../../api/auth";
+import PopUp from "../../components/Pop-up";
 import { AdminFullLayout } from "../../layouts/AdminFullLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import { formatDotDate } from "../../utils/formatDate";
 import { VerificationItem } from "./components/VerificationItem";
 
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -13,54 +17,39 @@ export interface VerificationItemType{
     status: VerificationStatus;
 }
 
-const mockData: VerificationItemType[] = [
-    {
-        id: "1",
-        userId: "camnect1",    
-        phoneNum: "010-0000-0001",
-        date: "2025.01.01",
-        status: "PENDING",
-    },
-    {
-        id: "2",
-        userId: "camnect2",    
-        phoneNum: "010-0000-0002",
-        date: "2025.01.01",
-        status: "PENDING",
-    },  
-    {
-        id: "3",
-        userId: "camnect3",    
-        phoneNum: "010-0000-0003",
-        date: "2025.01.02",
-        status: "PENDING",
-    },
-    {
-        id: "4",
-        userId: "camnect4",
-        phoneNum: "010-0000-0004",
-        date: "2025.01.01",
-        status: "APPROVED",
-    },
-    {
-        id: "5",
-        userId: "camnect5",
-        phoneNum: "010-0000-0005",
-        date: "2025.01.05",
-        status: "REJECTED",
-    },
-];
-
-// todo useQuery로 제출된 증명서들 조회
-
 // 관리자 승인 대기 화면 리스트
 export const AdminVerificationList = () => {
 
     const [currentStatus, setCurrentStatus] = useState<VerificationStatus>('PENDING');
 
+    // useQuery에서의 isError로 인한 팝업을 닫기 위한 state 
+    const [isErrorDismissed, setIsErrorDismissed] = useState(false);
+
+    // 탭 변경 시 상태 및 에러 팝업 상태 초기화
+    const handleTabChange = (status: VerificationStatus) => {
+        setCurrentStatus(status);
+        setIsErrorDismissed(false);
+    };
+
+    // 관리자 인증 리스트 가져오기 useQuery
+    const { data: verificationList, isLoading, isError } = useQuery({
+        queryKey: ['verificationList', currentStatus], // currentState가 변경될 때마다 refetch
+        queryFn: () => requestAdminVerificationList({ status: currentStatus, size:1000 }),
+        staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
+    });
+    // 관리자 상세 페이지 조회 useMutation
+
     const renderContent = () => {
-        // 1. 상태에 맞는 데이터 필터링
-        const filteredData = mockData.filter(item => item.status === currentStatus);
+        const realDataList = verificationList?.content || []; // 화면에 렌더링 되는 content 프로퍼티만 가져옴
+
+        // realDataList를 VerificationItemType에 맞게 매핑
+        const filteredData: VerificationItemType[] = realDataList.map(item => ({
+            id: String(item.submissionId),
+            userId: item.username,
+            phoneNum: item.phoneNum,
+            date: formatDotDate(item.submittedAt), // YYYY.MM.DD로 변환
+            status: item.status as VerificationStatus,
+        }));
 
         // 2. 날짜별로 그룹화
         const groupedByDate = filteredData.reduce((acc, item) => {
@@ -110,7 +99,7 @@ export const AdminVerificationList = () => {
     return (
         <AdminFullLayout
             headerSlot={
-                <MainHeader title="재학증명서 승인 리스트" />
+                <MainHeader title="증명서 승인 리스트" />
             }
         >
             <div className="flex flex-col h-full bg-white">
@@ -124,7 +113,7 @@ export const AdminVerificationList = () => {
                     ].map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setCurrentStatus(tab.id as VerificationStatus)}
+                            onClick={() => handleTabChange(tab.id as VerificationStatus)}
                             className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors tracking-[-0.56px]
                                 ${currentStatus === tab.id 
                                     ? 'bg-primary text-white text-sb-14' 
@@ -140,6 +129,23 @@ export const AdminVerificationList = () => {
                     {renderContent()}
                 </div>
             </div>
+
+            {/* 로딩 팝업 */}
+            <PopUp 
+                isOpen={isLoading} 
+                type="loading" 
+                title="데이터를 불러오는 중입니다..." 
+            />
+
+            {/* 에러 팝업 (에러가 발생했고 + 아직 닫지 않았을 때만 노출) */}
+            <PopUp 
+                isOpen={isError && !isErrorDismissed} 
+                type="error" 
+                title="오류 발생" 
+                content="데이터를 불러오는 중 문제가 발생했습니다" 
+                buttonText="닫기"
+                onClick={() => setIsErrorDismissed(true)}
+            />
         </AdminFullLayout>
     );
 };

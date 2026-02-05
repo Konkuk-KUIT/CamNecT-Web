@@ -1,4 +1,16 @@
-import type { ProfileOnboardingRequest, ProfileOnboardingResponse, EmailRequest, EmailResponse, EmailVerificationRequest, EmailVerificationResponse, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationPresignRequest, SchoolVerificationPresignResponse, SchoolVerificationUploadRequest, SchoolVerificationUploadResponse, ProfileImagePresignRequest, ProfileImagePresignResponse } from "../api-types/authApiTypes";
+import type {
+    AdminVerificationDetailRequest, AdminVerificationDetailResponse,
+    AdminVerificationDownloadUrlRequest, AdminVerificationDownloadUrlResponse,
+    AdminVerificationListRequest, AdminVerificationListResponse,
+    AdminVerificationProcessRequest, AdminVerificationProcessResponse,
+    EmailRequest,
+    EmailResponse, EmailVerificationRequest, EmailVerificationResponse,
+    IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse,
+    ProfileImagePresignRequest, ProfileImagePresignResponse,
+    ProfileOnboardingRequest, ProfileOnboardingResponse,
+    SchoolVerificationPresignRequest, SchoolVerificationPresignResponse,
+    SchoolVerificationUploadRequest, SchoolVerificationUploadResponse
+} from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // 1. 로그인 API [POST] (/api/auth/login)
@@ -59,12 +71,39 @@ export const requestProfileOnboarding = async (data: ProfileOnboardingRequest) =
     return response.data;
 }
 
-// 9. (관리자) 인증 요청 리스트 확인 API (전체조회)
+// 9. (관리자) 인증 요청 리스트 확인 API [GET] (/api/admin/verification/documents)
+export const requestAdminVerificationList = async (data: AdminVerificationListRequest) => {
+    
+    const response = await axiosInstance.get<AdminVerificationListResponse>("/api/admin/verification/documents", {
+        params: data // query parameter
+    });
+    return response.data;
+}
 
-// 8. (관리자) 인증 요청 승인 API
+// 10. (관리자) 인증 리스트 상세확인 API [GET]
+export const requestAdminVerificationDetail = async (data: AdminVerificationDetailRequest) => {
+    
+    const response = await axiosInstance.get<AdminVerificationDetailResponse>(`/api/admin/verification/documents/${data.submissionId}`);
+    return response.data;
+}
 
-// 9. (관리자) 인증 요청 거부 API
+// 11. (관리자) 인증 리스트 문서 다운로드 URL 발급 API [GET] (/api/admin/verification/documents/{submissionId}/download-url)
+export const requestAdminVerificationDownloadUrl = async (data: AdminVerificationDownloadUrlRequest) => {
+    
+    const response = await axiosInstance.get<AdminVerificationDownloadUrlResponse>(`/api/admin/verification/documents/${data.submissionId}/download-url`);
+    return response.data;
+}
 
-// 10. 인증 완료 화면 요청 API 
+// 12. (관리자) 인증 요청 심사 API [PATCH] (/api/admin/verification/documents/{submissionId})
+export const requestAdminVerificationProcess = async (data: AdminVerificationProcessRequest) => {
+    // URL에는 ID를 넣고, 나머지 데이터는 Request Body로 보냄
+    const response = await axiosInstance.patch<AdminVerificationProcessResponse>(
+        `/api/admin/verification/documents/${data.submissionId}`, 
+        data
+    );
+    return response.data;
+}
 
-// 11. 회원가입 요청 API
+// 13. 인증 완료 화면 요청 API 
+
+// 14. 회원가입 요청 API

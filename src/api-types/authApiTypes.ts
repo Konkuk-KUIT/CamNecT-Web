@@ -134,6 +134,7 @@ export interface ProfileOnboardingResponse {
 }
 
 // 관리자 인증서 리스트 조회 DTO (/api/admin/verification/documents)
+// nullable인지 확인
 export interface AdminVerificationListRequest {
   status?: SchoolVerificationStatusType; // PENDING / APPROVED / REJECTED 
   page?: number;     // 페이지 번호 (0부터 시작)
@@ -142,13 +143,13 @@ export interface AdminVerificationListRequest {
 }
 
 export interface AdminVerificationItem {
-  submissionId: number;
-  status: SchoolVerificationStatusType;
+  submissionId: number; // id와 매핑
+  status: SchoolVerificationStatusType; // status와 매핑
   docType: SchoolDocType;
-  submittedAt: string;
-  userId: number;
-  username: string;
-  phoneNum: string;
+  submittedAt: string; // date와 매핑
+  userId: number; // userId
+  username: string; // 실제 유저 아이디 (매핑 X)
+  phoneNum: string; // 전화번호
 }
 
 export interface AdminVerificationListResponse {
@@ -180,6 +181,58 @@ export interface AdminVerificationListResponse {
   empty: boolean;
 }
 
+// 관리자 인증서 리스트 상세 조회 DTO (/api/admin/verification/documents/{submissionId})
+export interface AdminVerificationDetailRequest {
+  submissionId: number;
+}
+
+export interface AdminVerificationDetailResponse {
+  submissionId: number;
+  status: SchoolVerificationStatusType;
+  docType: SchoolDocType;
+  submittedAt: string;
+  reviewedAt: string | null;
+  rejectReason: string | null;
+  userId: number;
+  username: string;
+  phoneNum: string;
+  name: string;
+  studentNo: string;
+  yearLevel: number;
+  institutionId: number;
+  majorId: number;
+  originalFilename: string;
+  contentType: string;
+  size: number;
+}
+
+// 관리자 인증서 문서 다운로드 URL 발급 DTO (/api/admin/verification/documents/{submissionId}/download-url)
+export interface AdminVerificationDownloadUrlRequest {
+  submissionId: number;
+}
+
+export interface AdminVerificationDownloadUrlResponse {
+  downloadUrl: string;
+  expiresAt: string;
+  fileKey: string;
+}
+
+// 관리자 인증서 심사처리 DTO (/api/admin/verification/documents/{submissionId})
+// todo REJECT 인지는 확인 
+export type AdminVerificationDecisionType = 'APPROVE' | 'REJECT';
+
+export interface AdminVerificationProcessRequest {
+  adminId: number;
+  submissionId: number;
+  decision: AdminVerificationDecisionType;
+  reason?: string | null; // todo nullable인지 확인 
+  studentNo: string;
+  yearLevel: number;
+  institutionId: number;
+  majorId: number;
+}
+
+export type AdminVerificationProcessResponse = void;
 
 
 export interface SchoolInfoResponse {
