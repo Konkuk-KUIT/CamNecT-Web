@@ -98,20 +98,87 @@ export interface SchoolVerificationUploadResponse {
   submittedAt: string;
 }
 
-// 학교 인증서 인증 대기화면 조회 API DTO (/api/verification/documents/me)
-export interface SchoolVerificationStatusRequest {
-  email: string;
+// 프로필 사진 presign 발급 API DTO (/api/profile/uploads/presign)
+export interface ProfileImagePresignRequest {
+  userId: number;
+  contentType: string;
+  size: number;
+  originalFilename: string;
 }
 
-export interface SchoolVerificationStatusItem {
+export interface ProfileImagePresignResponse {
+  status: number;
+  message: string;
+  data: {
+    fileKey: string;
+    uploadUrl: string;
+    expiresAt: string;
+    requiredHeaders: Record<string, string>;
+  };
+}
+
+// 프로필 이미지, 자기소개, 관심태그 전송 DTO (/api/profile/onboarding)
+export interface ProfileOnboardingRequest {
+  userId: number;
+  profileImageKey?: string | null;
+  bio?: string | null;
+  tagIds?: number[] | null;
+}
+
+export interface ProfileOnboardingResponse {
+  status: number;
+  message: string;
+  data: {
+    status: string; // ex, 'EMAIL_PENDING'
+  };
+}
+
+// 관리자 인증서 리스트 조회 DTO (/api/admin/verification/documents)
+export interface AdminVerificationListRequest {
+  status?: SchoolVerificationStatusType; // PENDING / APPROVED / REJECTED 
+  page?: number;     // 페이지 번호 (0부터 시작)
+  size?: number;     // 페이지 당 항목 수
+  sort?: string[];   // 정렬 기준 (예: ["submittedAt,desc"]) // 정렬기준 X 
+}
+
+export interface AdminVerificationItem {
   submissionId: number;
-  docType: SchoolDocType; // 'ENROLLMENT_CERTIFICATE' 등
-  status: SchoolVerificationStatusType; 
+  status: SchoolVerificationStatusType;
+  docType: SchoolDocType;
   submittedAt: string;
-  reviewedAt: string | null; // 리뷰 전 일 가능성 -> null
+  userId: number;
+  username: string;
+  phoneNum: string;
 }
 
-export type SchoolVerificationStatusResponse = SchoolVerificationStatusItem[];
+export interface AdminVerificationListResponse {
+  totalElements: number;
+  totalPages: number;
+  pageable: {
+    paged: boolean;
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    sort: {
+      sorted: boolean;
+      empty: boolean;
+      unsorted: boolean;
+    };
+    unpaged: boolean;
+  };
+  size: number;
+  content: AdminVerificationItem[];
+  number: number;
+  sort: {
+    sorted: boolean;
+    empty: boolean;
+    unsorted: boolean;
+  };
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
 
 
 

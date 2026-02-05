@@ -68,16 +68,17 @@ export const LoginPage = () => {
     onSuccess: (data) => {
       const { accessToken, userId, role, nextStep } = data;
       
+      // 모든 로그인 성공 시 토큰과 유저 정보 저장 (AccessToken 필수)
+      setLogin(accessToken, {
+        id: String(userId),
+        role,
+        nextStep
+      });
+
       if (nextStep === 'HOME') {
-        // todo RefreshToken을 어떻게 관리할지
-        setLogin(accessToken, {
-          id: String(userId),
-          role,
-          nextStep
-        });
-        setShowSplash(true); // 스플래시 띄우고 홈 화면 이동 목적
+        setShowSplash(true); 
       } else {
-        // HOME이 아닌 경우 각 단계에 맞는 페이지로 리다이렉트
+        // 회원가입 단계가 남은 경우 해당 단계로 리다이렉트
         handleRedirect(role, nextStep);
       }
     },

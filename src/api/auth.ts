@@ -1,4 +1,4 @@
-import type { EmailRequest, EmailResponse, EmailVerificationRequest, EmailVerificationResponse, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationPresignRequest, SchoolVerificationPresignResponse, SchoolVerificationUploadRequest, SchoolVerificationUploadResponse } from "../api-types/authApiTypes";
+import type { ProfileOnboardingRequest, ProfileOnboardingResponse, EmailRequest, EmailResponse, EmailVerificationRequest, EmailVerificationResponse, IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse, SchoolVerificationPresignRequest, SchoolVerificationPresignResponse, SchoolVerificationUploadRequest, SchoolVerificationUploadResponse, ProfileImagePresignRequest, ProfileImagePresignResponse } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // 1. 로그인 API [POST] (/api/auth/login)
@@ -43,12 +43,21 @@ export const requestSchoolVerification = async (data: SchoolVerificationUploadRe
     return response.data;
 }
 
-// todo useImageUpload 수정해야되는지 알아보기
+// 7. 프로필 이미지 업로드용 presign 발급 API [POST] (/api/profile/uploads/presign)
+export const requestProfilePresign = async (data: ProfileImagePresignRequest) => {
+    
+    const response = await axiosInstance.post<ProfileImagePresignResponse>("/api/profile/uploads/presign", data);
+    return response.data;
+}
 
+// 8. 관심태그 리스트 조회 API [GET] 
 
-// 7. 관심태그 리스트 조회 API [GET] 
-
-// 8. 학교 인증서 인증 대기화면 조회 API [GET] (/api/verification/documents/me)
+// 9. 프로필 이미지, 자기소개, 관심태그 전송 API [POST] (/api/profile/onboarding)
+export const requestProfileOnboarding = async (data: ProfileOnboardingRequest) => {
+    
+    const response = await axiosInstance.post<ProfileOnboardingResponse>("/api/profile/onboarding", data);
+    return response.data;
+}
 
 // 9. (관리자) 인증 요청 리스트 확인 API (전체조회)
 
@@ -56,8 +65,6 @@ export const requestSchoolVerification = async (data: SchoolVerificationUploadRe
 
 // 9. (관리자) 인증 요청 거부 API
 
-// 10. 학교 인증 완료 이메일 알림 API
+// 10. 인증 완료 화면 요청 API 
 
-// 11. 인증 완료 화면 요청 API 
-
-// 12. 회원가입 요청 API
+// 11. 회원가입 요청 API

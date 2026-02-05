@@ -14,15 +14,15 @@ interface SignupStore {
         privacyTerms: boolean;
     };
     userId: number | null; // 가입 과정에서 발급받는 ID
-    // todo 태그 및 소개글 
-    selfIntroduction: string;
+    selfIntroduction: string | null;
     profileImage: File | null; 
+    profileImageKey: string | null;
     verificationFile: File | null;
     isVerificationSubmitted: boolean;
-    tags: string[];
+    tags: string[] | null;
 
     // UI 상태 
-    verificationType: 'email' | 'phone'; // todo 휴대폰인증은 추후구현
+    verificationType: 'email' | 'phone'; // 휴대폰인증 안함
     emailVerified: boolean;
     // phoneVerified: boolean;
 
@@ -36,11 +36,12 @@ interface SignupStore {
     setUserId: (userId: number | null) => void;
     setVerificationType: (verificationType: 'email' | 'phone') => void;
     setEmailVerified: (emailVerified: boolean) => void;
-    setSelfIntroduction: (selfIntroduction: string) => void;
+    setSelfIntroduction: (selfIntroduction: string | null) => void;
     setProfileImage: (profileImage: File | null) => void;
+    setProfileImageKey: (profileImageKey: string | null) => void;
     setVerificationFile: (verificationFile: File | null) => void;
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => void;
-    setTags: (tags: string[]) => void;
+    setTags: (tags: string[] | null) => void;
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
@@ -70,9 +71,10 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     ...initialState,
     selfIntroduction: '',
     profileImage: null,
+    profileImageKey: null,
     verificationFile: null,
     isVerificationSubmitted: false,
-    tags: [],
+    tags: null,
 
     // 상태 변경 함수들 구현
     setEmail: (email: string) => set({ email }),
@@ -85,11 +87,12 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setVerificationType: (verificationType: 'email' | 'phone') => set({ verificationType }),
     setEmailVerified: (emailVerified: boolean) => set({ emailVerified }),
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),
-    setSelfIntroduction: (selfIntroduction: string) => set({ selfIntroduction }),
+    setSelfIntroduction: (selfIntroduction: string | null) => set({ selfIntroduction }),
     setProfileImage: (profileImage: File | null) => set({ profileImage }),
+    setProfileImageKey: (profileImageKey: string | null) => set({ profileImageKey }),
     setVerificationFile: (verificationFile: File | null) => set({ verificationFile }),
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => set({ isVerificationSubmitted }),
-    setTags: (tags: string[]) => set({ tags }),
+    setTags: (tags: string[] | null) => set({ tags }),
 
     // 이메일 인증번호 검증 API 요청시 필요한 필드만 추출
     getEmailVerificationData: (): Omit<EmailVerificationRequest, 'code'> => {
