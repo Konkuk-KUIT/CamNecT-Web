@@ -9,14 +9,10 @@ import TagsFilterModal from '../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import { useAuthStore } from '../../store/useAuthStore';
-import { createCommunityPost } from '../../api/community';
+import { createCommunityPost, getCommunityPostDetail, updateCommunityPost } from '../../api/community';
 import type { CommunityPostDetail } from '../../types/community';
-import {
-    communityPostData,
-    communityPostSamples,
-    infoPosts,
-    questionPosts,
-} from '../../mock/community';
+import { mapToCommunityPost } from './utils/post';
+import { mapToCommunityPostDetail } from '../../utils/communityMapper';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -27,51 +23,8 @@ export const WritePage = () => {
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
 
-    // 편집 진입 시 기존 글 데이터 매핑
-    const editPost = useMemo<CommunityPostDetail | null>(() => {
-        if (!postId) return null;
-        if (communityPostData.id === postId) return communityPostData;
-
-        const sampleMatch = communityPostSamples.find((post) => post.id === postId);
-        if (sampleMatch) return sampleMatch;
-
-        const infoMatch = infoPosts.find((post) => post.id === postId);
-        if (infoMatch) {
-            return {
-                id: infoMatch.id,
-                boardType: '정보',
-                title: infoMatch.title,
-                likes: infoMatch.likes,
-                comments: infoMatch.comments,
-                saveCount: infoMatch.saveCount,
-                isAdopted: false,
-                createdAt: infoMatch.createdAt,
-                author: infoMatch.author,
-                content: infoMatch.content,
-                categories: infoMatch.categories,
-                postImages: infoMatch.postImageUrl ? [infoMatch.postImageUrl] : undefined,
-            };
-        }
-
-        const questionMatch = questionPosts.find((post) => post.id === postId);
-        if (questionMatch) {
-            return {
-                id: questionMatch.id,
-                boardType: '질문',
-                title: questionMatch.title,
-                likes: questionMatch.likes,
-                comments: questionMatch.answers,
-                saveCount: questionMatch.saveCount,
-                isAdopted: questionMatch.isAdopted,
-                createdAt: questionMatch.createdAt,
-                author: questionMatch.author,
-                content: questionMatch.content,
-                categories: questionMatch.categories,
-            };
-        }
-
-        return null;
-    }, [postId]);
+    const [editPost, setEditPost] = useState<CommunityPostDetail | null>(null);
+    const didInitEditRef = useRef(false);
 
     const initialBoardType = (editPost?.boardType as BoardType | undefined) ?? null;
     const initialTitle = editPost?.title ?? '';
@@ -174,6 +127,41 @@ export const WritePage = () => {
         };
     }, []);
 
+    useEffect(() => {
+        didInitEditRef.current = false;
+        setEditPost(null);
+    }, [postId]);
+
+    useEffect(() => {
+        if (!isEditMode || !postId) return;
+        const numericUserId = Number(userId);
+        if (!Number.isFinite(numericUserId)) return;
+        getCommunityPostDetail({ postId, params: { userId: numericUserId } })
+            .then((response) => {
+                setEditPost(mapToCommunityPostDetail(response.data));
+            })
+            .catch(() => {
+                setEditPost(mapToCommunityPost(postId));
+            });
+    }, [isEditMode, postId, userId]);
+
+    useEffect(() => {
+        if (!isEditMode || !editPost || didInitEditRef.current) return;
+        const nextBoardType = editPost.boardType as BoardType;
+        setBoardType(nextBoardType);
+        setDraftBoardType(nextBoardType);
+        setTitle(editPost.title);
+        setContent(editPost.content);
+        setSelectedTags(editPost.categories ?? []);
+        setPhotoPreviews(
+            editPost.postImages?.map((url, index) => ({
+                id: `edit-${editPost.id}-${index}`,
+                url,
+            })) ?? [],
+        );
+        didInitEditRef.current = true;
+    }, [isEditMode, editPost]);
+
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
     const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -213,15 +201,16 @@ export const WritePage = () => {
     // 확인 모달에서 "네" 클릭 시 메인으로 이동
     const handleConfirm = () => {
         // TODO: 수정 모드인 경우 변경된 데이터만 전송
-        if (isEditMode && postId) {
-            navigate(`/community/post/${postId}`);
-            return;
-        }
         if (!userId) {
             alert('로그인 정보가 없습니다. 다시 로그인해 주세요.');
             return;
         }
         if (isSubmitting) return;
+        const numericUserId = Number(userId);
+        if (!Number.isFinite(numericUserId)) {
+            alert('로그인 정보가 올바르지 않습니다. 다시 로그인해 주세요.');
+            return;
+        }
 
         const boardCode = boardType === '질문' ? 'QUESTION' : 'INFO';
         const tagIds = selectedTags
@@ -234,9 +223,33 @@ export const WritePage = () => {
             .filter((tagId): tagId is number => Number.isFinite(tagId));
 
         setIsSubmitting(true);
-        createCommunityPost(
-            { userId },
-            {
+        if (isEditMode && postId) {
+            updateCommunityPost({
+                postId,
+                params: { userId: numericUserId },
+                body: {
+                    title: title.trim(),
+                    content: content.trim(),
+                    anonymous: false,
+                    tagIds,
+                    attachments: [],
+                },
+            })
+                .then(() => {
+                    navigate(`/community/post/${postId}`);
+                })
+                .catch(() => {
+                    alert('게시글 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+                })
+                .finally(() => {
+                    setIsSubmitting(false);
+                    setIsConfirmOpen(false);
+                });
+            return;
+        }
+
+        createCommunityPost({
+            body: {
                 boardCode,
                 title: title.trim(),
                 content: content.trim(),
@@ -246,7 +259,7 @@ export const WritePage = () => {
                 accessType: 'FREE',
                 requiredPoints: 0,
             },
-        )
+        })
             .then((response) => {
                 const nextPostId = response.data.postId;
                 navigate(`/community/post/${nextPostId}`);
@@ -298,29 +311,35 @@ export const WritePage = () => {
                     </button>
 
                     <div className='flex items-center' style={{ gap: '13px' }}>
-                        <button
-                            type='button'
-                            onClick={openBoardSelector}
-                            className='flex text-r-16'
-                            style={{ color: boardLabelColor }}
-                        >
-                            {boardLabel}
-                            <svg
-                                xmlns='http://www.w3.org/2000/svg'
-                                width='22'
-                                height='22'
-                                viewBox='0 0 22 22'
-                                fill='none'
+                        {!isEditMode ? (
+                            <button
+                                type='button'
+                                onClick={openBoardSelector}
+                                className='flex text-r-16'
+                                style={{ color: boardLabelColor }}
                             >
-                                <path
-                                    d='M17.875 7.5625L11 14.4375L4.125 7.5625'
-                                    stroke='#A1A1A1'
-                                    strokeWidth='1.5'
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                />
-                            </svg>
-                        </button>
+                                {boardLabel}
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    width='22'
+                                    height='22'
+                                    viewBox='0 0 22 22'
+                                    fill='none'
+                                >
+                                    <path
+                                        d='M17.875 7.5625L11 14.4375L4.125 7.5625'
+                                        stroke='#A1A1A1'
+                                        strokeWidth='1.5'
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                    />
+                                </svg>
+                            </button>
+                        ) : (
+                            <span className='text-r-16' style={{ color: boardLabelColor }}>
+                                {boardLabel}
+                            </span>
+                        )}
                         <button
                             type='button'
                             className='text-b-16-hn'
@@ -501,7 +520,7 @@ export const WritePage = () => {
             </div>
 
             {/* 게시판 선택 모달 */}
-            {isBoardOpen && (
+            {!isEditMode && isBoardOpen && (
                 <div
                     className='fixed inset-0 z-50 flex items-end justify-center'
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}

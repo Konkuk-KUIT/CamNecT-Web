@@ -69,10 +69,99 @@ export type CreateCommunityPostBody = {
   requiredPoints: number;
 };
 
-export type CreateCommunityPostParams = {
-  userId: string | number;
-};
-
 export type CreateCommunityPostResult = {
   postId: number;
 };
+
+export type PostReactionParams = {
+  userId: number | string;
+};
+
+export type PostLikeResult = {
+  liked: boolean;
+  likeCount: number;
+};
+
+export type PostBookmarkResult = {
+  postId: number;
+  bookmarked: boolean;
+  bookmarkCount: number;
+};
+
+export type DeleteCommunityPostParams = {
+  userId: number | string;
+};
+
+export type DeleteCommunityPostResult = string;
+
+export type UpdateCommunityPostParams = {
+  userId: number | string;
+};
+
+export type UpdateCommunityPostBody = {
+  title: string;
+  content: string;
+  anonymous: boolean;
+  tagIds: number[];
+  attachments: CommunityAttachment[];
+};
+
+export type UpdateCommunityPostResult = string;
+
+export type CommunityPostDetailResponse = {
+  postId: number;
+  boardCode: "INFO" | "QUESTION";
+  title: string;
+  content: string;
+  anonymous: boolean;
+  authorId: number;
+  viewCount: number;
+  likeCount: number;
+  likedByMe: boolean;
+  acceptedCommentId: number | null;
+  tagIds: number[];
+  accessStatus: "GRANTED" | "LOCKED";
+  requiredPoints: number;
+  myPoints: number;
+};
+
+export type GetCommunityPostDetailParams = {
+  userId: number | string;
+};
+
+export type CommunityPostCommentResponse = {
+  commentId: number;
+  userId: number;
+  parentCommentId: number | null;
+  content: string;
+  likeCount: number;
+};
+
+export type CreateCommunityCommentParams = {
+  userId: number | string;
+};
+
+export type CreateCommunityCommentBody = {
+  content: string;
+  parentCommentId: number | null;
+};
+
+export type CreateCommunityCommentResult = {
+  commentId: number;
+};
+
+export type DeleteCommunityCommentParams = {
+  userId: number | string;
+};
+
+export type DeleteCommunityCommentResult = string;
+
+export type UpdateCommunityCommentParams = {
+  userId: number | string;
+};
+
+export type UpdateCommunityCommentBody = {
+  content: string;
+};
+
+export type UpdateCommunityCommentResult = string;

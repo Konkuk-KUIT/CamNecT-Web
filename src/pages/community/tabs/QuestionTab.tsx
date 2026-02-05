@@ -9,10 +9,6 @@ import TagsFilterModal from '../../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 import SortSelector from '../../../components/SortSelector';
 
-type QuestionTabProps = {
-  posts: QuestionPost[];
-};
-
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
@@ -22,11 +18,16 @@ const sortLabels: Record<SortKey, string> = {
   bookmarks: '북마크 많은 순',
 };
 
+type QuestionTabProps = {
+  posts: QuestionPost[];
+  sortKey: SortKey;
+  onSortChange: (next: SortKey) => void;
+};
+
 // 질문 탭: 필터 + 정렬 + 질문글 리스트
-const QuestionTab = ({ posts }: QuestionTabProps) => {
+const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>('recommended');
 
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
@@ -52,21 +53,6 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
     });
   }, [posts, selectedTags]);
 
-  // 정렬 기준에 따른 목록 재계산
-  const sortedPosts = useMemo(() => {
-    if (sortKey === 'recommended') return filteredPosts;
-    const cloned = [...filteredPosts];
-    if (sortKey === 'latest') {
-      return cloned.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-    if (sortKey === 'likes') {
-      return cloned.sort((a, b) => b.likes - a.likes);
-    }
-    return cloned.sort((a, b) => b.saveCount - a.saveCount);
-  }, [filteredPosts, sortKey]);
-
   return (
     <div className='flex flex-col bg-white' style={{ padding: '20px 25px', gap: '10px' }}>
       {/* 필터 영역: 선택된 태그 표시 + 모달 호출 */}
@@ -80,13 +66,13 @@ const QuestionTab = ({ posts }: QuestionTabProps) => {
             }
           />
         </div>
-        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} />
+        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={onSortChange} />
       </div>
 
       {/* 질문글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 질문글 리스트 API 연결 */}
-        {sortedPosts.map((post) => {
+        {filteredPosts.map((post) => {
           const isLocked = post.accessStatus !== 'GRANTED';
           const requiredPoints = post.requiredPoints;
           return (

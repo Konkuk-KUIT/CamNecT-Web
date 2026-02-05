@@ -27,6 +27,12 @@ type UseCommentActionsParams = {
   isQuestionPost: boolean;
   isAdopted: boolean;
   adoptedCommentId?: string;
+  onSubmitCommentApi?: (payload: {
+    content: string;
+    parentCommentId: string | null;
+  }) => Promise<void>;
+  onDeleteCommentApi?: (commentId: string) => Promise<void>;
+  onUpdateCommentApi?: (payload: { commentId: string; content: string }) => Promise<void>;
 };
 
 // 댓글 작성/편집/답글/정렬에 필요한 상태와 핸들러 제공
@@ -39,6 +45,9 @@ export const useCommentActions = ({
   isQuestionPost,
   isAdopted,
   adoptedCommentId,
+  onSubmitCommentApi,
+  onDeleteCommentApi,
+  onUpdateCommentApi,
 }: UseCommentActionsParams) => {
   const [commentContent, setCommentContent] = useState('');
   const [commentList, setCommentList] = useState<CommentItem[]>(initialComments);
@@ -48,6 +57,10 @@ export const useCommentActions = ({
   const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
   const [replyFocusToken, setReplyFocusToken] = useState(0);
   const highlightTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setCommentList(initialComments);
+  }, [initialComments, resetKey]);
 
   // 채택된 댓글을 상단에 고정하는 정렬 로직
   const sortedComments = useMemo(() => {
@@ -94,6 +107,16 @@ export const useCommentActions = ({
     if (isLockedQuestion) return;
     const trimmed = commentContent.trim();
     if (!trimmed) return;
+    if (onSubmitCommentApi) {
+      onSubmitCommentApi({
+        content: trimmed,
+        parentCommentId: replyTarget?.id ?? null,
+      }).finally(() => {
+        setCommentContent('');
+        setReplyTarget(null);
+      });
+      return;
+    }
     const now = new Date();
     const newComment: CommentItem = {
       id: `comment-${generateId()}`,
@@ -128,6 +151,12 @@ export const useCommentActions = ({
       handleCancelEdit();
       return;
     }
+    if (onUpdateCommentApi) {
+      onUpdateCommentApi({ commentId: editingCommentId, content: trimmed }).finally(() => {
+        handleCancelEdit();
+      });
+      return;
+    }
     setCommentList((prev) =>
       updateCommentContent(prev, editingCommentId, trimmed),
     );
@@ -136,6 +165,10 @@ export const useCommentActions = ({
 
   // 댓글 삭제
   const deleteComment = (commentId: string) => {
+    if (onDeleteCommentApi) {
+      onDeleteCommentApi(commentId);
+      return;
+    }
     setCommentList((prev) => removeCommentById(prev, commentId));
     if (editingCommentId === commentId) {
       setEditingCommentId(null);

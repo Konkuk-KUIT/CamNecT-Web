@@ -1,5 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
+import type { AxiosError } from 'axios';
 import { mapToCommunityPost } from '../utils/post';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { getCommunityPostDetail } from '../../../api/community';
+import { mapToCommunityPostDetail } from '../../../utils/communityMapper';
+import type { CommunityPostDetail } from '../../../types/community';
 
 type UsePostParams = {
   postId?: string;
@@ -8,7 +13,37 @@ type UsePostParams = {
 
 // 게시글 선택 및 파생 상태 계산을 캡슐화
 export const usePost = ({ postId, currentUserId }: UsePostParams) => {
-  const selectedPost = useMemo(() => mapToCommunityPost(postId), [postId]);
+  const userId = useAuthStore((state) => state.user?.id);
+  const [selectedPost, setSelectedPost] = useState<CommunityPostDetail>(() =>
+    mapToCommunityPost(postId),
+  );
+  const [likedByMe, setLikedByMe] = useState(false);
+  const [detailError, setDetailError] = useState(false);
+
+  useEffect(() => {
+    if (!postId) return;
+    const numericUserId = Number(userId);
+    if (!Number.isFinite(numericUserId)) return;
+
+    getCommunityPostDetail({
+      postId,
+      params: { userId: numericUserId },
+    })
+      .then((response) => {
+        setSelectedPost(mapToCommunityPostDetail(response.data));
+        setLikedByMe(Boolean(response.data.likedByMe));
+        setDetailError(false);
+      })
+      .catch((error: AxiosError) => {
+        const status = error.response?.status;
+        if (status === 404) {
+          setDetailError(true);
+          return;
+        }
+        setSelectedPost(mapToCommunityPost(postId));
+        setLikedByMe(false);
+      });
+  }, [postId, userId]);
 
   const isQuestionPost = selectedPost.boardType === '질문';
   const isInfoPost = !isQuestionPost;
@@ -32,5 +67,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     requiredPoints,
     textCount,
     imageCount,
+    likedByMe,
+    detailError,
   };
 };

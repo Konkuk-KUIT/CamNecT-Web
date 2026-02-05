@@ -10,10 +10,6 @@ import { formatTimeAgo } from '../time';
 import TagsFilterModal from '../../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 
-type InfoTabProps = {
-  posts: InfoPost[];
-};
-
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
@@ -23,11 +19,16 @@ const sortLabels: Record<SortKey, string> = {
   bookmarks: '북마크 많은 순',
 };
 
+type InfoTabProps = {
+  posts: InfoPost[];
+  sortKey: SortKey;
+  onSortChange: (next: SortKey) => void;
+};
+
 // 정보 탭: 필터 + 정렬 + 정보글 리스트
-const InfoTab = ({ posts }: InfoTabProps) => {
+const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>('recommended');
 
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
@@ -35,21 +36,6 @@ const InfoTab = ({ posts }: InfoTabProps) => {
       selectedTags.every((tag) => post.categories.includes(tag)),
     );
   }, [posts, selectedTags]);
-
-  // 정렬 기준에 따른 목록 재계산
-  const sortedPosts = useMemo(() => {
-    if (sortKey === 'recommended') return filteredPosts;
-    const cloned = [...filteredPosts];
-    if (sortKey === 'latest') {
-      return cloned.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-    if (sortKey === 'likes') {
-      return cloned.sort((a, b) => b.likes - a.likes);
-    }
-    return cloned.sort((a, b) => b.saveCount - a.saveCount);
-  }, [filteredPosts, sortKey]);
 
   return (
     <div
@@ -67,13 +53,13 @@ const InfoTab = ({ posts }: InfoTabProps) => {
             }
           />
         </div>
-        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} />
+        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={onSortChange} />
       </div>
 
       {/* 정보글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 정보글 리스트 API 연결 */}
-        {sortedPosts.map((post) => (
+        {filteredPosts.map((post) => (
           <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
             <article
               className='flex flex-col'

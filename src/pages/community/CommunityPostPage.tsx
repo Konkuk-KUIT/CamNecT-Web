@@ -20,11 +20,16 @@ import { usePost } from './hooks/usePost';
 import { formatPostDisplayDate } from './utils/post';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
+import { useAuthStore } from '../../store/useAuthStore';
+import { createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, updateCommunityComment } from '../../api/community';
+import { mapFlatCommentsToTree } from '../../utils/communityMapper';
 
 const CommunityPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const currentUser = loggedInUserProfile;
+  const authUserId = useAuthStore((state) => state.user?.id) ?? loggedInUserProfile.id;
+  const currentUserIdForOwnership = authUserId;
   // 옵션/팝업/이미지 실패 등 화면 단일 상태
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
@@ -44,6 +49,13 @@ const CommunityPostPage = () => {
     'GRANTED' | 'LOCKED' | null
   >(null);
   const [myPoints, setMyPoints] = useState(0);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+  const [commentListFromApi, setCommentListFromApi] = useState<CommentItem[]>([]);
   // 토스트 표시 제어
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
   // 게시글 파생 상태
@@ -57,9 +69,12 @@ const CommunityPostPage = () => {
     requiredPoints,
     textCount,
     imageCount,
-  } = usePost({ postId, currentUserId: currentUser.id });
+    likedByMe,
+    detailError,
+  } = usePost({ postId, currentUserId: currentUserIdForOwnership });
   const accessStatus = accessStatusOverride ?? selectedPost.accessStatus ?? 'GRANTED';
   const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
+  const userId = useAuthStore((state) => state.user?.id);
 
   useEffect(() => {
     const resetTimer = window.setTimeout(() => {
@@ -68,6 +83,24 @@ const CommunityPostPage = () => {
     }, 0);
     return () => window.clearTimeout(resetTimer);
   }, [selectedPost.id, selectedPost.myPoints]);
+
+  useEffect(() => {
+    setLikeCount(selectedPost.likes ?? 0);
+    setBookmarkCount(selectedPost.saveCount ?? 0);
+    setIsLiked(likedByMe);
+    setIsBookmarked(false);
+  }, [selectedPost.id, selectedPost.likes, selectedPost.saveCount, likedByMe]);
+
+  useEffect(() => {
+    if (!postId) return;
+    getCommunityPostComments(postId)
+      .then((response) => {
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      })
+      .catch(() => {
+        setCommentListFromApi([]);
+      });
+  }, [postId]);
 
   // 댓글 상태/액션 묶음
   const {
@@ -91,24 +124,74 @@ const CommunityPostPage = () => {
     formatCommentDisplayDate,
   } = useCommentActions({
     currentUser,
+    initialComments: commentListFromApi,
     resetKey: postId,
     isInfoPost,
     isLockedQuestion,
     isQuestionPost,
     isAdopted,
     adoptedCommentId: selectedPost.adoptedCommentId,
+    onSubmitCommentApi: async ({ content, parentCommentId }) => {
+      if (!userId || !postId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericParentId = parentCommentId ? Number(parentCommentId) : null;
+      await createCommunityComment({
+        postId,
+        params: { userId: numericUserId },
+        body: {
+          content,
+          parentCommentId: Number.isFinite(numericParentId ?? NaN)
+            ? numericParentId
+            : null,
+        },
+      });
+      const response = await getCommunityPostComments(postId);
+      setCommentListFromApi(mapFlatCommentsToTree(response.data));
+    },
+    onDeleteCommentApi: async (commentId) => {
+      if (!userId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericCommentId = Number(commentId);
+      if (!Number.isFinite(numericCommentId)) return;
+      await deleteCommunityComment({
+        commentId: numericCommentId,
+        params: { userId: numericUserId },
+      });
+      if (postId) {
+        const response = await getCommunityPostComments(postId);
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      }
+    },
+    onUpdateCommentApi: async ({ commentId, content }) => {
+      if (!userId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericCommentId = Number(commentId);
+      if (!Number.isFinite(numericCommentId)) return;
+      await updateCommunityComment({
+        commentId: numericCommentId,
+        params: { userId: numericUserId },
+        body: { content },
+      });
+      if (postId) {
+        const response = await getCommunityPostComments(postId);
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      }
+    },
   });
 
   // 게시글/댓글 옵션 열기
   const handleOpenCommentOptions = (comment: CommentItem) => {
-    setSelectedIsMine(comment.author.id === currentUser.id);
+    setSelectedIsMine(comment.author.id === currentUserIdForOwnership);
     setSelectedTarget('comment');
     setSelectedCommentId(comment.id);
     setIsOptionOpen(true);
   };
 
   const handleOpenPostOptions = () => {
-    setSelectedIsMine(selectedPost.author.id === currentUser.id);
+    setSelectedIsMine(selectedPost.author.id === currentUserIdForOwnership);
     setSelectedTarget('post');
     setSelectedCommentId(null);
     setIsOptionOpen(true);
@@ -126,6 +209,40 @@ const CommunityPostPage = () => {
     setIsPurchasePopupOpen(true);
   };
   const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
+
+  const handleLikeChange = async (next: boolean) => {
+    if (!userId || isLikeLoading) return;
+    const prev = { liked: isLiked, count: likeCount };
+    setIsLikeLoading(true);
+    setIsLiked(next);
+    try {
+      const response = await postCommunityLike(selectedPost.id, { userId });
+      setIsLiked(response.data.liked);
+      setLikeCount(response.data.likeCount);
+    } catch {
+      setIsLiked(prev.liked);
+      setLikeCount(prev.count);
+    } finally {
+      setIsLikeLoading(false);
+    }
+  };
+
+  const handleBookmarkChange = async (next: boolean) => {
+    if (!userId || isBookmarkLoading) return;
+    const prev = { bookmarked: isBookmarked, count: bookmarkCount };
+    setIsBookmarkLoading(true);
+    setIsBookmarked(next);
+    try {
+      const response = await postCommunityBookmark(selectedPost.id, { userId });
+      setIsBookmarked(response.data.bookmarked);
+      setBookmarkCount(response.data.bookmarkCount);
+    } catch {
+      setIsBookmarked(prev.bookmarked);
+      setBookmarkCount(prev.count);
+    } finally {
+      setIsBookmarkLoading(false);
+    }
+  };
 
   // URL 복사: 클립보드 실패 시 fallback 적용
   const copyPostUrl = async () => {
@@ -170,7 +287,7 @@ const CommunityPostPage = () => {
       if (!selectedIsMine || !selectedCommentId) return;
       startEditingComment(selectedCommentId);
     },
-    'delete-post': () => {
+    'delete-post': async () => {
       if (!selectedIsMine) return;
       setIsDeletePopupOpen(true);
     },
@@ -244,18 +361,23 @@ const CommunityPostPage = () => {
       headerSlot={
         <MainHeader
           title='커뮤니티'
+          leftAction={{
+            onClick: () => navigate('/community', { replace: true }),
+            ariaLabel: '커뮤니티로 이동',
+          }}
           rightActions={[
             { icon: 'option', onClick: handleOpenPostOptions, ariaLabel: '게시글 옵션 열기' },
           ]}
         />
       }
     >
-      <main
-        className='flex w-full justify-center bg-white'
-        style={{ paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}
-      >
-        <div className='flex w-full max-w-[720px] flex-col sm:px-[25px]'>
-          <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
+      {!detailError ? (
+        <main
+          className='flex w-full justify-center bg-white'
+          style={{ paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}
+        >
+          <div className='flex w-full max-w-[720px] flex-col sm:px-[25px]'>
+            <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
             <div className='flex flex-col items-start gap-[20px]'>
               {isQuestionPost ? (
                 <div
@@ -280,7 +402,7 @@ const CommunityPostPage = () => {
                   <div className='flex items-center gap-[5px]'>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='like' className='h-[14px] w-[14px]' />
-                      <span>{selectedPost.likes}</span>
+                      <span>{likeCount}</span>
                     </div>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='comment' className='h-[14px] w-[14px]' />
@@ -388,19 +510,26 @@ const CommunityPostPage = () => {
                 {sortedComments.map((comment) => renderComment(comment))}
               </div>
             )}
-          </section>
-        </div>
-      </main>
-      <BottomChat
-        likeCount={selectedPost.likes}
-        placeholder={isLockedQuestion ? '구매 후 입력 가능' : '댓글을 입력해 주세요'}
-        content={commentContent}
-        onChange={setCommentContent}
-        onSubmit={handleSubmitComment}
-        disabled={isLockedQuestion}
-        replyTargetName={replyTarget?.name}
-        focusToken={replyFocusToken}
-      />
+            </section>
+          </div>
+        </main>
+      ) : null}
+      {!detailError ? (
+        <BottomChat
+          likeCount={likeCount}
+          isLiked={isLiked}
+          onLikeChange={handleLikeChange}
+          isSaved={isBookmarked}
+          onSaveChange={handleBookmarkChange}
+          placeholder={isLockedQuestion ? '구매 후 입력 가능' : '댓글을 입력해 주세요'}
+          content={commentContent}
+          onChange={setCommentContent}
+          onSubmit={handleSubmitComment}
+          disabled={isLockedQuestion}
+          replyTargetName={replyTarget?.name}
+          focusToken={replyFocusToken}
+        />
+      ) : null}
       <BottomSheetModalPost
         isOpen={isOptionOpen}
         onClose={() => setIsOptionOpen(false)}
@@ -439,9 +568,19 @@ const CommunityPostPage = () => {
         type='warning'
         title='정말 삭제하시겠습니까?'
         content='삭제된 내용은 복구 불가능합니다.'
-        onLeftClick={() => {
-          // TODO: 삭제 API 요청 연결 예정
-          setIsDeletePopupOpen(false);
+        onLeftClick={async () => {
+          if (!userId) return;
+          const numericUserId = Number(userId);
+          if (!Number.isFinite(numericUserId)) return;
+          try {
+            await deleteCommunityPost({
+              postId: selectedPost.id,
+              params: { userId: numericUserId },
+            });
+            navigate('/community', { replace: true });
+          } finally {
+            setIsDeletePopupOpen(false);
+          }
         }}
         onRightClick={() => setIsDeletePopupOpen(false)}
       />
@@ -457,6 +596,13 @@ const CommunityPostPage = () => {
           setIsDeleteCommentPopupOpen(false);
         }}
         onRightClick={() => setIsDeleteCommentPopupOpen(false)}
+      />
+      <PopUp
+        isOpen={detailError}
+        type='error'
+        title='게시글 데이터를 불러올 수 없습니다'
+        titleSecondary='다음에 다시 시도해주세요.'
+        onClick={() => navigate('/community', { replace: true })}
       />
       <PopUp
         isOpen={isPurchasePopupOpen}

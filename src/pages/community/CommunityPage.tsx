@@ -9,8 +9,8 @@ import MainTab from './tabs/MainTab';
 import QuestionTab from './tabs/QuestionTab';
 import { loggedInUserMajor } from '../../mock/community';
 import { getCommunityHome, getCommunityPosts } from '../../api/community';
-import type { CommunityPostItem, Tab } from '../../api-types/communityApiTypes';
-import type { InfoPost, QuestionPost } from '../../types/community';
+import type { CommunityPostItem, Sort, Tab } from '../../api-types/communityApiTypes';
+import { mapToInfoPost, mapToQuestionPost } from '../../utils/communityMapper';
 
 const tabItems: TabItem[] = [
   { id: 'all', label: '전체' },
@@ -40,44 +40,15 @@ const createInitialState = (): CommunityListState => ({
   error: null,
 });
 
-const mapToInfoPost = (post: CommunityPostItem, major: string): InfoPost => ({
-  id: String(post.postId),
-  author: {
-    id: 'unknown',
-    name: '익명',
-    major,
-    studentId: '',
-    isAlumni: true,
-  },
-  categories: post.tags,
-  title: post.title,
-  content: post.preview,
-  likes: post.likeCount,
-  saveCount: post.bookmarkCount,
-  comments: post.commentCount,
-  createdAt: post.createdAt,
-});
+type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
-const mapToQuestionPost = (post: CommunityPostItem, major: string): QuestionPost => ({
-  id: String(post.postId),
-  author: {
-    id: 'unknown',
-    name: '익명',
-    major,
-    studentId: '',
-  },
-  categories: post.tags,
-  title: post.title,
-  content: post.preview,
-  likes: post.likeCount,
-  saveCount: post.bookmarkCount,
-  answers: post.answerCount,
-  isAdopted: post.accepted,
-  createdAt: post.createdAt,
-  accessStatus: 'GRANTED',
-  requiredPoints: 0,
-  myPoints: 0,
-});
+const mapSortKeyToApiSort = (sortKey: SortKey): Sort => {
+  if (sortKey === 'latest') return 'LATEST';
+  if (sortKey === 'likes') return 'LIKE';
+  if (sortKey === 'bookmarks') return 'BOOKMARK';
+  return 'RECOMMENDED';
+};
+
 
 export const CommunityPage = () => {
   const navigate = useNavigate();
@@ -88,9 +59,17 @@ export const CommunityPage = () => {
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
   // 검색어 정규화
   const normalizedQuery = searchQuery.trim();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(normalizedQuery);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [normalizedQuery]);
 
   const [infoState, setInfoState] = useState<CommunityListState>(() =>
     createInitialState(),
@@ -98,19 +77,26 @@ export const CommunityPage = () => {
   const [questionState, setQuestionState] = useState<CommunityListState>(() =>
     createInitialState(),
   );
+  const [infoSortKey, setInfoSortKey] = useState<SortKey>('recommended');
+  const [questionSortKey, setQuestionSortKey] = useState<SortKey>('recommended');
   const [mainState, setMainState] = useState<{
     recommendedByInterest: CommunityPostItem[];
     waitingQuestions: CommunityPostItem[];
     isLoading: boolean;
     error: string | null;
+    hasFetched: boolean;
   }>({
     recommendedByInterest: [],
     waitingQuestions: [],
     isLoading: false,
     error: null,
+    hasFetched: false,
   });
   const requestSeq = useRef({ INFO: 0, QUESTION: 0 });
-  const lastQueryRef = useRef({ INFO: '', QUESTION: '' });
+  const lastRequestRef = useRef({
+    INFO: { keyword: '', sort: 'RECOMMENDED' as Sort },
+    QUESTION: { keyword: '', sort: 'RECOMMENDED' as Sort },
+  });
   const infoStateRef = useRef(infoState);
   const questionStateRef = useRef(questionState);
 
@@ -145,20 +131,21 @@ export const CommunityPage = () => {
   const fetchCommunityPosts = useCallback(
     async (
       tab: Tab,
-      options: { append?: boolean; keyword?: string } = {},
+      options: { append?: boolean; keyword?: string; sort?: Sort } = {},
     ) => {
       if (tab === 'ALL') return;
 
       const isAppend = options.append ?? false;
       const keyword = options.keyword ?? undefined;
+      const sort = options.sort ?? undefined;
       const state = getTabState(tab);
 
       if (isAppend && (!state.hasNext || state.isLoadingMore || state.isLoading)) {
         return;
       }
 
-      if (!isAppend) {
-        lastQueryRef.current[tab] = keyword ?? '';
+      if (!isAppend && sort) {
+        lastRequestRef.current[tab] = { keyword: keyword ?? '', sort };
       }
 
       const requestId = ++requestSeq.current[tab];
@@ -175,6 +162,7 @@ export const CommunityPage = () => {
         const response = await getCommunityPosts({
           tab,
           keyword,
+          sort,
           size: DEFAULT_PAGE_SIZE,
           cursorId: isAppend ? state.nextCursorId ?? undefined : undefined,
           cursorValue: isAppend ? state.nextCursorValue ?? undefined : undefined,
@@ -207,26 +195,19 @@ export const CommunityPage = () => {
   );
 
   const infoPostsFromApi = useMemo(
-    () => infoState.items.map((post) => mapToInfoPost(post, loggedInUserMajor)),
+    () => infoState.items.map((post) => mapToInfoPost(post)),
     [infoState.items],
   );
   const questionPostsFromApi = useMemo(
-    () =>
-      questionState.items.map((post) => mapToQuestionPost(post, loggedInUserMajor)),
+    () => questionState.items.map((post) => mapToQuestionPost(post)),
     [questionState.items],
   );
   const recommendedPostsFromApi = useMemo(
-    () =>
-      mainState.recommendedByInterest.map((post) =>
-        mapToInfoPost(post, loggedInUserMajor),
-      ),
+    () => mainState.recommendedByInterest.map((post) => mapToInfoPost(post)),
     [mainState.recommendedByInterest],
   );
   const waitingQuestionsFromApi = useMemo(
-    () =>
-      mainState.waitingQuestions.map((post) =>
-        mapToQuestionPost(post, loggedInUserMajor),
-      ),
+    () => mainState.waitingQuestions.map((post) => mapToQuestionPost(post)),
     [mainState.waitingQuestions],
   );
 
@@ -251,22 +232,28 @@ export const CommunityPage = () => {
   useEffect(() => {
     if (activeTab === 'info') {
       const state = getTabState('INFO');
-      const isNewQuery = lastQueryRef.current.INFO !== normalizedQuery;
-      if (isNewQuery || (!state.isLoading && state.items.length === 0 && !state.error)) {
-        fetchCommunityPosts('INFO', { keyword: normalizedQuery });
+      const apiSort = mapSortKeyToApiSort(infoSortKey);
+      const lastRequest = lastRequestRef.current.INFO;
+      const isNewRequest =
+        lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
+      if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+        fetchCommunityPosts('INFO', { keyword: debouncedQuery, sort: apiSort });
       }
     }
     if (activeTab === 'question') {
       const state = getTabState('QUESTION');
-      const isNewQuery = lastQueryRef.current.QUESTION !== normalizedQuery;
-      if (isNewQuery || (!state.isLoading && state.items.length === 0 && !state.error)) {
-        fetchCommunityPosts('QUESTION', { keyword: normalizedQuery });
+      const apiSort = mapSortKeyToApiSort(questionSortKey);
+      const lastRequest = lastRequestRef.current.QUESTION;
+      const isNewRequest =
+        lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
+      if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+        fetchCommunityPosts('QUESTION', { keyword: debouncedQuery, sort: apiSort });
       }
     }
     if (activeTab === 'all') {
       if (
         !mainState.isLoading &&
-        mainState.recommendedByInterest.length === 0 &&
+        !mainState.hasFetched &&
         !mainState.error
       ) {
         setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
@@ -277,6 +264,7 @@ export const CommunityPage = () => {
               waitingQuestions: response.data.waitingQuestions,
               isLoading: false,
               error: null,
+              hasFetched: true,
             });
           })
           .catch(() => {
@@ -284,24 +272,40 @@ export const CommunityPage = () => {
               ...previous,
               isLoading: false,
               error: '커뮤니티 메인 정보를 불러오지 못했어요.',
+              hasFetched: true,
             }));
           });
       }
     }
   }, [
     activeTab,
-    normalizedQuery,
+    debouncedQuery,
+    infoSortKey,
+    questionSortKey,
     fetchCommunityPosts,
     mainState.isLoading,
-    mainState.recommendedByInterest.length,
     mainState.error,
+    mainState.hasFetched,
   ]);
 
   // 현재 탭에 맞는 화면 반환
   const renderTab = () => {
-    if (activeTab === 'info') return <InfoTab posts={infoPostsFromApi} />;
+    if (activeTab === 'info')
+      return (
+        <InfoTab
+          posts={infoPostsFromApi}
+          sortKey={infoSortKey}
+          onSortChange={setInfoSortKey}
+        />
+      );
     if (activeTab === 'question')
-      return <QuestionTab posts={questionPostsFromApi} />;
+      return (
+        <QuestionTab
+          posts={questionPostsFromApi}
+          sortKey={questionSortKey}
+          onSortChange={setQuestionSortKey}
+        />
+      );
     return (
       <MainTab
         userMajor={loggedInUserMajor}
