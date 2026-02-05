@@ -13,8 +13,7 @@ export const axiosInstance = axios.create({
 // Request Interceptor (요청 직전에 수행하는 작업)
 axiosInstance.interceptors.request.use(
     (config) => {
-        const accessToken =
-            useAuthStore.getState().accessToken ?? import.meta.env.VITE_DEV_ACCESS_TOKEN;
+        const accessToken = useAuthStore.getState().accessToken;
 
         if (accessToken) {
             // 로그인된 유저의 accessToken 붙이기
