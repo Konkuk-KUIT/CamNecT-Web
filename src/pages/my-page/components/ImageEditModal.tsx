@@ -54,14 +54,14 @@ export default function ProfileImageModal({ isOpen, onClose, onSelect, onDelete 
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpg"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, 'album')}
                 />
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpg"
                     capture="environment"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, 'camera')}

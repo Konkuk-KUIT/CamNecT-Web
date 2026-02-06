@@ -389,7 +389,7 @@ export const ActivityWritePage = () => {
               id='activity-photos'
               name='photos'
               type='file'
-              accept='image/*'
+              accept="image/png, image/jpg"
               multiple
               className='hidden'
               onChange={handlePhotoChange}

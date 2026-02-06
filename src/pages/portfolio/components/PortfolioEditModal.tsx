@@ -913,14 +913,14 @@ export default function PortfolioEditModal({
                 <input
                     ref={thumbnailInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpg"
                     onChange={handleThumbnailUpload}
                     className="hidden"
                 />
                 <input
                     ref={imageInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpg"
                     multiple
                     onChange={handleImageUpload}
                     className="hidden"
@@ -928,7 +928,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpg"
                     capture="environment"
                     onChange={handleCameraUpload}
                     className="hidden"
@@ -936,7 +936,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={pdfInputRef}
                     type="file"
-                    accept=".pdf,.txt,.html,.hwp,.doc,.docx" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
+                    accept=".pdf" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
                     multiple
                     onChange={handlePdfUpload}
                     className="hidden"
