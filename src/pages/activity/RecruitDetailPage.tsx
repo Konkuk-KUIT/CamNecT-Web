@@ -206,7 +206,7 @@ export const RecruitDetailPage = () => {
         >
             {recruitDetail.recruitNow ? (
                 <>
-                    {recruitDetail.isSubmited ? (
+                    {recruitDetail.isSubmitted ? (
                         <button
                             type='button'
                             disabled={true}

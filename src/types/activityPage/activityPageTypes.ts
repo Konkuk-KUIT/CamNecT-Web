@@ -132,5 +132,5 @@ export interface TeamRecruitDetail extends TeamRecruitPost{
 
     description: string;
 
-    isSubmited?:boolean;
+    isSubmitted?:boolean;
 }

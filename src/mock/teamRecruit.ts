@@ -129,7 +129,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 - 빠른 작업 가능하신 분
 
 활동비 지급 및 포트폴리오 제작 가능합니다!`,
-  isSubmited: true,
+  isSubmitted: true,
   },
 };
 
