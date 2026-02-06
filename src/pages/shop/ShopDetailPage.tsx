@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PopUp from '../../components/Pop-up';
-import Toast from '../../components/Toast';
-import { useToast } from '../../hooks/useToast';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { usePointStore } from '../../store/usePointStore';
@@ -19,9 +17,12 @@ export const ShopDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
+  const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
+  const [confirmPopUpConfig, setConfirmPopUpConfig] = useState<{
+    title: string;
+    content: string;
+    rightButtonText: string;
+  } | null>(null);
   // 전역 포인트 (구매 즉시 반영)
   const point = usePointStore((state) => state.point);
   const getPoint = usePointStore((state) => state.getPoint);
@@ -62,7 +63,11 @@ export const ShopDetailPage = () => {
       return;
     }
     // 구매중 상태에서 재클릭 시 구매 확인 팝업
-    setIsConfirmOpen(true);
+    setConfirmPopUpConfig({
+      title: '구매를 진행하시겠습니까?',
+      content: '* 사용 시 포인트가 차감됩니다',
+      rightButtonText: '네, 구매하겠습니다',
+    });
   };
 
   const handleConfirmPurchase = () => {
@@ -70,13 +75,15 @@ export const ShopDetailPage = () => {
     const currentPoint = getPoint();
     // 포인트가 부족하면 구매 진행 중단 (최신 포인트 기준)
     if (currentPoint < totalRequiredPoint) {
-      setToastMessage('포인트가 부족해서 구매할 수 없어요');
-      openToast();
-      setIsConfirmOpen(false);
+      setConfirmPopUpConfig(null);
+      setPopUpConfig({
+        title: '포인트가 부족해서 구매할 수 없어요',
+        content: '다양한 활동으로 포인트를 채워보세요!',
+      });
       return;
     }
     deductPoint(totalRequiredPoint);
-    setIsConfirmOpen(false);
+    setConfirmPopUpConfig(null);
     setIsSheetOpen(false);
     setIsPurchasing(false);
     navigate('/shop', { state: { purchaseSuccess: true } });
@@ -122,10 +129,16 @@ export const ShopDetailPage = () => {
 
         <div className='flex flex-col gap-[10px] px-[25px] py-[15px] flex-1'>
           <span className='text-r-12 text-[var(--ColorGray2,#A1A1A1)]'>
-            - 구매일로부터 교환권 지급까지 영업일 기준 ~3일 소요될 수 있습니다.
+            - 구매일로부터 교환권 지급까지 평균 3일 정도 소요될 수 있습니다.
           </span>
           <span className='text-r-12 text-[var(--ColorGray2,#A1A1A1)]'>
-            - 환불 및 취소와 관련된 사항은 문의 탭 이용 바랍니다.
+            - 교환권은 등록된 번호로 문자 발송됩니다.
+          </span>
+          <span className='text-r-12 text-[var(--ColorGray2,#A1A1A1)]'>
+            - 구매 불가 시 이메일로 알림발송 됩니다.
+          </span>
+          <span className='text-r-12 text-[var(--ColorGray2,#A1A1A1)]'>
+            - (주요 사유 : 재고부족)
           </span>
         </div>
       </section>
@@ -140,16 +153,26 @@ export const ShopDetailPage = () => {
         requiredPoint={product.point}
         bottomOffset='calc(105px)'
       />
-      <PopUp
-        isOpen={isConfirmOpen}
-        type='info'
-        title='구매를 진행하시겠습니까?'
-        content='* 사용 시 포인트가 차감됩니다'
-        rightButtonText='네, 구매하겠습니다'
-        onLeftClick={() => setIsConfirmOpen(false)}
-        onRightClick={handleConfirmPurchase}
-      />
-      <Toast isOpen={isToastOpen} isFading={isToastFading} message={toastMessage} />
+      {confirmPopUpConfig && (
+        <PopUp
+          isOpen={true}
+          type='info'
+          title={confirmPopUpConfig.title}
+          content={confirmPopUpConfig.content}
+          rightButtonText={confirmPopUpConfig.rightButtonText}
+          onLeftClick={() => setConfirmPopUpConfig(null)}
+          onRightClick={handleConfirmPurchase}
+        />
+      )}
+      {popUpConfig && (
+        <PopUp
+          isOpen={true}
+          type='confirm'
+          title={popUpConfig.title}
+          content={popUpConfig.content}
+          onClick={() => setPopUpConfig(null)}
+        />
+      )}
     </HeaderLayout>
   );
 };
