@@ -150,7 +150,8 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityTitle: "2026 창업 아이디어톤 참가",
     activityUrl: "https://example.com/activities/act_2026_001",
     authorMajor: "경영학부",
-    authorGrade: 3,
+    authorGrade: "23",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-10T23:59:59.999Z",
     recruitTeamNumber: 4,
@@ -174,7 +175,8 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityTitle: "교내 해커톤 2026 Winter 참가",
     activityUrl: "https://example.com/activities/act_2026_002",
     authorMajor: "컴퓨터공학부",
-    authorGrade: 2,
+    authorGrade: "16",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-06T23:59:59.999Z",
     recruitTeamNumber: 5,
@@ -198,7 +200,8 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityTitle: "AI 서비스 기획 공모전",
     activityUrl: "https://example.com/activities/act_2026_003",
     authorMajor: "산업공학과",
-    authorGrade: 4,
+    authorGrade: "21",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-01-25T23:59:59.999Z",
     recruitTeamNumber: 6,
@@ -222,7 +225,8 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityTitle: "UX 챌린지 2026 참가",
     activityUrl: "https://example.com/activities/act_2026_004",
     authorMajor: "미디어디자인학부",
-    authorGrade: 3,
+    authorGrade: "19",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-12T23:59:59.999Z",
     recruitTeamNumber: 3,
@@ -246,7 +250,8 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityTitle: "브랜딩/콘텐츠 공모전 참가",
     activityUrl: "https://example.com/activities/act_2026_005",
     authorMajor: "미디어디자인학부",
-    authorGrade: 4,
+    authorGrade: "20",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-15T23:59:59.999Z",
     recruitTeamNumber: 4,
