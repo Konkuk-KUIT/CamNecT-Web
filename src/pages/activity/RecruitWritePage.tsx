@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { EditHeader } from '../../layouts/headers/EditHeader';
@@ -13,18 +13,33 @@ export const RecruitWritePage = () => {
     const navigate = useNavigate();
     const { recruitId } = useParams();
     const isEditMode = Boolean(recruitId);
+    const currentYear = new Date().getFullYear();
     
     const existingRecruit = useMemo(
         () => (recruitId ? getTeamRecruitDetail(recruitId) : null),
         [recruitId]
     );
 
-    const [title, setTitle] = useState('');
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [month, setMonth] = useState(1);
-    const [day, setDay] = useState(1);
-    const [teamNumber, setTeamNumber] = useState(1);
-    const [description, setDescription] = useState('');
+    const initial = useMemo(() => {
+        const d = existingRecruit ? new Date(existingRecruit.recruitDeadline) : null;
+
+        return {
+            title: existingRecruit?.title ?? '',
+            year: d?.getFullYear() ?? currentYear,
+            month: d ? d.getMonth() + 1 : 1,
+            day: d?.getDate() ?? 1,
+            teamNumber: existingRecruit?.recruitTeamNumber ?? 1,
+            description: existingRecruit?.description ?? '',
+        };
+    }, [existingRecruit, currentYear]);
+
+
+    const [title, setTitle] = useState(() => initial.title);
+    const [year, setYear] = useState(() => initial.year);
+    const [month, setMonth] = useState(() => initial.month);
+    const [day, setDay] = useState(() => initial.day);
+    const [teamNumber, setTeamNumber] = useState(() => initial.teamNumber);
+    const [description, setDescription] = useState(() => initial.description);
     const [showWarning, setShowWarning] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -33,7 +48,6 @@ export const RecruitWritePage = () => {
     const [showDayDropdown, setShowDayDropdown] = useState(false);
 
     const maxLength = 300;
-    const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
     
     // 선택된 연도/월에 따른 일수 계산
@@ -43,28 +57,16 @@ export const RecruitWritePage = () => {
 
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    // 수정 모드일 때 기존 데이터 로드
-    useEffect(() => {
-        if (existingRecruit) {
-        setTitle(existingRecruit.title);
-        const deadlineDate = new Date(existingRecruit.recruitDeadline);
-        setYear(deadlineDate.getFullYear());
-        setMonth(deadlineDate.getMonth() + 1);
-        setDay(deadlineDate.getDate());
-        setTeamNumber(existingRecruit.recruitTeamNumber);
-        setDescription(existingRecruit.description);
-        }
-    }, [existingRecruit]);
-
     // 초기값 저장
     const initialData = useMemo(() => ({
-        title: existingRecruit?.title || '',
-        year: existingRecruit ? new Date(existingRecruit.recruitDeadline).getFullYear() : currentYear,
-        month: existingRecruit ? new Date(existingRecruit.recruitDeadline).getMonth() + 1 : 1,
-        day: existingRecruit ? new Date(existingRecruit.recruitDeadline).getDate() : 1,
-        teamNumber: existingRecruit?.recruitTeamNumber || 1,
-        description: existingRecruit?.description || '',
-    }), [existingRecruit, currentYear]);
+        title: initial.title,
+        year: initial.year,
+        month: initial.month,
+        day: initial.day,
+        teamNumber: initial.teamNumber,
+        description: initial.description,
+    }), [initial]);
+
 
     // 변경사항 추적
     const hasChanges = useMemo(
@@ -100,13 +102,6 @@ export const RecruitWritePage = () => {
     const handleDecrement = () => {
         setTeamNumber(prev => (prev > 1 ? prev - 1 : 1));
     };
-
-    // 월이 변경되면 일자가 유효한지 확인
-    useEffect(() => {
-        if (day > daysInMonth) {
-        setDay(daysInMonth);
-        }
-    }, [day, daysInMonth]);
 
     return (
         <>
@@ -169,11 +164,13 @@ export const RecruitWritePage = () => {
                                             key={y}
                                             type='button'
                                             onClick={() => {
-                                            setYear(y);
-                                            setShowYearDropdown(false);
+                                                setYear(y);
+                                                const dim = new Date(y, month, 0).getDate();
+                                                setDay((d) => Math.min(d, dim));
+                                                setShowYearDropdown(false);
                                             }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
-                                            year === y ? 'text-primary' : 'text-gray-650'
+                                                year === y ? 'text-primary' : 'text-gray-650'
                                             }`}
                                         >
                                             {y}년
@@ -203,11 +200,13 @@ export const RecruitWritePage = () => {
                                             key={m}
                                             type='button'
                                             onClick={() => {
-                                            setMonth(m);
-                                            setShowMonthDropdown(false);
+                                                setMonth(m);
+                                                const dim = new Date(year, m, 0).getDate();
+                                                setDay((d) => Math.min(d, dim));
+                                                setShowMonthDropdown(false);
                                             }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${
-                                            month === m ? 'text-primary' : 'text-gray-650'
+                                                month === m ? 'text-primary' : 'text-gray-650'
                                             }`}
                                         >
                                             {m}월

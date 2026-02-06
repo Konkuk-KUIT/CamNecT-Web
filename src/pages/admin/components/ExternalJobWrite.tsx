@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../../components/Icon';
 import PopUp from '../../../components/Pop-up';
@@ -12,321 +12,327 @@ import { useImageUpload } from '../../../hooks/useImageUpload';
 import { mapToActivityPost } from '../../../mock/activityCommunity';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const daysInMonth = (year: number, month: number) => new Date(year, month, 0).getDate();
+const clampDay = (day: number, year: number, month: number) => Math.min(day, daysInMonth(year, month));
+
 
 type PostType = 'external' | 'job';
 
 interface ExternalJobWritePageProps {
-  type: PostType;
+    type: PostType;
 }
 
 export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
-  const navigate = useNavigate();
-  const { postId } = useParams();
-  const isEditMode = Boolean(postId);
+    const navigate = useNavigate();
+    const { postId } = useParams();
+    const isEditMode = Boolean(postId);
 
-  // TODO: postId로 기존 데이터 가져오기
-  const editPost = useMemo(() => {
-      if (!postId) return null;
-      return mapToActivityPost(postId);
-}, [postId]);
+    // TODO: postId로 기존 데이터 가져오기
+    const editPost = useMemo(() => {
+        if (!postId) return null;
+        return mapToActivityPost(postId);
+    }, [postId]);
 
+    const initial = useMemo(() => {
   const currentYear = new Date().getFullYear();
 
-  const [title, setTitle] = useState('');
-  // external 전용
-  const [target, setTarget] = useState('');
-  const [announceYear, setAnnounceYear] = useState(currentYear);
-  const [announceMonth, setAnnounceMonth] = useState(1);
-  const [announceDay, setAnnounceDay] = useState(1);
-  const [showAnnounceYearDropdown, setShowAnnounceYearDropdown] = useState(false);
-  const [showAnnounceMonthDropdown, setShowAnnounceMonthDropdown] = useState(false);
-  const [showAnnounceDayDropdown, setShowAnnounceDayDropdown] = useState(false);
-  
-  // job 전용
-  const [employType, setEmployType] = useState('');
-  const [payment, setPayment] = useState('');
-  
-  // 공통
-  const [startYear, setStartYear] = useState(currentYear);
-  const [startMonth, setStartMonth] = useState(1);
-  const [startDay, setStartDay] = useState(1);
-  const [endYear, setEndYear] = useState(currentYear);
-  const [endMonth, setEndMonth] = useState(12);
-  const [endDay, setEndDay] = useState(31);
-  const [organizer, setOrganizer] = useState('');
-  const [applyUrl, setApplyUrl] = useState('');
-  const [descriptionTitle, setDescriptionTitle] = useState('');
-  const [descriptionBody, setDescriptionBody] = useState('');
+  const startDate = editPost?.applyPeriod?.start ? new Date(editPost.applyPeriod.start) : null;
+  const endDate = editPost?.applyPeriod?.end ? new Date(editPost.applyPeriod.end) : null;
+  const announceDate = editPost?.announceDate ? new Date(editPost.announceDate) : null;
 
-  const [thumbnail, setThumbnail] = useState<{ id: string; url: string } | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const startY = startDate?.getFullYear() ?? currentYear;
+  const startM = startDate ? startDate.getMonth() + 1 : 1;
+  const startD = startDate?.getDate() ?? 1;
 
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const endY = endDate?.getFullYear() ?? currentYear;
+  const endM = endDate ? endDate.getMonth() + 1 : 12;
+  const endD = endDate?.getDate() ?? 31;
 
-  const [showStartYearDropdown, setShowStartYearDropdown] = useState(false);
-  const [showStartMonthDropdown, setShowStartMonthDropdown] = useState(false);
-  const [showStartDayDropdown, setShowStartDayDropdown] = useState(false);
-  const [showEndYearDropdown, setShowEndYearDropdown] = useState(false);
-  const [showEndMonthDropdown, setShowEndMonthDropdown] = useState(false);
-  const [showEndDayDropdown, setShowEndDayDropdown] = useState(false);
+  const announceY = announceDate?.getFullYear() ?? currentYear;
+  const announceM = announceDate ? announceDate.getMonth() + 1 : 1;
+  const announceD = announceDate?.getDate() ?? 1;
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { prepareImage } = useImageUpload();
+  return {
+    currentYear,
 
-  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+    title: editPost?.title ?? '',
+    selectedTags: editPost?.categories ?? [],
+    organizer: editPost?.organizer ?? '',
+    applyUrl: editPost?.applyUrl ?? '',
+    descriptionTitle: editPost?.descriptionBlocks?.title ?? '',
+    descriptionBody: editPost?.descriptionBlocks?.body ?? '',
 
-  const startDaysInMonth = useMemo(() => new Date(startYear, startMonth, 0).getDate(), [startYear, startMonth]);
-  const endDaysInMonth = useMemo(() => new Date(endYear, endMonth, 0).getDate(), [endYear, endMonth]);
-  const announceDaysInMonth = useMemo(() => new Date(announceYear, announceMonth, 0).getDate(), [announceYear, announceMonth]);
+    target: editPost?.target ?? '',
+    employType: editPost?.employType ?? '',
+    payment: editPost?.payment ?? '',
 
-  const startDays = Array.from({ length: startDaysInMonth }, (_, i) => i + 1);
-  const endDays = Array.from({ length: endDaysInMonth }, (_, i) => i + 1);
-  const announceDays = Array.from({ length: announceDaysInMonth }, (_, i) => i + 1);
+    startYear: startY,
+    startMonth: startM,
+    startDay: clampDay(startD, startY, startM),
 
-  // 타입별 설정
-  const config = useMemo(() => {
-    if (type === 'external') {
-      return {
-        title: '대외활동',
-        field1Label: '모집 대상',
-        field1Placeholder: '내용 입력',
-        field2Label: '수상 발표',
-        imageLabel: '대표 이미지',
-        contentLabel: '공모전 개요',
-        contentPlaceholder: '공모전 개요 입력',
-        detailLabel: '공모전 상세 정보',
-        detailPlaceholder: '공모전 상세 입력',
-      };
-    } else {
-      return {
-        title: '취업정보',
-        field1Label: '채용 형태',
-        field1Placeholder: '내용 입력',
-        field2Label: '급여',
-        imageLabel: '대표 이미지',
-        contentLabel: '취업 정보 개요',
-        contentPlaceholder: '취업 정보 개요 입력',
-        detailLabel: '취업 정보 상세',
-        detailPlaceholder: '취업 정보 상세 입력',
-      };
-    }
-  }, [type]);
+    endYear: endY,
+    endMonth: endM,
+    endDay: clampDay(endD, endY, endM),
 
-  // 수정 모드일 때 기존 데이터 로드
-  useEffect(() => {
-    if (editPost) {
-      setTitle(editPost.title || '');
-      setSelectedTags(editPost.categories || []);
-      setOrganizer(editPost.organizer || '');
-      setApplyUrl(editPost.applyUrl || '');
-      setDescriptionTitle(editPost.descriptionBlocks?.title || '');
-      setDescriptionBody(editPost.descriptionBlocks?.body || '');
-      
-      if (type === 'external') {
-        setTarget(editPost.target || '');
-        if (editPost.announceDate) {
-          const announceDate = new Date(editPost.announceDate);
-          setAnnounceYear(announceDate.getFullYear());
-          setAnnounceMonth(announceDate.getMonth() + 1);
-          setAnnounceDay(announceDate.getDate());
+    announceYear: announceY,
+    announceMonth: announceM,
+    announceDay: clampDay(announceD, announceY, announceM),
+
+    thumbnailUrl: editPost?.thumbnailUrl
+      ? { id: 'existing-thumbnail', url: editPost.thumbnailUrl }
+      : null,
+  };
+}, [editPost]);
+
+
+    const currentYear = initial.currentYear;
+
+    const [title, setTitle] = useState(() => initial.title);
+    // external 전용
+    const [target, setTarget] = useState(() => initial.target);
+    const [announceYear, setAnnounceYear] = useState(() => initial.announceYear);
+    const [announceMonth, setAnnounceMonth] = useState(() => initial.announceMonth);
+    const [announceDay, setAnnounceDay] = useState(() => initial.announceDay);
+    const [showAnnounceYearDropdown, setShowAnnounceYearDropdown] = useState(false);
+    const [showAnnounceMonthDropdown, setShowAnnounceMonthDropdown] = useState(false);
+    const [showAnnounceDayDropdown, setShowAnnounceDayDropdown] = useState(false);
+    
+    // job 전용
+    const [employType, setEmployType] = useState(() => initial.employType);
+    const [payment, setPayment] = useState(() => initial.payment);  
+    
+    // 공통
+    const [startYear, setStartYear] = useState(() => initial.startYear);
+    const [startMonth, setStartMonth] = useState(() => initial.startMonth);
+    const [startDay, setStartDay] = useState(() => initial.startDay);
+
+    const [endYear, setEndYear] = useState(() => initial.endYear);
+    const [endMonth, setEndMonth] = useState(() => initial.endMonth);
+    const [endDay, setEndDay] = useState(() => initial.endDay);
+
+    const [organizer, setOrganizer] = useState(() => initial.organizer);
+    const [applyUrl, setApplyUrl] = useState(() => initial.applyUrl);
+    const [descriptionTitle, setDescriptionTitle] = useState(() => initial.descriptionTitle);
+    const [descriptionBody, setDescriptionBody] = useState(() => initial.descriptionBody);
+
+    const [thumbnailUrl, setThumbnailUrl] = useState<{ id: string; url: string } | null>(
+        () => initial.thumbnailUrl
+    );
+
+    const [selectedTags, setSelectedTags] = useState<string[]>(
+        () => initial.selectedTags
+    );
+
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const [showStartYearDropdown, setShowStartYearDropdown] = useState(false);
+    const [showStartMonthDropdown, setShowStartMonthDropdown] = useState(false);
+    const [showStartDayDropdown, setShowStartDayDropdown] = useState(false);
+    const [showEndYearDropdown, setShowEndYearDropdown] = useState(false);
+    const [showEndMonthDropdown, setShowEndMonthDropdown] = useState(false);
+    const [showEndDayDropdown, setShowEndDayDropdown] = useState(false);
+
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const { prepareImage } = useImageUpload();
+
+    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+
+    const startDaysInMonth = useMemo(() => new Date(startYear, startMonth, 0).getDate(), [startYear, startMonth]);
+    const endDaysInMonth = useMemo(() => new Date(endYear, endMonth, 0).getDate(), [endYear, endMonth]);
+    const announceDaysInMonth = useMemo(() => new Date(announceYear, announceMonth, 0).getDate(), [announceYear, announceMonth]);
+
+    const startDays = Array.from({ length: startDaysInMonth }, (_, i) => i + 1);
+    const endDays = Array.from({ length: endDaysInMonth }, (_, i) => i + 1);
+    const announceDays = Array.from({ length: announceDaysInMonth }, (_, i) => i + 1);
+
+    // 타입별 설정
+    const config = useMemo(() => {
+        if (type === 'external') {
+        return {
+            title: '대외활동',
+            field1Label: '모집 대상',
+            field1Placeholder: '내용 입력',
+            field2Label: '수상 발표',
+            imageLabel: '대표 이미지',
+            contentLabel: '공모전 개요',
+            contentPlaceholder: '공모전 개요 입력',
+            detailLabel: '공모전 상세 정보',
+            detailPlaceholder: '공모전 상세 입력',
+        };
+        } else {
+        return {
+            title: '취업정보',
+            field1Label: '채용 형태',
+            field1Placeholder: '내용 입력',
+            field2Label: '급여',
+            imageLabel: '대표 이미지',
+            contentLabel: '취업 정보 개요',
+            contentPlaceholder: '취업 정보 개요 입력',
+            detailLabel: '취업 정보 상세',
+            detailPlaceholder: '취업 정보 상세 입력',
+        };
         }
-      } else {
-        setEmployType(editPost.employType || '');
-        setPayment(editPost.payment || '');
-      }
-      
-      if (editPost.thumbnailUrl) {
-        setThumbnail({
-          id: 'existing-thumbnail',
-          url: editPost.thumbnailUrl,
-        });
-      }
-
-      if (editPost.applyPeriod?.start) {
-        const startDate = new Date(editPost.applyPeriod.start);
-        setStartYear(startDate.getFullYear());
-        setStartMonth(startDate.getMonth() + 1);
-        setStartDay(startDate.getDate());
-      }
-
-      if (editPost.applyPeriod?.end) {
-        const endDate = new Date(editPost.applyPeriod.end);
-        setEndYear(endDate.getFullYear());
-        setEndMonth(endDate.getMonth() + 1);
-        setEndDay(endDate.getDate());
-      }
-    }
-  }, [editPost, type]);
+    }, [type]);
 
     // 초기값 저장
     const initialBase = useMemo(() => ({
-        title: editPost?.title || '',
-        organizer: editPost?.organizer || '',
-        applyUrl: editPost?.applyUrl || '',
-        descriptionTitle: editPost?.descriptionBlocks?.title || '',
-        descriptionBody: editPost?.descriptionBlocks?.body || '',
-        startYear: editPost?.applyPeriod?.start ? new Date(editPost.applyPeriod.start).getFullYear() : currentYear,
-        startMonth: editPost?.applyPeriod?.start ? new Date(editPost.applyPeriod.start).getMonth() + 1 : 1,
-        startDay: editPost?.applyPeriod?.start ? new Date(editPost.applyPeriod.start).getDate() : 1,
-        endYear: editPost?.applyPeriod?.end ? new Date(editPost.applyPeriod.end).getFullYear() : currentYear,
-        endMonth: editPost?.applyPeriod?.end ? new Date(editPost.applyPeriod.end).getMonth() + 1 : 12,
-        endDay: editPost?.applyPeriod?.end ? new Date(editPost.applyPeriod.end).getDate() : 31,
-        selectedTags: editPost?.categories || [],
-        thumbnail: editPost?.thumbnailUrl || null,
-    }), [editPost, currentYear]);
-
-const initialDataExternal = useMemo(() => ({
-  ...initialBase,
-  target: editPost?.target || '',
-  announceYear: editPost?.announceDate ? new Date(editPost.announceDate).getFullYear() : currentYear,
-  announceMonth: editPost?.announceDate ? new Date(editPost.announceDate).getMonth() + 1 : 1,
-  announceDay: editPost?.announceDate ? new Date(editPost.announceDate).getDate() : 1,
-}), [initialBase, editPost, currentYear]);
-
-const initialDataJob = useMemo(() => ({
-  ...initialBase,
-  employType: editPost?.employType || '',
-  payment: editPost?.payment || '',
-}), [initialBase, editPost]);
+        title: initial.title,
+        organizer: initial.organizer,
+        applyUrl: initial.applyUrl,
+        descriptionTitle: initial.descriptionTitle,
+        descriptionBody: initial.descriptionBody,
+        startYear: initial.startYear,
+        startMonth: initial.startMonth,
+        startDay: initial.startDay,
+        endYear: initial.endYear,
+        endMonth: initial.endMonth,
+        endDay: initial.endDay,
+        selectedTags: initial.selectedTags,
+        thumbnailUrl: initial.thumbnailUrl?.url ?? null,
+    }), [initial]);
 
 
-  // 변경사항 추적
-  const hasChanges = useMemo(() => {
-    const baseChanges =
-      title !== initialBase.title ||
-      organizer !== initialBase.organizer ||
-      applyUrl !== initialBase.applyUrl ||
-      descriptionTitle !== initialBase.descriptionTitle ||
-      descriptionBody !== initialBase.descriptionBody ||
-      startYear !== initialBase.startYear ||
-      startMonth !== initialBase.startMonth ||
-      startDay !== initialBase.startDay ||
-      endYear !== initialBase.endYear ||
-      endMonth !== initialBase.endMonth ||
-      endDay !== initialBase.endDay ||
-      JSON.stringify(selectedTags) !== JSON.stringify(initialBase.selectedTags) ||
-      (thumbnail?.url ?? null) !== (initialBase.thumbnail ?? null)
+    const initialDataExternal = useMemo(() => ({
+        ...initialBase,
+        target: initial.target,
+        announceYear: initial.announceYear,
+        announceMonth: initial.announceMonth,
+        announceDay: initial.announceDay,
+    }), [initialBase, initial]);
 
-    if (type === 'external') {
-      return (
-        baseChanges ||
-        target !== initialDataExternal.target ||
-        announceYear !== initialDataExternal.announceYear ||
-        announceMonth !== initialDataExternal.announceMonth ||
-        announceDay !== initialDataExternal.announceDay
-      );
-    } else {
-      return (
-        baseChanges ||
-        employType !== initialDataJob.employType ||
-        payment !== initialDataJob.payment
-      );
-    }
-  }, [title, organizer, applyUrl, descriptionTitle, descriptionBody, startYear, startMonth, startDay, endYear, endMonth, endDay, selectedTags, thumbnail,
-      target, announceYear, announceMonth, announceDay, employType, payment, initialBase, initialDataExternal, initialDataJob, type]);
+    const initialDataJob = useMemo(() => ({
+        ...initialBase,
+        employType: initial.employType,
+        payment: initial.payment,
+    }), [initialBase, initial]);
 
-  const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
-  const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
 
-  const isSubmitEnabled = title.trim().length > 0 && selectedTags.length > 0;
 
-  const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+    // 변경사항 추적
+    const hasChanges = useMemo(() => {
+        const baseChanges =
+        title !== initialBase.title ||
+        organizer !== initialBase.organizer ||
+        applyUrl !== initialBase.applyUrl ||
+        descriptionTitle !== initialBase.descriptionTitle ||
+        descriptionBody !== initialBase.descriptionBody ||
+        startYear !== initialBase.startYear ||
+        startMonth !== initialBase.startMonth ||
+        startDay !== initialBase.startDay ||
+        endYear !== initialBase.endYear ||
+        endMonth !== initialBase.endMonth ||
+        endDay !== initialBase.endDay ||
+        JSON.stringify(selectedTags) !== JSON.stringify(initialBase.selectedTags) ||
+        (thumbnailUrl?.url ?? null) !== (initialBase.thumbnailUrl ?? null)
 
-    const file = files[0];
-    const result = prepareImage(file);
-    if (!result) return;
+        if (type === 'external') {
+        return (
+            baseChanges ||
+            target !== initialDataExternal.target ||
+            announceYear !== initialDataExternal.announceYear ||
+            announceMonth !== initialDataExternal.announceMonth ||
+            announceDay !== initialDataExternal.announceDay
+        );
+        } else {
+        return (
+            baseChanges ||
+            employType !== initialDataJob.employType ||
+            payment !== initialDataJob.payment
+        );
+        }
+    }, [title, organizer, applyUrl, descriptionTitle, descriptionBody, startYear, startMonth, startDay, endYear, endMonth, endDay, selectedTags, thumbnailUrl,
+        target, announceYear, announceMonth, announceDay, employType, payment, initialBase, initialDataExternal, initialDataJob, type]);
 
-    if (thumbnail) {
-      URL.revokeObjectURL(thumbnail.url);
-    }
+    const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
+    const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
 
-    setThumbnail({
-      id: `${file.name}-${file.lastModified}`,
-      url: result.previewUrl,
-    });
+    const isSubmitEnabled = title.trim().length > 0 && selectedTags.length > 0;
 
-    event.target.value = '';
-  };
+    const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
 
-  const handleRemoveThumbnail = () => {
-    if (thumbnail) {
-      URL.revokeObjectURL(thumbnail.url);
-      setThumbnail(null);
-    }
-  };
+        const file = files[0];
+        const result = prepareImage(file);
+        if (!result) return;
 
-  const handleSubmit = () => {
-    if (!isSubmitEnabled) return;
-    setIsConfirmOpen(true);
-  };
+        if (thumbnailUrl) {
+        URL.revokeObjectURL(thumbnailUrl.url);
+        }
 
-  const handleConfirm = () => {
-    const baseData = {
-      id: postId,
-      title,
-      organizer,
-      applyUrl,
-      descriptionBlocks: {
-        title: descriptionTitle,
-        body: descriptionBody,
-      },
-      applyPeriod: {
-        start: `${startYear}-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
-        end: `${endYear}-${String(endMonth).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`,
-      },
-      categories: selectedTags,
-      thumbnail: thumbnail?.url,
+        setThumbnailUrl({
+        id: `${file.name}-${file.lastModified}`,
+        url: result.previewUrl,
+        });
+
+        event.target.value = '';
     };
 
-    if (type === 'external') {
-      console.log({
-        ...baseData,
-        target,
-        announceDate: `${announceYear}-${String(announceMonth).padStart(2, '0')}-${String(announceDay).padStart(2, '0')}`,
-      });
-    } else {
-      console.log({
-        ...baseData,
-        employType,
-        payment,
-      });
-    }
-    
-    navigate(-1);
-  };
+    const handleRemoveThumbnail = () => {
+        if (thumbnailUrl) {
+        URL.revokeObjectURL(thumbnailUrl.url);
+        setThumbnailUrl(null);
+        }
+    };
 
-  const handleCancelClick = () => {
-    if (hasChanges) {
-      setIsCancelWarningOpen(true);
-      return;
-    }
-    navigate(-1);
-  };
+    const handleSubmit = () => {
+        if (!isSubmitEnabled) return;
+        setIsConfirmOpen(true);
+    };
 
-  const handleCancelConfirm = () => {
-    setIsCancelWarningOpen(false);
-    navigate(-1);
-  };
+    const handleConfirm = () => {
+        const baseData = {
+        id: postId,
+        title,
+        organizer,
+        applyUrl,
+        descriptionBlocks: {
+            title: descriptionTitle,
+            body: descriptionBody,
+        },
+        applyPeriod: {
+            start: `${startYear}-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
+            end: `${endYear}-${String(endMonth).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`,
+        },
+        categories: selectedTags,
+        thumbnailUrl: thumbnailUrl?.url,
+        };
 
-  const handleCancelDismiss = () => {
-    setIsCancelWarningOpen(false);
-  };
+        if (type === 'external') {
+        console.log({
+            ...baseData,
+            target,
+            announceDate: `${announceYear}-${String(announceMonth).padStart(2, '0')}-${String(announceDay).padStart(2, '0')}`,
+        });
+        } else {
+        console.log({
+            ...baseData,
+            employType,
+            payment,
+        });
+        }
+        
+        navigate(-1);
+    };
 
-  useEffect(() => {
-    if (startDay > startDaysInMonth) setStartDay(startDaysInMonth);
-  }, [startDay, startDaysInMonth]);
+    const handleCancelClick = () => {
+        if (hasChanges) {
+        setIsCancelWarningOpen(true);
+        return;
+        }
+        navigate(-1);
+    };
 
-  useEffect(() => {
-    if (endDay > endDaysInMonth) setEndDay(endDaysInMonth);
-  }, [endDay, endDaysInMonth]);
+    const handleCancelConfirm = () => {
+        setIsCancelWarningOpen(false);
+        navigate(-1);
+    };
 
-  useEffect(() => {
-    if (announceDay > announceDaysInMonth) setAnnounceDay(announceDaysInMonth);
-  }, [announceDay, announceDaysInMonth]);
+    const handleCancelDismiss = () => {
+        setIsCancelWarningOpen(false);
+    };
 
     return (
         <HeaderLayout
@@ -413,7 +419,11 @@ const initialDataJob = useMemo(() => ({
                                     {showStartYearDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                         {years.map((y) => (
-                                        <button key={y} type='button' onClick={() => { setStartYear(y); setShowStartYearDropdown(false); }}
+                                        <button key={y} type='button' onClick={() => { 
+                                            setStartYear(y);
+                                            setStartDay((d) => clampDay(d, y, startMonth));
+                                            setShowStartYearDropdown(false);
+                                         }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startYear === y ? 'text-primary' : 'text-gray-650'}`}>
                                             {y}년
                                         </button>
@@ -431,7 +441,12 @@ const initialDataJob = useMemo(() => ({
                                     {showStartMonthDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                         {MONTHS.map((m) => (
-                                        <button key={m} type='button' onClick={() => { setStartMonth(m); setShowStartMonthDropdown(false); }}
+                                        <button key={m} type='button'
+                                            onClick={() => {
+                                                setStartMonth(m);
+                                                setStartDay((d) => clampDay(d, startYear, m));
+                                                setShowStartMonthDropdown(false);
+                                            }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startMonth === m ? 'text-primary' : 'text-gray-650'}`}>
                                             {m}월
                                         </button>
@@ -449,7 +464,10 @@ const initialDataJob = useMemo(() => ({
                                     {showStartDayDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                         {startDays.map((d) => (
-                                        <button key={d} type='button' onClick={() => { setStartDay(d); setShowStartDayDropdown(false); }}
+                                        <button key={d} type='button' 
+                                        onClick={() => { 
+                                            setStartDay(d); setShowStartDayDropdown(false); 
+                                        }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startDay === d ? 'text-primary' : 'text-gray-650'}`}>
                                             {d}일
                                         </button>
@@ -473,7 +491,12 @@ const initialDataJob = useMemo(() => ({
                                     {showEndYearDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                         {years.map((y) => (
-                                        <button key={y} type='button' onClick={() => { setEndYear(y); setShowEndYearDropdown(false); }}
+                                        <button key={y} type='button' 
+                                        onClick={() => { 
+                                            setEndYear(y);
+                                            setEndDay(d => clampDay(d, y, endMonth));
+                                            setShowEndYearDropdown(false); 
+                                        }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${endYear === y ? 'text-primary' : 'text-gray-650'}`}>
                                             {y}년
                                         </button>
@@ -491,7 +514,12 @@ const initialDataJob = useMemo(() => ({
                                     {showEndMonthDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                         {MONTHS.map((m) => (
-                                        <button key={m} type='button' onClick={() => { setEndMonth(m); setShowEndMonthDropdown(false); }}
+                                        <button key={m} type='button' 
+                                            onClick={() => { 
+                                                setEndMonth(m); 
+                                                setEndDay(d => clampDay(d, endYear, m));
+                                                setShowEndMonthDropdown(false); 
+                                            }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${endMonth === m ? 'text-primary' : 'text-gray-650'}`}>
                                             {m}월
                                         </button>
@@ -535,7 +563,12 @@ const initialDataJob = useMemo(() => ({
                                 {showAnnounceYearDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                     {years.map((y) => (
-                                        <button key={y} type='button' onClick={() => { setAnnounceYear(y); setShowAnnounceYearDropdown(false); }}
+                                        <button key={y} type='button' 
+                                        onClick={() => { 
+                                            setAnnounceYear(y);
+                                            setAnnounceDay(d => clampDay(d, y, announceMonth));
+                                            setShowAnnounceYearDropdown(false); 
+                                        }}
                                         className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${announceYear === y ? 'text-primary' : 'text-gray-650'}`}>
                                         {y}년
                                         </button>
@@ -553,7 +586,12 @@ const initialDataJob = useMemo(() => ({
                                 {showAnnounceMonthDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
                                     {MONTHS.map((m) => (
-                                        <button key={m} type='button' onClick={() => { setAnnounceMonth(m); setShowAnnounceMonthDropdown(false); }}
+                                        <button key={m} type='button' 
+                                        onClick={() => { 
+                                            setAnnounceMonth(m);
+                                            setAnnounceDay(d => clampDay(d, announceYear, m));
+                                            setShowAnnounceMonthDropdown(false); 
+                                        }}
                                         className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${announceMonth === m ? 'text-primary' : 'text-gray-650'}`}>
                                         {m}월
                                         </button>
@@ -605,9 +643,9 @@ const initialDataJob = useMemo(() => ({
                     <div className='flex flex-col gap-[10px]'>
                         <label className='text-sb-16-hn text-gray-900'>{config.imageLabel}</label>
                         
-                        {thumbnail ? (
+                        {thumbnailUrl ? (
                         <div className='relative w-full h-[200px]'>
-                            <img src={thumbnail.url} alt='썸네일' className='w-full h-full rounded-[12px] object-cover' />
+                            <img src={thumbnailUrl.url} alt='썸네일' className='w-full h-full rounded-[12px] object-cover' />
                             <button type='button' aria-label='사진 삭제'
                             className='absolute top-[10px] right-[10px] w-[32px] h-[32px] bg-black/50 rounded-full flex items-center justify-center'
                             onClick={handleRemoveThumbnail}>
