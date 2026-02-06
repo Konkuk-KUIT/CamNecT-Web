@@ -72,25 +72,32 @@ const CommunityPostPage = () => {
     likedByMe,
     detailError,
     refetchPost,
+    isLoading: isDetailLoading,
   } = usePost({ postId, currentUserId: currentUserIdForOwnership });
-  const accessStatus = accessStatusOverride ?? selectedPost.accessStatus ?? 'GRANTED';
-  const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
+  const accessStatus =
+    accessStatusOverride ??
+    selectedPost?.accessStatus ??
+    (isPostMine ? 'GRANTED' : 'LOCKED');
+  const isLockedQuestion =
+    isQuestionPost && !isPostMine && accessStatus !== 'GRANTED';
   const userId = useAuthStore((state) => state.user?.id);
 
   useEffect(() => {
+    if (!selectedPost) return;
     const resetTimer = window.setTimeout(() => {
       setAccessStatusOverride(null);
       setMyPoints(selectedPost.myPoints ?? 0);
     }, 0);
     return () => window.clearTimeout(resetTimer);
-  }, [selectedPost.id, selectedPost.myPoints]);
+  }, [selectedPost?.id, selectedPost?.myPoints]);
 
   useEffect(() => {
+    if (!selectedPost) return;
     setLikeCount(selectedPost.likes ?? 0);
     setBookmarkCount(selectedPost.saveCount ?? 0);
     setIsLiked(likedByMe);
     setIsBookmarked(false);
-  }, [selectedPost.id, selectedPost.likes, selectedPost.saveCount, likedByMe]);
+  }, [selectedPost?.id, selectedPost?.likes, selectedPost?.saveCount, likedByMe]);
 
   useEffect(() => {
     if (!postId) return;
@@ -131,7 +138,7 @@ const CommunityPostPage = () => {
     isLockedQuestion,
     isQuestionPost,
     isAdopted,
-    adoptedCommentId: selectedPost.adoptedCommentId,
+    adoptedCommentId: selectedPost?.adoptedCommentId,
     onSubmitCommentApi: async ({ content, parentCommentId }) => {
       if (!userId || !postId) return;
       const numericUserId = Number(userId);
@@ -182,6 +189,10 @@ const CommunityPostPage = () => {
       }
     },
   });
+
+  if (isDetailLoading || !selectedPost) {
+    return <PopUp isOpen={true} type='loading' title='게시글을 불러오는 중입니다' />;
+  }
 
   // 게시글/댓글 옵션 열기
   const handleOpenCommentOptions = (comment: CommentItem) => {
@@ -479,7 +490,7 @@ const CommunityPostPage = () => {
                 />
               ) : (
                 <>
-                  <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+                  <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] whitespace-pre-wrap'>
                     {selectedPost.content}
                   </div>
                   {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
@@ -576,7 +587,7 @@ const CommunityPostPage = () => {
         content={
           '채택이 완료된 게시물의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
         }
-        onRightClick={() => setIsAdoptedPostPopupOpen(false)}
+        onClick={() => setIsAdoptedPostPopupOpen(false)}
       />
       <PopUp
         isOpen={isAdoptedCommentPopupOpen}
@@ -585,7 +596,7 @@ const CommunityPostPage = () => {
         content={
           '채택이 완료된 댓글의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
         }
-        onRightClick={() => setIsAdoptedCommentPopupOpen(false)}
+        onClick={() => setIsAdoptedCommentPopupOpen(false)}
       />
       <PopUp
         isOpen={isDeletePopupOpen}

@@ -15,6 +15,9 @@ export type CommunityPostItem = {
   accepted: boolean;
   tags: string[];
   thumbnailUrl: string;
+  accessStatus?: "GRANTED" | "LOCKED";
+  requiredPoints?: number;
+  myPoints?: number;
 };
 
 export type CursorPage<T> = {
@@ -65,7 +68,7 @@ export type CreateCommunityPostBody = {
   anonymous: boolean;
   tagIds: number[];
   attachments: CommunityAttachment[];
-  accessType: "FREE" | "PAID";
+  accessType: "FREE" | "POINT_REQUIRED";
   requiredPoints: number;
 };
 

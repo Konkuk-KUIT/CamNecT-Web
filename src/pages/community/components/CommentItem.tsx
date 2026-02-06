@@ -105,7 +105,7 @@ const CommentItem = ({
                 className='mt-[5px] min-h-[24px] w-full resize-none rounded-[10px] border border-[var(--ColorGray1,#ECECEC)] bg-white p-[10px] text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] focus:outline-none'
               />
             ) : (
-              <div className='mt-[5px] text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+              <div className='mt-[5px] whitespace-pre-wrap text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
                 {comment.content}
               </div>
             )}

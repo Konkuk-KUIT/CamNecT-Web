@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axiosInstance";
+import { communityAxiosInstance } from "./communityAxiosInstance";
 import type {
   ApiResponse,
   CommunityPostItem,
@@ -58,7 +58,7 @@ export const getCommunityPosts = async (data: GetCommunityPostsParams = {}) => {
     ...(cursorValue !== undefined ? { cursorValue } : {}),
   };
 
-  const response = await axiosInstance.get<ApiResponse<CursorPage<CommunityPostItem>>>(
+  const response = await communityAxiosInstance.get<ApiResponse<CursorPage<CommunityPostItem>>>(
     "/api/community/posts",
     { params: queryParams }
   );
@@ -66,7 +66,7 @@ export const getCommunityPosts = async (data: GetCommunityPostsParams = {}) => {
 };
 
 export const getCommunityHome = async (data: GetCommunityHomeParams = {}) => {
-  const response = await axiosInstance.get<ApiResponse<CommunityHomeData>>(
+  const response = await communityAxiosInstance.get<ApiResponse<CommunityHomeData>>(
     "/api/community/home",
     { params: data }
   );
@@ -75,7 +75,7 @@ export const getCommunityHome = async (data: GetCommunityHomeParams = {}) => {
 };
 
 export const createCommunityPost = async (data: { body: CreateCommunityPostBody }) => {
-  const response = await axiosInstance.post<ApiResponse<CreateCommunityPostResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<CreateCommunityPostResult>>(
     "/api/community/posts",
     data.body
   );
@@ -87,7 +87,7 @@ export const postCommunityLike = async (
   postId: number | string,
   params: PostReactionParams
  ) => {
-  const response = await axiosInstance.post<ApiResponse<PostLikeResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<PostLikeResult>>(
     `/api/community/posts/${postId}/likes`,
     null,
     { params }
@@ -100,7 +100,7 @@ export const postCommunityBookmark = async (
   postId: number | string,
   params: PostReactionParams
  ) => {
-  const response = await axiosInstance.post<ApiResponse<PostBookmarkResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<PostBookmarkResult>>(
     `/api/community/posts/${postId}/bookmarks`,
     null,
     { params }
@@ -113,7 +113,7 @@ export const getCommunityPostDetail = async (data: {
   postId: number | string;
   params: GetCommunityPostDetailParams;
 }) => {
-  const response = await axiosInstance.get<ApiResponse<CommunityPostDetailResponse>>(
+  const response = await communityAxiosInstance.get<ApiResponse<CommunityPostDetailResponse>>(
     `/api/community/posts/${data.postId}`,
     { params: data.params }
   );
@@ -122,7 +122,7 @@ export const getCommunityPostDetail = async (data: {
 };
 
 export const getCommunityPostComments = async (postId: number | string) => {
-  const response = await axiosInstance.get<ApiResponse<CommunityPostCommentResponse[]>>(
+  const response = await communityAxiosInstance.get<ApiResponse<CommunityPostCommentResponse[]>>(
     `/api/community/posts/${postId}/comments`
   );
 
@@ -134,7 +134,7 @@ export const createCommunityComment = async (data: {
   params: CreateCommunityCommentParams;
   body: CreateCommunityCommentBody;
 }) => {
-  const response = await axiosInstance.post<ApiResponse<CreateCommunityCommentResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<CreateCommunityCommentResult>>(
     `/api/community/posts/${data.postId}/comments`,
     data.body,
     { params: data.params }
@@ -147,7 +147,7 @@ export const deleteCommunityComment = async (data: {
   commentId: number | string;
   params: DeleteCommunityCommentParams;
 }) => {
-  const response = await axiosInstance.delete<ApiResponse<DeleteCommunityCommentResult>>(
+  const response = await communityAxiosInstance.delete<ApiResponse<DeleteCommunityCommentResult>>(
     `/api/community/comments/${data.commentId}`,
     { params: data.params }
   );
@@ -160,7 +160,7 @@ export const updateCommunityComment = async (data: {
   params: UpdateCommunityCommentParams;
   body: UpdateCommunityCommentBody;
 }) => {
-  const response = await axiosInstance.patch<ApiResponse<UpdateCommunityCommentResult>>(
+  const response = await communityAxiosInstance.patch<ApiResponse<UpdateCommunityCommentResult>>(
     `/api/community/comments/${data.commentId}`,
     data.body,
     { params: data.params }
@@ -174,7 +174,7 @@ export const acceptCommunityComment = async (data: {
   commentId: number | string;
   params: AcceptCommunityCommentParams;
 }) => {
-  const response = await axiosInstance.post<ApiResponse<AcceptCommunityCommentResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<AcceptCommunityCommentResult>>(
     `/api/community/posts/${data.postId}/comments/${data.commentId}/accept`,
     null,
     { params: data.params }
@@ -187,7 +187,7 @@ export const purchaseCommunityPostAccess = async (data: {
   postId: number | string;
   params: PurchasePostAccessParams;
 }) => {
-  const response = await axiosInstance.post<ApiResponse<PurchasePostAccessResult>>(
+  const response = await communityAxiosInstance.post<ApiResponse<PurchasePostAccessResult>>(
     `/api/community/posts/${data.postId}/access/purchase`,
     null,
     { params: data.params }
@@ -200,7 +200,7 @@ export const deleteCommunityPost = async (data: {
   postId: number | string;
   params: DeleteCommunityPostParams;
 }) => {
-  const response = await axiosInstance.delete<ApiResponse<DeleteCommunityPostResult>>(
+  const response = await communityAxiosInstance.delete<ApiResponse<DeleteCommunityPostResult>>(
     `/api/community/posts/${data.postId}`,
     { params: data.params }
   );
@@ -213,7 +213,7 @@ export const updateCommunityPost = async (data: {
   params: UpdateCommunityPostParams;
   body: UpdateCommunityPostBody;
 }) => {
-  const response = await axiosInstance.patch<ApiResponse<UpdateCommunityPostResult>>(
+  const response = await communityAxiosInstance.patch<ApiResponse<UpdateCommunityPostResult>>(
     `/api/community/posts/${data.postId}`,
     data.body,
     { params: data.params }

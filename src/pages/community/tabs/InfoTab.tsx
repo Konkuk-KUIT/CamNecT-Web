@@ -84,7 +84,7 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
 
                   <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-                  <div className='line-clamp-2 text-r-16 text-gray-750'>
+                  <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
                     {post.content}
                   </div>
                 </div>

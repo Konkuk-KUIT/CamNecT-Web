@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AxiosError } from 'axios';
-import { mapToCommunityPost } from '../utils/post';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { getCommunityPostDetail } from '../../../api/community';
 import { mapToCommunityPostDetail } from '../../../utils/communityMapper';
@@ -14,9 +13,8 @@ type UsePostParams = {
 // 게시글 선택 및 파생 상태 계산을 캡슐화
 export const usePost = ({ postId, currentUserId }: UsePostParams) => {
   const userId = useAuthStore((state) => state.user?.id);
-  const [selectedPost, setSelectedPost] = useState<CommunityPostDetail>(() =>
-    mapToCommunityPost(postId),
-  );
+  const [selectedPost, setSelectedPost] = useState<CommunityPostDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [likedByMe, setLikedByMe] = useState(false);
   const [detailError, setDetailError] = useState(false);
 
@@ -25,6 +23,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     const numericUserId = Number(userId);
     if (!Number.isFinite(numericUserId)) return;
 
+    setIsLoading(true);
     getCommunityPostDetail({
       postId,
       params: { userId: numericUserId },
@@ -36,12 +35,12 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
       })
       .catch((error: AxiosError) => {
         const status = error.response?.status;
-        if (status === 404) {
-          setDetailError(true);
-          return;
-        }
-        setSelectedPost(mapToCommunityPost(postId));
+        setDetailError(status === 404 || Boolean(status));
+        setSelectedPost(null);
         setLikedByMe(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [postId, userId]);
 
@@ -49,15 +48,35 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     refetchPost();
   }, [refetchPost]);
 
+  if (!selectedPost) {
+    return {
+      selectedPost,
+      isQuestionPost: false,
+      isInfoPost: false,
+      isPostMine: false,
+      isAdopted: false,
+      showAdoptButton: false,
+      isLockedQuestion: false,
+      requiredPoints: 0,
+      textCount: 0,
+      imageCount: 0,
+      likedByMe,
+      detailError,
+      refetchPost,
+      isLoading,
+    };
+  }
+
   const isQuestionPost = selectedPost.boardType === '질문';
   const isInfoPost = !isQuestionPost;
   const isPostMine = selectedPost.author.id === currentUserId;
   const isAdopted = selectedPost.isAdopted;
   const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
-  const accessStatus = selectedPost.accessStatus ?? 'GRANTED';
-  const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
+  const accessStatus =
+    selectedPost.accessStatus ?? (isPostMine ? 'GRANTED' : 'LOCKED');
+  const isLockedQuestion = isQuestionPost && !isPostMine && accessStatus !== 'GRANTED';
   const requiredPoints = selectedPost.requiredPoints ?? 100;
-  const textCount = selectedPost.content.length;
+  const textCount = selectedPost.content?.length ?? 0;
   const imageCount = selectedPost.postImages?.length ?? 0;
 
   return {
@@ -74,5 +93,6 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     likedByMe,
     detailError,
     refetchPost,
+    isLoading,
   };
 };

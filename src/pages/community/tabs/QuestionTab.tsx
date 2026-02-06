@@ -110,12 +110,14 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
 
                 <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-                {isLocked ? (
+                {isLocked && !post.isAdopted ? (
                   <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
                     {requiredPoints} P
                   </div>
                 ) : (
-                  <div className='line-clamp-2 text-r-16 text-gray-750'>{post.content}</div>
+                  <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
+                    {post.content}
+                  </div>
                 )}
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>

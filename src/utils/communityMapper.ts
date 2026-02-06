@@ -45,9 +45,9 @@ export const mapToQuestionPost = (post: CommunityPostItem): QuestionPost => ({
   answers: post.answerCount,
   isAdopted: post.accepted,
   createdAt: post.createdAt,
-  accessStatus: "GRANTED",
-  requiredPoints: 0,
-  myPoints: 0,
+  accessStatus: post.accessStatus ?? "LOCKED",
+  requiredPoints: post.requiredPoints ?? 100,
+  myPoints: post.myPoints ?? 0,
 });
 
 export const mapToCommunityPostDetail = (

@@ -67,7 +67,7 @@ const MainBox = ({ post }: MainBoxProps) => {
                 >
                   {post.title}
                 </div>
-                <div className='line-clamp-2 text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
+                <div className='line-clamp-2 whitespace-pre-wrap text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
                   {post.content}
                 </div>
               </div>
