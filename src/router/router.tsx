@@ -184,7 +184,7 @@ export const router = createBrowserRouter([
                                         element: <RecruitWritePage/>
                                     },
                                     {
-                                        path: "edit/:recruitId",
+                                        path: ":recruitId",
                                         element: <RecruitWritePage/>
                                     }
                                 ]
