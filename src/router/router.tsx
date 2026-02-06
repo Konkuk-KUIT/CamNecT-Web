@@ -23,6 +23,7 @@ import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
 import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
+import { ShopDetailPage } from "../pages/shop/ShopDetailPage";
 import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
 import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
 import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
@@ -223,8 +224,16 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: "shop",
-                        element: <ShopPage />,
-
+                        children: [
+                            {
+                                index: true,
+                                element: <ShopPage />,
+                            },
+                            {
+                                path: ":productId",
+                                element: <ShopDetailPage />,
+                            },
+                        ]
                     },
                     {
                         path: "community",

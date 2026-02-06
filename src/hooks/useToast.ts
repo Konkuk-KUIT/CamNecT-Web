@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type UseToastOptions = {
   fadeDelayMs?: number;
@@ -26,11 +26,11 @@ export const useToast = ({
     };
   }, [autoCloseMs, fadeDelayMs, isOpen, triggerKey]);
 
-  const openToast = () => {
+  const openToast = useCallback(() => {
     setIsFading(false);
     setIsOpen(true);
     setTriggerKey((prev) => prev + 1);
-  };
+  }, []);
 
   return {
     isOpen,
