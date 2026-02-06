@@ -34,7 +34,7 @@ export const ExternalActivityPostPage = () => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
-  const isPostMine = currentUser.id === "admin";
+  const canControll = currentUser.id === "admin";
   const thumbnailUrl = selectedPost.thumbnailUrl ?? selectedPost.postImages?.[0];
 
   // 팀원 모집 데이터 가져오기
@@ -47,7 +47,7 @@ export const ExternalActivityPostPage = () => {
     setIsBookmarked(checked);
   };
 
-  const optionItems: OptionItem[] = isPostMine
+  const optionItems: OptionItem[] = canControll
     ? [
         { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
         { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
