@@ -138,7 +138,7 @@ export const ShopDetailPage = () => {
         onIncrease={handleIncrease}
         myPoint={point}
         requiredPoint={product.point}
-        bottomOffset='calc(60px + env(safe-area-inset-bottom))'
+        bottomOffset='calc(105px)'
       />
       <PopUp
         isOpen={isConfirmOpen}
