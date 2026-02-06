@@ -36,6 +36,8 @@ export type ActivityPost = {
 export type ActivityPostDetail = ActivityPost & {
   // 대외활동/취업정보에만 있는 필드들
   location?: string;
+  employType?:string;
+  payment?:string;
   target?: string;
   applyPeriod?: {
     start: string;
@@ -43,35 +45,12 @@ export type ActivityPostDetail = ActivityPost & {
   };
   announceDate?: string;
   applyUrl?: string;
-  descriptionBlocks?: Array<{
+  descriptionBlocks?: {
     title: string;
     body: string;
-  }>;
+  };
 };
 
-// export type ActivityPost = {
-//   id: string;
-//   tab: ActivityPostTab;
-//   title: string;
-//   content: string;
-//   categories: string[];
-//   likes: number;
-//   comments: number;
-//   saveCount: number;
-//   createdAt: string;
-//   author: ActivityPostAuthor;
-//   status?: ActivityPostStatus;
-//   postImages?: string[];
-//   thumbnailUrl?: string;
-// };
-
-// export type ActivityComment = {
-//   id: string;
-//   author: ActivityPostAuthor;
-//   content: string;
-//   createdAt: string;
-//   replies?: ActivityComment[];
-// };
 
 
 
