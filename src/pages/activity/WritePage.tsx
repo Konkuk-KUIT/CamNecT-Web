@@ -8,7 +8,7 @@ import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { useImageUpload } from '../../hooks/useImageUpload';
-import type { ActivityPost } from '../../types/activityPost';
+import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
 import {
   activityLoggedInUser,
   addActivityPost,
@@ -168,7 +168,6 @@ export const ActivityWritePage = () => {
       content: content.trim(),
       categories: selectedTags,
       likes: editPost?.likes ?? 0,
-      comments: editPost?.comments ?? 0,
       saveCount: editPost?.saveCount ?? 0,
       createdAt: editPost?.createdAt ?? new Date().toISOString(),
       author: editPost?.author ?? activityLoggedInUser,

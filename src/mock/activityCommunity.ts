@@ -64,6 +64,8 @@ const buildPost = (
   target: overrides.target,
   applyPeriod: overrides.applyPeriod,
   announceDate: overrides.announceDate,
+  employType: overrides.employType,
+  payment: overrides.payment,
   applyUrl: overrides.applyUrl,
   descriptionBlocks: overrides.descriptionBlocks,
 });
@@ -160,7 +162,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '데이터 분석 기반 서비스 아이디어를 모집합니다. 서류 심사 후 본선 발표가 예정되어 있습니다.',
     categories: ['대외활동', '기획'],
-    likes: 29,
     saveCount: 16,
     createdAt: '2026-02-02T14:30:00.000Z',
     isBookmarked: true,
@@ -176,17 +177,10 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-01T00:00:00.000Z',
     applyUrl: 'https://example.com/contest/data-2025',
     thumbnailUrl: sampleThumbnail2,
-    postImages: [samplePostImage2, samplePostImage],
-    descriptionBlocks: [
-      {
+    descriptionBlocks: {
         title: '공모 주제',
         body: '공공데이터를 활용한 혁신적인 서비스 아이디어',
       },
-      {
-        title: '시상 내역',
-        body: '대상 500만원, 최우수상 300만원, 우수상 100만원',
-      },
-    ],
   }),
   buildPost({
     id: 'external-2',
@@ -195,7 +189,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       'SNS 숏폼 콘텐츠 제작 경험자를 모집합니다. 활동비 및 굿즈 제공.',
     categories: ['마케팅', '대외활동'],
-    likes: 7,
     saveCount: 3,
     createdAt: '2026-01-21T09:00:00.000Z',
     organizer: '㈜브랜드컴퍼니',
@@ -215,7 +208,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '지역 브랜드와 협업하여 디자인 솔루션을 제안하는 챌린지입니다. 포트폴리오 제출이 필요합니다.',
     categories: ['디자인', '대외활동'],
-    likes: 14,
     saveCount: 5,
     createdAt: '2026-02-04T04:00:00.000Z',
     organizer: '로컬크리에이터협회',
@@ -229,32 +221,45 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-15T00:00:00.000Z',
     applyUrl: 'https://example.com/design-challenge',
     thumbnailUrl: sampleThumbnail1,
-    postImages: [samplePostImage3, samplePostImage2, samplePostImage],
   }),
   buildPost({
     id: 'job-1',
     tab: 'job',
-    title: '2025 상반기 채용 설명회 일정 공유',
+    title: '현대 종합 금속',
     content:
-      '대기업/중견기업 채용 설명회 일정과 준비 체크리스트를 공유합니다.',
+      '기계사업본부 신입/경력사원 모집',
     categories: ['취업', '설명회'],
-    likes: 42,
     saveCount: 24,
+    organizer: "현대",
     createdAt: '2026-02-04T22:00:00.000Z',
+    deadline: '2026-03-31T23:59:59.000Z',
+    applyPeriod: {
+      start: '2026-02-15T00:00:00.000Z',
+      end: '2026-03-31T23:59:59.000Z',
+    },
+    employType: "채용연계형 인턴, 체험형 인턴",
+    payment: "연봉 4900만원~6000만원",
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail2,
-    postImages: [samplePostImage, samplePostImage3],
   }),
   buildPost({
     id: 'job-2',
     tab: 'job',
-    title: '인턴 합격 자소서 공개 및 리뷰',
+    title: '어폴라이드 머티리얼 컴퍼니',
+    organizer: "어폴라이드 머티리얼",
     content:
-      '합격 자소서와 피드백 포인트를 정리했습니다. 필요한 분들은 참고하세요!',
+      'Customer Engineer - 반도체 장비 엔지니어 채용(학사)',
     categories: ['취업', '자소서'],
-    likes: 16,
     saveCount: 10,
     createdAt: '2026-01-29T15:30:00.000Z',
+    deadline: '2026-04-31T23:59:59.000Z',
+    applyPeriod: {
+      start: '2026-02-05T00:00:00.000Z',
+      end: '2026-04-31T23:59:59.000Z',
+    },
+    employType: "정직원",
+    payment: "연봉 2000만원~3000만원",
+    isBookmarked: false,
     thumbnailUrl: sampleThumbnail1,
   }),
 ];

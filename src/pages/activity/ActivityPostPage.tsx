@@ -13,7 +13,7 @@ import {
   getActivityPostStatusLabel,
   mapToActivityPost,
 } from '../../mock/activityCommunity';
-import type { ActivityPostStatus } from '../../types/activityPost';
+import type { ActivityPostStatus } from '../../types/activityPage/activityPageTypes';
 import { formatPostDisplayDate } from './utils/post';
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
@@ -45,8 +45,16 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(selectedPost.isLiked ?? false);
+  const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
 
-  const commentCount = selectedPost.comments ?? 0;
+  const handleLikeToggle = (checked: boolean) => {
+    setIsLiked(checked);
+  };
+
+  const handleBookmarkToggle = (checked: boolean) => {
+    setIsBookmarked(checked);
+  };
 
   const isPostMine = selectedPost.author.id === currentUser.id;
   const statusLabel = getActivityPostStatusLabel(status);
@@ -97,7 +105,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
     <HeaderLayout
       headerSlot={
         <MainHeader
-          title='활동'
+          title='대외활동'
           rightActions={[
             { icon: 'option', onClick: () => setIsOptionOpen(true), ariaLabel: '게시글 옵션 열기' },
           ]}
@@ -105,10 +113,10 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
       }
     >
       <main className='flex w-full justify-center bg-white'>
-        <div className='flex w-full max-w-[720px] flex-col pb-[90px] sm:px-[25px]'>
-          <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
-            <div className='flex flex-col items-start gap-[20px]'>
-              <div
+         <div className='flex w-full max-w-[720px] flex-col pb-[90px] sm:px-[25px]'>
+           <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
+             <div className='flex flex-col items-start gap-[20px]'>
+               <div
                 className={`inline-flex min-w-[68px] items-center justify-center rounded-[30px] border px-[12px] py-[4px] text-r-16 ${
                   status === 'CLOSED'
                     ? 'border-[var(--ColorGray2,#A1A1A1)] text-[var(--ColorGray2,#A1A1A1)]'
@@ -128,8 +136,15 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
                       <span>{selectedPost.likes}</span>
                     </div>
                     <div className='flex items-center gap-[3px]'>
-                      <Icon name='comment' className='h-[14px] w-[14px]' />
-                      <span>{commentCount}</span>
+                      <svg viewBox='0 0 11 12' fill='none' className='w-[11px] h-[12px]'>
+                        <path 
+                          d='M9.22867 0.697692C9.962 0.775908 10.5 1.3558 10.5 2.03286V11.5L5.5 9.20853L0.5 11.5V2.03286C0.5 1.3558 1.03733 0.775908 1.77133 0.697692C4.24879 0.434103 6.75121 0.434103 9.22867 0.697692Z' 
+                          stroke='#646464' 
+                          strokeLinecap='round' 
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                      <span>{selectedPost.saveCount}</span>
                     </div>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>
@@ -216,6 +231,10 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         isMine={isPostMine}
         status={status}
         likeCount={selectedPost.likes}
+        isLiked={isLiked}
+        isBookmarked={isBookmarked}
+        onLikeToggle={handleLikeToggle}
+        onBookmarkToggle={handleBookmarkToggle}
         onOpenCompletePopup={() => setIsRecruitPopupOpen(true)}
       />
 

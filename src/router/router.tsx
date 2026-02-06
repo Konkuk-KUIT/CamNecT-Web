@@ -36,6 +36,7 @@ import { EditPasswordPage } from "../pages/my-page/sidebar/EditPasswordPage";
 import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
 import { ActivityWritePage } from "../pages/activity/WritePage";
+import { ExternalActivityPostPage } from "../pages/activity/ExternalActivityPostPage";
 
 export const router = createBrowserRouter([
 
@@ -146,22 +147,30 @@ export const router = createBrowserRouter([
                         ]
                         
                     },
-
                     {
                         path: "activity",
-                        element: <ActivityPage />,
-                    },
-                    {
-                        path: "activity/write",
-                        element: <ActivityWritePage />,
-                    },
-                    {
-                        path: "activity/edit/:postId",
-                        element: <ActivityWritePage />,
-                    },
-                    {
-                        path: "activity/post/:postId",
-                        element: <ActivityPostPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ActivityPage />,
+                            },
+                            {
+                                path: "write",
+                                element: <ActivityWritePage />,
+                            },
+                            {
+                                path: "edit/:postId",
+                                element: <ActivityWritePage />,
+                            },
+                            {
+                                path: "internal/:postId",
+                                element: <ActivityPostPage />,
+                            },
+                            {
+                                path: "external/:postId",
+                                element: <ExternalActivityPostPage />
+                            }
+                        ]
                     },
                     {
                         path: "schedule",

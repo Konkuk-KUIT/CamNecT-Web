@@ -1,22 +1,22 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import FilterHeader from '../../../components/FilterHeader';
 import SortSelector from '../../../components/SortSelector';
 import TagsFilterModal from '../../../components/TagsFilterModal';
 import WriteButton from '../components/WriteButton';
-import DefaultPost from '../components/DefaultPost';
-import ContestPost from '../components/ContestPost';
+import InternalActivityPost from '../../../components/posts/InternalActivityPost';
+import ExternalActivityPost from '../../../components/posts/ExternalActivityPost';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
-import type { ActivityPost } from '../../../types/activityPost';
+import type { ActivityPost, ActivityPostDetail } from '../../../types/activityPage/activityPageTypes';
 
 type ActivityListTabProps = {
-  posts: ActivityPost[];
-  linkToPost?: boolean;
+  posts: ActivityPost[] | ActivityPostDetail[];
   showWriteButton?: boolean;
   showRecruitStatus?: boolean;
+  tab: string;
 };
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
+type SortExternalKey = 'recommended' | 'latest' | 'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
   recommended: '추천순',
@@ -24,16 +24,24 @@ const sortLabels: Record<SortKey, string> = {
   likes: '좋아요 많은 순',
   bookmarks: '북마크 많은 순',
 };
+const sortExternalLabels: Record<SortExternalKey, string> = {
+  recommended: '추천순',
+  latest: '최신순',
+  bookmarks: '북마크 많은 순',
+};
 
 const ActivityListTab = ({
   posts,
-  linkToPost = false,
   showWriteButton = true,
   showRecruitStatus = false,
+  tab,
 }: ActivityListTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
+  const [sortExternalKey, setSortExternalKey] = useState<SortExternalKey>('recommended');
+
+  const isExternalTab = tab === 'external' || tab === 'job';
 
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
@@ -64,22 +72,37 @@ const ActivityListTab = ({
   }, [posts, selectedTags, showRecruitStatus]);
 
   const sortedPosts = useMemo(() => {
-    if (sortKey === 'recommended') return filteredPosts;
-    const cloned = [...filteredPosts];
-    if (sortKey === 'latest') {
+  const cloned = [...filteredPosts];
+
+  if (isExternalTab) {
+    if (sortExternalKey === 'recommended') return cloned;
+    if (sortExternalKey === 'latest') {
       return cloned.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
     }
-    if (sortKey === 'likes') {
-      return cloned.sort((a, b) => b.likes - a.likes);
-    }
+
     return cloned.sort((a, b) => b.saveCount - a.saveCount);
-  }, [filteredPosts, sortKey]);
+  }
+
+
+  if (sortKey === 'recommended') return cloned;
+  if (sortKey === 'latest') {
+    return cloned.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }
+  if (sortKey === 'likes') {
+    return cloned.sort((a, b) => b.likes - a.likes);
+  }
+
+  return cloned.sort((a, b) => b.saveCount - a.saveCount);
+}, [filteredPosts, isExternalTab, sortKey, sortExternalKey]);
+
 
   return (
-    <div className='flex flex-col bg-white' style={{ padding: '20px 25px', gap: '10px' }}>
-      <div className='flex flex-wrap items-center gap-[12px]'>
+    <div className='flex flex-col bg-white' style={{ padding: '20px 0px', gap: '10px' }}>
+      <div className='flex flex-wrap items-center gap-[12px] px-[25px]'>
         <div className='flex-1'>
           <FilterHeader
             activeFilters={selectedTags}
@@ -89,30 +112,27 @@ const ActivityListTab = ({
             }
           />
         </div>
-        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} />
+        
+        {!isExternalTab ? 
+        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} /> :
+        <SortSelector sortKey={sortExternalKey} sortLabels={sortExternalLabels} onChange={setSortExternalKey}/>
+        }
       </div>
 
-      <div className='flex flex-col' style={{ gap: '10px' }}>
+      <div className='flex flex-col'>
         {sortedPosts.map((post) => {
-          const isContestPost = post.tab === 'external' || post.tab === 'job';
-          const content = isContestPost ? (
-            <ContestPost post={post} />
-          ) : (
-            <DefaultPost post={post} showRecruitStatus={showRecruitStatus} />
-          );
-
-          if (linkToPost) {
-            return (
-              <Link key={post.id} to={`/activity/post/${post.id}`} className='block'>
-                {content}
-              </Link>
-            );
+          const isExternalPost = post.tab === 'external' || post.tab === 'job';
+          
+          if (isExternalPost) {
+            return <ExternalActivityPost key={post.id} post={post} />;
           }
 
           return (
-            <div key={post.id} className='block'>
-              {content}
-            </div>
+            <InternalActivityPost
+              key={post.id}
+              post={post}
+              showRecruitStatus={showRecruitStatus}
+            />
           );
         })}
       </div>
