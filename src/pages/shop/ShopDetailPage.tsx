@@ -13,12 +13,15 @@ const formatPoint = (value: number) => value.toLocaleString('ko-KR');
 export const ShopDetailPage = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
+  // 구매 수량 및 구매 플로우 상태
   const [quantity, setQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  // 전역 포인트 (구매 즉시 반영)
   const point = usePointStore((state) => state.point);
   const deductPoint = usePointStore((state) => state.deductPoint);
+  // URL 파라미터로 상품 찾기
   const product = useMemo(() => {
     const id = Number(productId);
     if (!Number.isFinite(id)) {
@@ -44,6 +47,7 @@ export const ShopDetailPage = () => {
 
   const closePurchaseSheet = () => {
     setIsSheetOpen(false);
+    // 바텀 시트가 내려가면 기본 상태로 복귀
     setIsPurchasing(false);
   };
 
@@ -52,11 +56,17 @@ export const ShopDetailPage = () => {
       openPurchaseSheet();
       return;
     }
+    // 구매중 상태에서 재클릭 시 구매 확인 팝업
     setIsConfirmOpen(true);
   };
 
   const handleConfirmPurchase = () => {
     const totalRequiredPoint = product.point * quantity;
+    // 포인트가 부족하면 구매 진행 중단
+    if (point < totalRequiredPoint) {
+      setIsConfirmOpen(false);
+      return;
+    }
     deductPoint(totalRequiredPoint);
     setIsConfirmOpen(false);
     setIsSheetOpen(false);
@@ -65,12 +75,14 @@ export const ShopDetailPage = () => {
   };
 
   const handleDecrease = () => {
+    // 수량은 최소 1 유지
     setQuantity((prev) => Math.max(1, prev - 1));
   };
 
   const handleIncrease = () => {
     const nextQuantity = quantity + 1;
     const nextRequiredPoint = product.point * nextQuantity;
+    // 잔여 포인트가 0 아래로 내려가는 경우 증가 불가
     if (point - nextRequiredPoint < 0) {
       return;
     }
@@ -109,7 +121,7 @@ export const ShopDetailPage = () => {
           </span>
         </div>
       </section>
-      <BottomBuy onClick={handleBuyClick} state={isPurchasing ? 'purchasing' : 'default'} />
+      <BottomBuy onClick={handleBuyClick} />
       <PurchaseBottomSheet
         isOpen={isSheetOpen}
         onClose={closePurchaseSheet}

@@ -13,12 +13,15 @@ export const ShopPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
+  // 전역 포인트 표시
   const point = usePointStore((state) => state.point);
 
+  // 구매 성공 플래그는 라우터 state로 전달됨
   const purchaseSuccess = Boolean(location.state?.purchaseSuccess);
 
   useEffect(() => {
     if (!purchaseSuccess) return;
+    // 구매 성공 토스트 표시 후 state 초기화
     openToast();
     navigate('/shop', { replace: true, state: {} });
   }, [purchaseSuccess, navigate, openToast]);

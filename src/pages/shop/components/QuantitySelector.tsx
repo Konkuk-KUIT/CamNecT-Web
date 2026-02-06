@@ -10,6 +10,7 @@ export const QuantitySelector = ({
   onIncrease,
 }: QuantitySelectorProps) => {
   return (
+    // 수량 선택 컨테이너
     <div className='flex h-[52px] w-full items-center justify-between rounded-[5px] border border-[var(--ColorGray1,#ECECEC)] px-[15px]'>
       <button
         type='button'

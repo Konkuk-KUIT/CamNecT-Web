@@ -6,6 +6,7 @@ export type ShopItem = {
   imageUrl?: string;
 };
 
+// 임시 상품 데이터 (API 연결 전까지 사용)
 export const shopItems: ShopItem[] = [
   {
     id: 1,
