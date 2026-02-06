@@ -40,6 +40,9 @@ import { ActivityWritePage } from "../pages/activity/WritePage";
 import { ExternalActivityPostPage } from "../pages/activity/ExternalActivityPostPage";
 import { RecruitDetailPage } from "../pages/activity/RecruitDetailPage";
 import { RecruitWritePage } from "../pages/activity/RecruitWritePage";
+import { AdminWritePage } from "../pages/admin/AdminWritePage";
+import { ExternalWritePage } from "../pages/admin/ExternalPostWritePage";
+import { JobWritePage } from "../pages/admin/JobPostWritePage";
 
 export const router = createBrowserRouter([
 
@@ -78,8 +81,43 @@ export const router = createBrowserRouter([
                             {
                                 path: "school-verification/:id",
                                 element: <AdminVerificationDetail />,
+                            },
+                            {
+                                path:"post",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <AdminWritePage/>
+                                    },
+                                    {
+                                        path: "external-write", 
+                                        children: [
+                                            {
+                                                index: true,
+                                                element: <ExternalWritePage />,
+                                            },
+                                            {
+                                                path: ":postId",
+                                                element: <ExternalWritePage />,
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        path: "job-write", 
+                                        children: [
+                                            {
+                                                index: true,
+                                                element: <JobWritePage />,
+                                            },
+                                            {
+                                                path: ":postId",
+                                                element: <JobWritePage />,
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
-                            // todo 관리자 대외활동 등록 페이지도 추가
+
                         ]
                     },
                 
