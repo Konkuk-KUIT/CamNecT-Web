@@ -114,7 +114,7 @@ export interface ProfileImagePresignResponse {
   };
 }
 
-// 프로필 이미지, 자기소개, 관심태그 전송 DTO (/api/profile/onboarding)
+// 프로필 이미지, 자기소개, 관심태그 전송 DTO (/api/auth/onboarding)
 export interface ProfileOnboardingRequest {
   userId: number;
   profileImageKey?: string | null;

@@ -63,10 +63,10 @@ export const requestProfilePresign = async (data: ProfileImagePresignRequest) =>
 
 // 8. 관심태그 리스트 조회 API [GET] 
 
-// 9. 프로필 이미지, 자기소개, 관심태그 전송 API [POST] (/api/profile/onboarding)
+// 9. 프로필 이미지, 자기소개, 관심태그 전송 API [POST] (/api/auth/onboarding)
 export const requestProfileOnboarding = async (data: ProfileOnboardingRequest) => {
     
-    const response = await axiosInstance.post<ProfileOnboardingResponse>("/api/profile/onboarding", data);
+    const response = await axiosInstance.post<ProfileOnboardingResponse>("/api/auth/onboarding", data);
     return response.data;
 }
 
