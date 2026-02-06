@@ -112,7 +112,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         />
       }
     >
-      <main className='flex w-full justify-center bg-white'>
+      <div className='flex w-full justify-center bg-white'>
          <div className='flex w-full max-w-[720px] flex-col pb-[90px] sm:px-[25px]'>
            <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
              <div className='flex flex-col items-start gap-[20px]'>
@@ -225,7 +225,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
           </section>
 
         </div>
-      </main>
+      </div>
 
       <BottomReact
         isMine={isPostMine}

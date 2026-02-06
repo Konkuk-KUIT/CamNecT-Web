@@ -123,6 +123,7 @@ export const ExternalActivityPostPage = () => {
             <div className='w-full flex justify-end px-[15px] py-[15px]'>
                 <button
                     className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30'
+                    onClick={() => navigate("/activity/recruit-write")}
                 >
                     <Icon name='edit'/>
                     팀원 모집하기
@@ -159,7 +160,7 @@ export const ExternalActivityPostPage = () => {
                 </header>
             }
         >
-        <main className='flex w-full justify-center bg-white'>
+        <div className='flex w-full justify-center bg-white'>
             <div className='flex w-full max-w-[720px] flex-col'>
                 {/* 썸네일 이미지 */}
                 {thumbnailUrl && (
@@ -283,7 +284,7 @@ export const ExternalActivityPostPage = () => {
             {/* 탭 컨텐츠 */}
             {activeTab === 'detail' ? renderDetailTab() : renderTeamTab()}
             </div>
-        </main>
+        </div>
 
 
         <BottomSheetModal isOpen={isOptionOpen} onClose={() => setIsOptionOpen(false)} height='auto'>

@@ -6,8 +6,8 @@ export const teamRecruitPosts: TeamRecruitPost[] = [
     id: 'team-recruit-1',
     activityId: 'external-1',
     title: '기획 포지션 한 분 구합니다. 같이 성장하실 분!',
-    authorId: 'user-1',
-    authorName: '컴퓨터공학',
+    authorId: 'user-seo-jiyoon-17',
+    authorName: '이지윤',
     contestName: '2025 공공기관 데이터 아이디어 공모전',
     recruitNow: true,
     bookmarkCount: 12,
@@ -18,7 +18,7 @@ export const teamRecruitPosts: TeamRecruitPost[] = [
     activityId: 'external-1',
     title: '두 분 구합니다. 열심히 하실 분!',
     authorId: 'user-2',
-    authorName: '컴퓨터공학',
+    authorName: '박영희',
     contestName: '2025 공공기관 데이터 아이디어 공모전',
     recruitNow: false,
     bookmarkCount: 3,
@@ -29,7 +29,7 @@ export const teamRecruitPosts: TeamRecruitPost[] = [
     activityId: 'external-2',
     title: '영상 편집 가능하신 분 찾습니다!',
     authorId: 'user-3',
-    authorName: '미디어커뮤니케이션학과',
+    authorName: '이지은',
     contestName: '브랜드 숏폼 콘텐츠 서포터즈 모집',
     recruitNow: true,
     bookmarkCount: 8,
@@ -43,10 +43,11 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
     id: 'team-recruit-1',
     activityId: 'external-1',
     title: '기획 포지션 한 분 구합니다. 같이 성장하실 분!',
-    authorId: 'user-1',
-    authorName: '김철수',
-    authorMajor: '컴퓨터공학과',
-    authorGrade: 3,
+    authorId: 'user-park-wonbin-20',
+    authorName: '박원빈',
+    authorMajor: '컴퓨터공학부',
+    authorGrade: "20",
+    authorProfile: "https://picsum.photos/seed/user-park-wonbin-20/100/100",
     contestName: '2025 공공기관 데이터 아이디어 공모전',
     activityTitle: '2025 공공기관 데이터 아이디어 공모전',
     activityUrl: '/activity/external/external-1',
@@ -67,9 +68,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 - 공모전 경험이 있으신 분
 - 데이터 분석에 관심이 있으신 분
 - 적극적이고 책임감 있으신 분
-
-💬 지원 방법
-댓글 또는 오픈채팅으로 연락주세요!`,
+`,
   },
   'team-recruit-2': {
     id: 'team-recruit-2',
@@ -78,7 +77,8 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
     authorId: 'user-2',
     authorName: '박영희',
     authorMajor: '컴퓨터공학과',
-    authorGrade: 2,
+    authorGrade: "20",
+    authorProfile: "https://picsum.photos/seed/user_002/100/100",
     contestName: '2025 공공기관 데이터 아이디어 공모전',
     activityTitle: '2025 공공기관 데이터 아이디어 공모전',
     activityUrl: '/activity/external/external-1',
@@ -105,7 +105,8 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
     authorId: 'user-3',
     authorName: '이지은',
     authorMajor: '미디어커뮤니케이션학과',
-    authorGrade: 4,
+    authorGrade: "21",
+    authorProfile: "https://picsum.photos/seed/user_003/100/100",
     contestName: '브랜드 숏폼 콘텐츠 서포터즈 모집',
     activityTitle: '브랜드 숏폼 콘텐츠 서포터즈 모집',
     activityUrl: '/activity/external/external-2',
@@ -128,6 +129,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 - 빠른 작업 가능하신 분
 
 활동비 지급 및 포트폴리오 제작 가능합니다!`,
+  isSubmited: true,
   },
 };
 

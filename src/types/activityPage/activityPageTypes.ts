@@ -124,10 +124,13 @@ export interface TeamRecruitDetail extends TeamRecruitPost{
     activityUrl: string;
 
     authorMajor: string;
-    authorGrade: number;
+    authorGrade: string;
+    authorProfile: string;
 
     recruitDeadline: string;
     recruitTeamNumber: number;
 
     description: string;
+
+    isSubmited?:boolean;
 }

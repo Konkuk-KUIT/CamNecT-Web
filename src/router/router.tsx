@@ -37,6 +37,8 @@ import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfol
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
 import { ActivityWritePage } from "../pages/activity/WritePage";
 import { ExternalActivityPostPage } from "../pages/activity/ExternalActivityPostPage";
+import { RecruitDetailPage } from "../pages/activity/RecruitDetailPage";
+import { RecruitWritePage } from "../pages/activity/RecruitWritePage";
 
 export const router = createBrowserRouter([
 
@@ -169,6 +171,23 @@ export const router = createBrowserRouter([
                             {
                                 path: "external/:postId",
                                 element: <ExternalActivityPostPage />
+                            },
+                            {
+                                path: "recruit/:recruitId",
+                                element: <RecruitDetailPage/>
+                            },
+                            {
+                                path:"recruit-write",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <RecruitWritePage/>
+                                    },
+                                    {
+                                        path: "edit/:recruitId",
+                                        element: <RecruitWritePage/>
+                                    }
+                                ]
                             }
                         ]
                     },
