@@ -5,7 +5,10 @@ type BottomBuyProps = {
 export const BottomBuy = ({ onClick }: BottomBuyProps) => {
   return (
     // 화면 하단 고정 구매 버튼
-    <div className='fixed bottom-0 left-0 right-0 z-50 bg-white px-[25px] py-[5px]'>
+    <div
+      className='fixed bottom-0 left-0 right-0 z-50 bg-white px-[25px] py-[5px]'
+      style={{ paddingBottom: 'calc(5px + env(safe-area-inset-bottom))' }}
+    >
       <button
         type='button'
         onClick={onClick}

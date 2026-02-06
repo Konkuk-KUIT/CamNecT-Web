@@ -50,7 +50,7 @@ export const PurchaseBottomSheet = ({
               <span className='text-m-16 text-[var(--ColorGray2,#A1A1A1)]'>Point</span>
             </div>
           </div>
-          <svg width="325" height="1" viewBox="0 0 325 1" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className='w-full' height="1" viewBox="0 0 325 1" fill="none" xmlns="http://www.w3.org/2000/svg">
             <line y1="0.5" x2="325" y2="0.5" stroke="#ECECEC" />
           </svg>
           <div className='flex items-center justify-between'>

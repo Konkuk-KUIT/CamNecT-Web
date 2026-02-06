@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PopUp from '../../components/Pop-up';
+import Toast from '../../components/Toast';
+import { useToast } from '../../hooks/useToast';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { usePointStore } from '../../store/usePointStore';
@@ -18,8 +20,11 @@ export const ShopDetailPage = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
   // 전역 포인트 (구매 즉시 반영)
   const point = usePointStore((state) => state.point);
+  const getPoint = usePointStore((state) => state.getPoint);
   const deductPoint = usePointStore((state) => state.deductPoint);
   // URL 파라미터로 상품 찾기
   const product = useMemo(() => {
@@ -62,8 +67,11 @@ export const ShopDetailPage = () => {
 
   const handleConfirmPurchase = () => {
     const totalRequiredPoint = product.point * quantity;
-    // 포인트가 부족하면 구매 진행 중단
-    if (point < totalRequiredPoint) {
+    const currentPoint = getPoint();
+    // 포인트가 부족하면 구매 진행 중단 (최신 포인트 기준)
+    if (currentPoint < totalRequiredPoint) {
+      setToastMessage('포인트가 부족해서 구매할 수 없어요');
+      openToast();
       setIsConfirmOpen(false);
       return;
     }
@@ -141,6 +149,7 @@ export const ShopDetailPage = () => {
         onLeftClick={() => setIsConfirmOpen(false)}
         onRightClick={handleConfirmPurchase}
       />
+      <Toast isOpen={isToastOpen} isFading={isToastFading} message={toastMessage} />
     </HeaderLayout>
   );
 };
