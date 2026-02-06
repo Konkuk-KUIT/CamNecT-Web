@@ -200,6 +200,10 @@ const baseActivityPosts: ActivityPostDetail[] = [
     },
     applyUrl: 'https://example.com/supporters/2025',
     thumbnailUrl: sampleThumbnail3,
+    descriptionBlocks: {
+        title: '설명',
+        body: '설명',
+      },
   }),
   buildPost({
     id: 'external-3',
@@ -221,6 +225,10 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-15T00:00:00.000Z',
     applyUrl: 'https://example.com/design-challenge',
     thumbnailUrl: sampleThumbnail1,
+    descriptionBlocks: {
+        title: '설명',
+        body: '설명',
+      },
   }),
   buildPost({
     id: 'job-1',
@@ -239,8 +247,13 @@ const baseActivityPosts: ActivityPostDetail[] = [
     },
     employType: "채용연계형 인턴, 체험형 인턴",
     payment: "연봉 4900만원~6000만원",
+    applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail2,
+    descriptionBlocks: {
+        title: '설명',
+        body: '설명',
+      },
   }),
   buildPost({
     id: 'job-2',
@@ -259,8 +272,13 @@ const baseActivityPosts: ActivityPostDetail[] = [
     },
     employType: "정직원",
     payment: "연봉 2000만원~3000만원",
+    applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: false,
     thumbnailUrl: sampleThumbnail1,
+    descriptionBlocks: {
+        title: '설명',
+        body: '설명',
+      },
   }),
 ];
 

@@ -10,111 +10,103 @@ import Icon from '../../components/Icon';
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export const RecruitWritePage = () => {
-  const navigate = useNavigate();
-  const { recruitId } = useParams();
-  
-  const existingRecruit = useMemo(
-    () => (recruitId ? getTeamRecruitDetail(recruitId) : null),
-    [recruitId]
-  );
-
-  const [title, setTitle] = useState('');
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [month, setMonth] = useState(1);
-  const [day, setDay] = useState(1);
-  const [teamNumber, setTeamNumber] = useState(1);
-  const [description, setDescription] = useState('');
-  const [showWarning, setShowWarning] = useState(false);
-
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
-  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
-  const [showDayDropdown, setShowDayDropdown] = useState(false);
-
-  const maxLength = 300;
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
-  
-  // 선택된 연도/월에 따른 일수 계산
-  const daysInMonth = useMemo(() => {
-    return new Date(year, month, 0).getDate();
-  }, [year, month]);
-
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-  // 수정 모드일 때 기존 데이터 로드
-  useEffect(() => {
-    if (existingRecruit) {
-      setTitle(existingRecruit.title);
-      const deadlineDate = new Date(existingRecruit.recruitDeadline);
-      setYear(deadlineDate.getFullYear());
-      setMonth(deadlineDate.getMonth() + 1);
-      setDay(deadlineDate.getDate());
-      setTeamNumber(existingRecruit.recruitTeamNumber);
-      setDescription(existingRecruit.description);
-    }
-  }, [existingRecruit]);
-
-  // 초기값 저장
-  const initialData = useMemo(() => ({
-    title: existingRecruit?.title || '',
-    year: existingRecruit ? new Date(existingRecruit.recruitDeadline).getFullYear() : currentYear,
-    month: existingRecruit ? new Date(existingRecruit.recruitDeadline).getMonth() + 1 : 1,
-    day: existingRecruit ? new Date(existingRecruit.recruitDeadline).getDate() : 1,
-    teamNumber: existingRecruit?.recruitTeamNumber || 1,
-    description: existingRecruit?.description || '',
-  }), [existingRecruit, currentYear]);
-
-  // 변경사항 추적
-  const hasChanges = useMemo(
-    () =>
-      title !== initialData.title ||
-      year !== initialData.year ||
-      month !== initialData.month ||
-      day !== initialData.day ||
-      teamNumber !== initialData.teamNumber ||
-      description !== initialData.description,
-    [title, year, month, day, teamNumber, description, initialData]
-  );
-
-  const isFormValid = title.trim() !== '' && description.trim() !== '';
-
-  const handleClose = () => {
-    if (hasChanges) {
-      setShowWarning(true);
-    } else {
-      navigate(-1);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!isFormValid) return;
+    const navigate = useNavigate();
+    const { recruitId } = useParams();
+    const isEditMode = Boolean(recruitId);
     
-    // TODO: API 호출하여 팀원 모집 글 생성/수정
-    console.log({
-      id: recruitId,
-      title,
-      deadline: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-      teamNumber,
-      description,
-    });
+    const existingRecruit = useMemo(
+        () => (recruitId ? getTeamRecruitDetail(recruitId) : null),
+        [recruitId]
+    );
+
+    const [title, setTitle] = useState('');
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(1);
+    const [day, setDay] = useState(1);
+    const [teamNumber, setTeamNumber] = useState(1);
+    const [description, setDescription] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+    const [showYearDropdown, setShowYearDropdown] = useState(false);
+    const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+    const [showDayDropdown, setShowDayDropdown] = useState(false);
+
+    const maxLength = 300;
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
     
-    navigate(-1);
-  };
+    // 선택된 연도/월에 따른 일수 계산
+    const daysInMonth = useMemo(() => {
+        return new Date(year, month, 0).getDate();
+    }, [year, month]);
 
-  const handleIncrement = () => {
-    setTeamNumber(prev => (prev < 20 ? prev + 1 : 20));
-  };
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  const handleDecrement = () => {
-    setTeamNumber(prev => (prev > 1 ? prev - 1 : 1));
-  };
+    // 수정 모드일 때 기존 데이터 로드
+    useEffect(() => {
+        if (existingRecruit) {
+        setTitle(existingRecruit.title);
+        const deadlineDate = new Date(existingRecruit.recruitDeadline);
+        setYear(deadlineDate.getFullYear());
+        setMonth(deadlineDate.getMonth() + 1);
+        setDay(deadlineDate.getDate());
+        setTeamNumber(existingRecruit.recruitTeamNumber);
+        setDescription(existingRecruit.description);
+        }
+    }, [existingRecruit]);
 
-  // 월이 변경되면 일자가 유효한지 확인
-  useEffect(() => {
-    if (day > daysInMonth) {
-      setDay(daysInMonth);
-    }
-  }, [day, daysInMonth]);
+    // 초기값 저장
+    const initialData = useMemo(() => ({
+        title: existingRecruit?.title || '',
+        year: existingRecruit ? new Date(existingRecruit.recruitDeadline).getFullYear() : currentYear,
+        month: existingRecruit ? new Date(existingRecruit.recruitDeadline).getMonth() + 1 : 1,
+        day: existingRecruit ? new Date(existingRecruit.recruitDeadline).getDate() : 1,
+        teamNumber: existingRecruit?.recruitTeamNumber || 1,
+        description: existingRecruit?.description || '',
+    }), [existingRecruit, currentYear]);
+
+    // 변경사항 추적
+    const hasChanges = useMemo(
+        () =>
+        title !== initialData.title ||
+        year !== initialData.year ||
+        month !== initialData.month ||
+        day !== initialData.day ||
+        teamNumber !== initialData.teamNumber ||
+        description !== initialData.description,
+        [title, year, month, day, teamNumber, description, initialData]
+    );
+
+    const isFormValid = title.trim() !== '' && description.trim() !== '';
+
+    const handleClose = () => {
+        if (hasChanges) {
+        setShowWarning(true);
+        } else {
+        navigate(-1);
+        }
+    };
+
+    const handleSubmit = () => {
+        if (!isFormValid) return;
+        setIsConfirmOpen(true);
+    };
+
+    const handleIncrement = () => {
+        setTeamNumber(prev => (prev < 20 ? prev + 1 : 20));
+    };
+
+    const handleDecrement = () => {
+        setTeamNumber(prev => (prev > 1 ? prev - 1 : 1));
+    };
+
+    // 월이 변경되면 일자가 유효한지 확인
+    useEffect(() => {
+        if (day > daysInMonth) {
+        setDay(daysInMonth);
+        }
+    }, [day, daysInMonth]);
 
     return (
         <>
@@ -196,7 +188,7 @@ export const RecruitWritePage = () => {
                                     <button
                                     type='button'
                                     onClick={() => setShowMonthDropdown(!showMonthDropdown)}
-                                    className='w-full min-w-[79px] h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none'
+                                    className='w-full min-w-[86px] h-[52px] p-[15px] border border-gray-150 rounded-[5px] flex items-center justify-between focus:outline-none'
                                     >
                                         <span className='text-r-16-hn text-gray-750'>{month}월</span>
                                         <Icon 
@@ -323,6 +315,24 @@ export const RecruitWritePage = () => {
                 }}
                 onRightClick={() => setShowWarning(false)}
             />
+
+            <PopUp 
+                isOpen={isConfirmOpen} 
+                type='info' 
+                title={isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?'} 
+                content={isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.'}
+                onLeftClick={() => setIsConfirmOpen(false)} 
+                onRightClick={() => {
+                    // TODO: API 호출하여 팀원 모집 글 생성/수정
+                    console.log({
+                    id: recruitId,
+                    title,
+                    deadline: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+                    teamNumber,
+                    description,
+                    });
+                    navigate(-1);
+                }} />
         </>
     );
 };

@@ -79,7 +79,9 @@ export const ExternalActivityPostPage = () => {
         }
 
         if (item.id === 'edit-post') {
-            navigate(`/activity/edit/${selectedPost.id}`);
+            if (selectedPost.tab === "external")
+                navigate(`/admin/post/external-write/${selectedPost.id}`);
+            else navigate(`/admin/post/job-write/${selectedPost.id}`);
         }
 
         if (item.id === 'delete-post') {
