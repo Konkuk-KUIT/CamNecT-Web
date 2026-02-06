@@ -164,7 +164,7 @@ const PopUp = ({
 
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-[20px] py-[20px]'
+      className='fixed inset-0 z-[1200] flex items-center justify-center bg-black/40 px-[20px] py-[20px]'
       role='dialog'
       aria-modal='true'
     >

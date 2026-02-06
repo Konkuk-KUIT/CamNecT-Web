@@ -34,6 +34,7 @@ export const BottomChat = ({
 }: BottomChatProps) => {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const hasContent = !disabled && content.trim().length > 0;
 
   useEffect(() => {
@@ -74,10 +75,12 @@ export const BottomChat = ({
     textarea.focus();
   }, [focusToken, disabled]);
 
+  const bottomOffset = isFocused ? keyboardOffset : 0;
+
   return (
     <div
-      className='fixed left-0 right-0 z-50 bg-white'
-      style={{ bottom: keyboardOffset }}
+      className='fixed left-0 right-0 z-50 bg-white pb-[40px]'
+      style={{ bottom: bottomOffset }}
     >
       <div
         className='mx-auto flex w-full max-w-[720px] items-center gap-[clamp(8px,2.2vw,10px)] px-[clamp(16px,6vw,25px)] py-[6px] box-border'
@@ -106,6 +109,8 @@ export const BottomChat = ({
               placeholder={placeholder}
               disabled={disabled}
               onChange={(event) => onChange(event.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               rows={1}
               className='min-h-[40px] max-h-[120px] min-w-0 flex-1 resize-none bg-transparent px-[clamp(12px,3.5vw,15px)] py-[10px] text-[16px] text-[var(--ColorBlack,#202023)] placeholder:text-[16px] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:text-[var(--ColorGray2,#A1A1A1)]'
             />
