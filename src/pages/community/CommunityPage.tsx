@@ -202,14 +202,14 @@ export const CommunityPage = () => {
     () => questionState.items.map((post) => mapToQuestionPost(post)),
     [questionState.items],
   );
-  const recommendedPostsFromApi = useMemo(
-    () => mainState.recommendedByInterest.map((post) => mapToInfoPost(post)),
-    [mainState.recommendedByInterest],
-  );
-  const waitingQuestionsFromApi = useMemo(
-    () => mainState.waitingQuestions.map((post) => mapToQuestionPost(post)),
-    [mainState.waitingQuestions],
-  );
+  const recommendedPostsFromApi = useMemo(() => {
+    const items = mainState.recommendedByInterest ?? [];
+    return items.map((post) => mapToInfoPost(post));
+  }, [mainState.recommendedByInterest]);
+  const waitingQuestionsFromApi = useMemo(() => {
+    const items = mainState.waitingQuestions ?? [];
+    return items.map((post) => mapToQuestionPost(post));
+  }, [mainState.waitingQuestions]);
 
   // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈
   const alumniInfos = useMemo(
@@ -261,9 +261,11 @@ export const CommunityPage = () => {
         setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
         getCommunityHome()
           .then((response) => {
+            const recommendedByInterest = response.data.recommendedByInterest ?? [];
+            const waitingQuestions = response.data.waitingQuestions ?? [];
             setMainState({
-              recommendedByInterest: response.data.recommendedByInterest,
-              waitingQuestions: response.data.waitingQuestions,
+              recommendedByInterest,
+              waitingQuestions,
               isLoading: false,
               error: null,
               hasFetched: true,
