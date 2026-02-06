@@ -913,14 +913,14 @@ export default function PortfolioEditModal({
                 <input
                     ref={thumbnailInputRef}
                     type="file"
-                    accept="image/png, image/jpg"
+                    accept="image/png, image/jpg, image/jpeg"
                     onChange={handleThumbnailUpload}
                     className="hidden"
                 />
                 <input
                     ref={imageInputRef}
                     type="file"
-                    accept="image/png, image/jpg"
+                    accept="image/png, image/jpg, image/jpeg"
                     multiple
                     onChange={handleImageUpload}
                     className="hidden"
@@ -928,7 +928,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/png, image/jpg"
+                    accept="image/png, image/jpg, image/jpeg"
                     capture="environment"
                     onChange={handleCameraUpload}
                     className="hidden"
