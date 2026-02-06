@@ -9,7 +9,7 @@ import { HeaderLayout } from '../../layouts/HeaderLayout';
 import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
 import { activityLoggedInUser, mapToActivityPost } from '../../mock/activityCommunity';
 import { getTeamRecruitsByActivityId } from '../../mock/teamRecruit';
-import { formatOnlyDate, formatTimeAgo } from '../../utils/formatDate';
+import { formatOnlyDate } from '../../utils/formatDate';
 import { RecruitPost } from '../../components/posts/RecruitPost';
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';

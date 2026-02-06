@@ -203,7 +203,6 @@ export const RecruitDetailPage = () => {
       <div className='fixed bottom-0 left-0 right-0 z-50 bg-white'>
         <div
           className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] px-[25px] py-[15px] box-border'
-          style={{ paddingBottom: 'calc(6px + env(safe-area-inset-bottom))' }}
         >
             {recruitDetail.recruitNow ? (
                 <>
@@ -211,7 +210,7 @@ export const RecruitDetailPage = () => {
                         <button
                             type='button'
                             disabled={true}
-                            className='flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn'
+                            className='flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn border-none'
                         >
                             팀원 신청 완료
                         </button>
