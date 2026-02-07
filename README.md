@@ -170,7 +170,7 @@ src/
 ┃ ┣ chat/ # 커피챗 / 채팅
 ┃ ┣ home/ # 홈
 ┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
-┃ ┃ ┣ HomePage.tsx # xxxPage.ts로 통일
+┃ ┃ ┣ HomePage.tsx # xxPage.ts로 통일
 ┃ ┣ community/ # 커뮤니티
 ┃ ┣ alumni/ # 동문찾기 / 동문프로필
 ┃ ┣ mypage/ # 마이페이지

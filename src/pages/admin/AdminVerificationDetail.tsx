@@ -11,8 +11,6 @@ import PopUp from "../../components/Pop-up";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import { useAuthStore } from "../../store/useAuthStore";
 
-// todo 2. 승인 모달 호출 (이때 verificationList 초기화)
-// todo 3. 거절 모달 호출 (이때 verificationList 초기화)
 export const AdminVerificationDetail = () => {
 
     const location = useLocation();

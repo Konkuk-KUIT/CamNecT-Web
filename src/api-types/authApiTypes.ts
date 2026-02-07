@@ -209,7 +209,6 @@ export interface AdminVerificationDownloadUrlResponse {
 }
 
 // 관리자 인증서 심사처리 DTO (/api/admin/verification/documents/{submissionId})
-// todo REJECT 인지는 확인 
 export type AdminVerificationDecisionType = 'APPROVE' | 'REJECT';
 
 export type AdminVerificationProcessRequest = {
@@ -231,10 +230,14 @@ export type AdminVerificationProcessRequest = {
 
 export type AdminVerificationProcessResponse = void;
 
+// 인증 완료 화면 조회 DTO (/api/auth/verification-complete)
+export interface VerificationCompleteRequest {
+  userId: number;
+}
 
-export interface SchoolInfoResponse {
-    name: string;
-    studentId: string;
-    univ: string;
-    major: string;
+export interface VerificationCompleteResponse {
+  name: string;
+  studentNo: string;
+  institutionName: string;
+  majorName: string;
 }

@@ -17,7 +17,6 @@ interface EmailVerificationStepProps {
     onNext: () => void;
 }
 
-// todo 이메일 토큰 요구하는 API 구현
 // 이메일 인증 단계
 export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) => {
 

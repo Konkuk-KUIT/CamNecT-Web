@@ -39,7 +39,6 @@ import { AdminActivityRegistrationPage } from "../pages/admin/AdminActivityRegis
 
 export const router = createBrowserRouter([
 
-    // todo 각 페이지 연결 
     {
         path: "/",
         element: <App />, // 모든 화면을 감싸는 컴포넌트 (큰 틀)

@@ -9,7 +9,7 @@ import type {
     ProfileOnboardingRequest, ProfileOnboardingResponse,
     SchoolVerificationPresignRequest, SchoolVerificationPresignResponse,
     SchoolVerificationUploadRequest, SchoolVerificationUploadResponse,
-    TagListResponse
+    TagListResponse, VerificationCompleteRequest, VerificationCompleteResponse
 } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
@@ -102,6 +102,11 @@ export const requestAdminVerificationProcess = async (data: AdminVerificationPro
     return response.data;
 }
 
-// 13. 인증 완료 화면 요청 API 
-
-// 14. 회원가입 요청 API
+// 13. (인증 완료 화면) 인증 완료 화면 요청 API [GET] (/api/auth/verification-complete)
+export const requestVerificationComplete = async (data: VerificationCompleteRequest) => {
+    
+    const response = await axiosInstance.get<VerificationCompleteResponse>("/api/auth/verification-complete", {
+        params: data // query parameter
+    });
+    return response.data;
+}
