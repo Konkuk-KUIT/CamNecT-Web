@@ -51,7 +51,7 @@ export const SchoolCompletion = () => {
                 입력하신 정보가 일치하지 않는 경우 재인증을 해주세요
             </h2>  
             
-            <div className="mt-[60px] grid grid-cols-2 gap-y-[40px] gap-x-[10px] w-full">
+            <div className="mt-[60px] px-[25px] grid grid-cols-2 gap-y-[40px] gap-x-[10px] w-full">
                 <InfoItem label="이름" value={verificationCompleteData?.name || "-"} />
                 <InfoItem label="학번" value={verificationCompleteData?.studentNo || "-"} />
                 <InfoItem label="대학교" value={verificationCompleteData?.institutionName || "-"} />
