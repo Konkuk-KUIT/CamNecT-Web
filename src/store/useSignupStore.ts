@@ -58,17 +58,16 @@ const initialState = {
     },
     verificationType: 'email' as const,
     emailVerified: false,
-    // phoneVerified: false,
+    selfIntroduction: '',
+    profileImage: null as File | null,
+    profileImageKey: null as string | null,
+    verificationFile: null as File | null,
+    isVerificationSubmitted: false,
 };
 
 // Zustand Store 생성
 export const useSignupStore = create<SignupStore>((set, get) => ({
     ...initialState,
-    selfIntroduction: '',
-    profileImage: null,
-    profileImageKey: null,
-    verificationFile: null,
-    isVerificationSubmitted: false,
 
     // 상태 변경 함수들 구현
     setEmail: (email: string) => set({ email }),
