@@ -60,11 +60,6 @@ export const MySettingsPage = () => {
         }
     ];
 
-    const handleLogout = (userId: string) => {
-        alert(`${userId} 로그아웃 로직 실행`); //TODO: 로그아웃 api 연결
-        navigate("/");
-    }
-
     if (!meDetail) {
         return (
             <PopUp
@@ -91,7 +86,7 @@ export const MySettingsPage = () => {
         >
             <div className="w-full h-full bg-white">
                 {/* Profile Section */}
-                <div className="flex flex-col gap-[20px] px-[25px] pt-[25px] pb-[20px] border-b border-gray-150">
+                <div className="flex flex-col gap-[20px] px-[25px] py-[30px] border-b border-gray-150">
                     <div className="flex gap-[25px]">
                         <div className="min-w-[55px] h-[55px] rounded-full overflow-hidden">
                             <img 
@@ -114,12 +109,6 @@ export const MySettingsPage = () => {
                             </div>
                         </div>
                     </div>
-                    <button 
-                        className="w-full py-[10px] rounded-[6px] bg-gray-150 flex items-center justify-center"
-                        onClick={() => handleLogout(user.id)}
-                    >
-                        <span className="text-sb-14-hn text-gray-650">로그아웃</span>
-                    </button>
                 </div>
 
                 {/* Menu Items */}

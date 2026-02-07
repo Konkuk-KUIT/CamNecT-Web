@@ -7,20 +7,21 @@ import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
 import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
 import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
+import ActivityPostPage from "../pages/activity/ActivityPostPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { SignUpPage } from "../pages/auth/SignUpPage";
-import { CommunityPage } from "../pages/community/CommunityPage";
 import { HomePage } from "../pages/home/HomePage";
-import { NotificationPage } from "../pages/home/NotificationPage";
 import { MypageEditPage } from "../pages/my-page/MypageEditPage";
 import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
 import { MypagePage } from "../pages/my-page/MypagePage";
 import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
 import { WritePage } from "../pages/community/WritePage";
-import CommunityPostPage from "../pages/community/CommunityPostPage";
 import { AuthGuard } from "./AuthGuard";
 import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
 import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
+import { CommunityPage } from "../pages/community/CommunityPage";
+import  CommunityPostPage  from "../pages/community/CommunityPostPage";
+import { NotificationPage } from "../pages/home/NotificationPage";
 import { Schedule } from "../pages/schedule/Schedule";
 import { ShopPage } from "../pages/shop/ShopPage";
 import { ShopDetailPage } from "../pages/shop/ShopDetailPage";
@@ -35,6 +36,13 @@ import { TermsPage } from "../pages/my-page/sidebar/TermsPage";
 import { EditPasswordPage } from "../pages/my-page/sidebar/EditPasswordPage";
 import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
 import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
+import { ActivityWritePage } from "../pages/activity/WritePage";
+import { ExternalActivityPostPage } from "../pages/activity/ExternalActivityPostPage";
+import { RecruitDetailPage } from "../pages/activity/RecruitDetailPage";
+import { RecruitWritePage } from "../pages/activity/RecruitWritePage";
+import { AdminWritePage } from "../pages/admin/AdminWritePage";
+import { ExternalWritePage } from "../pages/admin/ExternalPostWritePage";
+import { JobWritePage } from "../pages/admin/JobPostWritePage";
 
 export const router = createBrowserRouter([
 
@@ -73,8 +81,43 @@ export const router = createBrowserRouter([
                             {
                                 path: "school-verification/:id",
                                 element: <AdminVerificationDetail />,
+                            },
+                            {
+                                path:"post",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <AdminWritePage/>
+                                    },
+                                    {
+                                        path: "external", 
+                                        children: [
+                                            {
+                                                index: true,
+                                                element: <ExternalWritePage />,
+                                            },
+                                            {
+                                                path: ":postId",
+                                                element: <ExternalWritePage />,
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        path: "job", 
+                                        children: [
+                                            {
+                                                index: true,
+                                                element: <JobWritePage />,
+                                            },
+                                            {
+                                                path: ":postId",
+                                                element: <JobWritePage />,
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
-                            // todo 관리자 대외활동 등록 페이지도 추가
+
                         ]
                     },
                 
@@ -145,10 +188,47 @@ export const router = createBrowserRouter([
                         ]
                         
                     },
-
                     {
                         path: "activity",
-                        element: <ActivityPage />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ActivityPage />,
+                            },
+                            {
+                                path: "write",
+                                element: <ActivityWritePage />,
+                            },
+                            {
+                                path: "edit/:postId",
+                                element: <ActivityWritePage />,
+                            },
+                            {
+                                path: "internal/:postId",
+                                element: <ActivityPostPage />,
+                            },
+                            {
+                                path: "external/:postId",
+                                element: <ExternalActivityPostPage />
+                            },
+                            {
+                                path: "recruit/:recruitId",
+                                element: <RecruitDetailPage/>
+                            },
+                            {
+                                path:":activityId/recruit-write",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <RecruitWritePage/>
+                                    },
+                                    {
+                                        path: ":recruitId",
+                                        element: <RecruitWritePage/>
+                                    }
+                                ]
+                            }
+                        ]
                     },
                     {
                         path: "schedule",
@@ -219,6 +299,14 @@ export const router = createBrowserRouter([
                         ]
                     },
                     {
+                        path: "community",
+                        element: <CommunityPage />,
+                    },
+                    {
+                        path: "community/post/:postId",
+                        element: <CommunityPostPage />,
+                    },
+                    {
                         path: "shop",
                         children: [
                             {
@@ -251,6 +339,14 @@ export const router = createBrowserRouter([
                                 element: <CommunityPostPage />,
                             },
                         ]
+                    },
+                    {
+                        path: "community/write",
+                        element: <WritePage />,
+                    },
+                    {
+                        path: "community/edit/:postId",
+                        element: <WritePage />,
                     },
                 ]
             },

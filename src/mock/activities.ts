@@ -4,11 +4,6 @@ import type {
   ActivityListItem
 } from "../types/activityPage/activityPageTypes";
 
-// export const MOCK_ACTIVITY_FILTERS = {
-//   host: ["전체", "공공기관", "기업", "학교", "동아리/커뮤니티", "기타"] as const,
-//   region: ["전체", "서울", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "부산"] as const,
-// };
-
 export const MOCK_INTERNAL_ACTIVITY_POSTS: ActivityListItem[] = [
     {
         id: '3',
@@ -43,14 +38,10 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2026-02-01T00:00:00.000Z", end: "2026-03-01T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_001/apply",
-    descriptionBlocks: [
-      {
-        title: "공모 개요",
-        body:
+    descriptionTitle: "공모 개요",
+    descriptionBody:
           "지역과 함께하는 나라사랑 캠페인 콘텐츠를 모집합니다.\n" +
           "기획서/카피/포스터/영상 등 다양한 형식으로 참여할 수 있습니다.",
-      },
-    ],
   },
   {
     id: "act_002",
@@ -69,9 +60,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2025-09-25T00:00:00.000Z", end: "2026-09-25T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_002/apply",
-    descriptionBlocks: [
-      { title: "공모 주제", body: "경기도 브랜드를 홍보할 수 있는 콘텐츠(숏폼/이미지/카피 등)" },
-    ],
+    descriptionTitle: "공모 주제", 
+    descriptionBody: "경기도 브랜드를 홍보할 수 있는 콘텐츠(숏폼/이미지/카피 등)",
   },
   {
     id: "act_003",
@@ -90,9 +80,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_003/apply",
-    descriptionBlocks: [
-      { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-    ],
+    descriptionTitle: "상세 안내", 
+    descriptionBody: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다.",
   },
   {
         id: 'act_005',
@@ -111,9 +100,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
         applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
         announceDate: "2026-11-30T00:00:00.000Z",
         applyUrl: "https://example.com/activities/act_003/apply",
-        descriptionBlocks: [
-            { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-        ],
+        descriptionTitle: "상세 안내", 
+        descriptionBody: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." ,
     },
     {
         id: "act_006",
@@ -131,9 +119,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
         applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
         announceDate: "2026-11-30T00:00:00.000Z",
         applyUrl: "https://example.com/activities/act_003/apply",
-        descriptionBlocks: [
-            { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-        ],
+        descriptionTitle: "상세 안내", 
+        descriptionBody: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다.",
     },
 ];
 
@@ -145,17 +132,17 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityId: "act_2026_001",
     authorId: "u_1001",
     authorName: "김은지",
-    contestName: "2026 창업 아이디어톤",
+    activityName: "2026 창업 아이디어톤",
     recruitNow: true,
     bookmarkCount: 42,
     createdAt: "2026-01-31T01:12:00.000Z",
     title: "창업 아이디어톤 같이 나갈 디자이너/FE 구해요",
 
     isBookmarked: false,
-    activityTitle: "2026 창업 아이디어톤 참가",
-    activityUrl: "https://example.com/activities/act_2026_001",
+    applyUrl: "https://example.com/activities/act_2026_001",
     authorMajor: "경영학부",
-    authorGrade: 3,
+    authorGrade: "23",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-10T23:59:59.999Z",
     recruitTeamNumber: 4,
@@ -169,17 +156,17 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityId: "act_2026_002",
     authorId: "u_1002",
     authorName: "박원빈",
-    contestName: "교내 해커톤 2026 Winter",
+    activityName: "교내 해커톤 2026 Winter",
     recruitNow: true,
     bookmarkCount: 18,
     createdAt: "2026-02-01T12:40:00.000Z",
     title: "React + Spring 해커톤 팀원 모집 (BE 1, FE 1)",
 
     isBookmarked: false,
-    activityTitle: "교내 해커톤 2026 Winter 참가",
-    activityUrl: "https://example.com/activities/act_2026_002",
+    applyUrl: "https://example.com/activities/act_2026_002",
     authorMajor: "컴퓨터공학부",
-    authorGrade: 2,
+    authorGrade: "16",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-06T23:59:59.999Z",
     recruitTeamNumber: 5,
@@ -193,17 +180,17 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityId: "act_2026_003",
     authorId: "u_1003",
     authorName: "정태호",
-    contestName: "AI 서비스 기획 공모전",
+    activityName: "AI 서비스 기획 공모전",
     recruitNow: false,
     bookmarkCount: 63,
     createdAt: "2026-01-20T04:05:00.000Z",
     title: "AI 서비스 기획 공모전 팀원 모집 (기획/데이터) — 모집 완료",
 
     isBookmarked: true,
-    activityTitle: "AI 서비스 기획 공모전",
-    activityUrl: "https://example.com/activities/act_2026_003",
+    applyUrl: "https://example.com/activities/act_2026_003",
     authorMajor: "산업공학과",
-    authorGrade: 4,
+    authorGrade: "21",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-01-25T23:59:59.999Z",
     recruitTeamNumber: 6,
@@ -217,17 +204,17 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityId: "act_2026_004",
     authorId: "user_002",
     authorName: "박원빈",
-    contestName: "UX 챌린지 2026",
+    activityName: "UX 챌린지 2026",
     recruitNow: true,
     bookmarkCount: 9,
     createdAt: "2026-02-02T00:18:00.000Z",
     title: "UX 챌린지 같이 할 PM/리서처 구해요",
 
     isBookmarked: true,
-    activityTitle: "UX 챌린지 2026 참가",
-    activityUrl: "https://example.com/activities/act_2026_004",
+    applyUrl: "https://example.com/activities/act_2026_004",
     authorMajor: "미디어디자인학부",
-    authorGrade: 3,
+    authorGrade: "19",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-12T23:59:59.999Z",
     recruitTeamNumber: 3,
@@ -241,17 +228,17 @@ export const MOCK_TEAM_RECRUIT_DETAILS: TeamRecruitDetail[] = [
     activityId: "act_2026_005",
     authorId: "user_002",
     authorName: "박원빈",
-    contestName: "교외 공모전 (브랜딩/콘텐츠)",
+    activityName: "교외 공모전 (브랜딩/콘텐츠)",
     recruitNow: true,
     bookmarkCount: 27,
     createdAt: "2026-02-02T08:55:00.000Z",
     title: "브랜딩 공모전: 콘텐츠 기획/디자인 팀원 구합니다",
 
     isBookmarked: false,
-    activityTitle: "브랜딩/콘텐츠 공모전 참가",
-    activityUrl: "https://example.com/activities/act_2026_005",
+    applyUrl: "https://example.com/activities/act_2026_005",
     authorMajor: "미디어디자인학부",
-    authorGrade: 4,
+    authorGrade: "20",
+    authorProfile:"https://picsum.photos/seed/temp/200/200",
 
     recruitDeadline: "2026-02-15T23:59:59.999Z",
     recruitTeamNumber: 4,

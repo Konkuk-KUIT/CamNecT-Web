@@ -1,4 +1,4 @@
-import BottomSheetModal from './BottomSheetModal';
+import BottomSheetModal from '../BottomSheetModal/BottomSheetModal';
 import Icon, { type IconName } from './Icon';
 import { isDeleteOption, type OptionItemId } from '../../pages/community/utils/option';
 
