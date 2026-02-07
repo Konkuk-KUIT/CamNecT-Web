@@ -158,6 +158,13 @@ src/
 ┃
 ┣ pages/
 ┃ ┣ auth/ # 로그인 / 온보딩
+┃ ┣ admin/ # 관리자
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ AdminVerificationDetail.tsx
+┃ ┃ ┣ AdminVerificationList.tsx
+┃ ┃ ┣ AdminWritePage.tsx # 대외활동 관리 화면
+┃ ┃ ┣ ExternalPostWritePage.tsx # 대외활동 추가/수정 화면
+┃ ┃ ┣ JobPostWritePage.tsx # 취업정보 추가/수정 화면
 ┃ ┣ chat/ # 커피챗 / 채팅
 ┃ ┣ home/ # 홈
 ┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
@@ -176,6 +183,15 @@ src/
 ┃ ┃ ┣ PortfolioListPage.tsx # 포트폴리오 리스트 화면
 ┃ ┃ ┣ PortfolioDetailPage.tsx # 포트폴리오 상세 화면
 ┃ ┗ activity/ # 대외활동 / 팀원모집
+┃ ┃ ┣ components/ # 페이지 내부 컴포넌트 폴더
+┃ ┃ ┣ hooks/ # 페이지 내부 훅 폴더
+┃ ┃ ┣ utils/ # 페이지 내부 유틸 폴더
+┃ ┃ ┣ ActivityPage.tsx # 대외활동 메인 화면
+┃ ┃ ┣ ActivityPostPage.tsx # 동아리/스터디 상세 화면
+┃ ┃ ┣ ExternalActivityPostPage.tsx # 대외활동/취업정보 상세 화면
+┃ ┃ ┣ RecruitDetailPage.tsx # 팀원 모집 상세 화면
+┃ ┃ ┣ RecruitWritePage.tsx # 팀원 모집 추가 및 수정 화면
+┃ ┃ ┣ WritePage.tsx # 동아리/스터디 추가 및 수정 화면
 ┃
 ┣ utils/ # custom utils
 ┣ hooks/ # custom hooks

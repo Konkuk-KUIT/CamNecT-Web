@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { formatTimeAgo } from "../../../../utils/formatDate";
-import type { TeamRecruitPost } from '../../../../types/activityPage/activityPageTypes';
+import { formatTimeAgo } from "../../utils/formatDate";
+import type { TeamRecruitPost } from '../../types/activityPage/activityPageTypes';
 
 export const RecruitPost = (post: TeamRecruitPost) => {
     const navigate = useNavigate();
     return (
         <button
             className="flex flex-col items-start gap-[10px] px-[25px] py-[20px] border-b border-gray-150 text-left"
-            onClick={() => navigate(`/recruit/post/${post.id}`)}
+            onClick={() => navigate(`/activity/recruit/${post.id}`)}
         >
             {/* Tag */}
             <span
@@ -25,7 +25,7 @@ export const RecruitPost = (post: TeamRecruitPost) => {
                 </span>
                 <div className="text-r-14-hn text-gray-750">
                     {post.authorName}
-+                   {post.contestName ? ` | ${post.contestName}` : ""}
+                    {post.activityName ? ` | ${post.activityName}` : ""}
                 </div>
             </div>
 

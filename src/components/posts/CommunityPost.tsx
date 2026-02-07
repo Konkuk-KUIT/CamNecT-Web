@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import type { InfoPost, QuestionPost } from '../../../../types/community';
-import { formatTimeAgo } from "../../../../utils/formatDate";
+import type { InfoPost, QuestionPost } from '../../types/community';
+import { formatTimeAgo } from "../../utils/formatDate";
 
 type CommunityPostProps = (InfoPost|QuestionPost)
 

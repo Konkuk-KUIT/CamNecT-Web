@@ -1,18 +1,14 @@
+import { FullLayout } from '../../layouts/FullLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
-import { FullLayout } from '../../layouts/FullLayout';
-import { MainHeader } from '../../layouts/headers/MainHeader';
 import { getActivityPosts } from '../../mock/activityCommunity';
-import ClubTab from './tabs/ClubTab';
-import ExternalTab from './tabs/ExternalTab';
-import JobTab from './tabs/JobTab';
-import StudyTab from './tabs/StudyTab';
+import ExternalTab from '../activity/tabs/ExternalTab';
+import JobTab from '../activity/tabs/JobTab';
 import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
 
 const tabItems: TabItem[] = [
-  { id: 'club', label: '동아리' },
-  { id: 'study', label: '스터디' },
   { id: 'external', label: '대외활동' },
   { id: 'job', label: '취업정보' },
 ];
@@ -29,9 +25,8 @@ const filterByQuery = (posts: ActivityPost[], query: string) => {
   });
 };
 
-export const ActivityPage = () => {
-  const [activeTab, setActiveTab] = useState<ActivityPostTab>('club');
-
+export const AdminWritePage = () => {
+  const [activeTab, setActiveTab] = useState<ActivityPostTab>('external')
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -54,14 +49,6 @@ export const ActivityPage = () => {
     );
   }, [posts]);
 
-  const filteredClubPosts = useMemo(
-    () => filterByQuery(postsByTab.club, normalizedQuery),
-    [postsByTab.club, normalizedQuery],
-  );
-  const filteredStudyPosts = useMemo(
-    () => filterByQuery(postsByTab.study, normalizedQuery),
-    [postsByTab.study, normalizedQuery],
-  );
   const filteredExternalPosts = useMemo(
     () => filterByQuery(postsByTab.external, normalizedQuery),
     [postsByTab.external, normalizedQuery],
@@ -72,10 +59,8 @@ export const ActivityPage = () => {
   );
 
   const renderTab = () => {
-    if (activeTab === 'club') return <ClubTab posts={filteredClubPosts} />;
-    if (activeTab === 'study') return <StudyTab posts={filteredStudyPosts} />;
-    if (activeTab === 'external') return <ExternalTab posts={filteredExternalPosts} />;
-    return <JobTab posts={filteredJobPosts} />;
+    if (activeTab === 'external') return <ExternalTab posts={filteredExternalPosts} isAdmin={true}/>;
+    return <JobTab posts={filteredJobPosts} isAdmin={true}/>;
   };
 
   return (
@@ -107,8 +92,7 @@ export const ActivityPage = () => {
           </div>
         ) : (
           <MainHeader
-            title='대외활동'
-            leftIcon='empty'
+            title='대외활동 등록'
             rightActions={[
               {
                 icon: 'search',
