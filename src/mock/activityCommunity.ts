@@ -210,7 +210,7 @@ const baseActivityPosts: ActivityPostDetail[] = [
     location: '부산',
     target: '디자인 전공자',
     applyPeriod: {
-      start: '2026-02-15T00:00:00.000Z',
+      start: '2026-02-02T00:00:00.000Z',
       end: '2026-03-31T23:59:59.000Z',
     },
     announceDate: '2026-04-15T00:00:00.000Z',
@@ -248,10 +248,10 @@ const baseActivityPosts: ActivityPostDetail[] = [
     categories: ['취업', '자소서'],
     saveCount: 10,
     createdAt: '2026-01-29T15:30:00.000Z',
-    deadline: '2026-04-31T23:59:59.000Z',
+    deadline: '2026-04-30T23:59:59.000Z',
     applyPeriod: {
       start: '2026-02-05T00:00:00.000Z',
-      end: '2026-04-31T23:59:59.000Z',
+      end: '2026-04-30T23:59:59.000Z',
     },
     employType: "정직원",
     payment: "연봉 2000만원~3000만원",

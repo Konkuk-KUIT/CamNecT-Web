@@ -82,7 +82,7 @@ export const ActivityPage = () => {
     <FullLayout
       headerSlot={
         isSearchOpen ? (
-          <div className='bg-white'>
+          <div className='bg-white top-0 z-50 sticky'>
             <div className='px-[25px]'>
               <div className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] py-[10px]'>
                 <button

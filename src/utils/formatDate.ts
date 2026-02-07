@@ -91,5 +91,5 @@ export const getDDay = (targetDate: string): number => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     // 양수만 반환 (음수면 0)
-    return diffDays > 0 ? diffDays : 0;
+    return diffDays >= 0 ? diffDays : -1;
 };

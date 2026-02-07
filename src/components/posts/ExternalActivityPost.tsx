@@ -56,13 +56,13 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
               ) : (
                 <>
                   {post.organizer && <span>{post.organizer}</span>}
-                  {post.deadline && <span>접수 기간 : {formatOnlyDate(post.deadline)}</span>}
+                  {post.deadline && <span>접수 마감 : {formatOnlyDate(post.deadline)}</span>}
                 </>
               )}
             </div>
             {dDay !== null && (
               <div className='flex justify-center items-center px-[12px] py-[6px] rounded-[20px] bg-primary text-b-14-hn text-white'>
-                D-{dDay}
+                {dDay > 0 ? `D-${dDay}` : dDay === 0 ? "D-Day" : "마감"}
               </div>
             )}
           </div>
