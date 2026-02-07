@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../../components/Icon';
 import PopUp from '../../../components/Pop-up';
@@ -155,33 +155,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
             announceYear === startYear && announceMonth === startMonth ? startDay : 1;
         return Array.from({ length: max - min + 1 }, (_, i) => min + i);
     }, [announceYear, announceMonth, startYear, startMonth, startDay]);
-
-
-    useEffect(() => {
-        const start = new Date(startYear, startMonth - 1, startDay).getTime();
-        const end = new Date(endYear, endMonth - 1, endDay).getTime();
-
-        if (end < start) {
-            setEndYear(startYear);
-            setEndMonth(startMonth);
-            setEndDay(startDay);
-        }
-
-        if (type === 'external') {
-            const announce = new Date(announceYear, announceMonth - 1, announceDay).getTime();
-            if (announce < start) {
-            setAnnounceYear(startYear);
-            setAnnounceMonth(startMonth);
-            setAnnounceDay(startDay);
-            }
-        }
-        }, [
-        type,
-        startYear, startMonth, startDay,
-        endYear, endMonth, endDay,
-        announceYear, announceMonth, announceDay,
-    ]);
-
 
     // 타입별 설정
     const config = useMemo(() => {
@@ -458,6 +431,30 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                         <button key={y} type='button' onClick={() => { 
                                             setStartYear(y);
                                             setStartDay((d) => clampDay(d, y, startMonth));
+                                            if (endYear < y) {
+                                                setEndYear(y);
+                                                setEndMonth(startMonth);
+                                                setEndDay(startDay);
+                                            } else if (endYear === y && endMonth < startMonth) {
+                                                setEndMonth(startMonth);
+                                                setEndDay(startDay);
+                                            } else if (endYear === y && endMonth === startMonth && endDay < startDay) {
+                                                setEndDay(startDay);
+                                            }
+
+                                            // announce도 동일 (external만)
+                                            if (type === 'external') {
+                                                if (announceYear < y) {
+                                                setAnnounceYear(y);
+                                                setAnnounceMonth(startMonth);
+                                                setAnnounceDay(startDay);
+                                                } else if (announceYear === y && announceMonth < startMonth) {
+                                                setAnnounceMonth(startMonth);
+                                                setAnnounceDay(startDay);
+                                                } else if (announceYear === y && announceMonth === startMonth && announceDay < startDay) {
+                                                setAnnounceDay(startDay);
+                                                }
+                                            }
                                             setShowStartYearDropdown(false);
                                          }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startYear === y ? 'text-primary' : 'text-gray-650'}`}>
@@ -481,6 +478,21 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                             onClick={() => {
                                                 setStartMonth(m);
                                                 setStartDay((d) => clampDay(d, startYear, m));
+                                                if (endYear === startYear && endMonth < m) {
+                                                    setEndMonth(m);
+                                                    setEndDay(startDay);
+                                                } else if (endYear === startYear && endMonth === m && endDay < startDay) {
+                                                    setEndDay(startDay);
+                                                }
+
+                                                if (type === 'external') {
+                                                    if (announceYear === startYear && announceMonth < m) {
+                                                    setAnnounceMonth(m);
+                                                    setAnnounceDay(startDay);
+                                                    } else if (announceYear === startYear && announceMonth === m && announceDay < startDay) {
+                                                    setAnnounceDay(startDay);
+                                                    }
+                                                }
                                                 setShowStartMonthDropdown(false);
                                             }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startMonth === m ? 'text-primary' : 'text-gray-650'}`}>
@@ -502,7 +514,14 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                         {startDays.map((d) => (
                                         <button key={d} type='button' 
                                         onClick={() => { 
-                                            setStartDay(d); setShowStartDayDropdown(false); 
+                                            setStartDay(d); 
+                                            if (endYear === startYear && endMonth === startMonth && endDay < d) {
+                                                setEndDay(d);
+                                            }
+                                            if (type === 'external' && announceYear === startYear && announceMonth === startMonth && announceDay < d) {
+                                                setAnnounceDay(d);
+                                            }
+                                            setShowStartDayDropdown(false); 
                                         }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${startDay === d ? 'text-primary' : 'text-gray-650'}`}>
                                             {d}일
