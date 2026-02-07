@@ -94,10 +94,15 @@ export const requestAdminVerificationDownloadUrl = async (data: AdminVerificatio
 
 // 12. (관리자) 인증 요청 심사 API [PATCH] (/api/admin/verification/documents/{submissionId})
 export const requestAdminVerificationProcess = async (data: AdminVerificationProcessRequest) => {
-    // URL에는 ID를 넣고, 나머지 데이터는 Request Body로 보냄
+    // submissionId는 경로(path)에, adminId는 쿼리(query)에, 나머지는 바디(body)에 담음
+    const { submissionId, adminId, ...body } = data;
+
     const response = await axiosInstance.patch<AdminVerificationProcessResponse>(
-        `/api/admin/verification/documents/${data.submissionId}`, 
-        data
+        `/api/admin/verification/documents/${submissionId}`,
+        body,
+        {
+            params: { adminId }
+        }
     );
     return response.data;
 }

@@ -149,6 +149,10 @@ src/
 ┃ ┣ activities.ts
 ┃ ┗ ...
 ┃
+┣ api-types/ # 서버 통신 DTO 인터페이스
+┃ ┣ authApiTypes.ts
+┃ ┣ chatApiTypes.ts
+┃
 ┣ components/ # 공통 UI 컴포넌트
 ┃ ┣ Button.tsx
 ┃ ┣ Card.tsx
@@ -196,7 +200,7 @@ src/
 ┣ utils/ # custom utils
 ┣ hooks/ # custom hooks
 ┣ store/ # 전역 상태 (auth 등)
-┣ types/ # TS interface 정의
+┣ types/ # TS interface 정의 (화면 구현 용)
 ┃ ┣ activity/
 ┃ ┃ ┗ activityTypes.ts
 ┃ ┗ ...

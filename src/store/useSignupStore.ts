@@ -69,7 +69,6 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     profileImageKey: null,
     verificationFile: null,
     isVerificationSubmitted: false,
-    tags: null,
 
     // 상태 변경 함수들 구현
     setEmail: (email: string) => set({ email }),
