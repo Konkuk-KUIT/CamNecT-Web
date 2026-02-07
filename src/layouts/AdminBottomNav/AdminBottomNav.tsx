@@ -22,7 +22,7 @@ const navList: AdminBottomNavProps[] = [
         icon: "adminActivityRegistration",
         activeIcon: "adminActivityRegistrationActive",
         label: "대외활동 글쓰기",
-        path: "/admin/activity-registration"
+        path: "/admin/post"
     }
 ];
 

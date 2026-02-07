@@ -1,4 +1,3 @@
-import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
@@ -7,6 +6,7 @@ import { getActivityPosts } from '../../mock/activityCommunity';
 import ExternalTab from '../activity/tabs/ExternalTab';
 import JobTab from '../activity/tabs/JobTab';
 import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
+import { AdminFullLayout } from '../../layouts/AdminFullLayout';
 
 const tabItems: TabItem[] = [
   { id: 'external', label: '대외활동' },
@@ -64,7 +64,7 @@ export const AdminWritePage = () => {
   };
 
   return (
-    <FullLayout
+    <AdminFullLayout
       headerSlot={
         isSearchOpen ? (
           <div className='bg-white top-0 z-50 sticky'>
@@ -108,6 +108,6 @@ export const AdminWritePage = () => {
         <Tabs tabs={tabItems} activeId={activeTab} onChange={(id) => setActiveTab(id as ActivityPostTab)} />
       </div>
       <div>{renderTab()}</div>
-    </FullLayout>
+    </AdminFullLayout>
   );
 };
