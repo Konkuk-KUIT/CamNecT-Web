@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../../components/Icon';
 import PopUp from '../../../components/Pop-up';
@@ -59,8 +59,8 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     selectedTags: editPost?.categories ?? [],
     organizer: editPost?.organizer ?? '',
     applyUrl: editPost?.applyUrl ?? '',
-    descriptionTitle: editPost?.descriptionBlocks?.title ?? '',
-    descriptionBody: editPost?.descriptionBlocks?.body ?? '',
+    descriptionTitle: editPost?.descriptionTitle ?? '',
+    descriptionBody: editPost?.descriptionBody ?? '',
 
     target: editPost?.target ?? '',
     employType: editPost?.employType ?? '',
@@ -140,12 +140,48 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
     const startDaysInMonth = useMemo(() => new Date(startYear, startMonth, 0).getDate(), [startYear, startMonth]);
-    const endDaysInMonth = useMemo(() => new Date(endYear, endMonth, 0).getDate(), [endYear, endMonth]);
-    const announceDaysInMonth = useMemo(() => new Date(announceYear, announceMonth, 0).getDate(), [announceYear, announceMonth]);
-
     const startDays = Array.from({ length: startDaysInMonth }, (_, i) => i + 1);
-    const endDays = Array.from({ length: endDaysInMonth }, (_, i) => i + 1);
-    const announceDays = Array.from({ length: announceDaysInMonth }, (_, i) => i + 1);
+
+    const endDayOptions = useMemo(() => {
+        const max = new Date(endYear, endMonth, 0).getDate();
+        const min = endYear === startYear && endMonth === startMonth ? startDay : 1;
+        return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+    }, [endYear, endMonth, startYear, startMonth, startDay]);
+
+    
+    const announceDayOptions = useMemo(() => {
+        const max = new Date(announceYear, announceMonth, 0).getDate();
+        const min =
+            announceYear === startYear && announceMonth === startMonth ? startDay : 1;
+        return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+    }, [announceYear, announceMonth, startYear, startMonth, startDay]);
+
+
+    useEffect(() => {
+        const start = new Date(startYear, startMonth - 1, startDay).getTime();
+        const end = new Date(endYear, endMonth - 1, endDay).getTime();
+
+        if (end < start) {
+            setEndYear(startYear);
+            setEndMonth(startMonth);
+            setEndDay(startDay);
+        }
+
+        if (type === 'external') {
+            const announce = new Date(announceYear, announceMonth - 1, announceDay).getTime();
+            if (announce < start) {
+            setAnnounceYear(startYear);
+            setAnnounceMonth(startMonth);
+            setAnnounceDay(startDay);
+            }
+        }
+        }, [
+        type,
+        startYear, startMonth, startDay,
+        endYear, endMonth, endDay,
+        announceYear, announceMonth, announceDay,
+    ]);
+
 
     // 타입별 설정
     const config = useMemo(() => {
@@ -490,7 +526,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                     </button>
                                     {showEndYearDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                        {years.map((y) => (
+                                        {years.filter((y) => y >= startYear).map((y) => (
                                         <button key={y} type='button' 
                                         onClick={() => { 
                                             setEndYear(y);
@@ -513,7 +549,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                     </button>
                                     {showEndMonthDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                        {MONTHS.map((m) => (
+                                        {MONTHS.filter((m) => (endYear === startYear ? m >= startMonth : true)).map((m) => (
                                         <button key={m} type='button' 
                                             onClick={() => { 
                                                 setEndMonth(m); 
@@ -536,7 +572,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                     </button>
                                     {showEndDayDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                        {endDays.map((d) => (
+                                        {endDayOptions.map((d) => (
                                         <button key={d} type='button' onClick={() => { setEndDay(d); setShowEndDayDropdown(false); }}
                                             className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${endDay === d ? 'text-primary' : 'text-gray-650'}`}>
                                             {d}일
@@ -562,7 +598,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                 </button>
                                 {showAnnounceYearDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                    {years.map((y) => (
+                                    {years.filter((y) => y >= startYear).map((y) => (
                                         <button key={y} type='button' 
                                         onClick={() => { 
                                             setAnnounceYear(y);
@@ -585,7 +621,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                 </button>
                                 {showAnnounceMonthDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                    {MONTHS.map((m) => (
+                                    {MONTHS.filter((m) => (announceYear === startYear ? m >= startMonth : true)).map((m) => (
                                         <button key={m} type='button' 
                                         onClick={() => { 
                                             setAnnounceMonth(m);
@@ -608,7 +644,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                 </button>
                                 {showAnnounceDayDropdown && (
                                     <div className='absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto mt-1'>
-                                    {announceDays.map((d) => (
+                                    {announceDayOptions.map((d) => (
                                         <button key={d} type='button' onClick={() => { setAnnounceDay(d); setShowAnnounceDayDropdown(false); }}
                                         className={`flex w-full p-[15px] border-gray-150 border-b last:border-b-0 text-r-16-hn ${announceDay === d ? 'text-primary' : 'text-gray-650'}`}>
                                         {d}일
