@@ -7,16 +7,17 @@ import InternalActivityPost from '../../../components/posts/InternalActivityPost
 import ExternalActivityPost from '../../../components/posts/ExternalActivityPost';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
 import type { ActivityPost, ActivityPostDetail } from '../../../types/activityPage/activityPageTypes';
+import { useNavigate } from 'react-router-dom';
 
 type ActivityListTabProps = {
   posts: ActivityPost[] | ActivityPostDetail[];
-  showWriteButton?: boolean;
+  isAdmin?: boolean;
   showRecruitStatus?: boolean;
   tab: string;
 };
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
-type SortExternalKey = 'recommended' | 'latest' | 'bookmarks';
+type SortExternalKey = 'recommended' | 'latest' | 'deadline' |'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
   recommended: '추천순',
@@ -27,21 +28,25 @@ const sortLabels: Record<SortKey, string> = {
 const sortExternalLabels: Record<SortExternalKey, string> = {
   recommended: '추천순',
   latest: '최신순',
+  deadline: '마감임박순',
   bookmarks: '북마크 많은 순',
 };
 
 const ActivityListTab = ({
   posts,
-  showWriteButton = true,
+  isAdmin = false,
   showRecruitStatus = false,
   tab,
 }: ActivityListTabProps) => {
+  const navigate = useNavigate();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
   const [sortExternalKey, setSortExternalKey] = useState<SortExternalKey>('recommended');
 
   const isExternalTab = tab === 'external' || tab === 'job';
+  const writePath = tab === 'external' ? "/admin/post/external" : "/admin/post/job";
+
 
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
@@ -74,27 +79,34 @@ const ActivityListTab = ({
   const sortedPosts = useMemo(() => {
   const cloned = [...filteredPosts];
 
-  if (isExternalTab) {
-    if (sortExternalKey === 'recommended') return cloned;
-    if (sortExternalKey === 'latest') {
-      return cloned.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
+    if (isExternalTab) {
+		if (sortExternalKey === 'recommended') return cloned;
+		if (sortExternalKey === 'latest') {
+			return cloned.sort(
+				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+			);
+		}
+		if (sortExternalKey === 'deadline') {
+			return cloned.sort((a, b) => {
+				const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.NEGATIVE_INFINITY;
+				const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.NEGATIVE_INFINITY;
+				return aTime - bTime; 
+			});
+		}
+
+		return cloned.sort((a, b) => b.saveCount - a.saveCount);
+
+	} else {
+		if (sortKey === 'recommended') return cloned;
+		if (sortKey === 'latest') {
+			return cloned.sort(
+				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+			);
+		}
+		if (sortKey === 'likes') {
+			return cloned.sort((a, b) => b.likes - a.likes);
+		}
     }
-
-    return cloned.sort((a, b) => b.saveCount - a.saveCount);
-  }
-
-
-  if (sortKey === 'recommended') return cloned;
-  if (sortKey === 'latest') {
-    return cloned.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-  }
-  if (sortKey === 'likes') {
-    return cloned.sort((a, b) => b.likes - a.likes);
-  }
 
   return cloned.sort((a, b) => b.saveCount - a.saveCount);
 }, [filteredPosts, isExternalTab, sortKey, sortExternalKey]);
@@ -163,7 +175,10 @@ const ActivityListTab = ({
         }
       />
 
-      {showWriteButton ? <WriteButton /> : null}
+      {isAdmin
+      ? (isExternalTab ? <WriteButton onClick={() => navigate(writePath)}/> : null)
+      : (!isExternalTab ? <WriteButton /> : null)}
+
     </div>
   );
 };

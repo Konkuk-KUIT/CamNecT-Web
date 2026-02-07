@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { FullLayout } from '../../layouts/FullLayout';
@@ -31,15 +30,8 @@ const filterByQuery = (posts: ActivityPost[], query: string) => {
 };
 
 export const ActivityPage = () => {
-  const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<ActivityPostTab>(() => {
-    const queryTab = searchParams.get('tab') as ActivityPostTab | null;
-    if (queryTab && ['club', 'study', 'external', 'job'].includes(queryTab)) {
-      return queryTab;
-    }
-    const stored = sessionStorage.getItem('activityActiveTab') as ActivityPostTab | null;
-    return stored ?? 'club';
-  });
+  const [activeTab, setActiveTab] = useState<ActivityPostTab>('club');
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -78,10 +70,6 @@ export const ActivityPage = () => {
     () => filterByQuery(postsByTab.job, normalizedQuery),
     [postsByTab.job, normalizedQuery],
   );
-
-  useEffect(() => {
-    sessionStorage.setItem('activityActiveTab', activeTab);
-  }, [activeTab]);
 
   const renderTab = () => {
     if (activeTab === 'club') return <ClubTab posts={filteredClubPosts} />;

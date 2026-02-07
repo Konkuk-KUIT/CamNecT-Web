@@ -1,67 +1,113 @@
-import { useNavigate } from 'react-router-dom';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { useMemo, useState } from 'react';
+import Icon from '../../components/Icon';
+import { Tabs, type TabItem } from '../../components/Tabs';
+import { getActivityPosts } from '../../mock/activityCommunity';
+import ExternalTab from '../activity/tabs/ExternalTab';
+import JobTab from '../activity/tabs/JobTab';;
+import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
+
+const tabItems: TabItem[] = [
+  { id: 'external', label: '대외활동' },
+  { id: 'job', label: '취업정보' },
+];
+
+const filterByQuery = (posts: ActivityPost[], query: string) => {
+  if (!query) return posts;
+  return posts.filter((post) => {
+    const title = post.title.toLowerCase();
+    const content = post.content.toLowerCase();
+    const categories = post.categories.some((category) =>
+      category.toLowerCase().includes(query),
+    );
+    return title.includes(query) || content.includes(query) || categories;
+  });
+};
 
 export const AdminWritePage = () => {
-    const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<ActivityPostTab>('external')
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-    return (
-        <FullLayout
-            headerSlot={
-                <MainHeader
-                    title='대외활동 등록'
-                />
-            }
-            >
-            <div className='flex h-full w-full flex-col items-center justify-center bg-white px-[25px] py-[30px]'>
-                <div className='flex w-full max-w-[720px] flex-col gap-[40px]'>
-                    {/* 대외활동 등록 페이지 */}
-                    <div className='flex flex-col gap-[15px]'>
-                        <span className='text-sb-20 text-gray-900'>대외활동 등록 페이지</span>
-                    </div>
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
-                    {/* 버튼 영역 */}
-                    <div className='flex gap-[20px]'>
-                        <button
-                        type='button'
-                        onClick={() => navigate('external-write')}
-                        className='w-full py-[20px] rounded-[12px] bg-gray-100 flex flex-col items-center justify-center gap-[15px] border border-gray-150'
-                        >
-                            <div className='flex items-center justify-center w-[50px] h-[50px] rounded-full bg-primary'>
-                                <svg width='30' height='30' viewBox='0 0 24 24' fill='none'>
-                                <path
-                                    d='M12 4V20M4 12H20'
-                                    stroke='white'
-                                    strokeWidth='2'
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                />
-                                </svg>
-                            </div>
-                            <span className='text-m-16-hn text-gray-900'>대외활동 등록하기</span>
-                        </button>
+  const [posts] = useState<ActivityPost[]>(() => getActivityPosts());
 
-                        <button
-                        type='button'
-                        onClick={() => navigate('job-write')}
-                        className='w-full py-[20px] rounded-[12px] bg-gray-100 flex flex-col items-center justify-center gap-[15px] border border-gray-150'
-                        >
-                        <div className='flex items-center justify-center w-[50px] h-[50px] rounded-full bg-primary'>
-                            <svg width='30' height='30' viewBox='0 0 24 24' fill='none'>
-                            <path
-                                d='M12 4V20M4 12H20'
-                                stroke='white'
-                                strokeWidth='2'
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                            />
-                            </svg>
-                        </div>
-                        <span className='text-m-16-hn text-gray-900'>취업정보 등록하기</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </FullLayout>
+  const postsByTab = useMemo(() => {
+    return posts.reduce<Record<ActivityPostTab, ActivityPost[]>>(
+      (acc, post) => {
+        acc[post.tab].push(post);
+        return acc;
+      },
+      {
+        club: [],
+        study: [],
+        external: [],
+        job: [],
+      },
     );
+  }, [posts]);
+
+  const filteredExternalPosts = useMemo(
+    () => filterByQuery(postsByTab.external, normalizedQuery),
+    [postsByTab.external, normalizedQuery],
+  );
+  const filteredJobPosts = useMemo(
+    () => filterByQuery(postsByTab.job, normalizedQuery),
+    [postsByTab.job, normalizedQuery],
+  );
+
+  const renderTab = () => {
+    if (activeTab === 'external') return <ExternalTab posts={filteredExternalPosts} isAdmin={true}/>;
+    return <JobTab posts={filteredJobPosts} isAdmin={true}/>;
+  };
+
+  return (
+    <FullLayout
+      headerSlot={
+        isSearchOpen ? (
+          <div className='bg-white'>
+            <div className='px-[25px]'>
+              <div className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] py-[10px]'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsSearchOpen(false);
+                  }}
+                  aria-label='검색 닫기'
+                >
+                  <Icon name='search' className='h-[28px] w-[28px]' />
+                </button>
+                <input
+                  type='text'
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder='제목, 내용, 태그, 검색'
+                  className='flex-1 bg-transparent text-r-16 text-[var(--ColorBlack,#202023)] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none'
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <MainHeader
+            title='대외활동 등록'
+            rightActions={[
+              {
+                icon: 'search',
+                onClick: () => setIsSearchOpen(true),
+                ariaLabel: '검색 열기',
+              },
+            ]}
+          />
+        )
+      }
+    >
+      <div className='bg-white'>
+        <Tabs tabs={tabItems} activeId={activeTab} onChange={(id) => setActiveTab(id as ActivityPostTab)} />
+      </div>
+      <div>{renderTab()}</div>
+    </FullLayout>
+  );
 };

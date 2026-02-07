@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
                                         element: <AdminWritePage/>
                                     },
                                     {
-                                        path: "external-write", 
+                                        path: "external", 
                                         children: [
                                             {
                                                 index: true,
@@ -103,7 +103,7 @@ export const router = createBrowserRouter([
                                         ]
                                     },
                                     {
-                                        path: "job-write", 
+                                        path: "job", 
                                         children: [
                                             {
                                                 index: true,

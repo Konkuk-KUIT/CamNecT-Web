@@ -5,12 +5,12 @@ import Card from '../../../components/Card';
 type TeamApplyModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  activityTitle: string;
+  activityName: string;
   onSubmit?: (payload: { message: string }) => Promise<boolean | void> | boolean | void;
 };
 
 // 팀원 신청을 작성하는 바텀시트 모달
-const TeamApplyModal = ({ isOpen, onClose, activityTitle, onSubmit }: TeamApplyModalProps) => {
+const TeamApplyModal = ({ isOpen, onClose, activityName, onSubmit }: TeamApplyModalProps) => {
   const [message, setMessage] = useState('');
   const [keyboardInset, setKeyboardInset] = useState(0);
   const maxLength = 100;
@@ -83,7 +83,7 @@ const TeamApplyModal = ({ isOpen, onClose, activityTitle, onSubmit }: TeamApplyM
                 <div className='flex flex-col gap-[10px]'>
                     <span className='text-sb-18 text-gray-900'>모집 공고</span>
                     <p className='text-m-16-hn text-gray-750'>
-                    {activityTitle}
+                    {activityName}
                     </p>
                 </div>
 

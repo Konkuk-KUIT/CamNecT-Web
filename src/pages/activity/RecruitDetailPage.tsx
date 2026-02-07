@@ -163,10 +163,13 @@ export const RecruitDetailPage = () => {
                         <div className='flex'>
                             <span className='min-w-[100px] text-sb-16-hn text-gray-750'>공고</span>
                             <a
-                                href={recruitDetail.activityUrl}
+                                href={recruitDetail.applyUrl}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                onClick={(e) => e.stopPropagation()}
                                 className='text-r-16-hn text-primary underline'
                             >
-                                {recruitDetail.activityTitle}
+                                {recruitDetail.activityName}
                             </a>
                         </div>
 
@@ -279,7 +282,7 @@ export const RecruitDetailPage = () => {
         <TeamApplyModal
             isOpen={isApplyModalOpen}
             onClose={() => setIsApplyModalOpen(false)}
-            activityTitle={recruitDetail.activityTitle}
+            activityName={recruitDetail.activityName}
             onSubmit={async (payload) => {
                 console.log('팀원 신청:', payload);
                 // TODO: API 호출

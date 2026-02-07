@@ -112,7 +112,7 @@ export interface TeamRecruitPost extends TeamPost{
     activityId: string; // 어떤 활동에 붙은 팀원공고인지
     authorId: string;
     authorName: string;
-    contestName?: string;
+    activityName: string;
     recruitNow: boolean; // 모집중/완료
     bookmarkCount: number;
     createdAt: string;
@@ -120,8 +120,7 @@ export interface TeamRecruitPost extends TeamPost{
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
     isBookmarked: boolean;
-    activityTitle: string;
-    activityUrl: string;
+    applyUrl: string;
 
     authorMajor: string;
     authorGrade: string;

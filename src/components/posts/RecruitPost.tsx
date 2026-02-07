@@ -25,7 +25,7 @@ export const RecruitPost = (post: TeamRecruitPost) => {
                 </span>
                 <div className="text-r-14-hn text-gray-750">
                     {post.authorName}
-                    {post.contestName ? ` | ${post.contestName}` : ""}
+                    {post.activityName ? ` | ${post.activityName}` : ""}
                 </div>
             </div>
 

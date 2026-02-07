@@ -80,8 +80,8 @@ export const ExternalActivityPostPage = () => {
 
         if (item.id === 'edit-post') {
             if (selectedPost.tab === "external")
-                navigate(`/admin/post/external-write/${selectedPost.id}`);
-            else navigate(`/admin/post/job-write/${selectedPost.id}`);
+                navigate(`/admin/post/external/${selectedPost.id}`);
+            else navigate(`/admin/post/job/${selectedPost.id}`);
         }
 
         if (item.id === 'delete-post') {
