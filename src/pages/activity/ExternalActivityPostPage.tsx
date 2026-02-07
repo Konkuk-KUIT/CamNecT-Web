@@ -28,14 +28,6 @@ export const ExternalActivityPostPage = () => {
   const navigate = useNavigate();
   const currentUser = activityLoggedInUser;
 
-  if (!selectedPost) {
-   return (
-     <div className='flex items-center justify-center min-h-screen'>
-       <p className='text-[16px] text-gray-650'>게시글을 찾을 수 없습니다.</p>
-     </div>
-   );
- }
-
   const [activeTab, setActiveTab] = useState<TabType>('detail');
   const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
@@ -141,6 +133,14 @@ export const ExternalActivityPostPage = () => {
             </div>
         </div>
     );
+
+    if (!selectedPost) {
+        return (
+            <div className='flex items-center justify-center min-h-screen'>
+            <p className='text-[16px] text-gray-650'>게시글을 찾을 수 없습니다.</p>
+            </div>
+        );
+    }
 
     return (
         <HeaderLayout
