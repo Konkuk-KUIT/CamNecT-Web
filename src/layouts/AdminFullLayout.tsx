@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
-import { BottomNav } from "../layouts/BottomNav/BottomNav";
+import { AdminBottomNav } from "../layouts/AdminBottomNav/AdminBottomNav";
 
-// Header (O) BottomNav (O) 레이아웃
+// Admin페이지 Header (O) BottomNav (O) 레이아웃
 type FullLayoutProps = {
   headerSlot?: ReactNode;
   children?: ReactNode;
 };
 
-export const FullLayout = ({ headerSlot, children }: FullLayoutProps) => {
+export const AdminFullLayout = ({ headerSlot, children }: FullLayoutProps) => {
   return (
     <div className="w-full min-h-[100dvh] relative bg-white">
       {headerSlot ?? null}
@@ -18,7 +18,7 @@ export const FullLayout = ({ headerSlot, children }: FullLayoutProps) => {
         {children ?? <Outlet />}
       </main>
       
-      <BottomNav />
+      <AdminBottomNav />
     </div>
   );
 };

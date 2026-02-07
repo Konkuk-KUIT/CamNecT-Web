@@ -22,7 +22,10 @@ export const useAuthStore = create<AuthState>()(
                 accessToken: null,
                 isAuthenticated: false,
                 user: null
-            })
+            }),
+            setUserId: (userId: string) => set((state) => ({
+                user: state.user ? { ...state.user, id: userId } : { id: userId }
+            }))
         }),
         {
             name: "auth-storage",

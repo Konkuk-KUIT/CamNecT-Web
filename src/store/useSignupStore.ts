@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { EmailRequest } from "../api-types/authApiTypes";
+import type { EmailVerificationRequest } from "../api-types/authApiTypes";
 
 // Store 상태 타입 정의
 interface SignupStore {
@@ -13,15 +13,14 @@ interface SignupStore {
         serviceTerms: boolean;
         privacyTerms: boolean;
     };
-    // todo 태그 및 소개글 
-    selfIntroduction: string;
+    selfIntroduction: string | null;
     profileImage: File | null; 
+    profileImageKey: string | null;
     verificationFile: File | null;
     isVerificationSubmitted: boolean;
-    tags: string[];
 
     // UI 상태 
-    verificationType: 'email' | 'phone'; // todo 휴대폰인증은 추후구현
+    verificationType: 'email' | 'phone'; // 휴대폰인증 안함
     emailVerified: boolean;
     // phoneVerified: boolean;
 
@@ -34,15 +33,15 @@ interface SignupStore {
     setAgreements: (agreements: {serviceTerms: boolean, privacyTerms: boolean}) => void;
     setVerificationType: (verificationType: 'email' | 'phone') => void;
     setEmailVerified: (emailVerified: boolean) => void;
-    setSelfIntroduction: (selfIntroduction: string) => void;
+    setSelfIntroduction: (selfIntroduction: string | null) => void;
     setProfileImage: (profileImage: File | null) => void;
+    setProfileImageKey: (profileImageKey: string | null) => void;
     setVerificationFile: (verificationFile: File | null) => void;
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => void;
-    setTags: (tags: string[]) => void;
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
-    getSignupData: () => EmailRequest;
+    getEmailVerificationData: () => Omit<EmailVerificationRequest, 'code'>;
     reset: () => void;
 }
 
@@ -50,7 +49,7 @@ interface SignupStore {
 const initialState = {
     email: '',
     username: '',
-    password: '',
+    password: '',   
     name: '',
     phoneNum: '',
     agreements: {
@@ -59,17 +58,16 @@ const initialState = {
     },
     verificationType: 'email' as const,
     emailVerified: false,
-    // phoneVerified: false,
+    selfIntroduction: '',
+    profileImage: null as File | null,
+    profileImageKey: null as string | null,
+    verificationFile: null as File | null,
+    isVerificationSubmitted: false,
 };
 
 // Zustand Store 생성
 export const useSignupStore = create<SignupStore>((set, get) => ({
     ...initialState,
-    selfIntroduction: '',
-    profileImage: null,
-    verificationFile: null,
-    isVerificationSubmitted: false,
-    tags: [],
 
     // 상태 변경 함수들 구현
     setEmail: (email: string) => set({ email }),
@@ -81,15 +79,15 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setVerificationType: (verificationType: 'email' | 'phone') => set({ verificationType }),
     setEmailVerified: (emailVerified: boolean) => set({ emailVerified }),
     // setPhoneVerified: (phoneVerified: boolean) => set({ phoneVerified }),
-    setSelfIntroduction: (selfIntroduction: string) => set({ selfIntroduction }),
+    setSelfIntroduction: (selfIntroduction: string | null) => set({ selfIntroduction }),
     setProfileImage: (profileImage: File | null) => set({ profileImage }),
+    setProfileImageKey: (profileImageKey: string | null) => set({ profileImageKey }),
     setVerificationFile: (verificationFile: File | null) => set({ verificationFile }),
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => set({ isVerificationSubmitted }),
-    setTags: (tags: string[]) => set({ tags }),
 
-    // API 요청 시 필요한 필드만 추출
-    getSignupData: (): EmailRequest => {
-        const state = get();
+    // 이메일 인증번호 검증 API 요청시 필요한 필드만 추출
+    getEmailVerificationData: (): Omit<EmailVerificationRequest, 'code'> => {
+        const state = get(); // 현재 전역상태에 저장된 모든 값들 불러오는 함수
         return {
             email: state.email,
             username: state.username,

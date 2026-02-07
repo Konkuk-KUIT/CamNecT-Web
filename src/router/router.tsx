@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-
 import { AlumniSearchPage } from "../pages/alumni/AlumniPage";
 import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
 import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
@@ -46,7 +45,6 @@ import { JobWritePage } from "../pages/admin/JobPostWritePage";
 
 export const router = createBrowserRouter([
 
-    // todo 각 페이지 연결 
     {
         path: "/",
         element: <App />, // 모든 화면을 감싸는 컴포넌트 (큰 틀)
@@ -117,7 +115,6 @@ export const router = createBrowserRouter([
                                     }
                                 ]
                             }
-
                         ]
                     },
                 
