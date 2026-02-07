@@ -114,6 +114,25 @@ export interface ProfileImagePresignResponse {
   };
 }
 
+// 태그조회 DTO 
+export interface Tag {
+  id: number;
+  name: string;
+}
+
+export interface TagCategory {
+  categoryId: number;
+  categoryCode: string;
+  categoryName: string;
+  tags: Tag[];
+}
+
+export interface TagListResponse {
+  status: number;
+  message: string;
+  data: TagCategory[];
+}
+
 // 프로필 이미지, 자기소개, 관심태그 전송 DTO (/api/auth/onboarding)
 export interface ProfileOnboardingRequest {
   userId: number;

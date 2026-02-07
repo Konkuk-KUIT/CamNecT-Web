@@ -18,7 +18,6 @@ interface SignupStore {
     profileImageKey: string | null;
     verificationFile: File | null;
     isVerificationSubmitted: boolean;
-    tags: string[] | null;
 
     // UI 상태 
     verificationType: 'email' | 'phone'; // 휴대폰인증 안함
@@ -39,7 +38,6 @@ interface SignupStore {
     setProfileImageKey: (profileImageKey: string | null) => void;
     setVerificationFile: (verificationFile: File | null) => void;
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => void;
-    setTags: (tags: string[] | null) => void;
     // setPhoneVerified: (phoneVerified: boolean) => void;
     
     // API 요청 & 초기화
@@ -88,7 +86,6 @@ export const useSignupStore = create<SignupStore>((set, get) => ({
     setProfileImageKey: (profileImageKey: string | null) => set({ profileImageKey }),
     setVerificationFile: (verificationFile: File | null) => set({ verificationFile }),
     setIsVerificationSubmitted: (isVerificationSubmitted: boolean) => set({ isVerificationSubmitted }),
-    setTags: (tags: string[] | null) => set({ tags }),
 
     // 이메일 인증번호 검증 API 요청시 필요한 필드만 추출
     getEmailVerificationData: (): Omit<EmailVerificationRequest, 'code'> => {

@@ -8,7 +8,8 @@ import type {
     ProfileImagePresignRequest, ProfileImagePresignResponse,
     ProfileOnboardingRequest, ProfileOnboardingResponse,
     SchoolVerificationPresignRequest, SchoolVerificationPresignResponse,
-    SchoolVerificationUploadRequest, SchoolVerificationUploadResponse
+    SchoolVerificationUploadRequest, SchoolVerificationUploadResponse,
+    TagListResponse
 } from "../api-types/authApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
@@ -61,7 +62,12 @@ export const requestProfilePresign = async (data: ProfileImagePresignRequest) =>
     return response.data;
 }
 
-// 8. 관심태그 리스트 조회 API [GET] 
+// 8. 관심태그 리스트 조회 API [GET] (/api/tags)
+export const requestTagList = async () => {
+    
+    const response = await axiosInstance.get<TagListResponse>("/api/tags");
+    return response.data;
+}
 
 // 9. 프로필 이미지, 자기소개, 관심태그 전송 API [POST] (/api/auth/onboarding)
 export const requestProfileOnboarding = async (data: ProfileOnboardingRequest) => {

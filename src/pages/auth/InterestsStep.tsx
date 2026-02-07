@@ -1,11 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { requestProfileOnboarding } from "../../api/auth";
+import { requestProfileOnboarding, requestTagList } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import PopUp from "../../components/Pop-up";
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../mock/tags";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
 import TagsChooseModal from "./components/TagsChooseModal";
@@ -14,13 +13,10 @@ interface InterestsStepProps {
     onNext: () => void;
 }
 
-// todo useEffect로 실제 서버에서 태그들 불러오기
 export const InterestsStep = ({ onNext }: InterestsStepProps) => {
 
-    const { tags, setTags, profileImageKey, selfIntroduction } = useSignupStore(
+    const { profileImageKey, selfIntroduction } = useSignupStore(
         useShallow((state) => ({
-            tags: state.tags,
-            setTags: state.setTags,
             profileImageKey: state.profileImageKey,
             selfIntroduction: state.selfIntroduction,
         }))
@@ -28,18 +24,49 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
 
     const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
 
-    const [selectedTags, setSelectedTags] = useState<string[]>(tags || []);
+    const [selectedTags, setSelectedTags] = useState<number[]>([]); // 선택된 태그들의 id를 보관해야 함 (로컬 상태로 관리)
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showErrorPopUp, setShowErrorPopUp] = useState(false);
+    const [isFetchErrorDismissed, setIsFetchErrorDismissed] = useState(false);
+
+    // 태그 불러오기 
+    const {data: tagList, isLoading, isError} = useQuery({
+        queryKey: ["tagList"],
+        queryFn: () => requestTagList(),
+    });
+
+    // 서버 데이터가 바뀔때만 API 통신 
+    const { formattedCategories, allTags } = useMemo(() => {
+        if (!tagList?.data) return { formattedCategories: [], allTags: [] };
+
+        const categories = tagList.data.map(cat => ({
+            id: cat.categoryId, // number
+            name: cat.categoryName,
+            tags: cat.tags.map(tag => ({
+                id: tag.id, // Number ID
+                name: tag.name,
+                category: cat.categoryId // number
+            }))
+        }));
+
+        // flatMap : map -> flat (이중배열 -> 단일 배열)
+        // -> 계층형데이터를 단일 배열로
+        const tags = categories.flatMap(cat => cat.tags);
+
+        return { formattedCategories: categories, allTags: tags };
+    }, [tagList?.data]);
 
     // 태그 토글 핸들러 (부모에서 관리)
-    const handleToggleTag = (tagName: string) => {
+    // tagId로 관리
+    const handleToggleTag = (tagId: number) => {
         setSelectedTags(prev => {
-            if (prev.includes(tagName)) {
-                return prev.filter(t => t !== tagName);
+            if (prev.includes(tagId)) {
+                // 이미 선택됐으면 선택해제
+                return prev.filter(id => id !== tagId);
             } else {
                 if (prev.length >= 5) return prev;
-                return [tagName, ...prev];
+                // 선택된 태그 추가
+                return [tagId, ...prev];
             }
         });
     };
@@ -57,11 +84,9 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
                 userId: userId || 0,
                 profileImageKey,
                 bio: selfIntroduction,
-                tagIds: null, // [] 대신 null로 전송하여 백엔드 500 에러 방지 시도
+                tagIds: selectedTags, // [number, number, ...]
             });
 
-            // 전송 성공 시에만 전역 상태 업데이트 및 이동
-            setTags(selectedTags);
             onNext();
         } catch {
             setShowErrorPopUp(true);
@@ -81,8 +106,8 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
             <div className="flex-1 min-h-0">
                 <TagsChooseModal 
                     selectedTags={selectedTags} 
-                    categories={TAG_CATEGORIES} 
-                    allTags={MOCK_ALL_TAGS} 
+                    categories={formattedCategories} 
+                    allTags={allTags} 
                     onToggle={handleToggleTag} 
                 />
             </div>
@@ -116,6 +141,23 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
                     onClick={() => setShowErrorPopUp(false)}
                 />
             )}
+
+            {/* 태그 리스트 로딩 팝업 */}
+            <PopUp 
+                isOpen={isLoading} 
+                type="loading" 
+                title="태그 목록을 불러오는 중입니다..." 
+            />
+
+            {/* 태그 리스트 에러 팝업 */}
+            <PopUp 
+                isOpen={isError && !isFetchErrorDismissed} 
+                type="error" 
+                title="오류 발생" 
+                content="태그 목록을 불러오는 중 문제가 발생했습니다" 
+                buttonText="닫기"
+                onClick={() => setIsFetchErrorDismissed(true)}
+            />
         </div>
     );
 };
