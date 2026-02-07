@@ -12,7 +12,7 @@ import PopUp from '../../components/Pop-up';
 import Icon from '../../components/Icon';
 import TeamApplyModal from './components/TeamApplyModal';
 
-type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
+type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post' | 'close-post';
 
 type OptionItem = {
   id: OptionId;
@@ -28,6 +28,7 @@ export const RecruitDetailPage = () => {
 
     const [isBookmarked, setIsBookmarked] = useState(recruitDetail?.isBookmarked ?? false);
     const [isOptionOpen, setIsOptionOpen] = useState(false);
+    const [isStopRecruitPopupOpen, setIsStopRecruitPopupOpen] = useState(false);
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -48,6 +49,7 @@ export const RecruitDetailPage = () => {
     const optionItems: OptionItem[] = isPostMine
         ? [
             { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
+            { id: 'close-post', icon: 'report', label: '팀원 모집 종료' },
             { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
         ]
         : [
@@ -82,6 +84,10 @@ export const RecruitDetailPage = () => {
 
         if (item.id === 'delete-post') {
             setIsDeletePopupOpen(true);
+        }
+
+        if (item.id === 'close-post') {
+            setIsStopRecruitPopupOpen(true);
         }
 
         setIsOptionOpen(false);
@@ -270,6 +276,16 @@ export const RecruitDetailPage = () => {
             content='삭제된 내용은 복구 불가능합니다.'
             onLeftClick={() => setIsDeletePopupOpen(false)}
             onRightClick={() => setIsDeletePopupOpen(false)}
+        />
+
+        <PopUp
+            isOpen={isStopRecruitPopupOpen}
+            type='warning'
+            title='모집 종료하시겠습니까?'
+            content='해당 글로 다시 모집은 불가능합니다.'
+            leftButtonText='종료하기'
+            onLeftClick={() => setIsStopRecruitPopupOpen(false)}
+            onRightClick={() => setIsStopRecruitPopupOpen(false)}
         />
 
         <PopUp
