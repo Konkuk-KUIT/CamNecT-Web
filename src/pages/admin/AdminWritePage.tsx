@@ -5,7 +5,7 @@ import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { getActivityPosts } from '../../mock/activityCommunity';
 import ExternalTab from '../activity/tabs/ExternalTab';
-import JobTab from '../activity/tabs/JobTab';;
+import JobTab from '../activity/tabs/JobTab';
 import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
 
 const tabItems: TabItem[] = [

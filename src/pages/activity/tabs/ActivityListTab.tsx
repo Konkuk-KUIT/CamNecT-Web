@@ -88,8 +88,8 @@ const ActivityListTab = ({
 		}
 		if (sortExternalKey === 'deadline') {
 			return cloned.sort((a, b) => {
-				const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.NEGATIVE_INFINITY;
-				const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.NEGATIVE_INFINITY;
+				const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+				const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
 				return aTime - bTime; 
 			});
 		}

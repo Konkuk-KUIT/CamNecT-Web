@@ -286,7 +286,7 @@ export const RecruitDetailPage = () => {
             activityName={recruitDetail.activityName}
             onSubmit={async (payload) => {
                 console.log('팀원 신청:', payload);
-                // TODO: API 호출 (isSumbitted -> true로 변경)
+                // TODO: API 호출 (isSubmitted -> true로 변경)
                 setIsSubmitted(true);
                 return true;
             }}
