@@ -12,7 +12,7 @@ import PopUp from '../../components/Pop-up';
 import Icon from '../../components/Icon';
 import TeamApplyModal from './components/TeamApplyModal';
 
-type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post' | 'close-post';
+type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
 
 type OptionItem = {
   id: OptionId;
@@ -32,6 +32,7 @@ export const RecruitDetailPage = () => {
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [isRecruitNow, setIsRecruitNow] = useState(recruitDetail?.recruitNow ?? false);
     const [isSubmitted, setIsSubmitted] = useState(recruitDetail?.isSubmitted ?? false);
 
     if (!recruitDetail) {
@@ -49,7 +50,6 @@ export const RecruitDetailPage = () => {
     const optionItems: OptionItem[] = isPostMine
         ? [
             { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
-            { id: 'close-post', icon: 'report', label: '팀원 모집 종료' },
             { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
         ]
         : [
@@ -86,10 +86,6 @@ export const RecruitDetailPage = () => {
             setIsDeletePopupOpen(true);
         }
 
-        if (item.id === 'close-post') {
-            setIsStopRecruitPopupOpen(true);
-        }
-
         setIsOptionOpen(false);
     };
 
@@ -97,7 +93,7 @@ export const RecruitDetailPage = () => {
     setIsBookmarked(checked);
   };
 
-  const statusLabel = recruitDetail.recruitNow ? '모집 중' : '모집 완료';
+  const statusLabel = isRecruitNow ? '모집 중' : '모집 완료';
 
     return (
         <HeaderLayout
@@ -117,7 +113,7 @@ export const RecruitDetailPage = () => {
                     <div className='flex flex-col items-start gap-[15px]'>
                         <div
                             className={`inline-flex min-w-[68px] items-center justify-center rounded-full border px-[12px] py-[4px] text-r-16-hn ${
-                            recruitDetail.recruitNow
+                            isRecruitNow
                                 ? 'border-primary text-primary'
                                 : 'border-gray-650 text-gray-650'
                             }`}
@@ -214,35 +210,42 @@ export const RecruitDetailPage = () => {
         <div
           className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] px-[25px] py-[15px] box-border'
         >
-            {recruitDetail.recruitNow ? (
-                <>
-                    {isSubmitted ? (
-                        <button
-                            type='button'
-                            disabled={true}
-                            className='flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn border-none'
-                        >
-                            팀원 신청 완료
-                        </button>
-                    ) : (
-                        <button
-                            type='button'
-                            onClick={() => setIsApplyModalOpen(true)}
-                            className='flex-1 py-[15px] rounded-[5px] bg-primary text-white text-sb-16-hn'
-                        >
-                            팀원 신청하기
-                        </button>
-                    )}
-                </>
+            {isRecruitNow ? (
+                isPostMine ? (
+                    <button
+                        type="button"
+                        onClick={() => setIsStopRecruitPopupOpen(true)}
+                        className="flex-1 py-[15px] rounded-[5px] bg-[#FFEFEF] text-red text-sb-16-hn border-none"
+                    >
+                        모집 완료하기
+                    </button>
+                ) : isSubmitted ? (
+                    <button
+                        type="button"
+                        disabled
+                        className="flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn border-none"
+                    >
+                        팀원 신청 완료
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => setIsApplyModalOpen(true)}
+                        className="flex-1 py-[15px] rounded-[5px] bg-primary text-white text-sb-16-hn"
+                    >
+                        팀원 신청하기
+                    </button>
+                )
             ) : (
                 <button
-                    type='button'
-                    disabled={true}
-                    className='flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn'
+                    type="button"
+                    disabled
+                    className="flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn"
                 >
                     팀원 모집 종료
                 </button>
             )}
+
             <div className='flex shrink-0 items-center'>
                 <SaveToggle width={24} height={24} isActive={isBookmarked} onToggle={handleBookmarkToggle} />
             </div>
@@ -280,12 +283,14 @@ export const RecruitDetailPage = () => {
 
         <PopUp
             isOpen={isStopRecruitPopupOpen}
-            type='warning'
-            title='모집 종료하시겠습니까?'
-            content='해당 글로 다시 모집은 불가능합니다.'
-            leftButtonText='종료하기'
+            type='info'
+            title='모집을 완료하시겠습니까?'
+            content={'모집 완료 후에는 다시 모집 중 상태로\n변경할 수 없습니다.'}
             onLeftClick={() => setIsStopRecruitPopupOpen(false)}
-            onRightClick={() => setIsStopRecruitPopupOpen(false)}
+            onRightClick={() => {
+                setIsRecruitNow(false);
+                setIsStopRecruitPopupOpen(false);
+            }}
         />
 
         <PopUp

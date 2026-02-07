@@ -37,9 +37,9 @@ const BottomReact = ({
               type='button'
               onClick={onOpenCompletePopup}
               disabled={isClosed}
-              className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorMain,#00C56C)] text-[var(--ColorWhite,#FFF)] disabled:cursor-not-allowed disabled:opacity-60'
+              className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#FFEFEF] text-red disabled:cursor-not-allowed disabled:opacity-60'
             >
-              모집완료
+              모집 완료하기
             </button>
           ) : (
             <div className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorSub2,#F2FCF8)] text-[var(--ColorMain,#00C56C)]'>

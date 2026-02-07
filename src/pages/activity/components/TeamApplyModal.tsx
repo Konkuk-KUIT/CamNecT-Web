@@ -96,7 +96,7 @@ const TeamApplyModal = ({ isOpen, onClose, activityName, onSubmit }: TeamApplyMo
                         <textarea
                         value={message}
                         onChange={handleMessageChange}
-                        placeholder={`팀원 신청을 작성해 주세요.\n(예: 기획 분야로 팀원 구합니다. 공모전 수상 경험 다수 있습니다!)`}
+                        placeholder={`신청 내용을 작성해 주세요.\n(예: 기획 분야로 팀원 구합니다. 공모전 수상 경험 다수 있습니다!)`}
                         className='h-full w-full resize-none bg-transparent outline-none text-r-16 text-gray-750 placeholder:text-gray-650'
                         />
                     </Card>
