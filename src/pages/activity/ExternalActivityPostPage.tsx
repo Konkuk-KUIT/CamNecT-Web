@@ -125,7 +125,7 @@ export const ExternalActivityPostPage = () => {
             <div className='w-full flex justify-end px-[15px] py-[15px]'>
                 <button
                     className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30'
-                    onClick={() => navigate("/activity/recruit-write")}
+                    onClick={() => navigate(`/activity/${selectedPost.id}/recruit-write`)}
                 >
                     <Icon name='edit'/>
                     팀원 모집하기

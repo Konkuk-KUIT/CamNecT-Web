@@ -12,6 +12,7 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 export const RecruitWritePage = () => {
     const navigate = useNavigate();
     const { recruitId } = useParams();
+    //const { activityId } = useParams();
     const isEditMode = Boolean(recruitId);
     const currentYear = new Date().getFullYear();
     
@@ -19,6 +20,8 @@ export const RecruitWritePage = () => {
         () => (recruitId ? getTeamRecruitDetail(recruitId) : null),
         [recruitId]
     );
+
+    
 
     const initial = useMemo(() => {
         const d = existingRecruit ? new Date(existingRecruit.recruitDeadline) : null;

@@ -216,7 +216,7 @@ export const router = createBrowserRouter([
                                 element: <RecruitDetailPage/>
                             },
                             {
-                                path:"recruit-write",
+                                path:":activityId/recruit-write",
                                 children: [
                                     {
                                         index: true,

@@ -77,7 +77,7 @@ export const RecruitDetailPage = () => {
         }
 
         if (item.id === 'edit-post') {
-            navigate(`/activity/recruit-write/${recruitDetail.id}`);
+            navigate(`/activity/${recruitDetail.activityId}/recruit-write/${recruitDetail.id}`);
         }
 
         if (item.id === 'delete-post') {
