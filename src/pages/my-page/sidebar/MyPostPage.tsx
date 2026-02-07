@@ -61,7 +61,7 @@ export const MyPostsPage = () => {
 
     // 탭별 필터링된 게시물
     const filteredCommunityPosts = sortPosts(
-        MOCK_COMMUNITY_POSTS.filter(post => post.author.id === "user-park-wonbin-20")
+        MOCK_COMMUNITY_POSTS.filter(post => post.author.id === "user-park-wonbin-20") //TODO: api 연동 이후 userId로 변경
     );
     
     // 내가 작성한 활동 게시물만 필터링

@@ -31,6 +31,7 @@ export const RecruitDetailPage = () => {
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(recruitDetail?.isSubmitted ?? false);
 
     if (!recruitDetail) {
         return (
@@ -103,7 +104,7 @@ export const RecruitDetailPage = () => {
                 />
             }
         >
-        <div className='flex w-full justify-center bg-white pb-[60px]'>
+        <div className='flex w-full justify-center bg-white pb-[70px]'>
             <div className='flex w-full flex-col'>
                 <section className='flex flex-col gap-[30px] px-[25px] pt-[25px]'>
                     {/* 모집 상태 배지 & 제목 */}
@@ -209,7 +210,7 @@ export const RecruitDetailPage = () => {
         >
             {recruitDetail.recruitNow ? (
                 <>
-                    {recruitDetail.isSubmitted ? (
+                    {isSubmitted ? (
                         <button
                             type='button'
                             disabled={true}
@@ -285,8 +286,8 @@ export const RecruitDetailPage = () => {
             activityName={recruitDetail.activityName}
             onSubmit={async (payload) => {
                 console.log('팀원 신청:', payload);
-                // TODO: API 호출
-                //isSumbited -> true로 변경
+                // TODO: API 호출 (isSumbitted -> true로 변경)
+                setIsSubmitted(true);
                 return true;
             }}
         />

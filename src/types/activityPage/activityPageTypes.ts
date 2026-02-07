@@ -94,10 +94,10 @@ export interface ActivityDetail extends ActivityListItem {
   announceDate?: string;
 
   applyUrl: string; //해당 공모전 홈페이지 url
-  descriptionBlocks: Array<{
+  descriptionBlocks: {
     title: string;
     body: string;
-  }>;
+  };
 }
 
 

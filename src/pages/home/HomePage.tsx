@@ -98,8 +98,8 @@ export const HomePage = () => {
                 <section className="flex w-full flex-col gap-[10px] bg-white p-[25px]">
                     <ContestBox
                         contests={contests}
-                        onTitleClick={() => navigate('/activity?tab=external')}
-                        onItemClick={(contest) => navigate(`/activity/post/${contest.id}`)}
+                        onTitleClick={() => navigate('/activity')}
+                        onItemClick={(contest) => navigate(`/activity/external/${contest.id}`)}
                     />
                 </section>
             </div>

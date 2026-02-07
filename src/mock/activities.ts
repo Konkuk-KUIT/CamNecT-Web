@@ -38,14 +38,13 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2026-02-01T00:00:00.000Z", end: "2026-03-01T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_001/apply",
-    descriptionBlocks: [
+    descriptionBlocks:
       {
         title: "공모 개요",
         body:
           "지역과 함께하는 나라사랑 캠페인 콘텐츠를 모집합니다.\n" +
           "기획서/카피/포스터/영상 등 다양한 형식으로 참여할 수 있습니다.",
       },
-    ],
   },
   {
     id: "act_002",
@@ -64,9 +63,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2025-09-25T00:00:00.000Z", end: "2026-09-25T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_002/apply",
-    descriptionBlocks: [
+    descriptionBlocks:
       { title: "공모 주제", body: "경기도 브랜드를 홍보할 수 있는 콘텐츠(숏폼/이미지/카피 등)" },
-    ],
   },
   {
     id: "act_003",
@@ -85,9 +83,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
     applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
     announceDate: "2026-11-30T00:00:00.000Z",
     applyUrl: "https://example.com/activities/act_003/apply",
-    descriptionBlocks: [
+    descriptionBlocks:
       { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-    ],
   },
   {
         id: 'act_005',
@@ -106,9 +103,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
         applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
         announceDate: "2026-11-30T00:00:00.000Z",
         applyUrl: "https://example.com/activities/act_003/apply",
-        descriptionBlocks: [
+        descriptionBlocks:
             { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-        ],
     },
     {
         id: "act_006",
@@ -126,9 +122,8 @@ export const MOCK_EXTERNAL_ACTIVITY_DETAIL: ActivityDetail[] = [
         applyPeriod: { start: "2026-09-10T00:00:00.000Z", end: "2026-09-30T00:00:00.000Z" },
         announceDate: "2026-11-30T00:00:00.000Z",
         applyUrl: "https://example.com/activities/act_003/apply",
-        descriptionBlocks: [
+        descriptionBlocks:
             { title: "상세 안내", body: "지역 시장을 알릴 수 있는 영상/이미지 콘텐츠 제작 공모전입니다." },
-        ],
     },
 ];
 
