@@ -215,13 +215,12 @@ export type AdminVerificationDecisionType = 'APPROVE' | 'REJECT';
 export type AdminVerificationProcessRequest = {
   adminId: number;
   submissionId: number;
-  // todo DTO 수정 되야 함
 } & (
     {
       decision: 'APPROVE';
+      studentName: string;    // 이름
       studentNo: string;    // 학번
-      yearLevel: number;    // 학년
-      institutionId: number;// 학교
+      institutionId: number;// 학교 (1로 고정)
       majorId: number;       // 학과
     }
   | {
