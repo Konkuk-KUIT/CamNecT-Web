@@ -17,7 +17,7 @@ export type ActivityPost = {
   id: string;
   tab: ActivityPostTab;
   title: string;
-  content: string;
+  content?: string;
   categories: string[];
   likes: number;
   saveCount: number;
@@ -30,6 +30,7 @@ export type ActivityPost = {
   isBookmarked?: boolean;
   organizer?: string;
   deadline?: string;
+  descriptionTitle?: string;
 };
 
 // 대외활동 상세 정보 포함 타입
@@ -45,10 +46,7 @@ export type ActivityPostDetail = ActivityPost & {
   };
   announceDate?: string;
   applyUrl?: string;
-  descriptionBlocks?: {
-    title: string;
-    body: string;
-  };
+  descriptionBody?: string;
 };
 
 
@@ -94,10 +92,8 @@ export interface ActivityDetail extends ActivityListItem {
   announceDate?: string;
 
   applyUrl: string; //해당 공모전 홈페이지 url
-  descriptionBlocks: {
-    title: string;
-    body: string;
-  };
+  descriptionTitle: string;
+  descriptionBody: string;
 }
 
 

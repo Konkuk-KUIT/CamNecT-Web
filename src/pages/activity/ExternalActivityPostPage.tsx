@@ -94,13 +94,13 @@ export const ExternalActivityPostPage = () => {
     const renderDetailTab = () => (
         <div className='flex flex-col px-[25px] py-[30px]'>
         {/* 상세 정보 블록 */}
-        {selectedPost.descriptionBlocks && (
+        {(selectedPost.descriptionTitle && selectedPost.descriptionBody) && (
             <div className='flex flex-col gap-[20px]'>
                 <span className='text-b-16-hn text-gray-900'>
-                    {selectedPost.descriptionBlocks.title}
+                    {selectedPost.descriptionTitle}
                 </span>
                 <p className='text-r-14 text-gray-900 whitespace-pre-line'>
-                    {selectedPost.descriptionBlocks.body}
+                    {selectedPost.descriptionBody}
                 </p>
             </div>
         )}

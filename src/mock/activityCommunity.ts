@@ -67,7 +67,8 @@ const buildPost = (
   employType: overrides.employType,
   payment: overrides.payment,
   applyUrl: overrides.applyUrl,
-  descriptionBlocks: overrides.descriptionBlocks,
+  descriptionTitle: overrides.descriptionTitle,
+  descriptionBody: overrides.descriptionBody,
 });
 
 const baseActivityPosts: ActivityPostDetail[] = [
@@ -159,8 +160,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     id: 'external-1',
     tab: 'external',
     title: '2025 공공기관 데이터 아이디어 공모전',
-    content:
-      '데이터 분석 기반 서비스 아이디어를 모집합니다. 서류 심사 후 본선 발표가 예정되어 있습니다.',
     categories: ['대외활동', '기획'],
     saveCount: 16,
     createdAt: '2026-02-02T14:30:00.000Z',
@@ -177,17 +176,13 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-01T00:00:00.000Z',
     applyUrl: 'https://example.com/contest/data-2025',
     thumbnailUrl: sampleThumbnail2,
-    descriptionBlocks: {
-        title: '공모 주제',
-        body: '공공데이터를 활용한 혁신적인 서비스 아이디어',
-      },
+    descriptionTitle: '공모 주제',
+    descriptionBody: '공공데이터를 활용한 혁신적인 서비스 아이디어',
   }),
   buildPost({
     id: 'external-2',
     tab: 'external',
     title: '브랜드 숏폼 콘텐츠 서포터즈 모집',
-    content:
-      'SNS 숏폼 콘텐츠 제작 경험자를 모집합니다. 활동비 및 굿즈 제공.',
     categories: ['마케팅', '대외활동'],
     saveCount: 3,
     createdAt: '2026-01-21T09:00:00.000Z',
@@ -200,17 +195,13 @@ const baseActivityPosts: ActivityPostDetail[] = [
     },
     applyUrl: 'https://example.com/supporters/2025',
     thumbnailUrl: sampleThumbnail3,
-    descriptionBlocks: {
-        title: '설명',
-        body: '설명',
-      },
+    descriptionTitle: '설명',
+    descriptionBody: '설명',
   }),
   buildPost({
     id: 'external-3',
     tab: 'external',
     title: '로컬 브랜드 디자인 챌린지',
-    content:
-      '지역 브랜드와 협업하여 디자인 솔루션을 제안하는 챌린지입니다. 포트폴리오 제출이 필요합니다.',
     categories: ['디자인', '대외활동'],
     saveCount: 5,
     createdAt: '2026-02-04T04:00:00.000Z',
@@ -225,17 +216,13 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-15T00:00:00.000Z',
     applyUrl: 'https://example.com/design-challenge',
     thumbnailUrl: sampleThumbnail1,
-    descriptionBlocks: {
-        title: '설명',
-        body: '설명',
-      },
+    descriptionTitle: '설명',
+    descriptionBody: '설명',
   }),
   buildPost({
     id: 'job-1',
     tab: 'job',
     title: '현대 종합 금속',
-    content:
-      '기계사업본부 신입/경력사원 모집',
     categories: ['취업', '설명회'],
     saveCount: 24,
     organizer: "현대",
@@ -250,18 +237,14 @@ const baseActivityPosts: ActivityPostDetail[] = [
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail2,
-    descriptionBlocks: {
-        title: '설명',
-        body: '설명',
-      },
+    descriptionTitle: '기계사업본부 신입/경력사원 모집',
+    descriptionBody: '설명',
   }),
   buildPost({
     id: 'job-2',
     tab: 'job',
     title: '어폴라이드 머티리얼 컴퍼니',
     organizer: "어폴라이드 머티리얼",
-    content:
-      'Customer Engineer - 반도체 장비 엔지니어 채용(학사)',
     categories: ['취업', '자소서'],
     saveCount: 10,
     createdAt: '2026-01-29T15:30:00.000Z',
@@ -275,10 +258,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: false,
     thumbnailUrl: sampleThumbnail1,
-    descriptionBlocks: {
-        title: '설명',
-        body: '설명',
-      },
+    descriptionTitle: 'Customer Engineer - 반도체 장비 엔지니어 채용(학사)',
+    descriptionBody: '설명',
   }),
 ];
 

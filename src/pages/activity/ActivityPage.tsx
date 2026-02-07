@@ -21,7 +21,7 @@ const filterByQuery = (posts: ActivityPost[], query: string) => {
   if (!query) return posts;
   return posts.filter((post) => {
     const title = post.title.toLowerCase();
-    const content = post.content.toLowerCase();
+    const content = post.content ? post.content.toLowerCase() : '';
     const categories = post.categories.some((category) =>
       category.toLowerCase().includes(query),
     );
