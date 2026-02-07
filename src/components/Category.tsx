@@ -15,7 +15,7 @@ const Category = ({
 
   return (
     <div
-      className={`inline-flex h-[24px] items-center justify-center px-[10px] text-r-12 leading-[24px] opacity-100 text-primary box-border ${className}`}
+      className={`inline-flex h-[24px] items-center justify-center px-[10px] text-r-12-hn leading-[24px] opacity-100 text-primary box-border ${className}`}
       style={{
         display: 'inline-flex',
         justifyContent: 'center',

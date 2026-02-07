@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
 import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
@@ -10,13 +9,11 @@ type TabType = "follower" | "following";
 
 export const FollowerPage = () => {
     const navigate = useNavigate();
-    const { userId } = useParams<{ userId: string }>();
-    const targetUserId = userId || MOCK_SESSION.meUid;
+    const userId = MOCK_SESSION.meUid;
+    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[userId];
     
     const [activeTab, setActiveTab] = useState<TabType>("follower");
     const [searchQuery, setSearchQuery] = useState("");
-
-    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[targetUserId];
 
     if (!userDetail) {
         return (

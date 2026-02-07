@@ -1,42 +1,98 @@
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { requestProfileOnboarding, requestTagList } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../mock/tags";
+import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
 import TagsChooseModal from "./components/TagsChooseModal";
+
 interface InterestsStepProps {
     onNext: () => void;
 }
 
-// todo useEffect로 실제 서버에서 태그들 불러오기
 export const InterestsStep = ({ onNext }: InterestsStepProps) => {
 
-    const { tags, setTags } = useSignupStore(
+    const { profileImageKey, selfIntroduction } = useSignupStore(
         useShallow((state) => ({
-            tags: state.tags,
-            setTags: state.setTags,
+            profileImageKey: state.profileImageKey,
+            selfIntroduction: state.selfIntroduction,
         }))
     );
 
-    const [selectedTags, setSelectedTags] = useState<string[]>(tags);
+    const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
+
+    const [selectedTags, setSelectedTags] = useState<number[]>([]); // 선택된 태그들의 id를 보관해야 함 (로컬 상태로 관리)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showErrorPopUp, setShowErrorPopUp] = useState(false);
+    const [isFetchErrorDismissed, setIsFetchErrorDismissed] = useState(false);
+
+    // 태그 불러오기 
+    const {data: tagList, isLoading, isError} = useQuery({
+        queryKey: ["tagList"],
+        queryFn: () => requestTagList(),
+    });
+
+    // 서버 데이터가 바뀔때만 API 통신 
+    const { formattedCategories, allTags } = useMemo(() => {
+        if (!tagList?.data) return { formattedCategories: [], allTags: [] };
+
+        const categories = tagList.data.map(cat => ({
+            id: cat.categoryId, // number
+            name: cat.categoryName,
+            tags: cat.tags.map(tag => ({
+                id: tag.id, // Number ID
+                name: tag.name,
+                category: cat.categoryId // number
+            }))
+        }));
+
+        // flatMap : map -> flat (이중배열 -> 단일 배열)
+        // -> 계층형데이터를 단일 배열로
+        const tags = categories.flatMap(cat => cat.tags);
+
+        return { formattedCategories: categories, allTags: tags };
+    }, [tagList?.data]);
 
     // 태그 토글 핸들러 (부모에서 관리)
-    const handleToggleTag = (tagName: string) => {
+    // tagId로 관리
+    const handleToggleTag = (tagId: number) => {
         setSelectedTags(prev => {
-            if (prev.includes(tagName)) {
-                return prev.filter(t => t !== tagName);
+            if (prev.includes(tagId)) {
+                // 이미 선택됐으면 선택해제
+                return prev.filter(id => id !== tagId);
             } else {
                 if (prev.length >= 5) return prev;
-                return [tagName, ...prev];
+                // 선택된 태그 추가
+                return [tagId, ...prev];
             }
         });
     };
 
-    // 다음 버튼 클릭 시 전역스토어에 저장
-    const handleNext = () => {
-        setTags(selectedTags);
-        onNext();
+    const sendProfileInfo = useMutation({
+        mutationFn: requestProfileOnboarding
+    });
+
+    // 다음, 건너뛰기 버튼
+    const handleNext = async () => {
+        setIsSubmitting(true);
+        try {
+            // 프로필 이미지, 자기소개, 관심태그 전송 API 호출
+            await sendProfileInfo.mutateAsync({
+                userId: userId || 0,
+                profileImageKey,
+                bio: selfIntroduction,
+                tagIds: selectedTags, // [number, number, ...]
+            });
+
+            onNext();
+        } catch {
+            setShowErrorPopUp(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -50,8 +106,8 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
             <div className="flex-1 min-h-0">
                 <TagsChooseModal 
                     selectedTags={selectedTags} 
-                    categories={TAG_CATEGORIES} 
-                    allTags={MOCK_ALL_TAGS} 
+                    categories={formattedCategories} 
+                    allTags={allTags} 
                     onToggle={handleToggleTag} 
                 />
             </div>
@@ -60,19 +116,48 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
             <div className="flex-none pt-[20px] pb-[60px] w-full flex justify-center">
                 <div className="flex items-center gap-[10px] w-full max-w-[325px]">
                     <ButtonWhite
-                        label="건너뛰기"
+                        label={isSubmitting ? "처리 중..." : "건너뛰기"}
                         className="flex-1 !h-[50px] !rounded-[10px]"
-                        onClick={onNext}
+                        disabled={isSubmitting}
+                        onClick={handleNext}
                     />
 
                     <Button
-                        label="다음"
-                        disabled={selectedTags.length === 0}
+                        label={isSubmitting ? "제출 중..." : "다음"}
+                        disabled={selectedTags.length === 0 || isSubmitting}
                         className="flex-1 !h-[50px] !rounded-[10px]"
                         onClick={handleNext}
                     />
                 </div>
             </div>
+
+            {showErrorPopUp && (
+                <PopUp
+                    isOpen={showErrorPopUp}
+                    type="error"
+                    title="저장 실패"
+                    content="정보 저장 중 오류가 발생했습니다\n다시 시도해 주세요"
+                    buttonText="확인"
+                    onClick={() => setShowErrorPopUp(false)}
+                />
+            )}
+
+            {/* 태그 리스트 로딩 팝업 */}
+            <PopUp 
+                isOpen={isLoading} 
+                type="loading" 
+                title="태그 목록을 불러오는 중입니다..." 
+            />
+
+            {/* 태그 리스트 에러 팝업 */}
+            <PopUp 
+                isOpen={isError && !isFetchErrorDismissed} 
+                type="error" 
+                title="오류 발생" 
+                content="태그 목록을 불러오는 중 문제가 발생했습니다" 
+                buttonText="닫기"
+                onClick={() => setIsFetchErrorDismissed(true)}
+            />
         </div>
     );
 };

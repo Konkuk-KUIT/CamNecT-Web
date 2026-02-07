@@ -1,7 +1,10 @@
-// 로그인 전역상태의 인터페이스
+import type { NextStepType, UserRole } from "../../api-types/authApiTypes";
+
 export type AuthUser = {
     id: string;
     name?: string;
+    role?: UserRole;
+    nextStep?: NextStepType;
 }
 
 export interface AuthState {
@@ -10,4 +13,5 @@ export interface AuthState {
     user: AuthUser | null;
     setLogin: (accessToken: string, user: AuthUser) => void;
     setLogout: () => void;
+    setUserId: (userId: string) => void;
 }   

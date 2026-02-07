@@ -8,7 +8,6 @@ type FullLayoutProps = {
   children?: ReactNode;
 };
 
-// todo main태그 감싸기
 export const FullLayout = ({ headerSlot, children }: FullLayoutProps) => {
   return (
     <div className="w-full min-h-[100dvh] relative bg-white">

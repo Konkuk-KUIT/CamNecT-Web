@@ -1,15 +1,19 @@
 import { useState } from "react";
-import type { Tag } from "../../../mock/tags";
+interface TagItem {
+    id: number;
+    name: string;
+    category?: number;
+}
 
 interface TagsChooseModalProps {
-    selectedTags: string[];
+    selectedTags: number[];
     categories: {
-        id: string;
+        id: number; // 카테고리 ID (number)
         name: string;
-        tags: Tag[];
+        tags: TagItem[];
     }[];
-    allTags: Tag[];
-    onToggle: (tagName: string) => void;
+    allTags: TagItem[];
+    onToggle: (tagId: number) => void;
 }
 
 export default function TagsChooseModal({ selectedTags, categories, allTags, onToggle }: TagsChooseModalProps) {
@@ -43,26 +47,32 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                         <section className="w-full pt-[30px] pb-[20px] border-b border-gray-150 flex flex-col gap-[13px]">
                             <div className="flex h-[30px] gap-[7px] overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                 {selectedTags.length !== 0 && (
-                                    selectedTags.map(tag => (
-                                        <button
-                                            type="button"
-                                            key={tag}
-                                            onClick={() => onToggle(tag)}
-                                            className="h-[30px] flex justify-center items-center gap-[3px] px-[15px] py-[5px] rounded-[5px] border border-primary bg-green-50 text-primary text-m-14-hn"
-                                        >
-                                            {tag}
-                                            <svg width="16" height="16" viewBox="0 0 16 16" 
-                                            className="block shrink-0">
-                                                <path 
-                                                    d="M4 12L12 4M4 4L12 12" 
-                                                    stroke="#00C56C" 
-                                                    strokeWidth="1.5" 
-                                                    strokeLinecap="round" 
-                                                    strokeLinejoin="round"/>
-                                            </svg>
+                                    selectedTags.map(tagId => {
+                                        const tag = allTags.find(t => t.id === tagId);
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={tagId}
+                                                onClick={
+                                                    // 자식 컴포넌트에서 부모의 상태변경 함수 호출 (상태 호이스팅)
+                                                    () => onToggle(tagId)
+                                                }
+                                                className="h-[30px] flex justify-center items-center gap-[3px] px-[15px] py-[5px] rounded-[5px] border border-primary bg-green-50 text-primary text-m-14-hn"
+                                            >
+                                                {tag?.name || tagId}
+                                                <svg width="16" height="16" viewBox="0 0 16 16" 
+                                                className="block shrink-0">
+                                                    <path 
+                                                        d="M4 12L12 4M4 4L12 12" 
+                                                        stroke="#00C56C" 
+                                                        strokeWidth="1.5" 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round"/>
+                                                </svg>
 
-                                        </button>
-                                    ))
+                                            </button>
+                                        );
+                                    })
                                 )}
                             </div>
                         </section>
@@ -103,9 +113,9 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                                                             <button
                                                                 type="button"
                                                                 key={tag.id}
-                                                                onClick={() => onToggle(tag.name)}
+                                                                onClick={() => onToggle(tag.id)}
                                                                 className={`h-[30px] px-[15px] py-[5px] rounded-[5px] border ${
-                                                                    selectedTags.includes(tag.name)
+                                                                    selectedTags.includes(tag.id)
                                                                         ? 'text-m-14-hn bg-green-50 text-primary border-primary'
                                                                         : 'text-r-14-hn bg-white text-gray-650 border-gray-650'
                                                                 }`}

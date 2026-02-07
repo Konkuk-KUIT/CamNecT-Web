@@ -1,9 +1,56 @@
 import { type Activity } from "../activity/activityTypes";
 import { type TeamPost } from "../team/teamTypes";
 
-export type ActivityTab = "club"|"study"|"contest"|"external"|"job"|"recruit";
-export type ActivityTag = "광고/마케팅"|"기획/아이디어"|"개발"|"디자인" |"기타";
-export type SortKey = "추천순"|"최신순"|"마감임박순";
+export type ActivityPostTab = 'club' | 'study' | 'external' | 'job';
+export type ActivityPostStatus = 'OPEN' | 'CLOSED';
+
+export type ActivityPostAuthor = {
+  id: string;
+  name: string;
+  major: string;
+  studentId: string;
+  profileImageUrl?: string;
+};
+
+// 공통 기본 타입
+export type ActivityPost = {
+  id: string;
+  tab: ActivityPostTab;
+  title: string;
+  content?: string;
+  categories: string[];
+  likes: number;
+  saveCount: number;
+  createdAt: string;
+  author: ActivityPostAuthor;
+  status?: ActivityPostStatus;
+  postImages?: string[];
+  thumbnailUrl?: string;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  organizer?: string;
+  deadline?: string;
+  descriptionTitle?: string;
+};
+
+// 대외활동 상세 정보 포함 타입
+export type ActivityPostDetail = ActivityPost & {
+  // 대외활동/취업정보에만 있는 필드들
+  location?: string;
+  employType?:string;
+  payment?:string;
+  target?: string;
+  applyPeriod?: {
+    start: string;
+    end: string;
+  };
+  announceDate?: string;
+  applyUrl?: string;
+  descriptionBody?: string;
+};
+
+
+
 
 // // 공모전 공통 인터페이스
 // export interface Activity {
@@ -18,19 +65,25 @@ export type SortKey = "추천순"|"최신순"|"마감임박순";
 // }
 
 //대외활동 데이터
+export interface userInfo {
+    authorProfile:string;
+    authorName:string;
+    authorMajor:string;
+    authorGrade: string;
+}
 
 export interface ActivityListItem extends Activity{
-  tab: ActivityTab;
-
-  tags: ActivityTag[];
-  dDay?: number;
-  isBookmarked: boolean;
-
-  createdAt: string; //웹에 등록된 시간
+    authorId: string;
+    authorInfo?: userInfo;
+    tab: string;
+    content?: string;
+    tags: string[];
+    createdAt: string;
+    isBookmarked: boolean;
 }
 
 export interface ActivityDetail extends ActivityListItem {
-
+  images?: string[];
   target: string; //모집대상
   applyPeriod: { 
     start: string; 
@@ -39,16 +92,11 @@ export interface ActivityDetail extends ActivityListItem {
   announceDate?: string;
 
   applyUrl: string; //해당 공모전 홈페이지 url
-  descriptionBlocks: Array<{
-    title: string;
-    body: string;
-  }>;
+  descriptionTitle: string;
+  descriptionBody: string;
 }
 
 
-//팀원 공고 데이터
-
-export type RecruitStatus = "OPEN"|"CLOSED";
 
 // // 팀원 모집 인터페이스
 // export interface TeamPost {
@@ -57,56 +105,27 @@ export type RecruitStatus = "OPEN"|"CLOSED";
 // }
 
 export interface TeamRecruitPost extends TeamPost{
-  activityId: string; // 어떤 활동에 붙은 팀원공고인지
-
-  authorName: string;
-
-  status: RecruitStatus; // 모집중/완료
-  pastDays: number; // -일 전
-  bookmarkCount: number;
-  commentCount: number;
-
-  isBookmarked: boolean;
+    activityId: string; // 어떤 활동에 붙은 팀원공고인지
+    authorId: string;
+    authorName: string;
+    activityName: string;
+    recruitNow: boolean; // 모집중/완료
+    bookmarkCount: number;
+    createdAt: string;
 }
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
-    activityTitle: string;
-    activityUrl: string;
+    isBookmarked: boolean;
+    applyUrl: string;
 
     authorMajor: string;
-    authorGrade: number;
+    authorGrade: string;
+    authorProfile: string;
 
     recruitDeadline: string;
     recruitTeamNumber: number;
-    genderLimit: string;
 
     description: string;
 
-    comments: TeamRecruitComment[];
+    isSubmitted?:boolean;
 }
-
-export interface TeamRecruitComment {
-    id: string;
-    postId: string;
-
-    authorName: string;
-    content: string;
-    createdAt: string;
-
-    replies?: TeamRecruitComment[];
-}
-
-
-
-
-// 기본 UI
-export interface ActivityListUiState {
-  activeTab: ActivityTab;
-
-  selectedField: "전체" | ActivityTag;
-  selectedHost: "전체" | "공공기관" | "기업" | "학교" | "동아리/커뮤니티" | "기타";
-  selectedRegion: "전체"|"서울"|"경기"|"강원"|"충북"|"충남"|"전북"|"전남"|"경북"|"경남"|"부산";
-
-  sort: SortKey;
-}
-

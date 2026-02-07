@@ -6,8 +6,8 @@ import type { AuthState } from "../types/auth/authTypes";
 
 // persist: 새로고침 이후에도 로그인 상태를 유지하기 위함
 // todo JS가 localstorage에 접근하면 토큰 탈취 가능 (추후에 HttpOnly Cookie로 보안강화 가능)
-export const useAuthStore = create(
-    persist<AuthState>(
+export const useAuthStore = create<AuthState>()(
+    persist(
         (set) => ({
             accessToken: null,
             isAuthenticated: false,
@@ -22,7 +22,10 @@ export const useAuthStore = create(
                 accessToken: null,
                 isAuthenticated: false,
                 user: null
-            })
+            }),
+            setUserId: (userId: string) => set((state) => ({
+                user: state.user ? { ...state.user, id: userId } : { id: userId }
+            }))
         }),
         {
             name: "auth-storage",
