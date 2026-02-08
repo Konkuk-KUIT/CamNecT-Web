@@ -1,41 +1,72 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import Icon from '../../components/Icon';
 import {FullLayout} from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { alumniList } from './data';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
+import { getAlumniList } from '../../api/alumni';
+import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
+import { mapTagNamesToIds } from '../../utils/tagMapper';
+import PopUp from '../../components/Pop-up';
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
-  // 검색 입력값과 지연된 검색값으로 필터링 부담을 줄입니다.
   const [searchTerm, setSearchTerm] = useState('');
-  const deferredSearchTerm = useDeferredValue(searchTerm);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [alumniItems, setAlumniItems] = useState<ReturnType<typeof mapAlumniApiListToProfiles> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const trimmedName = searchTerm.trim();
+    let isActive = true;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timer = window.setTimeout(async () => {
+      try {
+        setIsLoading(true);
+        const response = await getAlumniList({
+          name: trimmedName || undefined,
+          tags: mapTagNamesToIds(selectedTags),
+          signal: controller.signal,
+        });
+        if (isActive) {
+          setAlumniItems(mapAlumniApiListToProfiles(response.data));
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error('Failed to fetch alumni list:', error);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isActive = false;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [searchTerm, selectedTags]);
 
   // 선택된 태그만 만족하는 동문만 추립니다.
   const filteredList = useMemo(() => {
-    if (selectedTags.length === 0) return alumniList;
-    return alumniList.filter((alumni) =>
+    if (!alumniItems) return [];
+    if (selectedTags.length === 0) return alumniItems;
+    return alumniItems.filter((alumni) =>
       selectedTags.every((tag) => alumni.categories.includes(tag)),
     );
-  }, [selectedTags]);
+  }, [selectedTags, alumniItems]);
 
-  // 검색어와 필터 결과를 조합해 최종 리스트를 생성합니다.
-  const visibleList = useMemo(() => {
-    const keyword = deferredSearchTerm.trim();
-    if (!keyword) return filteredList;
-    return filteredList.filter((alumni) => {
-      const nameMatch = alumni.author.name.includes(keyword);
-      const tagMatch = alumni.categories.some((category) => category.includes(keyword));
-      return nameMatch || tagMatch;
-    });
-  }, [deferredSearchTerm, filteredList]);
+  const visibleList = filteredList;
 
 
   return (
@@ -123,7 +154,7 @@ export const AlumniSearchPage = () => {
                           {alumni.author.name}
                         </div>
                         <div className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>
-                          {alumni.author.major} {alumni.author.studentId}학번
+                          {alumni.author.major} {alumni.author.studentId}
                         </div>
                       </div>
                     </div>
@@ -136,9 +167,11 @@ export const AlumniSearchPage = () => {
                   className='flex min-w-0 flex-col gap-[10px] pl-[7px]'
                 >
                   <div className='flex flex-wrap gap-[5px]'>
-                    {alumni.categories.map((category) => (
-                      <Category key={`${alumni.id}-${category}`} label={category} />
-                    ))}
+                    {alumni.categories
+                      .filter((category): category is string => Boolean(category))
+                      .map((category) => (
+                        <Category key={`${alumni.id}-${category}`} label={category} />
+                      ))}
                   </div>
 
                   <p className='line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
@@ -178,6 +211,7 @@ export const AlumniSearchPage = () => {
         categories={TAG_CATEGORIES}
         allTags={MOCK_ALL_TAGS}
       />
+      <PopUp isOpen={isLoading} type="loading" />
     </FullLayout>
   );
 };

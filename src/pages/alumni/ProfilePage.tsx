@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
-import { alumniList } from './data';
+import type { AlumniProfile } from './data';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
+import { useAuthStore } from '../../store/useAuthStore';
+import { getAlumniProfileDetail, sendCoffeeChatRequest } from '../../api/alumni';
+import { mapAlumniProfileDetailToProfile } from '../../utils/alumniMapper';
+import { mapTagNamesToIds } from '../../utils/tagMapper';
 
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
@@ -22,9 +25,54 @@ export const AlumniProfilePage = ({
 }: AlumniProfilePageProps) => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  // URL 파라미터를 기준으로 프로필을 찾습니다.
-  const profile = useMemo(() => alumniList.find((item) => item.id === id), [id]);
-  // 잘못된 id 접근 시 목록으로 리다이렉트합니다.
+  const loginUserId = useAuthStore((state) => state.user?.id);
+  const [profile, setProfile] = useState<AlumniProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const resolveProfileUserId = (rawId?: string) => {
+    if (!rawId) return undefined;
+    const normalized = rawId.startsWith('alumni-') ? rawId.slice('alumni-'.length) : rawId;
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  useEffect(() => {
+    const profileUserId = resolveProfileUserId(id);
+    const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
+    const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
+
+    if (!profileUserId) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isActive = true;
+    setIsLoading(true);
+    getAlumniProfileDetail({
+      loginUserId: loginUserIdValue,
+      profileUserId,
+    })
+      .then((response) => {
+        if (!isActive) return;
+        setProfile(mapAlumniProfileDetailToProfile(response.data));
+      })
+      .catch((error) => {
+        console.error('Failed to fetch alumni profile:', error);
+      })
+      .finally(() => {
+        if (!isActive) return;
+        setIsLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [id, loginUserId]);
+
+  if (isLoading) {
+    return null;
+  }
+
   if (!profile) {
     return <Navigate to='/alumni' replace />;
   }
@@ -42,7 +90,7 @@ export const AlumniProfilePage = ({
 };
 
 type AlumniProfileContentProps = {
-  profile: (typeof alumniList)[number];
+  profile: AlumniProfile;
   enableCoffeeChatModal: boolean;
   shouldOpenCoffeeChat: boolean;
 };
@@ -53,6 +101,7 @@ const AlumniProfileContent = ({
   shouldOpenCoffeeChat,
 }: AlumniProfileContentProps) => {
   const navigate = useNavigate();
+  const loginUserId = useAuthStore((state) => state.user?.id);
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
@@ -71,21 +120,25 @@ const AlumniProfileContent = ({
 
   // 커피챗 요청 모달 제출 처리.
   const handleCoffeeChatSubmit = async (payload: { categories: string[]; message: string }) => {
-    // TODO: send selected categories and message to coffee chat request API.
-    void payload;
-    return true;
+    const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
+    const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
+    const receiverId = Number(profile.userId);
+
+    try {
+      await sendCoffeeChatRequest({
+        userId: loginUserIdValue,
+        receiverId,
+        tagIds: mapTagNamesToIds(payload.categories),
+        content: payload.message,
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to send coffee chat request:', error);
+      return false;
+    }
   };
 
-  const portfolioItems = useMemo(() => {
-    const items = MOCK_PORTFOLIOS_BY_OWNER_ID[profile.userId] ?? [];
-    return items
-      .filter((item) => item.portfolioVisibility)
-      .map((item) => ({
-        id: item.portfolioId,
-        title: item.title,
-        image: typeof item.portfolioThumbnail === 'string' ? item.portfolioThumbnail : undefined,
-      }));
-  }, [profile.userId]);
+  const portfolioItems = profile.portfolioItems;
 
   return (
     <HeaderLayout headerSlot=
@@ -123,7 +176,7 @@ const AlumniProfileContent = ({
                     {profile.author.name}
                   </div>
                   <div className='text-r-12 text-[color:var(--ColorGray3,#646464)]'>
-                    {profile.author.major} {profile.author.studentId}학번
+                    {profile.author.major} {profile.author.studentId}
                   </div>
                 </div>
 

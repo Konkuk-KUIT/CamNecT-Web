@@ -1,0 +1,131 @@
+import { axiosInstance } from "./axiosInstance";
+import type {
+  AlumniApiResponse,
+  AlumniCertificateListResponse,
+  AlumniEducationListResponse,
+  AlumniPortfolioListResponse,
+  AlumniProfileDetailResponse,
+  CoffeeChatRequestBody,
+  CoffeeChatRequestResponse,
+} from "../api-types/alumniApiTypes";
+
+export type AlumniSearchParams = {
+  name?: string;
+  tags?: number[];
+  userId?: number;
+  signal?: AbortSignal;
+};
+
+export const getAlumniList = async (
+  params: AlumniSearchParams
+): Promise<AlumniApiResponse> => {
+  const response = await axiosInstance.get<AlumniApiResponse>("/api/alumni", {
+    params: {
+      userId: params.userId,
+      name: params.name,
+      tags: params.tags,
+    },
+    signal: params.signal,
+  });
+  return response.data;
+};
+
+export type AlumniProfileParams = {
+  loginUserId: number;
+  profileUserId: number;
+};
+
+export const getAlumniProfileDetail = async (
+  params: AlumniProfileParams
+): Promise<AlumniProfileDetailResponse> => {
+  const response = await axiosInstance.get<AlumniProfileDetailResponse>(
+    `/api/profile/${params.profileUserId}`,
+    {
+      params: {
+        loginUserId: params.loginUserId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export type AlumniPortfolioParams = {
+  userId: number;
+  portfolioUserId: number;
+};
+
+export const getAlumniPortfolioList = async (
+  params: AlumniPortfolioParams
+): Promise<AlumniPortfolioListResponse> => {
+  const response = await axiosInstance.get<AlumniPortfolioListResponse>(
+    `/api/portfolio/${params.portfolioUserId}`,
+    {
+      params: {
+        userId: params.userId,
+        portfolioUserId: params.portfolioUserId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export type AlumniUserDataParams = {
+  userId: number;
+};
+
+export const getAlumniEducations = async (
+  params: AlumniUserDataParams
+): Promise<AlumniEducationListResponse> => {
+  const response = await axiosInstance.get<AlumniEducationListResponse>(
+    "/api/user/me/educations",
+    {
+      params: {
+        userId: params.userId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getAlumniCertificates = async (
+  params: AlumniUserDataParams
+): Promise<AlumniCertificateListResponse> => {
+  const response = await axiosInstance.get<AlumniCertificateListResponse>(
+    "/api/user/me/certificates",
+    {
+      params: {
+        userId: params.userId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export type CoffeeChatRequestParams = {
+  userId: number;
+  receiverId: number;
+  tagIds: number[];
+  content: string;
+};
+
+export const sendCoffeeChatRequest = async (
+  params: CoffeeChatRequestParams
+): Promise<CoffeeChatRequestResponse> => {
+  const body: CoffeeChatRequestBody = {
+    receiverId: params.receiverId,
+    tagIds: params.tagIds,
+    content: params.content,
+  };
+
+  const response = await axiosInstance.post<CoffeeChatRequestResponse>(
+    "/api/request/send",
+    body,
+    {
+      params: {
+        userId: params.userId,
+      },
+    }
+  );
+
+  return response.data;
+};
