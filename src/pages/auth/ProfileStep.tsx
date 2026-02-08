@@ -1,32 +1,43 @@
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { requestProfilePresign } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import Input from "../../components/Input";
+import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
+import { uploadFileToS3 } from "../../utils/s3Upload";
 
 interface ProfileStepProps {
   onNext: () => void;
 }
 
 export const ProfileStep = ({ onNext }: ProfileStepProps) => {
-  const { storedIntroduction, storedProfileImage, setProfileImage, setSelfIntroduction } = useSignupStore(
+  const { storedIntroduction, storedProfileImage, setProfileImage, setSelfIntroduction, setProfileImageKey } = useSignupStore(
     useShallow((state) => ({
       storedIntroduction: state.selfIntroduction,
       storedProfileImage: state.profileImage,
       setProfileImage: state.setProfileImage,
       setSelfIntroduction: state.setSelfIntroduction,
+      setProfileImageKey: state.setProfileImageKey,
     }))
   );
 
-  const [introduction, setIntroduction] = useState(storedIntroduction);
+  const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [introduction, setIntroduction] = useState(storedIntroduction || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(storedProfileImage);
   const [showPreview, setShowPreview] = useState(!!storedProfileImage);
+  const [showErrorPopUp, setShowErrorPopUp] = useState(false);
 
   // 상태 변경 시 전역 스토어 동기화
   useEffect(() => {
-    setSelfIntroduction(introduction);
+    setSelfIntroduction(introduction || null);
   }, [introduction, setSelfIntroduction]);
 
   useEffect(() => {
@@ -58,9 +69,52 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
     }
   };
 
+  const presignMutation = useMutation({
+    mutationFn: requestProfilePresign
+  })
+
   // 다음 버튼 클릭
-  const handleNext = () => {
-    onNext();
+  const handleNext = async () => {
+    // 파일첨부 된 것 있으면 전역상태 set함수 호출
+    setSelfIntroduction(introduction || null);
+    setProfileImage(selectedFile);
+
+    if (selectedFile && userId) {
+      setIsSubmitting(true);
+      try {
+        // 1. Presign URL 발급
+        const presignResponse = await presignMutation.mutateAsync({
+          userId,
+          contentType: selectedFile.type,
+          size: selectedFile.size,
+          originalFilename: selectedFile.name,
+        });
+
+        // 2. S3 직접 업로드
+        await uploadFileToS3(
+          presignResponse.data.uploadUrl,
+          selectedFile,
+          presignResponse.data.requiredHeaders
+        );
+
+        // 3. 발급받은 Key 저장 (다음 단계에서 사용)
+        setProfileImageKey(presignResponse.data.fileKey);
+
+        onNext();
+      } catch (error) {
+        console.error("프로필 업로드 에러:", error);
+        setShowErrorPopUp(true);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // 사진이 없거나 유저 ID가 없는 경우
+      if (selectedFile && !userId) {
+        console.error("유저 ID가 없어 업로드를 중단합니다.");
+      }
+      setProfileImageKey(null); 
+      onNext();
+    }
   };
 
   return (
@@ -127,14 +181,14 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
           <Input
             width="100%"
             placeholder="자기소개 내용을 입력해주세요! (최대 100자)"
-            value={introduction}
+            value={introduction || ""}
             onChange={(e) => setIntroduction(e.target.value)}
             maxLength={100}
             height={130}
           />
 
           <div className="mt-2 self-end text-R-12 text-gray-650">
-            {introduction.length}/100
+            {(introduction?.length || 0)}/100
           </div>
         </div>
       </div>
@@ -149,13 +203,24 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
           />
 
           <Button
-            disabled={!(introduction && selectedFile)}
-            label="다음"
+            disabled={!(introduction && selectedFile) || isSubmitting}
+            label={isSubmitting ? "업로드 중..." : "다음"}
             onClick={handleNext}
             className="flex-1 !h-[50px] !rounded-[10px]"
           />
         </div>
       </div>
+
+      {showErrorPopUp && (
+        <PopUp
+          isOpen={showErrorPopUp}
+          type="error"
+          title="업로드 실패"
+          content="이미지 업로드 중 오류가 발생했습니다\n다시 시도해 주세요"
+          buttonText="확인"
+          onClick={() => setShowErrorPopUp(false)}
+        />
+      )}
     </div>
   );
 };

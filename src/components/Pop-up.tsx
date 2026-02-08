@@ -135,7 +135,7 @@ const PopUp = ({
             onClick={onRightClick}
             className='flex h-[45px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorGray1,#ECECEC)] text-sb-14 text-[var(--ColorGray2,#A1A1A1)]'
           >
-            <span className='whitespace-pre-wrap'>아니요</span>
+            <span className='whitespace-pre-wrap'>아니오</span>
           </button>
         </div>
       );
@@ -149,7 +149,7 @@ const PopUp = ({
           onClick={onLeftClick}
           className='flex h-[45px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorSub2,#F2FCF8)] text-sb-14 text-[var(--ColorMain,#00C56C)]'
         >
-          <span className='whitespace-pre-wrap'>아니요</span>
+          <span className='whitespace-pre-wrap'>{leftButtonText ?? '아니오'}</span>
         </button>
         <button
           type='button'

@@ -41,6 +41,11 @@ export const formatOnlyDate = (isoDate: string) => {
   return dayjs(isoDate).format('YY.MM.DD');
 };
 
+// YYYY.MM.DD 형식으로 반환
+export const formatDotDate = (isoDate: string) => {
+  return dayjs(isoDate).format('YYYY.MM.DD');
+};
+
 //community/recruit 용
 export const formatTimeAgo = (dateInput: string | number | Date) => {
   const targetDate = new Date(dateInput);
@@ -91,5 +96,5 @@ export const getDDay = (targetDate: string): number => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     // 양수만 반환 (음수면 0)
-    return diffDays > 0 ? diffDays : 0;
+    return diffDays >= 0 ? diffDays : -1;
 };

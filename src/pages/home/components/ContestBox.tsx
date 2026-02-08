@@ -2,6 +2,7 @@ import Card from '../../../components/Card';
 
 
 type Contest = {
+    id: string;
     title: string;
     posterImgUrl?: string;
     organizer: string;
@@ -16,9 +17,10 @@ type Contest = {
 type ContestBoxProps = {
     contests: Contest[];
     onTitleClick?: () => void;
+    onItemClick?: (contest: Contest) => void;
 };
 
-const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
+const ContestBox = ({ contests, onTitleClick, onItemClick }: ContestBoxProps) => {
     return (
         <div className="flex flex-col gap-[10px]">
             <div
@@ -51,6 +53,7 @@ const ContestBox = ({ contests, onTitleClick }: ContestBoxProps) => {
                         width="fit-content"
                         height="265px"
                         className="flex-shrink-0 min-w-[155px] flex flex-col gap-[10px] px-[10px] pt-[10px] pb-[15px]"
+                        onClick={() => onItemClick?.(contest)}
                     >
                         <div className="relative w-full flex justify-center">
                             {contest.posterImgUrl ? (

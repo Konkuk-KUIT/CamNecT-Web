@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
 import { Tabs, type TabItem } from "../../../components/Tabs";
-import { CommunityPost } from "../components/sidebar/CommunityPost";
-import { InternalActivityPost } from "../components/sidebar/InternalActivityPost";
-import { ExternalActivityPost } from "../components/sidebar/ExternalActivityPost";
-import { RecruitPost } from "../components/sidebar/RecruitPost";
+import { CommunityPost } from "../../../components/posts/CommunityPost";
+import InternalActivityPost from "../../../components/posts/InternalActivityPost";
+import ExternalActivityPost from "../../../components/posts/ExternalActivityPost";
+import { RecruitPost } from "../../../components/posts/RecruitPost";
 import SortSelector from "../../../components/SortSelector";
 import type { InfoPost, QuestionPost } from "../../../types/community";
 import { infoPosts, questionPosts } from "../../../mock/community";
-import { MOCK_EXTERNAL_ACTIVITY_DETAIL, MOCK_TEAM_RECRUIT_DETAILS, MOCK_INTERNAL_ACTIVITY_POSTS } from "../../../mock/activities";
+import { getActivityPosts } from "../../../mock/activityCommunity";
+import { MOCK_TEAM_RECRUIT_DETAILS } from "../../../mock/activities";
 
 type TabType = 'community' | 'activity' | 'recruit';
 type SortType = 'latest' | 'oldest';
@@ -53,18 +54,20 @@ export const MyBookmarksPage = () => {
         });
     };
 
-    type ActivityPost = 
-    | (typeof MOCK_INTERNAL_ACTIVITY_POSTS[number] & { postType: 'internal' })
-    | (typeof MOCK_EXTERNAL_ACTIVITY_DETAIL[number] & { postType: 'external' });
+    const MOCK_COMMUNITY_POSTS: (InfoPost | QuestionPost)[] = [...infoPosts, ...questionPosts];
+    const allActivityPosts = getActivityPosts();
 
-    const MOCK_COMMUNITY_POSTS:(InfoPost|QuestionPost)[] = [...infoPosts, ...questionPosts];
     // 탭별 필터링된 게시물
     const filteredCommunityPosts = sortPosts(MOCK_COMMUNITY_POSTS); //TODO: api 연동 후 필터링 추가
-    const filteredActivityPosts: ActivityPost[] = sortPosts([
-        ...MOCK_INTERNAL_ACTIVITY_POSTS.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'internal' as const })),
-        ...MOCK_EXTERNAL_ACTIVITY_DETAIL.filter(post => post.isBookmarked === true).map(p => ({ ...p, postType: 'external' as const })),
-    ])
-    const filteredRecruitPosts = sortPosts(MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.isBookmarked === true));
+    
+    // 북마크된 활동 게시물만 필터링
+    const filteredActivityPosts = sortPosts(
+        allActivityPosts.filter(post => post.isBookmarked === true)
+    );
+    
+    const filteredRecruitPosts = sortPosts(
+        MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.isBookmarked === true)
+    );
 
     // 현재 탭에 따른 게시물 개수
     const getPostCount = () => {
@@ -119,13 +122,21 @@ export const MyBookmarksPage = () => {
 
                                 {/* Activity Posts (Internal + External) */}
                                 {activeTab === 'activity' && (
-                                    filteredActivityPosts.map((post) => (
-                                        post.postType === 'internal' ? (
-                                            <InternalActivityPost key={`internal-${post.id}`} {...post} />
-                                        ) : (
-                                            <ExternalActivityPost key={`external-${post.id}`} {...post} />
-                                        )
-                                    ))
+                                    filteredActivityPosts.map((post) => {
+                                        const isExternal = post.tab === 'external' || post.tab === 'job';
+                                        
+                                        if (isExternal) {
+                                            return <ExternalActivityPost key={post.id} post={post} />;
+                                        }
+                                        
+                                        return (
+                                            <InternalActivityPost 
+                                                key={post.id} 
+                                                post={post}
+                                                showRecruitStatus={post.tab === 'club' || post.tab === 'study'}
+                                            />
+                                        );
+                                    })
                                 )}
 
                                 {/* Recruit Posts */}

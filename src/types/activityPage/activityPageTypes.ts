@@ -1,6 +1,57 @@
 import { type Activity } from "../activity/activityTypes";
 import { type TeamPost } from "../team/teamTypes";
 
+export type ActivityPostTab = 'club' | 'study' | 'external' | 'job';
+export type ActivityPostStatus = 'OPEN' | 'CLOSED';
+
+export type ActivityPostAuthor = {
+  id: string;
+  name: string;
+  major: string;
+  studentId: string;
+  profileImageUrl?: string;
+};
+
+// 공통 기본 타입
+export type ActivityPost = {
+  id: string;
+  tab: ActivityPostTab;
+  title: string;
+  content?: string;
+  categories: string[];
+  likes: number;
+  saveCount: number;
+  createdAt: string;
+  author: ActivityPostAuthor;
+  status?: ActivityPostStatus;
+  postImages?: string[];
+  thumbnailUrl?: string;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  organizer?: string;
+  deadline?: string;
+  descriptionTitle?: string;
+};
+
+// 대외활동 상세 정보 포함 타입
+export type ActivityPostDetail = ActivityPost & {
+  // 대외활동/취업정보에만 있는 필드들
+  location?: string;
+  employType?:string;
+  payment?:string;
+  target?: string;
+  applyPeriod?: {
+    start: string;
+    end: string;
+  };
+  announceDate?: string;
+  applyUrl?: string;
+  descriptionBody?: string;
+};
+
+
+
+
 // // 공모전 공통 인터페이스
 // export interface Activity {
 //   id: string;          
@@ -41,14 +92,10 @@ export interface ActivityDetail extends ActivityListItem {
   announceDate?: string;
 
   applyUrl: string; //해당 공모전 홈페이지 url
-  descriptionBlocks: Array<{
-    title: string;
-    body: string;
-  }>;
+  descriptionTitle: string;
+  descriptionBody: string;
 }
 
-
-//팀원 공고 데이터
 
 
 // // 팀원 모집 인터페이스
@@ -61,7 +108,7 @@ export interface TeamRecruitPost extends TeamPost{
     activityId: string; // 어떤 활동에 붙은 팀원공고인지
     authorId: string;
     authorName: string;
-    contestName?: string;
+    activityName: string;
     recruitNow: boolean; // 모집중/완료
     bookmarkCount: number;
     createdAt: string;
@@ -69,23 +116,16 @@ export interface TeamRecruitPost extends TeamPost{
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
     isBookmarked: boolean;
-    activityTitle: string;
-    activityUrl: string;
+    applyUrl: string;
 
     authorMajor: string;
-    authorGrade: number;
+    authorGrade: string;
+    authorProfile: string;
 
     recruitDeadline: string;
     recruitTeamNumber: number;
 
     description: string;
+
+    isSubmitted?:boolean;
 }
-
-
-
-// 기본 UI
-export interface ActivityListUiState {
-  selectedHost: "전체" | "공공기관" | "기업" | "학교" | "동아리/커뮤니티" | "기타";
-  selectedRegion: "전체"|"서울"|"경기"|"강원"|"충북"|"충남"|"전북"|"전남"|"경북"|"경남"|"부산";
-}
-
