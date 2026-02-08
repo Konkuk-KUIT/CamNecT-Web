@@ -42,7 +42,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
 
     const [formData, setFormData] = useState<Partial<EducationItem>>({
         school: '',
-        status: 'ENROLLED',
+        status: 'ATTENDING',
         startYear: new Date().getFullYear(),
         endYear: undefined,
     });
@@ -83,7 +83,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
             return false;
         }
         if (currentView === 'add') {
-            return !!(formData.school.trim() || formData.status !== 'ENROLLED' || formData.startYear !== currentYear);
+            return !!(formData.school.trim() || formData.status !== 'ATTENDING' || formData.startYear !== currentYear);
         }
         if (currentView === 'edit' && editingId !== null) {
             const original = listEducations.find(e => e.id === editingId);
@@ -109,7 +109,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     const handleAddEducation = () => {
         setFormData({
             school: '',
-            status: 'ENROLLED',
+            status: 'ATTENDING',
             startYear: currentYear,
             endYear: undefined,
         });

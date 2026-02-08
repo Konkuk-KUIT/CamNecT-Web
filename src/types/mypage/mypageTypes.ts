@@ -1,7 +1,7 @@
 import { type User } from "../user/userTypes";
 
-export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" | "DROPOUT" | "TRANSFERRED";
-// // User 공통 인터페이스 
+export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | 'EXCHANGE' | 'DROPPED_OUT' | 'TRANSFERRED';
+// User 공통 인터페이스 
 // export interface User {
 //   id: string; 
 //   name: string; 
@@ -65,10 +65,10 @@ export interface UserProfileDetail {
 }
 
 export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
-  ENROLLED: "재학",
-  LEAVE: "휴학",
-  EXCHANGED: "교환",
+  ATTENDING: "재학",
+  LEAVE_OF_ABSENCE: "휴학",
+  EXCHANGE: "교환",
   GRADUATED: "졸업",
-  DROPOUT: "중퇴",
+  DROPPED_OUT: "중퇴",
   TRANSFERRED: "편입"
 };
