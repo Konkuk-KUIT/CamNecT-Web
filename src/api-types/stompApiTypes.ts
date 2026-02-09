@@ -23,7 +23,7 @@ export interface StompReadReceiptResponse {
 }
 
 // 3. [발행] 메시지 보내기 (/pub/chat/message)
-export interface StompMessagePublishRequest {
+export interface StompMessageRequest {
     roomId: number;
     content: string;
 }

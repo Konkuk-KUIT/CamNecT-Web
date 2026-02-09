@@ -2,9 +2,6 @@ import { Client } from "@stomp/stompjs";
 
 export const stompClient = new Client({
     brokerURL: import.meta.env.VITE_SOCKET_URL,
-    connectHeaders: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-    },
     // 연결 상태를 로그로 확인
     debug: (str) => {
         console.log('STOMP Debug:', str);
