@@ -50,7 +50,7 @@ export default function IntroEditModal({ initialStatement, onClose, onSave }: In
                 <HeaderLayout
                     headerSlot = {
                         <EditHeader
-                            title="태그"
+                            title="자기 소개"
                             leftAction = {{onClick: handleClose}}
                             rightElement = {
                                 <button

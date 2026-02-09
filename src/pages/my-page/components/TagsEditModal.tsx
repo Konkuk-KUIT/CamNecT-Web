@@ -4,6 +4,8 @@ import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../../mock/tags";
 import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
+import { useQuery } from "@tanstack/react-query";
+import { requestTagList } from "../../../api/auth";
 
 interface TagEditModalProps {
     tags: string[];
@@ -11,9 +13,38 @@ interface TagEditModalProps {
     onSave: (newTags: string[]) => void;
 }
 
+const ALLOWED_CATEGORY_IDS = new Set([1, 2, 3, 4, 5]);
+
 export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProps) {
     const [selectedTags, setSelectedTags] = useState<string[]>(tags);
     const [searchQuery, setSearchQuery] = useState("");
+
+    // 태그 리스트 조회
+    const { data: tagList, isLoading } = useQuery({
+        queryKey: ["tagList"],
+        queryFn: () => requestTagList(),
+    });
+
+    // 태그 데이터 포맷팅
+    const { formattedCategories, allTags } = useMemo(() => {
+        if (!tagList?.data) return { formattedCategories: [], allTags: [] };
+
+        const categories = tagList.data
+        .filter((cat) => ALLOWED_CATEGORY_IDS.has(cat.categoryId))
+        .map(cat => ({
+            id: cat.categoryId,
+            name: cat.categoryName,
+            tags: cat.tags.map(tag => ({
+                id: tag.id,
+                name: tag.name,
+                category: cat.categoryId
+            }))
+        }));
+
+        const tags = categories.flatMap(cat => cat.tags);
+
+        return { formattedCategories: categories, allTags: tags };
+    }, [tagList?.data]);
 
     //변경사항 추적
     const hasChanges = useMemo(() => {
@@ -25,8 +56,8 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
     useModalHistory(onClose, hasChanges, () => setShowWarning(true));
 
     useEffect(() => {
-            window.scrollTo(0, 0);
-        }, []);
+        window.scrollTo(0, 0);
+    }, []);
 
     //태그 선택/해제
     const toggleTag = (tagName: string) => {
@@ -48,11 +79,11 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
     const getFilteredCategories = () => {
         if (searchQuery) {
             //검색어가 있을 때 검색 결과를 카테고리별로 그룹화
-            const filtered = MOCK_ALL_TAGS.filter(tag => 
+            const filtered = allTags.filter(tag => 
                 tag.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
             
-            const grouped = TAG_CATEGORIES.map(cat => ({
+            const grouped = formattedCategories.map(cat => ({
                 ...cat,
                 tags: filtered.filter(tag => tag.category === cat.id)
             })).filter(cat => cat.tags.length > 0);
@@ -60,7 +91,7 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
             return grouped;
         }
         
-        return TAG_CATEGORIES;
+        return formattedCategories;
     };
 
     const handleClose = () => {
@@ -80,6 +111,15 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
     };
 
     const filteredCategories = getFilteredCategories();
+
+    if (isLoading) {
+        return (
+            <PopUp
+                type="loading"
+                isOpen={true}
+            />
+        );
+    }
 
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
@@ -161,28 +201,28 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                             {/*태그 리스트*/}
                             {selectedTags.length < 5 && (
                                 <section className="flex-1 min-h-0 overflow-y-auto pb-[40px]">
-                                        <div className="w-full flex flex-col">
-                                            {filteredCategories.map(category => (
-                                                <div key={category.id} className="w-full flex flex-col gap-[15px] pt-[20px] pb-[15px] border-b border-gray-250 last:border-none">
-                                                    <span className="text-sb-16-hn text-gray-900">{category.name}</span>
-                                                    <div className="flex flex-wrap gap-[7px]">
-                                                        {category.tags.map(tag => (
-                                                            <button
-                                                                key={tag.id}
-                                                                onClick={() => toggleTag(tag.name)}
-                                                                className={`h-[30px] px-[15px] py-[5px] rounded-[5px] border ${
-                                                                    selectedTags.includes(tag.name)
-                                                                        ? 'text-m-14-hn bg-green-50 text-primary border-primary'
-                                                                        : 'text-r-14-hn bg-white text-gray-650 border-gray-650'
-                                                                }`}
-                                                            >
-                                                                {tag.name}
-                                                            </button>
-                                                        ))}
-                                                    </div>
+                                    <div className="w-full flex flex-col">
+                                        {filteredCategories.map(category => (
+                                            <div key={category.id} className="w-full flex flex-col gap-[15px] pt-[20px] pb-[15px] border-b border-gray-250 last:border-none">
+                                                <span className="text-sb-16-hn text-gray-900">{category.name}</span>
+                                                <div className="flex flex-wrap gap-[7px]">
+                                                    {category.tags.map(tag => (
+                                                        <button
+                                                            key={tag.id}
+                                                            onClick={() => toggleTag(tag.name)}
+                                                            className={`h-[30px] px-[15px] py-[5px] rounded-[5px] border ${
+                                                                selectedTags.includes(tag.name)
+                                                                    ? 'text-m-14-hn bg-green-50 text-primary border-primary'
+                                                                    : 'text-r-14-hn bg-white text-gray-650 border-gray-650'
+                                                            }`}
+                                                        >
+                                                            {tag.name}
+                                                        </button>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </section>
                             )}
                         </section>

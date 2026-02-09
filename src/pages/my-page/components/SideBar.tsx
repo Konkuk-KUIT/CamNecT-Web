@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { type User } from "../../../types/user/userTypes";
+import { type User } from "../../../types/mypage/mypageTypes";
 
 interface SideBarProps {
     isOpen: boolean;
@@ -17,7 +17,6 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
 
     const handleLogout = (userId: string) => {
         alert(`${userId} 로그아웃 로직 실행`); //TODO: 로그아웃 api 연결
-        navigate("/");
     }
 
     if (!isOpen) return null;
@@ -123,7 +122,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => handleLogout(user.id)} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
+                        <button onClick={() => handleLogout(user.uid)} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
                     </div>
                 </div>
             </div>

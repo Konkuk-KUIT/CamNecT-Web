@@ -29,8 +29,42 @@ export const FollowerPage = () => {
     }
 
     const { user } = userDetail;
-    const followers = user.follower || [];
-    const followings = user.following || [];
+    type FollowUser = {
+  uid: string;
+  name: string;
+  major: string;
+  gradeNumber: number;
+  profileImg: string;
+};
+
+const followers: FollowUser[] = [
+  {
+    uid: "u1",
+    name: "김나연",
+    major: "컴퓨터공학과",
+    gradeNumber: 23,
+    profileImg: "https://picsum.photos/seed/u1/200",
+  },
+  {
+    uid: "u2",
+    name: "이서현",
+    major: "전자공학과",
+    gradeNumber: 22,
+    profileImg: "https://picsum.photos/seed/u2/200",
+  },
+];
+
+const followings: FollowUser[] = [
+  {
+    uid: "u3",
+    name: "박지민",
+    major: "경영학과",
+    gradeNumber: 21,
+    profileImg: "https://picsum.photos/seed/u3/200",
+  },
+]; //TODO: mock 지우고 api 연결
+    // const followers = user.follower || [];
+    // const followings = user.following || [];
 
     // 검색 필터링
     const getFilteredList = () => {
@@ -128,13 +162,13 @@ export const FollowerPage = () => {
                         <div className="w-full flex flex-col">
                             {filteredList.map((user) => (
                                 <div 
-                                    key={user.id} 
+                                    key={user.uid} 
                                     className="w-full flex items-center justify-between gap-[15px] py-[15px] px-[25px] border-b border-gray-150"
                                 >
                                     <div className="flex items-center gap-[15px]">
                                         {/* 프로필 이미지 */}
                                         <button
-                                            onClick={() => alert(`${user.id}의 프로필로 이동`)} //TODO: 프로필로 navigate
+                                            onClick={() => alert(`${user.uid}의 프로필로 이동`)} //TODO: 프로필로 navigate
                                             className="flex-shrink-0"
                                         >
                                             <img
@@ -146,7 +180,7 @@ export const FollowerPage = () => {
 
                                         {/* 유저 정보 */}
                                         <button
-                                            onClick={() => alert(`${user.id}의 프로필로 이동`)} //TODO: 프로필로 navigate
+                                            onClick={() => alert(`${user.uid}의 프로필로 이동`)} //TODO: 프로필로 navigate
                                             className="flex-1 flex flex-col gap-[3px] items-start"
                                         >
                                             <span className="text-b-18-hn text-gray-900">{user.name}</span>
@@ -157,7 +191,7 @@ export const FollowerPage = () => {
                                     </div>
                                     {/* 커피챗 버튼 */}
                                     <button
-                                        onClick={() => handleCoffeeChat(user.id)}
+                                        onClick={() => handleCoffeeChat(user.uid)}
                                         className="min-w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
                                     >
                                         커피챗 보내기
