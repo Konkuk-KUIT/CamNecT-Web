@@ -29,6 +29,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showPublic, setShowPublic] = useState(initialShowPublic);
     const [showWarning, setShowWarning] = useState(false);
+    const [showSchoolInvalid, setShowSchoolInvalid] = useState(false);
 
     const [formData, setFormData] = useState<Partial<EducationItem>>({
         school: '',
@@ -121,7 +122,15 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     };
 
     const handleSaveForm = () => {
-        if (!formData.school || !formData.school.trim()) {
+        const school = (formData.school ?? "").trim();
+        if (!school) return;
+
+        // 완료 눌렀을 때: 검색 결과 목록(nameKor) 중 완전일치하는 경우만 통과
+        const institutions = filteredSchools; // 현재 query 기준으로 받은 목록
+        const isExactMatch = institutions.some(i => i.nameKor.trim() === school);
+        if (!isExactMatch) {
+            setShowSchoolInvalid(true);
+            setShowSchoolSuggestions(true); 
             return;
         }
         
@@ -141,6 +150,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                 e.id === editingId ? { ...e, ...formData } : e
             ));
         }
+        setShowSchoolSuggestions(false); 
         setCurrentView('list');
     };
 
@@ -326,8 +336,10 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                     type="text"
                                     value={schoolSearchQuery}
                                     onChange={(e) => {
-                                        setSchoolSearchQuery(e.target.value);
-                                        setShowSchoolSuggestions(e.target.value.length > 0);
+                                        const value = e.target.value;
+                                        setSchoolSearchQuery(value);
+                                        setFormData(prev => ({ ...prev, school: value }));
+                                        setShowSchoolSuggestions(value.length > 0);
                                     }}
                                     onFocus={() => setShowSchoolSuggestions(schoolSearchQuery.length > 0)}
                                     placeholder="학교 이름을 입력해 주세요"
@@ -340,8 +352,9 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                             <button
                                                 key={institution.id}
                                                 onClick={() => {
-                                                    setFormData({ ...formData, school: institution.nameKor });
-                                                    setSchoolSearchQuery(institution.nameKor);
+                                                    const name = institution.nameKor.trim();
+                                                    setFormData(prev => ({ ...prev, school: name }));
+                                                    setSchoolSearchQuery(name);
                                                     setShowSchoolSuggestions(false);
                                                 }}
                                                 className="w-full flex p-[15px] text-r-16-hn text-gray-650 border-b border-gray-150 last:border-b-0 hover:bg-gray-200"
@@ -511,6 +524,14 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                     setCurrentView('list');
                 }}
                 onRightClick={() => setShowWarning(false)}
+            />
+            <PopUp
+                isOpen={showSchoolInvalid}
+                type="error"
+                title="해당 학교의 데이터가 없습니다."
+                content="원하는 학교의 입력이 불가하다면\n문의사항에 남겨주세요."
+                buttonText="확인"
+                onClick={() => setShowSchoolInvalid(false)}
             />
         </div>
     );
