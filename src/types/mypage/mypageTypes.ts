@@ -1,26 +1,24 @@
-import { type User } from "../user/userTypes";
-
 export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | 'EXCHANGE' | 'DROPPED_OUT' | 'TRANSFERRED';
 // User 공통 인터페이스 
-// export interface User {
-//   id: string; 
-//   name: string; 
-//   profileImg: string; 
-//   major: string; 
-//   gradeNumber: string; 
-//   userTags: string[]; 
-//   introduction: string; // 자기소개 (최대 75자, 3줄)
-//   point: number; 
-// }
+export interface User {
+  uid: string; 
+  name: string; 
+  profileImg: string;
+  univ: string;
+  major: string; 
+  gradeNumber: string; 
+  userTags: string[]; 
+  introduction: string; // 자기소개 (최대 75자, 3줄)
+  following: number;
+  follower: number;
+  point: number; 
+}
 
 export type UserPreview = Omit<User, "userTags"|"introduction"|"point"|"univ">;
-export type UserMini = Pick<UserPreview, "id" | "name" | "major" | "gradeNumber">;
 
 export interface UserProfile extends User {
-  following: UserPreview[];
-  follower: UserPreview[];
-
-  isFollowCountPublic: boolean;
+  followingList: UserPreview[];
+  followerList: UserPreview[];
 }
 
 export interface EducationItem {
@@ -49,7 +47,7 @@ export interface CertificateItem {
 }
 
 export interface ProfileVisibility {
-  portfolioVisibility: boolean;
+  isFollowerVisible: boolean;
   educationVisibility: boolean;
   careerVisibility: boolean;
   certificateVisibility: boolean;
@@ -57,7 +55,7 @@ export interface ProfileVisibility {
 
 //프로필 상세(학력/경력/자격증 등)까지 포함
 export interface UserProfileDetail {
-  user: UserProfile;
+  user: User;
   visibility: ProfileVisibility;
   educations: EducationItem[];
   careers: CareerItem[];

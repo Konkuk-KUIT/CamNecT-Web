@@ -1,10 +1,7 @@
-import { type User } from "../user/userTypes";
-
-export type UserId = Pick<User, "id">;
-
 export type Media = string | File;
 
-export interface Portfolio extends UserId {
+export interface Portfolio {
+    uid: string
     portfolioId: string;
 
     title: string;
