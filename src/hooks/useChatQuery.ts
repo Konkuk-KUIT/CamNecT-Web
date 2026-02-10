@@ -75,10 +75,10 @@ export const useChatRoom = (roomId: string) => {
                     id: String(message.messageId),
                     roomId: String(message.roomId),
                     senderId: String(message.senderId),
-                    type: "TEXT",
                     content: message.message,
                     createdAt: message.sendDate,
                     isRead: message.read,
+                    readAt: message.readAt
                 }))
             };
         },

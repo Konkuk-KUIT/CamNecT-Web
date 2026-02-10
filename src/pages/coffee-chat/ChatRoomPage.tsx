@@ -11,7 +11,9 @@ import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
 import { TypingArea } from "./components/TypingArea";
+import { useStompChat } from "../../hooks/useStompChat";
 
+// todo 읽었을때 읽은 시각으로 보여줘야 함 (읽음 표시와 함께)
 export const ChatRoomPage = () => {
     const { id } = useParams<{ id: string }>();
     
@@ -21,9 +23,8 @@ export const ChatRoomPage = () => {
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     const { user } = useAuthStore();
     const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
-    
-    // 내가 보낸 임시 메시지 (소켓 연동 전 로컬 테스트용)
-    const [sentMessages, setSentMessages] = useState<ChatMessage[]>([]);
+
+    const {messages: socketMessages, sendMessage} = useStompChat(Number(roomId));
     
     // 검색 관련 상태
     const [isSearching, setIsSearching] = useState(false);
@@ -37,11 +38,31 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     const roomInfo = chatRoomData?.partner;
     const requestInfo = chatRoomData?.requestInfo;
-    const remoteMessages = chatRoomData?.messages || [];
+
+    // API로 받은 기존 채팅 내역 데이터들
+    const remoteMessages = useMemo(() => {
+        return chatRoomData?.messages || [];
+    }, [chatRoomData?.messages]);
+
     const myId = String(user?.id);
 
-    // API 데이터와 내가 보낸 임시 메시지를 합침
-    const allMessages = useMemo(() => [...remoteMessages, ...sentMessages], [remoteMessages, sentMessages]);
+    // 실시간 메시지를 도메인 타입으로 변환
+    const mappedSocketMessages = useMemo(() => {
+        return socketMessages.map((msg):ChatMessage => ({
+            id: String(msg.messageId),
+            roomId: String(msg.roomId),
+            senderId: String(msg.senderId),
+            content: msg.message,
+            createdAt: msg.sendDate,
+            isRead: msg.read,
+            readAt: msg.readAt
+        }))
+    }, [socketMessages]);
+
+    // API 데이터와 소켓 메시지를 합치기
+    const allMessages = useMemo(() => {
+        return [...remoteMessages, ...mappedSocketMessages];
+    }, [remoteMessages, mappedSocketMessages]);
 
     // 검색어 필터링 적용
     const localMessages = useMemo(() => {
@@ -82,16 +103,8 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     // 메시지 전송 함수 (임시 로직 - 추후 useStompChat과 교체)
     const handleSendMessage = (text: string) => {
-        const newMessage: ChatMessage = {
-            id: Date.now().toString(),
-            roomId: roomId,
-            senderId: myId,
-            type: "TEXT",
-            content: text,
-            createdAt: new Date().toISOString(),
-            isRead: false,
-        };
-        setSentMessages((prev) => [...prev, newMessage]);
+        sendMessage(text);
+        // setSentMessages((prev) => [...prev, newMessage]);
     }
 
     return (
@@ -218,7 +231,10 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                             </div>
                                         </div>
 
-                                        {/* 시간 표시: 묶음의 마지막 메시지일 때만 노출 */}
+                                        {/* 
+                                        시간 표시: 묶음의 마지막 메시지일 때만 노출 
+                                        읽음 표시도...
+                                        */}
                                         {!isSameAsNext && (
                                             <span className="text-r-12 text-gray-750 tracking-[-0.24px] shrink-0 mb-[2px]">
                                                 {formatTime(msg.createdAt)}
