@@ -59,6 +59,7 @@ export interface MyProfileData {
   basics: ProfileBasics;
   following: number;
   follower: number;
+  myPoint: number;
   portfolioProjectList: PortfolioProject[];
   educations: Education[];
   experience: Experience[];
@@ -131,4 +132,39 @@ export interface ProfilePrivacyUpdateResponse {
   status: number;
   message: string;
   data: string;
+}
+
+// ===== 팔로잉 타입 =====
+export interface FollowUser {
+  userId: number;
+  name: string;
+  majorName: string;
+  studentNo: string;
+  profileImageUrl: string;
+}
+
+export interface FollowListData {
+  users: FollowUser[];
+  count: number;
+}
+
+export interface FollowListResponse {
+  status: number;
+  message: string;
+  data: FollowListData;
+}
+
+// ===== 환경설정 타입 =====
+export interface SettingInfoData {
+  userId: number;
+  name: string;
+  profileImageUrl: string;
+  phoneNum: string;
+  email: string;
+}
+
+export interface SettingInfoResponse {
+  status: number;
+  message: string;
+  data: SettingInfoData;
 }

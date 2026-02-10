@@ -18,7 +18,7 @@ import {
   addCertificate,
   updateCertificate,
   deleteCertificate
-} from "../../../api/userApi";
+} from "../../../api/userInfoApi";
 import { requestProfilePresign } from "../../../api/auth";
 import { searchInstitutions } from "../../../api/institutionApi";
 

@@ -1,5 +1,5 @@
 import type { EducationItem, CareerItem, CertificateItem } from "../../../types/mypage/mypageTypes";
-import type { EducationRequest, ExperienceRequest, CertificateRequest } from "../../../api-types/userApiTypes";
+import type { EducationRequest, ExperienceRequest, CertificateRequest } from "../../../api-types/userInfoApiTypes";
 
 // ===== UI → API 변환 함수 =====
 

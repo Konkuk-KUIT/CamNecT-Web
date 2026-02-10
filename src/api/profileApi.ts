@@ -9,6 +9,8 @@ import type {
   ProfileTagsUpdateResponse,
   ProfilePrivacyUpdateRequest,
   ProfilePrivacyUpdateResponse,
+  FollowListResponse,
+  SettingInfoResponse
 } from "../api-types/profileApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
@@ -55,6 +57,33 @@ export const updateProfilePrivacy = async (userId: number, data: ProfilePrivacyU
   const response = await axiosInstance.patch<ProfilePrivacyUpdateResponse>(
     "/api/profile/me/privacy",
     data,
+    { params: { userId } }
+  );
+  return response.data;
+};
+
+// 팔로워 목록 조회 [GET] (/api/follow/me/followers)
+export const getFollowers = async (userId: number) => {
+  const response = await axiosInstance.get<FollowListResponse>(
+    "/api/follow/me/followers",
+    { params: { userId } }
+  );
+  return response.data;
+};
+
+// 팔로잉 목록 조회 [GET] (/api/follow/me/followings)
+export const getFollowings = async (userId: number) => {
+  const response = await axiosInstance.get<FollowListResponse>(
+    "/api/follow/me/followings",
+    { params: { userId } }
+  );
+  return response.data;
+};
+
+// 마이페이지 환경설정 [GET] (/api/profile/me/settings)
+export const getSettingInfo = async (userId: number) => {
+  const response = await axiosInstance.get<SettingInfoResponse>(
+    "/api/profile/me/settings",
     { params: { userId } }
   );
   return response.data;

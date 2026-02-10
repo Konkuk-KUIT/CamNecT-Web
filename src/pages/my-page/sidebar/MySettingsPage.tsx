@@ -1,25 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
-import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../../mock/mypages";
 import PopUp from "../../../components/Pop-up";
 import defaultProfileImg from "../../../assets/image/defaultProfileImg.png"
+import { useAuthStore } from "../../../store/useAuthStore";
+import { getSettingInfo } from "../../../api/profileApi";
+import { useQuery } from "@tanstack/react-query";
 
-type tempInfoType = {
-    phoneNumber: string;
-    email: string;
-}
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 export const MySettingsPage = () => {
     const navigate = useNavigate();
+    const authUser = useAuthStore(state => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
 
-    const meUid: string = MOCK_SESSION.meUid;
-    const meDetail = MOCK_PROFILE_DETAIL_BY_UID[meUid];
+    //데이터 조회
+    const { data: SettingInfoResponse, isLoading: isSettingLoading, isError: isSettingError } = useQuery({
+        queryKey: ["setting", userId],
+        queryFn: () => getSettingInfo(userId!),
+        enabled: !!userId,
+    });
 
-    const tempInfo: tempInfoType = {
-        phoneNumber: "010-1234-1234",
-        email: "temp@konkuk.ac.kr"
-    }
+    const userSetting = SettingInfoResponse?.data;
 
     const menuItems = [
         { 
@@ -61,7 +63,16 @@ export const MySettingsPage = () => {
         }
     ];
 
-    if (!meDetail) {
+    if (isSettingLoading) {
+        return (
+        <PopUp
+            type="loading"
+            isOpen={true}
+        />
+        );
+    }
+
+    if (!userSetting || isSettingError) {
         return (
             <PopUp
                 type="error"
@@ -73,8 +84,6 @@ export const MySettingsPage = () => {
             />
         );
     }
-
-    const {user} = meDetail;
 
     return (
         <HeaderLayout
@@ -91,21 +100,25 @@ export const MySettingsPage = () => {
                     <div className="flex gap-[25px]">
                         <div className="min-w-[55px] h-[55px] rounded-full overflow-hidden">
                             <img 
-                                src={user.profileImg ?? defaultProfileImg}
+                                src={userSetting.profileImageUrl ?? defaultProfileImg}
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null; //이미지 깨짐 방지->S3에서 403
+                                    e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                }}
                                 alt="프로필 사진" 
                                 className="w-full h-full object-cover"
                             />
                         </div>
                         <div className="flex flex-col gap-[8px]">
-                            <span className="text-sb-18 text-gray-900">{user.name}</span>
+                            <span className="text-sb-18 text-gray-900">{userSetting.name}</span>
                             <div className="flex gap-[15px]">
                                 <div className="min-w-[56px] flex flex-col gap-[5px] text-m-16-hn text-gray-650">
                                     <span>전화번호</span>
                                     <span>이메일</span>
                                 </div>
                                 <div className="w-full min-w-0 flex flex-col gap-[5px] text-m-16-hn text-gray-750 ">
-                                    <span>{tempInfo.phoneNumber}</span>
-                                    <div className="w-full min-w-0 break-all whitespace-normal">{tempInfo.email}</div>
+                                    <span>{userSetting.phoneNum}</span>
+                                    <div className="w-full min-w-0 break-all whitespace-normal">{userSetting.email}</div>
                                 </div>
                             </div>
                         </div>

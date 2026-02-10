@@ -99,7 +99,7 @@ export const MypagePage = () => {
     following: profileData.following,
     follower: profileData.follower,
     introduction: profileData.basics.bio || "",
-    point: 0, //TODO: api 연결
+    point: profileData.myPoint,
   };
 
   return (
@@ -120,7 +120,7 @@ export const MypagePage = () => {
                 <img
                   src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
                   onError={(e) => {
-                    e.currentTarget.onerror = null; // 무한루프 방지
+                    e.currentTarget.onerror = null; //이미지 깨짐 방지->S3에서 403
                     e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                   }}
                   alt="프로필"

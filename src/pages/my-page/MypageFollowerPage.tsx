@@ -1,22 +1,53 @@
 import { useState } from "react";
-import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import { useAuthStore } from "../../store/useAuthStore";
+import { getFollowers, getFollowings } from "../../api/profileApi";
+import type { FollowUser } from "../../api-types/profileApiTypes";
+import { useQuery } from "@tanstack/react-query";
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type TabType = "follower" | "following";
 
 export const FollowerPage = () => {
     const navigate = useNavigate();
-    const userId = MOCK_SESSION.meUid;
-    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[userId];
+    const authUser = useAuthStore(state => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
     
     const [activeTab, setActiveTab] = useState<TabType>("follower");
     const [searchQuery, setSearchQuery] = useState("");
 
-    if (!userDetail) {
+    //팔로워 목록 조회
+    const { data: followersResponse, isLoading: isFollowersLoading, isError: isFollowersError } = useQuery({
+        queryKey: ["followers", userId],
+        queryFn: () => getFollowers(userId!),
+        enabled: !!userId,
+    });
+
+    // 팔로잉 목록 조회
+    const { data: followingsResponse, isLoading: isFollowingsLoading, isError: isFollowingsError } = useQuery({
+        queryKey: ["followings", userId],
+        queryFn: () => getFollowings(userId!),
+        enabled: !!userId,
+    });
+
+    const isLoading = isFollowersLoading || isFollowingsLoading;
+    const isError = isFollowersError || isFollowingsError;
+
+    if (isLoading) {
+        return (
+            <PopUp
+                type="loading"
+                isOpen={true}
+            />
+        );
+    }
+
+    if (!userId || isError) {
         return (
             <PopUp
                 type="error"
@@ -29,60 +60,24 @@ export const FollowerPage = () => {
         );
     }
 
-    //const { user } = userDetail;
-    type FollowUser = {
-  uid: string;
-  name: string;
-  major: string;
-  gradeNumber: number;
-  profileImg: string | null;
-};
-
-const followers: FollowUser[] = [
-  {
-    uid: "u1",
-    name: "김나연",
-    major: "컴퓨터공학과",
-    gradeNumber: 23,
-    profileImg: "https://picsum.photos/seed/u1/200",
-  },
-  {
-    uid: "u2",
-    name: "이서현",
-    major: "전자공학과",
-    gradeNumber: 22,
-    profileImg: "https://picsum.photos/seed/u2/200",
-  },
-];
-
-const followings: FollowUser[] = [
-  {
-    uid: "u3",
-    name: "박지민",
-    major: "경영학과",
-    gradeNumber: 21,
-    profileImg: "https://picsum.photos/seed/u3/200",
-  },
-]; //TODO: mock 지우고 api 연결
-    // const followers = user.follower || [];
-    // const followings = user.following || [];
+    const followers = followersResponse?.data.users ?? [];
+    const followings = followingsResponse?.data.users ?? [];
 
     // 검색 필터링
-    const getFilteredList = () => {
+    const getFilteredList = (): FollowUser[] => {
         const list = activeTab === "follower" ? followers : followings;
         if (!searchQuery) return list;
-        
-        return list.filter(person => 
+
+        return list.filter(person =>
             person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            person.major.toLowerCase().includes(searchQuery.toLowerCase())
+            person.majorName.toLowerCase().includes(searchQuery.toLowerCase())
         );
     };
 
     const filteredList = getFilteredList();
 
-    const handleCoffeeChat = (personId: string) => {
-        // TODO: 커피챗 기능 구현 이후 연결
-        alert(`${personId}에게 커피챗 요청`);
+    const handleCoffeeChat = (personId: number) => {
+        navigate(`/alumni/profile/${personId}`);
     };
 
     return (
@@ -151,7 +146,7 @@ const followings: FollowUser[] = [
                 {/* 팔로워/팔로잉 리스트 */}
                 <div className="flex-1 overflow-y-auto">
                     {filteredList.length === 0 ? (
-                        <div className="flex items-center justify-center h-full text-r-14 text-gray-650">
+                        <div className="flex items-center justify-center py-[20px] h-full text-r-14 text-gray-650">
                             {searchQuery 
                                 ? "검색 결과가 없습니다" 
                                 : activeTab === "follower" 
@@ -163,17 +158,21 @@ const followings: FollowUser[] = [
                         <div className="w-full flex flex-col">
                             {filteredList.map((user) => (
                                 <div 
-                                    key={user.uid} 
+                                    key={user.userId} 
                                     className="w-full flex items-center justify-between gap-[15px] py-[15px] px-[25px] border-b border-gray-150"
                                 >
                                     <div className="flex items-center gap-[15px]">
                                         {/* 프로필 이미지 */}
                                         <button
-                                            onClick={() => alert(`${user.uid}의 프로필로 이동`)} //TODO: 프로필로 navigate
+                                            onClick={() => navigate(`/alumni/profile/${user.userId}`)} //TODO: 프로필로 navigate
                                             className="flex-shrink-0"
                                         >
                                             <img
-                                                src={user.profileImg ?? defaultProfileImg}
+                                                src={user.profileImageUrl ?? defaultProfileImg}
+                                                onError={(e) => {
+                                                    e.currentTarget.onerror = null; //이미지 깨짐 방지->S3에서 403
+                                                    e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                                }}
                                                 alt={user.name}
                                                 className="w-[48px] h-[48px] rounded-full object-cover"
                                             />
@@ -181,18 +180,18 @@ const followings: FollowUser[] = [
 
                                         {/* 유저 정보 */}
                                         <button
-                                            onClick={() => alert(`${user.uid}의 프로필로 이동`)} //TODO: 프로필로 navigate
+                                            onClick={() => alert(`${user.userId}의 프로필로 이동`)} //TODO: 프로필로 navigate
                                             className="flex-1 flex flex-col gap-[3px] items-start"
                                         >
                                             <span className="text-b-18-hn text-gray-900">{user.name}</span>
                                             <span className="text-r-14-hn text-gray-650 break-keep text-left">
-                                                {user.major} {user.gradeNumber}학번
+                                                {user.majorName} {user.studentNo.slice(2,4)}학번
                                             </span>
                                         </button>
                                     </div>
                                     {/* 커피챗 버튼 */}
                                     <button
-                                        onClick={() => handleCoffeeChat(user.uid)}
+                                        onClick={() => handleCoffeeChat(user.userId)}
                                         className="min-w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
                                     >
                                         커피챗 보내기

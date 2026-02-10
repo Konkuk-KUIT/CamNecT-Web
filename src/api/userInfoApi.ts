@@ -14,7 +14,7 @@ import type {
   CertificateAddResponse,
   CertificateUpdateResponse,
   CertificateDeleteResponse,
-} from "../api-types/userApiTypes";
+} from "../api-types/userInfoApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
 // ===== 학력 API =====

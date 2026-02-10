@@ -8,7 +8,7 @@ export interface User {
   major: string; 
   gradeNumber: string; 
   userTags: string[]; 
-  introduction: string; // 자기소개 (최대 75자, 3줄)
+  introduction: string;
   following: number;
   follower: number;
   point: number; 

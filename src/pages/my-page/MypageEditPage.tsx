@@ -186,6 +186,10 @@ export const MypageEditPage = () => {
                                 onClick={() => openModal('image')}>
                                     <img
                                     src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지->S3에서 403
+                                        e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                    }}
                                     alt="프로필"
                                     className="h-[56px] w-[56px] rounded-full"
                                 />
