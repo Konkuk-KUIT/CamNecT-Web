@@ -298,8 +298,6 @@ export const WritePage = () => {
 
         const isQuestionBoard = boardType === '질문';
         const boardCode = isQuestionBoard ? 'QUESTION' : 'INFO';
-        const accessType = isQuestionBoard ? 'POINT_REQUIRED' : 'FREE';
-        const requiredPoints = accessType === 'POINT_REQUIRED' ? 100 : 0;
         const tagIds = selectedTags
             .map((tagName) => MOCK_ALL_TAGS.find((tag) => tag.name === tagName)?.id)
             .map((tagId) => {
@@ -343,8 +341,6 @@ export const WritePage = () => {
                     anonymous: false,
                     tagIds,
                     attachments,
-                    accessType,
-                    requiredPoints,
                 },
             });
             const nextPostId = response.data.postId;

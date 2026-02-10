@@ -4,6 +4,7 @@ import Category from '../../components/Category';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
 import Toast from '../../components/Toast';
+import ImagePopUp from '../../components/ImagePopUp';
 import BottomSheetModalPost, {
   type ActionItem,
 } from '../../components/BottomSheetModal/BottomSheetModal-post';
@@ -44,6 +45,7 @@ const CommunityPostPage = () => {
   const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
   const [isInsufficientPointsPopupOpen, setIsInsufficientPointsPopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState('URL 복사가 완료되었습니다');
   const [accessStatusOverride, setAccessStatusOverride] = useState<
     'GRANTED' | 'LOCKED' | null
@@ -516,6 +518,7 @@ const CommunityPostPage = () => {
                               src={imageUrl}
                               alt={`${selectedPost.title} 이미지 ${index + 1}`}
                               className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
+                              onClick={() => setSelectedImageUrl(imageUrl)}
                               onError={() =>
                                 setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
                               }
@@ -568,6 +571,11 @@ const CommunityPostPage = () => {
           focusToken={replyFocusToken}
         />
       ) : null}
+      <ImagePopUp
+        isOpen={Boolean(selectedImageUrl)}
+        imageUrl={selectedImageUrl}
+        onClose={() => setSelectedImageUrl(null)}
+      />
       <BottomSheetModalPost
         isOpen={isOptionOpen}
         onClose={() => setIsOptionOpen(false)}

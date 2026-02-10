@@ -233,6 +233,15 @@ export const CommunityPage = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    document.body.classList.add('hide-scrollbar');
+    document.documentElement.classList.add('hide-scrollbar');
+    return () => {
+      document.body.classList.remove('hide-scrollbar');
+      document.documentElement.classList.remove('hide-scrollbar');
+    };
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'info') {
       const state = getTabState('INFO');
       const apiSort = mapSortKeyToApiSort(infoSortKey);

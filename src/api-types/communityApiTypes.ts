@@ -101,8 +101,8 @@ export type CreateCommunityPostBody = {
   anonymous: boolean;
   tagIds: number[];
   attachments: CommunityAttachment[];
-  accessType: "FREE" | "POINT_REQUIRED";
-  requiredPoints: number;
+  accessType?: "FREE" | "POINT_REQUIRED";
+  requiredPoints?: number;
 };
 
 export type CreateCommunityPostResult = {
