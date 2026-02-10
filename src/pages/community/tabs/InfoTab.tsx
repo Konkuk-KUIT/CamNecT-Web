@@ -76,10 +76,16 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
               </div>
 
               <div className='flex flex-col' style={{ gap: '7px' }}>
-                <div className='flex flex-col' style={{ gap: '5px' }}>
+                <div className='flex' style={{ gap: '12px' }}>
+                  <div className='flex flex-1 flex-col' style={{ gap: '5px' }}>
                   <div className='flex items-center gap-[6px]'>
                     <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
-                    <span className='text-r-12 text-gray-750'>· {post.author.major} {post.author.studentId}학번</span>
+                    <span className='text-r-12 text-gray-750'>
+                      · {post.author.major}{' '}
+                      {post.author.yearLevel
+                        ? `${post.author.yearLevel}학년`
+                        : `${post.author.studentId}학번`}
+                    </span>
                   </div>
 
                   <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
@@ -87,6 +93,17 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
                   <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
                     {post.content}
                   </div>
+                  </div>
+
+                  {post.thumbnailUrl && (
+                    <div className='h-[70px] w-[70px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--ColorGray1,#D5D5D5)]'>
+                      <img
+                        src={post.thumbnailUrl}
+                        alt=''
+                        className='h-full w-full object-cover'
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>

@@ -12,9 +12,18 @@ export type CommunityPostItem = {
   answerCount: number;
   commentCount: number;
   bookmarkCount: number;
-  accepted: boolean;
+  accepted?: boolean;
+  acceptedBadge?: boolean;
   tags: string[];
-  thumbnailUrl: string;
+  thumbnailUrl?: string | null;
+  author?: {
+    userId: number;
+    name: string;
+    profileImageUrl: string | null;
+    majorName: string;
+    yearLevel: number;
+  };
+  accessType?: "FREE" | "POINT_REQUIRED";
   accessStatus?: "GRANTED" | "LOCKED";
   requiredPoints?: number;
   myPoints?: number;
@@ -44,8 +53,11 @@ export type GetCommunityPostsParams = {
 };
 
 export type CommunityHomeData = {
-  interestTagId: number;
-  recommendedByInterest: CommunityPostItem[];
+  tagId?: number;
+  tagName?: string;
+  recommendedByTag?: CommunityPostItem[];
+  interestTagId?: number;
+  recommendedByInterest?: CommunityPostItem[];
   waitingQuestions: CommunityPostItem[];
 };
 
@@ -55,10 +67,31 @@ export type GetCommunityHomeParams = {
 
 export type CommunityAttachment = {
   fileKey: string;
-  thumbnailKey: string;
+  thumbnailKey?: string;
   width: number;
   height: number;
   fileSize: number;
+};
+
+export type CommunityUploadPresignItemRequest = {
+  contentType: string;
+  size: number;
+  originalFilename: string;
+};
+
+export type CommunityUploadPresignRequest = {
+  items: CommunityUploadPresignItemRequest[];
+};
+
+export type CommunityUploadPresignItemResponse = {
+  fileKey: string;
+  uploadUrl: string;
+  expiresAt: string;
+  requiredHeaders?: Record<string, string>;
+};
+
+export type CommunityUploadPresignResponse = {
+  items: CommunityUploadPresignItemResponse[];
 };
 
 export type CreateCommunityPostBody = {
@@ -118,6 +151,22 @@ export type CommunityPostDetailResponse = {
   content: string;
   anonymous: boolean;
   authorId: number;
+  attachments?: {
+    attachmentId: number;
+    sortOrder: number;
+    fileKey: string;
+    downloadUrl: string;
+    width: number;
+    height: number;
+    fileSize: number;
+  }[];
+  author?: {
+    userId: number;
+    name: string;
+    profileImageUrl: string | null;
+    majorName: string;
+    yearLevel: number;
+  };
   viewCount: number;
   likeCount: number;
   likedByMe: boolean;

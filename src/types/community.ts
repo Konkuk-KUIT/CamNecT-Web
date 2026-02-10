@@ -4,6 +4,8 @@ export type AuthorProfile = {
   major: string;
   studentId: string;
   isAlumni?: boolean;
+  yearLevel?: number;
+  profileImageUrl?: string | null;
 };
 
 export type CommentAuthor = AuthorProfile & {
@@ -25,6 +27,7 @@ export type InfoPost = {
   title: string;
   content: string;
   imageUrl?: string;
+  thumbnailUrl?: string | null;
   authorProfileImageUrl?: string;
   postImageUrl?: string;
   likes: number;
@@ -40,12 +43,14 @@ export type QuestionPost = {
   title: string;
   content: string;
   imageUrl?: string;
+  thumbnailUrl?: string | null;
   likes: number;
   saveCount: number;
   answers: number;
   isAdopted: boolean;
   createdAt: string;
   accessStatus: 'GRANTED' | 'LOCKED';
+  accessType?: 'FREE' | 'POINT_REQUIRED';
   requiredPoints: number;
   myPoints: number;
 };
@@ -64,6 +69,15 @@ export type CommunityPostDetail = {
   content: string;
   categories: string[];
   postImages?: string[];
+  attachments?: {
+    attachmentId: number;
+    sortOrder: number;
+    fileKey: string;
+    downloadUrl: string;
+    width: number;
+    height: number;
+    fileSize: number;
+  }[];
   accessStatus?: 'GRANTED' | 'LOCKED';
   requiredPoints?: number;
   myPoints?: number;

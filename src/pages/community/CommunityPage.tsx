@@ -80,12 +80,18 @@ export const CommunityPage = () => {
   const [infoSortKey, setInfoSortKey] = useState<SortKey>('recommended');
   const [questionSortKey, setQuestionSortKey] = useState<SortKey>('recommended');
   const [mainState, setMainState] = useState<{
+    tagId?: number;
+    tagName?: string;
+    recommendedByTag: CommunityPostItem[];
     recommendedByInterest: CommunityPostItem[];
     waitingQuestions: CommunityPostItem[];
     isLoading: boolean;
     error: string | null;
     hasFetched: boolean;
   }>({
+    tagId: undefined,
+    tagName: undefined,
+    recommendedByTag: [],
     recommendedByInterest: [],
     waitingQuestions: [],
     isLoading: false,
@@ -203,22 +209,19 @@ export const CommunityPage = () => {
     [questionState.items],
   );
   const recommendedPostsFromApi = useMemo(() => {
-    const items = mainState.recommendedByInterest ?? [];
+    const items =
+      mainState.recommendedByTag.length > 0
+        ? mainState.recommendedByTag
+        : mainState.recommendedByInterest ?? [];
     return items.map((post) => mapToInfoPost(post));
-  }, [mainState.recommendedByInterest]);
+  }, [mainState.recommendedByTag, mainState.recommendedByInterest]);
   const waitingQuestionsFromApi = useMemo(() => {
     const items = mainState.waitingQuestions ?? [];
     return items.map((post) => mapToQuestionPost(post));
   }, [mainState.waitingQuestions]);
 
-  // 미리 가공된 파생 데이터 (동문 정보, 미답변 질문)을 메모이즈
-  const alumniInfos = useMemo(
-    () =>
-      recommendedPostsFromApi.filter(
-        (post) => post.author.isAlumni && post.author.major === loggedInUserMajor,
-      ),
-    [recommendedPostsFromApi],
-  );
+  // 미리 가공된 파생 데이터 (추천 게시글, 미답변 질문)을 메모이즈
+  const recommendedPosts = useMemo(() => recommendedPostsFromApi, [recommendedPostsFromApi]);
 
   const unansweredQuestions = useMemo(
     () => waitingQuestionsFromApi.filter((post) => post.answers === 0),
@@ -261,9 +264,13 @@ export const CommunityPage = () => {
         setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
         getCommunityHome()
           .then((response) => {
+            const recommendedByTag = response.data.recommendedByTag ?? [];
             const recommendedByInterest = response.data.recommendedByInterest ?? [];
             const waitingQuestions = response.data.waitingQuestions ?? [];
             setMainState({
+              tagId: response.data.tagId,
+              tagName: response.data.tagName,
+              recommendedByTag,
               recommendedByInterest,
               waitingQuestions,
               isLoading: false,
@@ -313,8 +320,8 @@ export const CommunityPage = () => {
       );
     return (
       <MainTab
-        userMajor={loggedInUserMajor}
-        alumniInfos={alumniInfos}
+        tagName={mainState.tagName ?? loggedInUserMajor}
+        recommendedPosts={recommendedPosts}
         unansweredQuestions={unansweredQuestions}
       />
     );

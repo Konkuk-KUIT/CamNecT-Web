@@ -14,6 +14,18 @@ const buildAuthor = () => ({
   studentId: "",
 });
 
+const mapAuthorFromApi = (post: CommunityPostItem) => {
+  if (!post.author) return buildAuthor();
+  return {
+    id: String(post.author.userId),
+    name: post.author.name,
+    major: post.author.majorName,
+    studentId: "",
+    yearLevel: post.author.yearLevel,
+    profileImageUrl: post.author.profileImageUrl,
+  };
+};
+
 const mapTagIdToName = (tagId: number) => {
   const match = MOCK_ALL_TAGS.find((tag) => tag.id.endsWith(`_${tagId}`));
   return match?.name ?? `tag-${tagId}`;
@@ -22,12 +34,13 @@ const mapTagIdToName = (tagId: number) => {
 export const mapToInfoPost = (post: CommunityPostItem): InfoPost => ({
   id: String(post.postId),
   author: {
-    ...buildAuthor(),
+    ...mapAuthorFromApi(post),
     isAlumni: true,
   },
   categories: post.tags,
   title: post.title,
   content: post.preview,
+  thumbnailUrl: post.thumbnailUrl ?? null,
   likes: post.likeCount,
   saveCount: post.bookmarkCount,
   comments: post.commentCount,
@@ -36,16 +49,18 @@ export const mapToInfoPost = (post: CommunityPostItem): InfoPost => ({
 
 export const mapToQuestionPost = (post: CommunityPostItem): QuestionPost => ({
   id: String(post.postId),
-  author: buildAuthor(),
+  author: mapAuthorFromApi(post),
   categories: post.tags,
   title: post.title,
   content: post.preview,
+  thumbnailUrl: post.thumbnailUrl ?? null,
   likes: post.likeCount,
   saveCount: post.bookmarkCount,
   answers: post.answerCount,
-  isAdopted: post.accepted,
+  isAdopted: post.acceptedBadge ?? post.accepted ?? false,
   createdAt: post.createdAt,
   accessStatus: post.accessStatus ?? "LOCKED",
+  accessType: post.accessType,
   requiredPoints: post.requiredPoints ?? 100,
   myPoints: post.myPoints ?? 0,
 });
@@ -66,13 +81,29 @@ export const mapToCommunityPostDetail = (
   requiredPoints: post.requiredPoints,
   myPoints: post.myPoints,
   author: {
-    id: String(post.authorId),
-    name: "익명",
-    major: loggedInUserMajor,
+    id: post.author ? String(post.author.userId) : String(post.authorId),
+    name: post.author?.name ?? "익명",
+    major: post.author?.majorName ?? loggedInUserMajor,
     studentId: "",
+    yearLevel: post.author?.yearLevel,
+    profileImageUrl: post.author?.profileImageUrl,
   },
   content: post.content,
   categories: post.tagIds.map(mapTagIdToName),
+  attachments: post.attachments ?? [],
+  postImages: post.attachments
+    ?.filter((attachment) => {
+      const key = attachment.fileKey.toLowerCase();
+      return (
+        attachment.downloadUrl &&
+        (key.endsWith(".png") ||
+          key.endsWith(".jpg") ||
+          key.endsWith(".jpeg") ||
+          key.endsWith(".webp"))
+      );
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((attachment) => attachment.downloadUrl),
 });
 
 export const mapFlatCommentsToTree = (

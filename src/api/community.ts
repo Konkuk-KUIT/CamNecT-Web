@@ -31,6 +31,8 @@ import type {
   UpdateCommunityPostBody,
   UpdateCommunityPostParams,
   UpdateCommunityPostResult,
+  CommunityUploadPresignRequest,
+  CommunityUploadPresignResponse,
 } from "../api-types/communityApiTypes";
 
 const DEFAULT_TAB = "ALL";
@@ -217,6 +219,19 @@ export const updateCommunityPost = async (data: {
     `/api/community/posts/${data.postId}`,
     data.body,
     { params: data.params }
+  );
+
+  return response.data;
+};
+
+export const postCommunityUploadPresign = async (data: {
+  params: { userId: number | string };
+  body: CommunityUploadPresignRequest;
+}) => {
+  const response = await communityAxiosInstance.post<ApiResponse<CommunityUploadPresignResponse>>(
+    "/api/community/posts/uploads/presign",
+    data.body,
+    { params: data.params },
   );
 
   return response.data;

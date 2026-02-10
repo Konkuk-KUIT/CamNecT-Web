@@ -6,21 +6,20 @@ import type { InfoPost, QuestionPost } from '../../../types/community';
 import { formatTimeAgo } from '../time';
 
 type MainTabProps = {
-  userMajor: string;
-  alumniInfos: InfoPost[];
+  tagName: string;
+  recommendedPosts: InfoPost[];
   unansweredQuestions: QuestionPost[];
 };
 
 // 메인 탭: 전공 히어로 + 동문 카드 + 미답변 질문 목록
-const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) => {
+const MainTab = ({ tagName, recommendedPosts, unansweredQuestions }: MainTabProps) => {
   return (
     <div>
       {/* 상단 히어로 영역: 전공 해시태그 + 안내 문구 + 캐러셀 */}
       <div className='flex flex-col bg-white' style={{ padding: '30px 0', gap: '25px' }}>
         <section className='flex flex-col' style={{ padding: '0 25px', gap: '3px' }}>
-          {/* TODO: 사용자 전공 데이터 API 연동 후 실제 값 주입 */}
           <div className='text-b-20' style={{ color: 'var(--ColorMain, #00C56C)' }}>
-            #{userMajor}
+            #{tagName}
           </div>
           <div className='text-m-16' style={{ color: 'var(--ColorBlack, #202023)' }}>
             동문들의 경험과 조언을 확인해보세요!
@@ -28,9 +27,9 @@ const MainTab = ({ userMajor, alumniInfos, unansweredQuestions }: MainTabProps) 
         </section>
 
         <section className='flex flex-col' style={{ gap: '12px' }}>
-          {/* TODO: 알럼나이 정보 리스트 API 연결 */}
-          {alumniInfos.length > 0 ? (
-            <MainBoxCarousel items={alumniInfos} />
+          {/* TODO: 추천 게시글 리스트 API 연결 */}
+          {recommendedPosts.length > 0 ? (
+            <MainBoxCarousel items={recommendedPosts} />
           ) : (
             <div
               className='flex flex-col items-center justify-center text-center'

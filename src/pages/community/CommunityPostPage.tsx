@@ -467,7 +467,10 @@ const CommunityPostPage = () => {
                     {selectedPost.author.name}
                   </div>
                   <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major} {selectedPost.author.studentId}학번
+                    {selectedPost.author.major}{' '}
+                    {selectedPost.author.yearLevel
+                      ? `${selectedPost.author.yearLevel}학년`
+                      : `${selectedPost.author.studentId}학번`}
                   </div>
                 </div>
               </div>

@@ -73,7 +73,9 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 질문글 리스트 API 연결 */}
         {filteredPosts.map((post) => {
-          const isLocked = post.accessStatus !== 'GRANTED';
+          const isPointRequired = post.accessType
+            ? post.accessType === 'POINT_REQUIRED'
+            : post.accessStatus !== 'GRANTED';
           const requiredPoints = post.requiredPoints;
           return (
             <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
@@ -101,24 +103,41 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
               </div>
 
               <div className='flex flex-col' style={{ gap: '7px' }}>
-                <div className='flex items-center gap-[6px]'>
-                  <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
-                  <span className='text-r-12 text-gray-750'>
-                    · {post.author.major} {post.author.studentId}학번
-                  </span>
+                <div className='flex' style={{ gap: '12px' }}>
+                  <div className='flex flex-1 flex-col' style={{ gap: '7px' }}>
+                    <div className='flex items-center gap-[6px]'>
+                      <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
+                      <span className='text-r-12 text-gray-750'>
+                        · {post.author.major}{' '}
+                        {post.author.yearLevel
+                          ? `${post.author.yearLevel}학년`
+                          : `${post.author.studentId}학번`}
+                      </span>
+                    </div>
+
+                    <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
+
+                    {isPointRequired ? (
+                      <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
+                        {requiredPoints} P
+                      </div>
+                    ) : (
+                      <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
+                        {post.content}
+                      </div>
+                    )}
+                  </div>
+
+                  {post.thumbnailUrl && (
+                    <div className='h-[70px] w-[70px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--ColorGray1,#D5D5D5)]'>
+                      <img
+                        src={post.thumbnailUrl}
+                        alt=''
+                        className='h-full w-full object-cover'
+                      />
+                    </div>
+                  )}
                 </div>
-
-                <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
-
-                {isLocked && !post.isAdopted ? (
-                  <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
-                    {requiredPoints} P
-                  </div>
-                ) : (
-                  <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
-                    {post.content}
-                  </div>
-                )}
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
                   <span>답변 {post.answers}</span>
