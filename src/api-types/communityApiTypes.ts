@@ -132,6 +132,7 @@ export type DeleteCommunityPostResult = string;
 
 export type UpdateCommunityPostParams = {
   userId: number | string;
+  postId: number | string;
 };
 
 export type UpdateCommunityPostBody = {

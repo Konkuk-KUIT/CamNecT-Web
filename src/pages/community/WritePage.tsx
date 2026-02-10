@@ -322,7 +322,7 @@ export const WritePage = () => {
             if (isEditMode && postId) {
                 await updateCommunityPost({
                     postId,
-                    params: { userId: numericUserId },
+                    params: { userId: numericUserId, postId },
                     body: {
                         title: title.trim(),
                         content: content.trim(),
