@@ -88,3 +88,11 @@ export const getSettingInfo = async (userId: number) => {
   );
   return response.data;
 };
+
+// 로그아웃 API [POST] (/api/auth/logout)
+export const logout = async (loginUserId: number) => {
+  const response = await axiosInstance.post("/api/auth/logout", null, {
+    params: { loginUserId },
+  });
+  return response.data;
+};

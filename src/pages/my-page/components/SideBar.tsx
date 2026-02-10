@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { type User } from "../../../types/mypage/mypageTypes";
+import { logout } from "../../../api/profileApi";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 interface SideBarProps {
     isOpen: boolean;
@@ -9,14 +11,27 @@ interface SideBarProps {
 
 export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
     const navigate = useNavigate();
+    const setLogout = useAuthStore((s) => s.setLogout);
+    const userId = useAuthStore((s) => s.user?.id);
 
     const handleNavigation = (path: string) => {
         navigate(path);
         onClose();
     };
 
-    const handleLogout = (userId: string) => {
-        alert(`${userId} 로그아웃 로직 실행`); //TODO: 로그아웃 api 연결
+    const handleLogout = async () => {
+        try {
+            const loginUserId = Number(userId);
+            if (!Number.isFinite(loginUserId)) throw new Error("Invalid userId");
+
+            await logout(loginUserId);
+        } catch (e) {
+            // 401이어도 일단 로그아웃 처리
+        } finally {
+            setLogout();
+            onClose();
+            navigate("/login");
+        }
     }
 
     if (!isOpen) return null;
@@ -122,7 +137,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => handleLogout(user.uid)} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
+                        <button onClick={() => handleLogout()} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
                     </div>
                 </div>
             </div>
