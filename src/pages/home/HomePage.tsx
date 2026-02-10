@@ -81,7 +81,7 @@ export const HomePage = () => {
                     />
                     {/* 1-2: 일정 박스 + 포인트/커뮤니티 박스 */}
                     <div className="flex w-full flex-col gap-[15px]">
-                        <CheckScheduleBox />
+                        {/*<CheckScheduleBox />*/}
                         <div className="flex w-full justify-between gap-[20px]">
                             <PointBox points={homeViewModel.pointBalance} />
                             <CommunityBox />
