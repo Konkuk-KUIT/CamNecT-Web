@@ -20,7 +20,6 @@ export const useStompChat = (roomId: number) => {
         };
     }, [roomId]);
 
-
     // 메시지 발행 함수 (발신)
     const sendMessage = (content: string) => {
         const message: StompMessageRequest = { roomId, content };

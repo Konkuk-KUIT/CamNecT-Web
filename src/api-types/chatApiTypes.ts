@@ -6,6 +6,7 @@ export interface ChatRoomListRequest {
 
 export interface ChatRoomInfo {
     roomId: number;
+    opponentId: number;
     opponentName: string;
     opponentProfileImgUrl: string;
     opponentMajor: string;

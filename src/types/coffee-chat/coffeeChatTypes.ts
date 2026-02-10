@@ -50,7 +50,7 @@ export type ChatRoomListItemType = "COFFEE_CHAT" | "TEAM_RECRUIT";
 // 4. 채팅 목록 아이템 (ChatRoomListItem)
 export interface ChatRoomListItem {
   roomId: string;
-  type: ChatRoomListItemType;
+  type?: ChatRoomListItemType;
   partner: ChatUser;   // 상대방 정보 객체 
   
   lastMessage: string; // 내가 보낸 메시지 일 수도

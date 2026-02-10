@@ -6,10 +6,12 @@ import { useChatRooms } from '../../hooks/useChatQuery';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { ChatList } from './components/ChatList';
+import type { ChatRoomListItemType } from '../../types/coffee-chat/coffeeChatTypes';
 
 export const ChatListPage = () => {
-  const { data: chatRooms = [], isLoading } = useChatRooms();
-  const [activeId, setActiveId] = useState('COFFEE_CHAT');
+  const [activeId, setActiveId] = useState<ChatRoomListItemType>('COFFEE_CHAT');
+  const { data: chatRooms = [], isLoading } = useChatRooms(activeId);
+
   const [searchQuery, setSearchQuery] = useState('');
   const unreadCount = 3;
 
@@ -42,7 +44,6 @@ export const ChatListPage = () => {
     });
   };
 
-
   const handleChatRoomClick = (roomId: string) => {
     navigate(`/chat/${roomId}`);
   };
@@ -63,7 +64,7 @@ export const ChatListPage = () => {
       <Tabs
         tabs={tabs}
         activeId={activeId}
-        onChange={(id) => setActiveId(id)}
+        onChange={(id) => setActiveId(id as ChatRoomListItemType)}
       >
         {/* 검색영역 */}
         <section className="w-full px-[25px] py-[20px] ">
@@ -94,7 +95,7 @@ export const ChatListPage = () => {
         <ol>
           {
             // 검색어 여부로 분기 렌더링
-            // todo 길게 클릭 후 삭제 기능 추가
+            // todo 길게 클릭 후 알림 기능 추가
             searchQuery ? searchFilteredChatRoomList(searchQuery).map((chatRoom) => (
             <ChatList 
               key={chatRoom.roomId} 
