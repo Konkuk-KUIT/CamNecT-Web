@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import {
@@ -5,15 +7,18 @@ import {
   type NotificationItem,
   type NotificationType,
 } from './notificationData';
+import { requestNotifications } from '../../api/notifications';
 import { useNotificationStore } from '../../store/useNotificationStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { mapNotificationResponseToItems } from './notificationMapper';
 
 const titleMap: Record<NotificationType, string> = {
   coffeeChatRequest: '커피챗 요청',
   pointUse: '포인트 사용',
   pointEarn: '포인트 적립',
-  schedule: '일정 등록',
   reply: '답글',
   comment: '댓글',
+  commentAccepted: '댓글 채택',
 };
 
 const formatPoints = (points: number) => points.toLocaleString('ko-KR');
@@ -31,30 +36,58 @@ const getIconSvg = (type: NotificationType) => {
 const renderContent = (notification: NotificationItem) => {
   switch (notification.type) {
     case 'coffeeChatRequest':
+      if (notification.message) {
+        return (
+          <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+            {notification.message}
+          </p>
+        );
+      }
       return (
         <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
           {notification.name}님께서 커피챗을 요청하였습니다.
         </p>
       );
     case 'pointUse':
+      if (notification.message) {
+        return (
+          <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+            {notification.message}
+          </p>
+        );
+      }
       return (
         <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
           {formatPoints(notification.points)}p 사용 완료!
         </p>
       );
     case 'pointEarn':
+      if (notification.message) {
+        return (
+          <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+            {notification.message}
+          </p>
+        );
+      }
       return (
         <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
           +{formatPoints(notification.points)}p 적립 완료!
         </p>
       );
-    case 'schedule':
+    case 'commentAccepted':
       return (
         <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
-          새 일정이 등록되었습니다. 지금 확인해볼까요?
+          내 댓글이 채택되었어요. 지금바로 확인해보세요!
         </p>
       );
     case 'reply':
+      if (notification.message) {
+        return (
+          <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+            {notification.message}
+          </p>
+        );
+      }
       return (
         <div className="text-r-14 text-[var(--ColorGray3,#646464)]">
           <span className="block truncate">{notification.parentComment}</span>
@@ -64,6 +97,13 @@ const renderContent = (notification: NotificationItem) => {
         </div>
       );
     case 'comment':
+      if (notification.message) {
+        return (
+          <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+            {notification.message}
+          </p>
+        );
+      }
       return (
         <div className="text-r-14 text-[var(--ColorGray3,#646464)]">
           <span className="block truncate">{notification.postTitle}</span>
@@ -102,8 +142,25 @@ const renderIcon = (notification: NotificationItem) => {
 };
 
 export const NotificationPage = () => {
+  const userId = useAuthStore((state) => state.user?.id);
+  const numericUserId = userId ? Number(userId) : null;
+  const hasValidUserId = Number.isFinite(numericUserId) && Number(numericUserId) > 0;
   const items = useNotificationStore((state) => state.items);
   const markAsRead = useNotificationStore((state) => state.markAsRead);
+  const setItems = useNotificationStore((state) => state.setItems);
+
+  const { data: notificationResponse } = useQuery({
+    queryKey: ['notifications', numericUserId],
+    queryFn: () => requestNotifications({ userId: Number(numericUserId), size: 20 }),
+    enabled: hasValidUserId,
+    staleTime: 30 * 1000,
+  });
+
+  useEffect(() => {
+    if (!notificationResponse) return;
+    const mappedItems = mapNotificationResponseToItems(notificationResponse);
+    setItems(mappedItems);
+  }, [notificationResponse, setItems]);
 
   const handleNotificationClick = (notification: NotificationItem) => {
     markAsRead(notification.id);
@@ -118,8 +175,8 @@ export const NotificationPage = () => {
       case 'pointEarn':
         // TODO: 포인트 적립 - 포인트 내역 페이지 연결
         break;
-      case 'schedule':
-        // TODO: 일정 등록 - 일정 페이지 연결?
+      case 'commentAccepted':
+        // TODO: 댓글 채택 - 해당 게시물로 이동
         break;
       case 'reply':
         // TODO: 답글 - 해당하는 답글이 달린 게시물 연결
