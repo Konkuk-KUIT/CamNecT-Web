@@ -3,6 +3,7 @@ import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
 import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../../mock/mypages";
 import PopUp from "../../../components/Pop-up";
+import defaultProfileImg from "../../../assets/image/defaultProfileImg.png"
 
 type tempInfoType = {
     phoneNumber: string;
@@ -90,7 +91,7 @@ export const MySettingsPage = () => {
                     <div className="flex gap-[25px]">
                         <div className="min-w-[55px] h-[55px] rounded-full overflow-hidden">
                             <img 
-                                src={user.profileImg}
+                                src={user.profileImg ?? defaultProfileImg}
                                 alt="프로필 사진" 
                                 className="w-full h-full object-cover"
                             />

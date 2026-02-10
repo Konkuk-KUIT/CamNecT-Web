@@ -1,5 +1,3 @@
-// src/api/userApi.ts
-
 import type {
   EducationListResponse,
   EducationRequest,

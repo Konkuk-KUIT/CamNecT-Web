@@ -1,5 +1,3 @@
-// src/pages/mypage/MypageEditPage.tsx
-
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Icon from "../../components/Icon";
@@ -93,16 +91,23 @@ export const MypageEditPage = () => {
     }, [currentModal]);
 
     const handleImageUpload = (file: File) => {
-        // 이미지 미리보기용 URL 생성
+        // 이미지 미리보기용 URL 생성 (UI용)
         const previewUrl = URL.createObjectURL(file);
         
         setData((prev) => {
             if (!prev) return prev;
+
+            // 기존에 blob 미리보기였다면 revoke 해서 누수 방지
+            const prevImg = prev.user.profileImg;
+            if (prevImg && prevImg.startsWith("blob:")) {
+            URL.revokeObjectURL(prevImg);
+            }
+
             return {
-                ...prev,
-                user: { ...prev.user, profileImg: previewUrl },
+            ...prev,
+            user: { ...prev.user, profileImg: previewUrl }, // UI에서는 이걸로 보임
             };
-        });
+        });;
         
         // 서버 전송용 원본 파일 보관
         imageFileRef.current = file;
@@ -167,7 +172,7 @@ export const MypageEditPage = () => {
                                 <button className="relative h-[56px] w-[56px]"
                                 onClick={() => openModal('image')}>
                                     <img
-                                    src={user.profileImg}
+                                    src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
                                     alt="프로필"
                                     className="h-[56px] w-[56px] rounded-full"
                                 />
@@ -214,7 +219,7 @@ export const MypageEditPage = () => {
                                             <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
                                         </button>
                                     </div>
-                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep [overflow-wrap:anywhere]">
+                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] line-clamp-3 whitespace-pre-line break-keep [overflow-wrap:anywhere]">
                                         {user.introduction}
                                     </div>
                                 </div>
@@ -286,7 +291,16 @@ export const MypageEditPage = () => {
                 onClose={closeModal}
                 onSelect={handleImageUpload}
                 onDelete={() => {
-                    setData({ ...data, user: { ...user, profileImg: DEFAULT_PROFILE_IMAGE } });
+                    // 서버에 null로 보내기 위해 null 유지
+                    setData((prev) => {
+                        if (!prev) return prev;
+                        const prevImg = prev.user.profileImg;
+                        if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
+                        return { ...prev, user: { ...prev.user, profileImg: null } };
+                    });
+
+                    // 업로드 파일 제거
+                    imageFileRef.current = null;
                     closeModal();
                 }}
             />

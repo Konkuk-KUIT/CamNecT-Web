@@ -3,7 +3,7 @@ export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | '
 export interface User {
   uid: string; 
   name: string; 
-  profileImg: string;
+  profileImg: string | null;
   univ: string;
   major: string; 
   gradeNumber: string; 

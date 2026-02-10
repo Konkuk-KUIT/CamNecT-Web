@@ -1,5 +1,3 @@
-// src/utils/dataConverter.ts
-
 import type { EducationItem, CareerItem, CertificateItem } from "../../../types/mypage/mypageTypes";
 import type { EducationRequest, ExperienceRequest, CertificateRequest } from "../../../api-types/userApiTypes";
 
@@ -84,7 +82,6 @@ export interface InstitutionMapping {
  * @param institutionMappings 학교명-ID 매핑 정보
  */
 export const mapSchoolNamesToIds = (
-  educations: EducationItem[],
   institutionMappings: InstitutionMapping[]
 ): Map<string, number> => {
   const mapping = new Map<string, number>();

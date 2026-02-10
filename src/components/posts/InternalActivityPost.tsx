@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import Icon from '../Icon';
 import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
 import { formatTimeAgo } from '../../utils/formatDate';
 
@@ -53,12 +52,8 @@ const InternalActivityPost = ({
             </div>
           </div>
 
-          <div className='flex items-center gap-[7px] text-r-12-hn text-gray-650'>
+          <div className='flex items-center gap-[6px] text-r-12-hn text-gray-650'>
             <div className='flex items-center gap-[5px]'>
-              <div className='flex items-center gap-[3px]'>
-                <Icon name='like' className='h-[12px] w-[12px]'/>
-                <span>{post.likes}</span>
-              </div>
               <div className='flex items-center gap-[3px]'>
                 <svg width='11' height='12' viewBox='0 0 11 12' fill='none' xmlns='http://www.w3.org/2000/svg'>
                   <path 

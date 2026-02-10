@@ -80,7 +80,7 @@ export interface MyProfileRequest {
 
 // 프로필 이미지 수정 요청
 export interface ProfileImageUpdateRequest {
-  profileImageKey: string;
+  profileImageKey: string | null;
 }
 
 // 프로필 이미지 수정 응답

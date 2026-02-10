@@ -1,5 +1,3 @@
-// src/api/institutionApi.ts
-
 import type { 
   MajorRequest, 
   MajorResponse,

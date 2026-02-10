@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { 
   updateProfileImage, 
@@ -50,8 +49,8 @@ export function useProfileSave() {
   name: string;
   method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
   url: string;
-  params?: any;
-  body?: any;
+  params?: Record<string, unknown>;
+  body?: unknown;
 };
 
 const dryRun = async (req: DryRunRequest) => {
@@ -61,14 +60,13 @@ const dryRun = async (req: DryRunRequest) => {
   if (req.params !== undefined) console.log("params:", req.params);
   if (req.body !== undefined) console.log("body:", req.body);
   console.groupEnd();
-  return true; // 성공 처리
 };
 
   /**
    * 프로필 이미지 업로드 및 저장
    */
-  const saveProfileImage = async (imageFile: File | null, imageKey: string | null): Promise<boolean> => {
-    if (!userId) return false;
+  const saveProfileImage = async (imageFile: File | null, imageKey?: string | null): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       // 1. 이미지 파일이 있으면 presign URL 발급 후 S3 업로드
@@ -83,44 +81,42 @@ const dryRun = async (req: DryRunRequest) => {
         const { uploadUrl, fileKey, requiredHeaders } = presignResponse.data;
 
         // S3에 직접 업로드
-        await axios.put(uploadUrl, imageFile, {
-          headers: requiredHeaders,
-        });
+        await axios.put(uploadUrl, imageFile, {headers: requiredHeaders});
 
         // 2. fileKey로 프로필 이미지 업데이트
         await updateProfileImage(userId, { profileImageKey: fileKey });
-      } else if (imageKey) {
-        // 이미지 파일은 없지만 기존 imageKey가 있는 경우 (삭제 등)
-        await updateProfileImage(userId, { profileImageKey: imageKey });
+        return;
       }
-
-      return true;
+        // 파일 없으면 nextProfileImageKey 그대로 반영 (null이면 삭제)
+        if (imageKey === null) {
+            await updateProfileImage(userId, { profileImageKey: null  });
+            return;
+        }
     } catch (error) {
       console.error("프로필 이미지 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
   /**
    * 자기소개 저장
    */
-  const saveBio = async (bio: string): Promise<boolean> => {
-    if (!userId) return false;
+  const saveBio = async (bio: string): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       await updateProfileBio(userId, { bio });
-      return true;
     } catch (error) {
       console.error("자기소개 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
   /**
    * 태그 저장
    */
-  const saveTags = async (tagNames: string[], allTags: { id: number; name: string }[]): Promise<boolean> => {
-    if (!userId) return false;
+  const saveTags = async (tagNames: string[], allTags: { id: number; name: string }[]): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       // 태그 이름을 태그 ID로 변환
@@ -129,32 +125,28 @@ const dryRun = async (req: DryRunRequest) => {
         .filter((id): id is number => id !== undefined);
 
       await updateProfileTags(userId, { tagIds });
-      return true;
     } catch (error) {
       console.error("태그 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
   /**
    * 공개 여부 저장
    */
-  const savePrivacy = async (
-    data: ProfileEditData
-  ): Promise<boolean> => {
-    if (!userId) return false;
+  const savePrivacy = async (data: ProfileEditData): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       await updateProfilePrivacy(userId, {
         isFollowerVisible: data.visibility.isFollowerVisible,
         isEducationVisible: data.visibility.educationVisibility,
-        isExperienceVisible: data.visibility.careerVisibility, // ⚠️ API 필드명 다름
+        isExperienceVisible: data.visibility.careerVisibility,
         isCertificateVisible: data.visibility.certificateVisibility,
       });
-      return true;
     } catch (error) {
       console.error("공개 여부 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
@@ -164,8 +156,8 @@ const dryRun = async (req: DryRunRequest) => {
   const saveEducations = async (
     newEducations: EducationItem[],
     originalEducations: EducationItem[]
-  ): Promise<boolean> => {
-    if (!userId) return false;
+  ): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       // 삭제된 항목 찾기
@@ -214,8 +206,7 @@ const dryRun = async (req: DryRunRequest) => {
       for (const education of addedEducations) {
         const institutionId = institutionMap.get(education.school);
         if (!institutionId) {
-          console.error(`학교 ID를 찾을 수 없음: ${education.school}`);
-          continue;
+          throw new Error(`학교 ID를 찾을 수 없음: ${education.school}`);
         }
         const request = convertEducationToRequest(education, institutionId);
         if (DEBUG_DRY_RUN) {
@@ -235,8 +226,7 @@ const dryRun = async (req: DryRunRequest) => {
       for (const education of updatedEducations) {
         const institutionId = institutionMap.get(education.school);
         if (!institutionId) {
-          console.error(`학교 ID를 찾을 수 없음: ${education.school}`);
-          continue;
+          throw new Error(`학교 ID를 찾을 수 없음: ${education.school}`);
         }
         const request = convertEducationToRequest(education, institutionId);
         if (DEBUG_DRY_RUN) {
@@ -251,11 +241,9 @@ const dryRun = async (req: DryRunRequest) => {
           await updateEducation(userId, Number(education.id), request);
         }
       }
-
-      return true;
     } catch (error) {
       console.error("학력 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
@@ -265,8 +253,8 @@ const dryRun = async (req: DryRunRequest) => {
   const saveCareers = async (
     newCareers: CareerItem[],
     originalCareers: CareerItem[]
-  ): Promise<boolean> => {
-    if (!userId) return false;
+  ): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       // 삭제된 항목
@@ -331,10 +319,9 @@ const dryRun = async (req: DryRunRequest) => {
         }
       }
 
-      return true;
     } catch (error) {
       console.error("경력 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
@@ -344,8 +331,8 @@ const dryRun = async (req: DryRunRequest) => {
   const saveCertificates = async (
     newCertificates: CertificateItem[],
     originalCertificates: CertificateItem[]
-  ): Promise<boolean> => {
-    if (!userId) return false;
+  ): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
 
     try {
       // 삭제된 항목
@@ -410,10 +397,9 @@ const dryRun = async (req: DryRunRequest) => {
         }
       }
 
-      return true;
     } catch (error) {
       console.error("자격증 저장 실패:", error);
-      return false;
+      throw error;
     }
   };
 
@@ -421,50 +407,68 @@ const dryRun = async (req: DryRunRequest) => {
    * 전체 프로필 저장
    */
   const saveProfile = async (
-    currentData: any,
-    originalData: any,
+    currentData: ProfileEditData,
+    originalData: ProfileEditData,
     imageFile: File | null,
     allTags: { id: number; name: string }[]
   ): Promise<SaveResult> => {
     setIsSaving(true);
 
     try {
-      const results = await Promise.allSettled([
-        // 프로필 이미지 저장
-        currentData.user.profileImg !== originalData.user.profileImg
-          ? saveProfileImage(imageFile, null)
-          : Promise.resolve(true),
+      const tasks: Promise<void>[] = [];
+      // 프로필 이미지
+      if (currentData.user.profileImg !== originalData.user.profileImg) {
+        if (imageFile) {
+          // 새 이미지 업로드
+          tasks.push(saveProfileImage(imageFile)); 
+        } else if (currentData.user.profileImg === null) {
+          // 삭제
+          tasks.push(saveProfileImage(null, null));
+        } else {
+          //blob인데 파일이 없는 이상 케이스
+          throw new Error(
+            "[ProfileImage] image changed but no file provided and not marked as deleted (null). " +
+            "Upload requires imageFile, delete requires profileImg=null."
+          );
+        }
+      }
 
-        // 자기소개 저장
-        currentData.user.introduction !== originalData.user.introduction
-          ? saveBio(currentData.user.introduction)
-          : Promise.resolve(true),
+      // 자기소개
+      if (currentData.user.introduction !== originalData.user.introduction) {
+        tasks.push(saveBio(currentData.user.introduction));
+      }
 
-        // 태그 저장
-        JSON.stringify(currentData.user.userTags) !== JSON.stringify(originalData.user.userTags)
-          ? saveTags(currentData.user.userTags, allTags)
-          : Promise.resolve(true),
+      // 태그
+      if (JSON.stringify(currentData.user.userTags) !== JSON.stringify(originalData.user.userTags)) {
+        tasks.push(saveTags(currentData.user.userTags, allTags));
+      }
 
-        // 공개 여부 저장
-        JSON.stringify(currentData.visibility) !== JSON.stringify(originalData.visibility)
-          ? savePrivacy(currentData)
-          : Promise.resolve(true),
+      // 공개 여부
+      if (JSON.stringify(currentData.visibility) !== JSON.stringify(originalData.visibility)) {
+        tasks.push(savePrivacy(currentData));
+      }
 
-        // 학력 저장
-        JSON.stringify(currentData.educations) !== JSON.stringify(originalData.educations)
-          ? saveEducations(currentData.educations, originalData.educations)
-          : Promise.resolve(true),
+      // 학력
+      if (JSON.stringify(currentData.educations) !== JSON.stringify(originalData.educations)) {
+        tasks.push(saveEducations(currentData.educations, originalData.educations));
+      }
 
-        // 경력 저장
-        JSON.stringify(currentData.careers) !== JSON.stringify(originalData.careers)
-          ? saveCareers(currentData.careers, originalData.careers)
-          : Promise.resolve(true),
+      // 경력
+      if (JSON.stringify(currentData.careers) !== JSON.stringify(originalData.careers)) {
+        tasks.push(saveCareers(currentData.careers, originalData.careers));
+      }
 
-        // 자격증 저장
-        JSON.stringify(currentData.certificates) !== JSON.stringify(originalData.certificates)
-          ? saveCertificates(currentData.certificates, originalData.certificates)
-          : Promise.resolve(true),
-      ]);
+      // 자격증
+      if (JSON.stringify(currentData.certificates) !== JSON.stringify(originalData.certificates)) {
+        tasks.push(saveCertificates(currentData.certificates, originalData.certificates));
+      }
+
+      // 변경사항이 하나도 없으면 그대로 성공 처리
+      if (tasks.length === 0) {
+        return { success: true };
+      }
+
+      const results = await Promise.allSettled(tasks);
 
       // 실패한 항목 확인
       const failures = results.filter(r => r.status === "rejected");

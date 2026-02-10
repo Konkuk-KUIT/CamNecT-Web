@@ -1,5 +1,3 @@
-// src/api/profileApi.ts
-
 import type { 
   MyProfileRequest, 
   MyProfileResponse,

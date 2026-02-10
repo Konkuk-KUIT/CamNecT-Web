@@ -11,7 +11,7 @@ import SortSelector from "../../../components/SortSelector";
 import type { InfoPost, QuestionPost } from "../../../types/community";
 import { infoPosts, questionPosts } from "../../../mock/community";
 import { getActivityPosts } from "../../../mock/activityCommunity";
-import { MOCK_TEAM_RECRUIT_DETAILS } from "../../../mock/activities";
+import { teamRecruitDetails } from "../../../mock/teamRecruit";
 
 type TabType = 'community' | 'activity' | 'recruit';
 type SortType = 'latest' | 'oldest';
@@ -66,7 +66,7 @@ export const MyBookmarksPage = () => {
     );
     
     const filteredRecruitPosts = sortPosts(
-        MOCK_TEAM_RECRUIT_DETAILS.filter(post => post.isBookmarked === true)
+        teamRecruitDetails.filter(post => post.isBookmarked === true)
     );
 
     // 현재 탭에 따른 게시물 개수

@@ -1,10 +1,10 @@
-import type { PortfolioDetail, UserId } from "../types/portfolio/portfolioTypes";
+import type { PortfolioDetail } from "../types/portfolio/portfolioTypes";
 
-export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]> = {
+export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<PortfolioDetail["uid"], PortfolioDetail[]> = {
   user_001: [
     {
       portfolioId: "pf_001_1",
-      id: "user_001",
+      uid: "user_001",
       title: "나의 프로젝트 1",
 
       portfolioThumbnail: "https://picsum.photos/seed/pf_001_1_thumb/600/400",
@@ -44,7 +44,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
     },
     {
       portfolioId: "pf_001_2",
-      id: "user_001",
+      uid: "user_001",
       title: "서비스 모니터링 대시보드",
       portfolioThumbnail: "https://picsum.photos/seed/pf_001_2_thumb/600/400",
       updatedAt: "2025.09.12",
@@ -74,7 +74,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
   user_002: [
     {
       portfolioId: "pf_002_1",
-      id: "user_002",
+      uid: "user_002",
       title: "프로젝트 11111111111111111",
       portfolioThumbnail: "https://picsum.photos/seed/pf_002_1_thumb/600/400",
       updatedAt: "2025.11.11",
@@ -107,7 +107,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
     },
     {
       portfolioId: "pf_002_2",
-      id: "user_002",
+      uid: "user_002",
       title: "프로젝트 2",
       portfolioThumbnail: "https://picsum.photos/seed/pf_002_2_thumb/600/400",
       updatedAt: "2025.10.30",
@@ -138,7 +138,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
     },
     {
       portfolioId: "pf_002_3",
-      id: "user_002",
+      uid: "user_002",
       title: "프로젝트 3",
       portfolioThumbnail: "https://picsum.photos/seed/pf_002_3_thumb/600/400",
       updatedAt: "2025.01.30",
@@ -166,7 +166,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
   user_003: [
     {
       portfolioId: "pf_003_1",
-      id: "user_003",
+      uid: "user_003",
       title: "모바일 앱 리디자인",
       portfolioThumbnail: "https://picsum.photos/seed/pf_003_1_thumb/600/400",
       updatedAt: "2025.07.18",
@@ -193,7 +193,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
     },
     {
       portfolioId: "pf_003_2",
-      id: "user_003",
+      uid: "user_003",
       title: "UX 리서치 리포트",
       portfolioThumbnail: "https://picsum.photos/seed/pf_003_2_thumb/600/400",
       updatedAt: "2025.05.02",
@@ -217,7 +217,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
   user_004: [
     {
       portfolioId: "pf_004_1",
-      id: "user_004",
+      uid: "user_004",
       title: "브랜드 필름 제작",
       portfolioThumbnail: "https://picsum.photos/seed/pf_004_1_thumb/600/400",
       updatedAt: "2025.08.05",
@@ -244,7 +244,7 @@ export const MOCK_PORTFOLIOS_BY_OWNER_ID: Record<UserId["id"], PortfolioDetail[]
     },
     {
       portfolioId: "pf_004_2",
-      id: "user_004",
+      uid: "user_004",
       title: "콘텐츠 시리즈 연출",
       portfolioThumbnail: "https://picsum.photos/seed/pf_004_2_thumb/600/400",
       updatedAt: "2025.06.20",

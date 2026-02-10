@@ -1,5 +1,3 @@
-// import { MOCK_SESSION, MOCK_PROFILE_DETAIL_BY_UID } from "../../mock/mypages";
-// import { MOCK_PORTFOLIOS_BY_OWNER_ID } from "../../mock/portfolio";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +12,8 @@ import { getMyProfile } from "../../api/profileApi";
 import { getInstitution, getMajor } from "../../api/institutionApi";
 import { mapToPortfolios, mapToEducations, mapToCareers, mapToCertificates } from "./utils/profileMapper";
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 export const MypagePage = () => {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ export const MypagePage = () => {
   const user = {
     uid: profileData.userId.toString(),
     name: profileData.name,
-    profileImg: profileData.basics.profileImageUrl || defaultProfileImg,
+    profileImg: profileData.basics.profileImageUrl ?? null,
     univ: schoolName, 
     major: majorName,
     gradeNumber: profileData.basics.studentNo.slice(2, 4),
@@ -118,7 +118,7 @@ export const MypagePage = () => {
             <div className="flex flex-1 flex-col gap-[22px]">
               <div className="w-full flex items-start gap-[33px]">
                 <img
-                  src={user.profileImg}
+                  src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
                   alt="프로필"
                   className="h-[84px] w-[84px] shrink-0 rounded-full object-cover"
                 />
@@ -160,7 +160,7 @@ export const MypagePage = () => {
                   </div>
                 </button>
 
-                <p className="min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750 [overflow-wrap:anywhere]">
+                <p className="line-clamp-3 min-h-[63px] leading-[1.5] break-keep whitespace-pre-line text-R-14 text-gray-750 [overflow-wrap:anywhere]">
                   {user.introduction}
                 </p>
               </div>

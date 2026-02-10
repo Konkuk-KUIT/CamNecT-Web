@@ -4,6 +4,7 @@ import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
 
 type TabType = "follower" | "following";
 
@@ -28,13 +29,13 @@ export const FollowerPage = () => {
         );
     }
 
-    const { user } = userDetail;
+    //const { user } = userDetail;
     type FollowUser = {
   uid: string;
   name: string;
   major: string;
   gradeNumber: number;
-  profileImg: string;
+  profileImg: string | null;
 };
 
 const followers: FollowUser[] = [
@@ -172,7 +173,7 @@ const followings: FollowUser[] = [
                                             className="flex-shrink-0"
                                         >
                                             <img
-                                                src={user.profileImg}
+                                                src={user.profileImg ?? defaultProfileImg}
                                                 alt={user.name}
                                                 className="w-[48px] h-[48px] rounded-full object-cover"
                                             />

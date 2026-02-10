@@ -9,6 +9,7 @@ import ModalIcon from '../../components/BottomSheetModal/Icon'
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
 
 type PortfolioDetailPageProps = {
     ownerId?: string;
@@ -216,7 +217,7 @@ export const PortfolioDetailPage = ({
                         {/* 작성자 정보 */}
                             <div className="px-[25px] py-[20px] flex items-center gap-[15px]">
                                 <img
-                                    src={user.profileImg}
+                                    src={user.profileImg ?? defaultProfileImg}
                                     alt={user.name}
                                     className="w-[40px] h-[40px] rounded-full object-cover"
                                 />

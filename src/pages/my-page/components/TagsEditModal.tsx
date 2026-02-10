@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from "../../../mock/tags";
 import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 import { useQuery } from "@tanstack/react-query";
@@ -20,16 +19,18 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
     const [searchQuery, setSearchQuery] = useState("");
 
     // 태그 리스트 조회
-    const { data: tagList, isLoading } = useQuery({
+    const { data: tagList, isLoading, isError } = useQuery({
         queryKey: ["tagList"],
         queryFn: () => requestTagList(),
     });
 
+    const tagData = tagList?.data;
+
     // 태그 데이터 포맷팅
     const { formattedCategories, allTags } = useMemo(() => {
-        if (!tagList?.data) return { formattedCategories: [], allTags: [] };
+        if (!tagData) return { formattedCategories: [], allTags: [] };
 
-        const categories = tagList.data
+        const categories = tagData
         .filter((cat) => ALLOWED_CATEGORY_IDS.has(cat.categoryId))
         .map(cat => ({
             id: cat.categoryId,
@@ -44,12 +45,13 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
         const tags = categories.flatMap(cat => cat.tags);
 
         return { formattedCategories: categories, allTags: tags };
-    }, [tagList?.data]);
+    }, [tagData]);
 
     //변경사항 추적
     const hasChanges = useMemo(() => {
         if (selectedTags.length !== tags.length) return true;
-        return !selectedTags.every(tag => tags.includes(tag));
+        for (const t of selectedTags) if (!tags.includes(t)) return true;
+        return false;
     }, [selectedTags, tags]);
 
     const [showWarning, setShowWarning] = useState(false);
@@ -117,6 +119,18 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
             <PopUp
                 type="loading"
                 isOpen={true}
+            />
+        );
+    }
+
+    if (isError) {
+        return (
+            <PopUp 
+                isOpen={isError} 
+                type="error" 
+                title="오류 발생" 
+                content="태그 목록을 불러오는 중 문제가 발생했습니다" 
+                buttonText="닫기"
             />
         );
     }
