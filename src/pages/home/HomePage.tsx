@@ -12,13 +12,14 @@ import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
 import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
 import { requestHome } from '../../api/home';
+import { requestNotificationUnreadCount } from '../../api/notifications';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { mapHomeResponseToViewModel } from './homeMapper';
 
 export const HomePage = () => {
     const navigate = useNavigate();
-    const hasUnreadNotifications = useNotificationStore((state) =>
+    const hasUnreadNotificationsFromStore = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
     );
     const storedUserName = useAuthStore((state) => state.user?.name);
@@ -42,9 +43,19 @@ export const HomePage = () => {
         staleTime: 60 * 1000,
     });
 
+    const { data: unreadCountResponse } = useQuery({
+        queryKey: ['notificationsUnreadCount', numericUserId],
+        queryFn: () => requestNotificationUnreadCount({ userId: Number(numericUserId) }),
+        enabled: hasValidUserId,
+        staleTime: 30 * 1000,
+    });
+
     const homeViewModel = mapHomeResponseToViewModel(homeResponse, fallbackViewModel);
     const visibleRecommands = homeViewModel.recommendList.slice(0, 2);
     const userName = homeViewModel.userName;
+    const unreadCount = unreadCountResponse?.data?.unreadCount;
+    const hasUnreadNotifications =
+        typeof unreadCount === 'number' ? unreadCount > 0 : hasUnreadNotificationsFromStore;
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성

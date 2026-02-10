@@ -12,10 +12,22 @@ export interface NotificationListRequest {
   size?: number;
 }
 
+export interface NotificationUnreadCountRequest {
+  userId: number;
+}
+
 export interface NotificationListResponse {
   status: number;
   message: string;
   data: NotificationListData;
+}
+
+export interface NotificationUnreadCountResponse {
+  status: number;
+  message: string;
+  data: {
+    unreadCount: number;
+  };
 }
 
 export interface NotificationListData {
