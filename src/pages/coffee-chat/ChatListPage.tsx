@@ -13,7 +13,7 @@ export const ChatListPage = () => {
   const { data: chatRooms = [], isLoading } = useChatRooms(activeId);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const unreadCount = 3;
+  const unreadCount = 3; // 팀원 모집 전체 요청...?
 
   const navigate = useNavigate();
 
@@ -95,7 +95,7 @@ export const ChatListPage = () => {
         <ol>
           {
             // 검색어 여부로 분기 렌더링
-            // todo 길게 클릭 후 알림 기능 추가
+            // todo 길게 클릭 후 삭제 기능 추가
             searchQuery ? searchFilteredChatRoomList(searchQuery).map((chatRoom) => (
             <ChatList 
               key={chatRoom.roomId} 

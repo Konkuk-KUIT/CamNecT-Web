@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { viewChatRoomDetail, viewChatRoomList } from "../api/chat";
+import { getChatRequestDetail, getChatRequests, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
-import { getChatRequests, getChatRequestDetail } from "../api/chat";
 
 // 1. 채팅방 목록 조회 API [GET] (/api/chat/rooms)
 export const useChatRooms = (type: ChatRoomListItemType) => {
     const { user } = useAuthStore(); // 1. 유저 정보 가져오기 
+    const { setTotalUnreadCount } = useChatStore();
 
     return useQuery<ChatRoomListItem[]>({
         queryKey: ['chatRooms', user?.id, type], // 데이터 고유이름 (캐싱용)
@@ -16,6 +17,9 @@ export const useChatRooms = (type: ChatRoomListItemType) => {
                 userId: Number(user?.id),
                 type: type
             })
+
+            // 전역 안 읽은 개수 업데이트
+            setTotalUnreadCount(response.data.totalUnreadCount);
 
             // 4. API 응답 데이터를 UI에서 사용하는 형식으로 변환 (Mapper)
             return response.data.chatRoomList.map((room): ChatRoomListItem => ({
