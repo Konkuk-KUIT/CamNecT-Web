@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import Card from '../../../components/Card';
 
+type PointBoxProps = {
+    points?: number;
+};
+
 // 홈 1/2-2: 포인트 박스 UI
-const PointBox = () => {
+const PointBox = ({ points = 0 }: PointBoxProps) => {
     const navigate = useNavigate();
-    const points = 1230; // TODO: 추후 실제 데이터 바인딩
     const formattedPoints = points.toLocaleString();
 
     return (

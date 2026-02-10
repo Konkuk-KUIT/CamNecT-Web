@@ -10,11 +10,12 @@ type CoffeeChatRequest = {
 
 type CoffeeChatBoxProps = {
     requests: CoffeeChatRequest[];
+    totalCount?: number;
     onViewAll?: () => void;
 };
 
-const CoffeeChatBox = ({ requests, onViewAll }: CoffeeChatBoxProps) => {
-    const requestCount = requests.length;
+const CoffeeChatBox = ({ requests, totalCount, onViewAll }: CoffeeChatBoxProps) => {
+    const requestCount = typeof totalCount === 'number' ? totalCount : requests.length;
     const visibleRequests = requests.slice(0, 2);
 
     return (

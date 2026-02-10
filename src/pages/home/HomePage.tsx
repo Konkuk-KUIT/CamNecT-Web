@@ -1,6 +1,7 @@
 import {FullLayout} from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 import Card from '../../components/Card';
 import CheckScheduleBox from './components/CheckScheduleBox';
@@ -10,16 +11,40 @@ import RecommendBox from './components/RecommendBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
 import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
+import { requestHome } from '../../api/home';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { mapHomeResponseToViewModel } from './homeMapper';
 
 export const HomePage = () => {
     const navigate = useNavigate();
-    const visibleRecommands = recommendList.slice(0, 2);
     const hasUnreadNotifications = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
     );
-    const userName = useAuthStore((state) => state.user?.name) ?? homeGreetingUser.name;
+    const storedUserName = useAuthStore((state) => state.user?.name);
+    const storedUserId = useAuthStore((state) => state.user?.id);
+    const numericUserId = storedUserId ? Number(storedUserId) : null;
+    const hasValidUserId = Number.isFinite(numericUserId) && Number(numericUserId) > 0;
+
+    const fallbackViewModel = {
+        userName: storedUserName ?? homeGreetingUser.name,
+        coffeeChatRequests,
+        coffeeChatTotalCount: coffeeChatRequests.length,
+        pointBalance: 1230,
+        recommendList,
+        contests,
+    };
+
+    const { data: homeResponse } = useQuery({
+        queryKey: ['home', numericUserId],
+        queryFn: () => requestHome({ userId: Number(numericUserId) }),
+        enabled: hasValidUserId,
+        staleTime: 60 * 1000,
+    });
+
+    const homeViewModel = mapHomeResponseToViewModel(homeResponse, fallbackViewModel);
+    const visibleRecommands = homeViewModel.recommendList.slice(0, 2);
+    const userName = homeViewModel.userName;
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
@@ -38,12 +63,16 @@ export const HomePage = () => {
                         </p>
                     </div>
 
-                    <CoffeeChatBox requests={coffeeChatRequests} onViewAll={() => navigate('/chat/requests')} />
+                    <CoffeeChatBox
+                        requests={homeViewModel.coffeeChatRequests}
+                        totalCount={homeViewModel.coffeeChatTotalCount}
+                        onViewAll={() => navigate('/chat/requests')}
+                    />
                     {/* 1-2: 일정 박스 + 포인트/커뮤니티 박스 */}
                     <div className="flex w-full flex-col gap-[15px]">
                         <CheckScheduleBox />
                         <div className="flex w-full justify-between gap-[20px]">
-                            <PointBox />
+                            <PointBox points={homeViewModel.pointBalance} />
                             <CommunityBox />
                         </div>
                     </div>
@@ -97,7 +126,7 @@ export const HomePage = () => {
                 {/* 홈 3번 영역: 주목받은 공모전 리스트 */}
                 <section className="flex w-full flex-col gap-[10px] bg-white p-[25px]">
                     <ContestBox
-                        contests={contests}
+                        contests={homeViewModel.contests}
                         onTitleClick={() => navigate('/activity')}
                         onItemClick={(contest) => navigate(`/activity/external/${contest.id}`)}
                     />

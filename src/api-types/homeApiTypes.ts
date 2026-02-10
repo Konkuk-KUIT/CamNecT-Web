@@ -1,0 +1,74 @@
+export interface HomeRequest {
+    userId: number;
+}
+
+export interface HomeResponse {
+    status: number;
+    message: string;
+    data: HomeData;
+}
+
+export interface HomeData {
+    user: {
+        displayName: string;
+    };
+    coffeeChat: {
+        pendingCount: number;
+        latest2: CoffeeChatLatestItem[];
+    };
+    point: {
+        balance: number;
+    };
+    alumni: {
+        items: AlumniItem[];
+        hasMore: boolean;
+    };
+    contests: {
+        items: ContestItem[];
+        hasMore: boolean;
+    };
+}
+
+export interface CoffeeChatLatestItem {
+    requestId: number;
+    senderUserId: number;
+    senderName: string;
+    majorName: string;
+    studentNo: string;
+}
+
+export interface AlumniItem {
+    userId: number;
+    name: string;
+    profile: {
+        bio: string;
+        openToCoffeeChat: boolean;
+        profileImageUrl: string;
+        studentNo: string;
+        majorId: number;
+    };
+    tagList: TagItem[];
+}
+
+export interface TagItem {
+    id: number;
+    name: string;
+    category: TagCategory;
+    active: boolean;
+    createdAt: string;
+}
+
+export interface TagCategory {
+    id: number;
+    code: string;
+    name: string;
+    sortOrder: number;
+    active: boolean;
+}
+
+export interface ContestItem {
+    contestId: number;
+    title: string;
+    organizer: string;
+    thumbnailUrl: string;
+}

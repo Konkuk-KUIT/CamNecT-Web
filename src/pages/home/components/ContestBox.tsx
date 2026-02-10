@@ -33,7 +33,7 @@ const ContestBox = ({ contests, onTitleClick, onItemClick }: ContestBoxProps) =>
                 }}
             >
                 {/*TODO: 주목받은 공모전 글씨 클릭 시 공모전 페이지 라우터 연결*/}
-                <span className="text-sb-20 text-black tracking-[-0.04em]">주목받은 공모전</span>
+                <span className="text-sb-20 text-black tracking-[-0.04em]">주목받은 대외활동</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                         d="M8.25 4.5L15.75 12L8.25 19.5"
