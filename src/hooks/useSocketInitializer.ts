@@ -1,23 +1,12 @@
-import type { IMessage } from "@stomp/stompjs";
 import { stompClient } from "../api/stompClient";
 import { useAuthStore } from "../store/useAuthStore";
 import { useEffect } from "react";
-import { isReadReceipt, type StompChatResponse } from "../api-types/stompApiTypes";
-
-const onServerMessage = (message: IMessage) => {
-    const payload: StompChatResponse = JSON.parse(message.body);
-
-    // 읽음 처리 or 메시지 도착
-    if (isReadReceipt(payload)) {
-        console.log("읽음 처리", payload);
-    } else {
-        console.log("메시지 도착", payload);
-    }
-}
+import { useQueryClient } from "@tanstack/react-query";
 
 // 로그인 / 로그아웃 시 소켓 연결/해제 (커피챗 실시간 수신을 위해)
 export const useSocketInitializer = () => {
     const { isAuthenticated, user, accessToken } = useAuthStore();
+    const queryClient = useQueryClient();
 
     // 로그인 상태 바뀔 때만 수행
     useEffect(() => {
@@ -26,6 +15,7 @@ export const useSocketInitializer = () => {
             if (stompClient.active) {
                 stompClient.deactivate();
             }
+            return;
         }
         
         // accessToken 주입
@@ -33,15 +23,31 @@ export const useSocketInitializer = () => {
             Authorization: `Bearer ${accessToken}`,
         };
 
-        // 소켓 연결
-        stompClient.activate();
+        const setUpSubscriptions = () => {
+            console.log("전역 구독 중");
 
+            // 전역 채팅 목록 destination
+            stompClient.subscribe(`/sub/user/${user?.id}/rooms`, () => {
+                queryClient.invalidateQueries({ 
+                    queryKey: ['chatRooms'], 
+                    exact: false, // 'chatRooms'로 시작하는 모든 키를 포함
+                    refetchType: 'all' // 전부 리프레시
+                });
+            });
+
+        }
         // 연결 성공 후
         stompClient.onConnect = () => {
             console.log("socket 연결 성공");
+            setUpSubscriptions();
+        }
+        
+        // 소켓 연결
+        stompClient.activate();
 
-            // 전역 채팅 목록 destination
-            stompClient.subscribe(`/sub/user/${user?.id}/rooms`, onServerMessage);
+        // 이미 socket이 켜져있을때 새로운 구독 실행
+        if(stompClient.connected){
+            setUpSubscriptions();
         }
 
         return () => {
@@ -49,6 +55,6 @@ export const useSocketInitializer = () => {
                 stompClient.deactivate();
             }
         }
-    }, [isAuthenticated, user?.id, accessToken])
+    }, [isAuthenticated, user?.id, accessToken, queryClient])
     
 }

@@ -101,9 +101,3 @@ export const useChatRequestRoom = (roomId: string) => {
         enabled: !!roomId
     });
 };
-
-/*
---------------------------------------------------------------------
-*/
-
-
