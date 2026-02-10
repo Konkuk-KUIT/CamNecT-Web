@@ -56,6 +56,7 @@ export interface ChatRoomDetailResponse {
         opponentStudentYear: string;
         opponentProfileImg: string;
         opponentTags: string[];
+        requestAt: string;
         requestType: string;
         requestTags: string[];
         requestContent: string;

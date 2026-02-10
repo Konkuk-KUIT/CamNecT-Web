@@ -3,9 +3,10 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useParams } from "react-router-dom";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
-import { useChatMessages, useChatRoom } from "../../hooks/useChatQuery";
+import { useChatRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import { useAuthStore } from "../../store/useAuthStore";
 import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
@@ -18,10 +19,10 @@ export const ChatRoomPage = () => {
 };
 
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
-    const { data: roomInfo, isLoading: isRoomLoading } = useChatRoom(roomId);
-    // 서버에서 가져온 채팅 데이터
-    const { data: remoteMessages = [], isLoading: isMessagesLoading } = useChatMessages(roomId);
-    // 내가 보낸 임시 메시지
+    const { user } = useAuthStore();
+    const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
+    
+    // 내가 보낸 임시 메시지 (소켓 연동 전 로컬 테스트용)
     const [sentMessages, setSentMessages] = useState<ChatMessage[]>([]);
     
     // 검색 관련 상태
@@ -31,8 +32,13 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     // 초기 진입 시 깜빡임 방지를 위한 상태
     const [isReady, setIsReady] = useState(false);
 
-    const isLoading = isRoomLoading || isMessagesLoading;
+    const isLoading = isRoomLoading;
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const roomInfo = chatRoomData?.partner;
+    const requestInfo = chatRoomData?.requestInfo;
+    const remoteMessages = chatRoomData?.messages || [];
+    const myId = String(user?.id);
 
     // API 데이터와 내가 보낸 임시 메시지를 합침
     const allMessages = useMemo(() => [...remoteMessages, ...sentMessages], [remoteMessages, sentMessages]);
@@ -51,20 +57,15 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     };
 
     // 1. 레이아웃 안정화 및 초기 스크롤
-    // useLayoutEffect : 화면 렌더링 직전 실행
     useLayoutEffect(() => {
         if (!isLoading && !isReady) {
             if (localMessages.length > 0) {
-                // 화면 그린 후 이동
                 window.scrollTo(0, document.documentElement.scrollHeight);
-                
-                // 이동 직후 즉시 공개 (애니메이션 프레임을 기다려 더 정확하게 처리)
                 requestAnimationFrame(() => {
                     window.scrollTo(0, document.documentElement.scrollHeight);
-                    setIsReady(true); // 메시지들 visible 
+                    setIsReady(true);
                 });
             } else {
-                // 메시지가 없을 때는 스크롤 없이 즉시 표시
                 requestAnimationFrame(() => {
                     setIsReady(true);
                 });
@@ -79,12 +80,12 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         }
     }, [localMessages.length, isReady]);
 
-    // 메시지 전송 함수
+    // 메시지 전송 함수 (임시 로직 - 추후 useStompChat과 교체)
     const handleSendMessage = (text: string) => {
         const newMessage: ChatMessage = {
             id: Date.now().toString(),
             roomId: roomId,
-            senderId: 'me',
+            senderId: myId,
             type: "TEXT",
             content: text,
             createdAt: new Date().toISOString(),
@@ -98,7 +99,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             headerSlot={
                 !isSearching ? (
                     <MainHeader
-                        title={roomInfo?.partner.name}
+                        title={roomInfo?.name}
                         rightActions={[
                             { icon: 'search', onClick: () => setIsSearching(true) },
                             { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
@@ -139,15 +140,19 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 )
             }
         >
-            {/* invisible : 공간은 차지 하지만 보이지 않음*/}
             <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
                 {/* 상단 정보 영역 */}
-                {roomInfo && <ChatRoomInfo chatRoom={roomInfo} />}
+                {roomInfo && requestInfo && (
+                    <ChatRoomInfo 
+                        partner={roomInfo} 
+                        requestInfo={requestInfo} 
+                    />
+                )}
                 
                 {/* 메시지 리스트 영역 */}
                 <div className="flex flex-col mt-[40px] px-[25px]">
                     {localMessages.map((msg, index) => {
-                        const isMe = msg.senderId === 'me';
+                        const isMe = String(msg.senderId) === myId;
                         
                         // 날짜 구분선 표시 여부 확인
                         const showDateDivider = index === 0 || !dayjs(msg.createdAt).isSame(dayjs(localMessages[index - 1].createdAt), 'day');
@@ -185,16 +190,16 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                         {!isMe && (
                                             <div className="w-[32px] mr-[4px] flex-shrink-0 self-start">
                                                 {!isSameAsPrev && (
-                                                    roomInfo?.partner.profileImg ? (
+                                                    roomInfo?.profileImg ? (
                                                         <img 
-                                                            src={roomInfo?.partner.profileImg} 
-                                                            alt={`${roomInfo?.partner.name} 프로필`} 
+                                                            src={roomInfo.profileImg} 
+                                                            alt={`${roomInfo.name} 프로필`} 
                                                             className="w-[32px] h-[32px] rounded-full object-cover shrink-0" 
                                                         />
                                                     ) : (
                                                         <div className="w-[32px] h-[32px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                                                             <span className="text-[12px] font-bold text-gray-600">
-                                                                {roomInfo?.partner.name.charAt(0)}
+                                                                {roomInfo?.name.charAt(0)}
                                                             </span>
                                                         </div>
                                                     )
@@ -204,7 +209,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
                                         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} pt-[3px] gap-[7px]`}>
                                             {!isMe && !isSameAsPrev && (
-                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo?.partner.name}</span>
+                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo?.name}</span>
                                             )}
                                             <div className={`px-[13px] py-[7px] text-r-16 tracking-[-0.64px] ${bubbleRounding} ${
                                                 isMe ? 'bg-primary text-white' : 'bg-gray-150 text-gray-750'

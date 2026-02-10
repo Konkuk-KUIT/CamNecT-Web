@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getChatMessages, getChatRequestDetail, getChatRequests, getChatRoomDetail, viewChatRoomList } from "../api/chat";
-import type { ChatRoomListItem } from "../types/coffee-chat/coffeeChatTypes";
+import { viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
-import type { ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
+import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
+import { getChatRequests, getChatRequestDetail } from "../api/chat";
 
+// 1. 채팅방 목록 조회 API [GET] (/api/chat/rooms)
 export const useChatRooms = (type: ChatRoomListItemType) => {
     const { user } = useAuthStore(); // 1. 유저 정보 가져오기 
 
@@ -36,22 +37,56 @@ export const useChatRooms = (type: ChatRoomListItemType) => {
     });
 };
 
+// 2. 채팅방 조회 상세 API [GET] (/api/chat/room/{roomId})
 export const useChatRoom = (roomId: string) => {
+    const { user } = useAuthStore(); // 1. 유저 정보 가져오기 
+
     return useQuery({
         queryKey: ['chatRoom', roomId],
-        queryFn: () => getChatRoomDetail(roomId),
-        enabled: !!roomId // roomId가 유효할 때만 실행
+        queryFn: async () => {
+            
+            const response = await viewChatRoomDetail({
+                userId: Number(user?.id),
+                roomId: Number(roomId)
+            });
+
+            const { data } = response;
+
+            // 4. API DTO -> UI DTO 매핑
+            return {
+                // 커피챗 상대 정보
+                partner: {
+                    id: String(data.opponentId),
+                    name: data.opponentName,
+                    major: data.opponentMajor,
+                    studentId: data.opponentStudentYear,
+                    profileImg: data.opponentProfileImg,
+                    tags: data.opponentTags, // 상대방 전문 분야
+                },
+                // 커피챗 요청 상세 정보 (카드 영역)
+                requestInfo: {
+                    createdAt: data.requestAt,
+                    type: data.requestType,
+                    tags: data.requestTags || [], 
+                    content: data.requestContent,
+                },
+                // 채팅 메시지 리스트
+                messages: data.chatList.map((message): ChatMessage => ({
+                    id: String(message.messageId),
+                    roomId: String(message.roomId),
+                    senderId: String(message.senderId),
+                    type: "TEXT",
+                    content: message.message,
+                    createdAt: message.sendDate,
+                    isRead: message.read,
+                }))
+            };
+        },
+        enabled: !!roomId && !!user?.id
     });
 };
 
-export const useChatMessages = (roomId: string) => {
-    return useQuery({
-        queryKey: ['chatMessages', roomId],
-        queryFn: () => getChatMessages(roomId),
-        enabled: !!roomId
-    });
-};
-
+// 교체 예정
 export const useChatRequests = () => {
     return useQuery({
         queryKey: ['chatRequests'],
