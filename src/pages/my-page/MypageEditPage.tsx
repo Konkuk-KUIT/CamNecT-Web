@@ -27,6 +27,9 @@ export const MypageEditPage = () => {
     const authUser = useAuthStore(state => state.user);
     const userId = authUser?.id ? parseInt(authUser.id) : null;
     const pageRef = useRef<HTMLDivElement>(null);
+
+    type ImageAction = "KEEP"|"UPLOAD"|"DELETE";
+    const imageActionRef = useRef<ImageAction>("KEEP");
     const imageFileRef = useRef<File | null>(null);
 
     const { data, setData, hasChanges, originalData, isLoading, isError } = useProfileEdit(userId);
@@ -54,15 +57,29 @@ export const MypageEditPage = () => {
     const handleSave = async () => {
         if (!hasChanges || !data || !userId || !originalData) return;
 
-        // 저장 로직 실행
-        const result = await saveProfile(
-            data,
-            originalData, // originalData 전달
-            imageFileRef.current,
-            allTags
-        );
+        let imageChange:
+            | { action: "KEEP" }
+            | { action: "UPLOAD"; file: File }
+            | { action: "DELETE" };
+
+        if (imageActionRef.current === "UPLOAD") {
+            const file = imageFileRef.current;
+            if (!file) {
+            setSaveError("이미지 업로드 파일이 없습니다. 다시 선택해주세요.");
+            return;
+            }
+            imageChange = { action: "UPLOAD", file };
+        } else if (imageActionRef.current === "DELETE") {
+            imageChange = { action: "DELETE" };
+        } else {
+            imageChange = { action: "KEEP" };
+        }
+
+        const result = await saveProfile(data, originalData, imageChange, allTags);
 
         if (result.success) {
+            imageActionRef.current = "KEEP";
+            imageFileRef.current = null;
             setConfirm(true);
         } else {
             setSaveError(result.error || "저장에 실패했습니다.");
@@ -91,27 +108,23 @@ export const MypageEditPage = () => {
     }, [currentModal]);
 
     const handleImageUpload = (file: File) => {
-        // 이미지 미리보기용 URL 생성 (UI용)
         const previewUrl = URL.createObjectURL(file);
-        
-        setData((prev) => {
-            if (!prev) return prev;
 
-            // 기존에 blob 미리보기였다면 revoke 해서 누수 방지
-            const prevImg = prev.user.profileImg;
-            if (prevImg && prevImg.startsWith("blob:")) {
-            URL.revokeObjectURL(prevImg);
-            }
+        setData((prev) => {
+            const base = prev ?? data;
+            if (!base) return prev;
+
+            const prevImg = base.user.profileImg;
+            if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
 
             return {
-            ...prev,
-            user: { ...prev.user, profileImg: previewUrl }, // UI에서는 이걸로 보임
+            ...base,
+            user: { ...base.user, profileImg: previewUrl },
             };
-        });;
-        
-        // 서버 전송용 원본 파일 보관
-        imageFileRef.current = file;
+        });
 
+        imageFileRef.current = file;
+        imageActionRef.current = "UPLOAD";
         closeModal();
     };
 
@@ -291,16 +304,21 @@ export const MypageEditPage = () => {
                 onClose={closeModal}
                 onSelect={handleImageUpload}
                 onDelete={() => {
-                    // 서버에 null로 보내기 위해 null 유지
                     setData((prev) => {
-                        if (!prev) return prev;
-                        const prevImg = prev.user.profileImg;
+                        const base = prev ?? data;
+                        if (!base) return prev;
+
+                        const prevImg = base.user.profileImg;
                         if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
-                        return { ...prev, user: { ...prev.user, profileImg: null } };
+
+                        return {
+                        ...base,
+                        user: { ...base.user, profileImg: null }, //null->삭제
+                        };
                     });
 
-                    // 업로드 파일 제거
                     imageFileRef.current = null;
+                    imageActionRef.current = "DELETE";
                     closeModal();
                 }}
             />

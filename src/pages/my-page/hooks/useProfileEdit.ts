@@ -59,7 +59,7 @@ export function useProfileEdit(userId: number | null) {
                 userTags: profileData.tags.map((t) => t.name),
                 introduction: profileData.basics.bio || "",
                 following: profileData.following,
-                follower: profileData.following,
+                follower: profileData.follower,
                 point: 0,
             },
             visibility: {

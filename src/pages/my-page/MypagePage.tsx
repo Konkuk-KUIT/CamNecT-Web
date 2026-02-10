@@ -119,6 +119,10 @@ export const MypagePage = () => {
               <div className="w-full flex items-start gap-[33px]">
                 <img
                   src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null; // 무한루프 방지
+                    e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                  }}
                   alt="프로필"
                   className="h-[84px] w-[84px] shrink-0 rounded-full object-cover"
                 />

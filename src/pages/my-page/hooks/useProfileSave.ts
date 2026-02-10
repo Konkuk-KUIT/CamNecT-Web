@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getMyProfile } from "../../../api/profileApi";
 import { useAuthStore } from "../../../store/useAuthStore";
 import axios from "axios";
 import { 
@@ -45,6 +46,11 @@ export function useProfileSave() {
   const [isSaving, setIsSaving] = useState(false);
   const isServerId = (id: string) => /^\d+$/.test(id);
 
+  type ImageChange =
+  | { action: "KEEP" }
+  | { action: "UPLOAD"; file: File }
+  | { action: "DELETE" };
+
   type DryRunRequest = {
   name: string;
   method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
@@ -65,37 +71,28 @@ const dryRun = async (req: DryRunRequest) => {
   /**
    * 프로필 이미지 업로드 및 저장
    */
-  const saveProfileImage = async (imageFile: File | null, imageKey?: string | null): Promise<void> => {
+  const uploadProfileImage = async (file: File): Promise<void> => {
     if (!userId) throw new Error("userId is missing");
 
-    try {
-      // 1. 이미지 파일이 있으면 presign URL 발급 후 S3 업로드
-      if (imageFile) {
-        const presignResponse = await requestProfilePresign({
-          userId,
-          contentType: imageFile.type,
-          size: imageFile.size,
-          originalFilename: imageFile.name,
-        });
+    const presignResponse = await requestProfilePresign({
+      userId,
+      contentType: file.type,
+      size: file.size,
+      originalFilename: file.name,
+    });
 
-        const { uploadUrl, fileKey, requiredHeaders } = presignResponse.data;
+    const { uploadUrl, fileKey, requiredHeaders } = presignResponse.data;
 
-        // S3에 직접 업로드
-        await axios.put(uploadUrl, imageFile, {headers: requiredHeaders});
+    await axios.put(uploadUrl, file, { headers: requiredHeaders });
+    await updateProfileImage(userId, { profileImageKey: fileKey });
+  };
 
-        // 2. fileKey로 프로필 이미지 업데이트
-        await updateProfileImage(userId, { profileImageKey: fileKey });
-        return;
-      }
-        // 파일 없으면 nextProfileImageKey 그대로 반영 (null이면 삭제)
-        if (imageKey === null) {
-            await updateProfileImage(userId, { profileImageKey: null  });
-            return;
-        }
-    } catch (error) {
-      console.error("프로필 이미지 저장 실패:", error);
-      throw error;
-    }
+  const deleteProfileImage = async (): Promise<void> => {
+    if (!userId) throw new Error("userId is missing");
+    await updateProfileImage(userId, { profileImageKey: null });
+    //todo: 아래 코드 삭제. 디버깅용
+    const fresh = await getMyProfile({ loginUserId: userId });
+    console.log("[after delete] profileImageUrl:", fresh.data.basics.profileImageUrl);
   };
 
   /**
@@ -409,7 +406,7 @@ const dryRun = async (req: DryRunRequest) => {
   const saveProfile = async (
     currentData: ProfileEditData,
     originalData: ProfileEditData,
-    imageFile: File | null,
+    imageChange: ImageChange,
     allTags: { id: number; name: string }[]
   ): Promise<SaveResult> => {
     setIsSaving(true);
@@ -417,20 +414,10 @@ const dryRun = async (req: DryRunRequest) => {
     try {
       const tasks: Promise<void>[] = [];
       // 프로필 이미지
-      if (currentData.user.profileImg !== originalData.user.profileImg) {
-        if (imageFile) {
-          // 새 이미지 업로드
-          tasks.push(saveProfileImage(imageFile)); 
-        } else if (currentData.user.profileImg === null) {
-          // 삭제
-          tasks.push(saveProfileImage(null, null));
-        } else {
-          //blob인데 파일이 없는 이상 케이스
-          throw new Error(
-            "[ProfileImage] image changed but no file provided and not marked as deleted (null). " +
-            "Upload requires imageFile, delete requires profileImg=null."
-          );
-        }
+      if (imageChange.action === "UPLOAD") {
+        tasks.push(uploadProfileImage(imageChange.file));
+      } else if (imageChange.action === "DELETE") {
+        tasks.push(deleteProfileImage());
       }
 
       // 자기소개
@@ -486,7 +473,7 @@ const dryRun = async (req: DryRunRequest) => {
       console.error("프로필 저장 중 오류:", error);
       return {
         success: false,
-        error: "프로필 저장 중 오류가 발생했습니다.",
+        error: error instanceof Error ? error.message : "프로필 저장 중 오류가 발생했습니다.",
       };
     } finally {
       setIsSaving(false);
