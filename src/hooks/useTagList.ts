@@ -32,6 +32,8 @@ export const useTagList = () => {
     queryFn: () => requestTagList(),
   });
 
+  const tagData = data?.data;
+
   const {
     signupCategories,
     signupTags,
@@ -39,17 +41,20 @@ export const useTagList = () => {
     filterTags,
     mapTagNamesToIds,
   } = useMemo(() => {
-    if (!data?.data) {
+    if (!tagData) {
       return {
         signupCategories: [] as SignupTagCategory[],
         signupTags: [] as SignupTagItem[],
         filterCategories: [] as FilterTagCategory[],
         filterTags: [] as FilterTagItem[],
-        mapTagNamesToIds: (_names: string[]) => [] as number[],
+        mapTagNamesToIds: (names: string[]) => {
+          void names;
+          return [] as number[];
+        },
       };
     }
 
-    const signupCategories: SignupTagCategory[] = data.data.map((category) => ({
+    const signupCategories: SignupTagCategory[] = tagData.map((category) => ({
       id: category.categoryId,
       name: category.categoryName,
       tags: category.tags.map((tag) => ({
@@ -88,7 +93,7 @@ export const useTagList = () => {
       filterTags,
       mapTagNamesToIds,
     };
-  }, [data?.data]);
+  }, [tagData]);
 
   return {
     signupCategories,

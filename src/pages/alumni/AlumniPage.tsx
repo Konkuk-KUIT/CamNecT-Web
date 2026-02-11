@@ -21,6 +21,13 @@ export const AlumniSearchPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
   const { filterCategories, filterTags, mapTagNamesToIds } = useTagList();
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  const isTagSearch = useMemo(() => {
+    if (!normalizedSearchTerm) return false;
+    return filterTags.some((tag) =>
+      tag.name.toLowerCase().includes(normalizedSearchTerm),
+    );
+  }, [filterTags, normalizedSearchTerm]);
   const selectedTagIds = useMemo(
     () => mapTagNamesToIds(selectedTags),
     [mapTagNamesToIds, selectedTags],
@@ -38,7 +45,7 @@ export const AlumniSearchPage = () => {
         setIsLoading(true);
         // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
         const response = await getAlumniList({
-          name: trimmedName || undefined,
+          name: isTagSearch ? undefined : trimmedName || undefined,
           tags: selectedTagIds,
           signal: controller.signal,
         });
@@ -61,16 +68,33 @@ export const AlumniSearchPage = () => {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [searchTerm, selectedTagIds, selectedTags]);
+  }, [isTagSearch, searchTerm, selectedTagIds, selectedTags]);
 
   // 선택된 태그만 만족하는 동문만 추립니다.
   const filteredList = useMemo(() => {
     if (!alumniItems) return [];
-    if (selectedTags.length === 0) return alumniItems;
-    return alumniItems.filter((alumni) =>
-      selectedTags.every((tag) => alumni.categories.includes(tag)),
-    );
-  }, [selectedTags, alumniItems]);
+    let nextList = alumniItems;
+    if (selectedTags.length > 0) {
+      nextList = nextList.filter((alumni) =>
+        selectedTags.every((tag) => alumni.categories.includes(tag)),
+      );
+    }
+    if (!normalizedSearchTerm) return nextList;
+    return nextList.filter((alumni) => {
+      const name = alumni.author.name.toLowerCase();
+      const major = alumni.author.major.toLowerCase();
+      const intro = alumni.intro.toLowerCase();
+      const matchesTag = alumni.categories.some((category) =>
+        category.toLowerCase().includes(normalizedSearchTerm),
+      );
+      return (
+        name.includes(normalizedSearchTerm) ||
+        major.includes(normalizedSearchTerm) ||
+        intro.includes(normalizedSearchTerm) ||
+        matchesTag
+      );
+    });
+  }, [alumniItems, normalizedSearchTerm, selectedTags]);
 
   const visibleList = filteredList;
 

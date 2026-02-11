@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AxiosError } from 'axios';
+import { useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
@@ -35,9 +36,6 @@ export const AlumniProfilePage = ({
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const loginUserId = useAuthStore((state) => state.user?.id);
-  const [profile, setProfile] = useState<AlumniProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isProfileError, setIsProfileError] = useState(false);
 
   // URL 파라미터에서 숫자 userId만 안전하게 추출합니다.
   const resolveProfileUserId = (rawId?: string) => {
@@ -47,49 +45,40 @@ export const AlumniProfilePage = ({
     return Number.isFinite(parsed) ? parsed : undefined;
   };
 
-  // 프로필 상세 조회 및 로딩/에러 상태를 관리합니다.
-  useEffect(() => {
-    const profileUserId = resolveProfileUserId(id);
-    const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
-    const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
+  const profileUserId = useMemo(() => resolveProfileUserId(id), [id]);
 
-    if (!profileUserId) {
-      setIsLoading(false);
-      return;
-    }
+  const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
+  const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
 
-    let isActive = true;
-    setIsLoading(true);
-    setIsProfileError(false);
-    getAlumniProfileDetail({
-      loginUserId: loginUserIdValue,
-      profileUserId,
-    })
-      .then((response) => {
-        if (!isActive) return;
-        setProfile(mapAlumniProfileDetailToProfile(response.data));
-      })
-      .catch((error) => {
-        if (!isActive) return;
-        console.error('Failed to fetch alumni profile:', error);
-        setIsProfileError(true);
-      })
-      .finally(() => {
-        if (!isActive) return;
-        setIsLoading(false);
-      });
+  const {
+    data: profileResponse,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['alumniProfile', profileUserId, loginUserIdValue],
+    queryFn: () =>
+      getAlumniProfileDetail({
+        loginUserId: loginUserIdValue,
+        profileUserId: profileUserId as number,
+      }),
+    enabled: Boolean(profileUserId),
+  });
 
-    return () => {
-      isActive = false;
-    };
-  }, [id, loginUserId]);
+  const profile: AlumniProfile | null = useMemo(() => {
+    if (!profileResponse?.data) return null;
+    return mapAlumniProfileDetailToProfile(profileResponse.data);
+  }, [profileResponse]);
+
+  if (!profileUserId) {
+    return <Navigate to='/alumni' replace />;
+  }
 
   if (isLoading) {
     // 상세 조회 진행 중 로딩 팝업 표시.
     return <PopUp isOpen={true} type="loading" />;
   }
 
-  if (isProfileError) {
+  if (isError) {
     // 네트워크/서버 오류 시 안내 팝업.
     return (
       <PopUp

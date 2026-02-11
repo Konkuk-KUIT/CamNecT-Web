@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PopUp from '../../../components/Pop-up';
 import { PortfolioDetailPage } from '../../portfolio/PortfolioDetailPage';
@@ -10,6 +10,7 @@ import type {
   AlumniPortfolioDetailItem,
   AlumniPortfolioDetailPayload,
 } from '../../../api-types/alumniApiTypes';
+import { useQuery } from '@tanstack/react-query';
 
 const parseYearMonth = (value?: string) => {
   if (!value) {
@@ -82,10 +83,6 @@ export const AlumniPortfolioDetailPage = () => {
   const { id, portfolioId } = useParams();
   const navigate = useNavigate();
   const loginUserId = useAuthStore((state) => state.user?.id);
-  const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
-  const [isMine, setIsMine] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
   const portfolioUserId = useMemo(() => {
     if (!id) return undefined;
@@ -100,51 +97,49 @@ export const AlumniPortfolioDetailPage = () => {
     return Number.isFinite(parsed) ? parsed : undefined;
   }, [portfolioId]);
 
-  useEffect(() => {
-    if (!portfolioUserId || !portfolioIdValue) {
-      setHasError(true);
-      setIsLoading(false);
-      return;
-    }
+  const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
+  const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
 
-    const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
-    const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
+  const {
+    data: portfolioResponse,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['alumniPortfolioDetail', portfolioUserId, portfolioIdValue, loginUserIdValue],
+    queryFn: () =>
+      getAlumniPortfolioDetail({
+        userId: loginUserIdValue,
+        portfolioUserId: portfolioUserId as number,
+        portfolioId: portfolioIdValue as number,
+      }),
+    enabled: Boolean(portfolioUserId && portfolioIdValue),
+  });
 
-    let isActive = true;
-    setIsLoading(true);
-    setHasError(false);
+  const payload: AlumniPortfolioDetailPayload | undefined = portfolioResponse?.data;
+  const portfolio = useMemo<PortfolioDetail | null>(() => {
+    if (!payload?.data?.portfolio) return null;
+    return mapPortfolioDetail(payload.data.portfolio, payload.data.portfolioAssets ?? []);
+  }, [payload]);
+  const isMine = Boolean(payload?.isMine);
 
-    getAlumniPortfolioDetail({
-      userId: loginUserIdValue,
-      portfolioUserId,
-      portfolioId: portfolioIdValue,
-    })
-      .then((response) => {
-        if (!isActive) return;
-        const payload: AlumniPortfolioDetailPayload = response.data;
-        setIsMine(Boolean(payload.isMine));
-        setPortfolio(mapPortfolioDetail(payload.data.portfolio, payload.data.portfolioAssets ?? []));
-      })
-      .catch((error) => {
-        if (!isActive) return;
-        console.error('Failed to fetch alumni portfolio detail:', error);
-        setHasError(true);
-      })
-      .finally(() => {
-        if (!isActive) return;
-        setIsLoading(false);
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [portfolioUserId, portfolioIdValue, loginUserId]);
+  if (!portfolioUserId || !portfolioIdValue) {
+    return (
+      <PopUp
+        type="error"
+        title="일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다."
+        titleSecondary="잠시 후 다시 시도해주세요"
+        isOpen={true}
+        rightButtonText="돌아가기"
+        onClick={() => navigate('/alumni', { replace: true })}
+      />
+    );
+  }
 
   if (isLoading) {
     return <PopUp type="loading" isOpen={true} />;
   }
 
-  if (hasError || !portfolio) {
+  if (isError || !portfolio) {
     return (
       <PopUp
         type="error"
