@@ -7,7 +7,7 @@ import CoffeeChatModal from './components/CoffeeChatModal';
 import FollowButton from './components/FollowButton';
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
-import type { AlumniProfile } from './data';
+import type { AlumniProfile } from '../../types/alumni/alumniTypes';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useAuthStore } from '../../store/useAuthStore';
 import {

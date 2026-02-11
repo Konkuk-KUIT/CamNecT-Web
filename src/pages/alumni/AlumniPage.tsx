@@ -7,10 +7,9 @@ import {FullLayout} from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { getAlumniList } from '../../api/alumni';
 import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
-import { mapTagNamesToIds } from '../../utils/tagMapper';
+import { useTagList } from '../../hooks/useTagList';
 import PopUp from '../../components/Pop-up';
 
 export const AlumniSearchPage = () => {
@@ -21,6 +20,11 @@ export const AlumniSearchPage = () => {
   const [alumniItems, setAlumniItems] = useState<ReturnType<typeof mapAlumniApiListToProfiles> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
+  const { filterCategories, filterTags, mapTagNamesToIds } = useTagList();
+  const selectedTagIds = useMemo(
+    () => mapTagNamesToIds(selectedTags),
+    [mapTagNamesToIds, selectedTags],
+  );
 
   // 검색어/태그 변경 시 디바운스 + 이전 요청 취소로 중복 호출을 줄입니다.
   useEffect(() => {
@@ -35,7 +39,7 @@ export const AlumniSearchPage = () => {
         // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
         const response = await getAlumniList({
           name: trimmedName || undefined,
-          tags: mapTagNamesToIds(selectedTags),
+          tags: selectedTagIds,
           signal: controller.signal,
         });
         if (isActive) {
@@ -57,7 +61,7 @@ export const AlumniSearchPage = () => {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [searchTerm, selectedTags]);
+  }, [searchTerm, selectedTagIds, selectedTags]);
 
   // 선택된 태그만 만족하는 동문만 추립니다.
   const filteredList = useMemo(() => {
@@ -212,8 +216,8 @@ export const AlumniSearchPage = () => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={filterCategories}
+        allTags={filterTags}
       />
       <PopUp isOpen={isLoading} type="loading" />
     </FullLayout>

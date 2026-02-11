@@ -1,5 +1,5 @@
 import type { AlumniApiItem, AlumniProfileDetail } from "../api-types/alumniApiTypes";
-import type { AlumniProfile } from "../pages/alumni/data";
+import type { AlumniProfile } from "../types/alumni/alumniTypes";
 import { mapMajorIdToName } from "./majorMapper";
 
 const toProfileImage = (url?: string | null) => (url && url.trim() ? url : undefined);
