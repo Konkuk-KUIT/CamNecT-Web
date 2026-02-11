@@ -1,10 +1,34 @@
 import ButtonWhite from "../../components/ButtonWhite";
 import Button from "../../components/Button";
 import { useNavigate } from "react-router-dom";
+import { usePwaInstall } from "../../hooks/usePwaInstall";
+import PopUp from "../../components/Pop-up";
+import { useState } from "react";
 
-// todo 앱 설치 시 PWA 설치 동작
+
 export const SchoolStandByStep = () => {
     const navigate = useNavigate();
+    const { deferredPrompt, clearPrompt } = usePwaInstall();
+
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    const handleInstallClick = async () => {
+        
+        if (deferredPrompt) {
+            // 브라우저의 설치창 띄우기
+            deferredPrompt.prompt();
+            
+            // 사용자 선택 대기
+            const {outcome} = await deferredPrompt.userChoice;
+            
+            // 설치 선택 시
+            if (outcome === 'accepted') {
+                clearPrompt();
+            } else {
+                setIsPopupOpen(true);
+            }
+        }
+    }
 
     return (
         <div className="flex flex-col overflow-hidden absolute inset-0 bg-white px-[25px]">
@@ -21,16 +45,26 @@ export const SchoolStandByStep = () => {
                 완료 알림은 인증한 이메일로 발송됩니다
             </h2>
             
-                <div className="flex-1" />
-                
-                <div className="absolute bottom-[60px] flex-none relative z-10 w-full flex flex-col items-center gap-[10px]">
-                    <ButtonWhite label = "앱 설치"/>
-                    <Button 
-                        label="확인" 
-                        type="button"
-                        onClick={() => navigate('/login')}
-                    />
-                </div>
+            <div className="flex-1" />
+            
+            <div className="absolute bottom-[60px] flex-none relative z-10 w-full flex flex-col items-center gap-[10px]">
+                <ButtonWhite label="앱 설치"
+                    onClick={handleInstallClick} />
+                <Button 
+                    label="확인" 
+                    type="button"
+                    onClick={() => navigate('/login')}
+                />
+            </div>
+                    
+            <PopUp
+                isOpen={isPopupOpen}
+                type="confirm"
+                title="알림"
+                content="이미 설치되어 있거나,\n설치를 지원하지 않는 브라우저입니다."
+                buttonText="닫기"
+                onClick={() => setIsPopupOpen(false)}
+            />
         </div>
     )
 }

@@ -7,9 +7,9 @@ import type {
 } from "../api-types/pushApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
-// 1. FCM Token, FID 등록 API [POST] (/api/notification/push/tokens)
+// 1. FCM Token, FID 등록 API [POST] (/api/notifications/push/tokens)
 export const registerFcmToken = async (data: RegisterFcmTokenRequest): Promise<RegisterFcmTokenResponse> => {
-    const response = await axiosInstance.post("/api/notification/push/tokens", data);
+    const response = await axiosInstance.post("/api/notifications/push/tokens", data);
     return response.data;
 };
 
