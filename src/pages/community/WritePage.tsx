@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import type { AxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
@@ -48,10 +49,15 @@ export const WritePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     // 작성 취소 경고 팝업 상태
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
+    const [errorPopUp, setErrorPopUp] = useState<{ title: string; content: string } | null>(null);
+    type AttachmentItem = {
+        id: string;
+        file: File;
+        previewUrl: string;
+        kind: 'image' | 'pdf';
+    };
     const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initialPhotoUrls);
-    const [newAttachments, setNewAttachments] = useState<
-        { id: string; file: File; previewUrl?: string; kind: 'image' | 'pdf' }[]
-    >([]);
+    const [newAttachments, setNewAttachments] = useState<AttachmentItem[]>([]);
     // 숨김 파일 input 제어
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const { prepareFile, revokeUrl } = useFileUpload({
@@ -137,10 +143,21 @@ export const WritePage = () => {
             originalFilename: item.file.name,
         }));
 
-        const presignResponse = await postCommunityUploadPresign({
-            params: { userId: ownerId },
-            body: { items: presignItems },
-        });
+        let presignResponse;
+        try {
+            presignResponse = await postCommunityUploadPresign({
+                params: { userId: ownerId },
+                body: { items: presignItems },
+            });
+        } catch (error) {
+            const status = (error as AxiosError)?.response?.status;
+            if (status === 429) {
+                const limitError = new Error('UPLOAD_LIMIT_EXCEEDED');
+                limitError.name = 'UploadLimitError';
+                throw limitError;
+            }
+            throw error;
+        }
 
         const presignedItems: CommunityUploadPresignItemResponse[] =
             presignResponse.data.items ?? [];
@@ -209,7 +226,6 @@ export const WritePage = () => {
 
     useEffect(() => {
         didInitEditRef.current = false;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEditPost(null);
     }, [postId]);
 
@@ -229,17 +245,11 @@ export const WritePage = () => {
     useEffect(() => {
         if (!isEditMode || !editPost || didInitEditRef.current) return;
         const nextBoardType = editPost.boardType as BoardType;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setBoardType(nextBoardType);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraftBoardType(nextBoardType);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTitle(editPost.title);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setContent(editPost.content);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedTags(editPost.categories ?? []);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setExistingPhotoUrls(editPost.postImages ?? []);
         setNewAttachments([]);
         didInitEditRef.current = true;
@@ -254,12 +264,12 @@ export const WritePage = () => {
             .map((file) => {
                 const prepared = prepareFile(file);
                 if (!prepared) return null;
-                const kind = file.type === 'application/pdf' ? 'pdf' : 'image';
+                const kind: AttachmentItem['kind'] =
+                    file.type === 'application/pdf' ? 'pdf' : 'image';
                 return { id: prepared.id, file, previewUrl: prepared.previewUrl, kind };
             })
             .filter(
-                (attachment): attachment is { id: string; file: File; previewUrl?: string; kind: 'image' | 'pdf' } =>
-                    attachment !== null,
+                (attachment): attachment is AttachmentItem => attachment !== null,
             );
 
         setNewAttachments((prev) => [...nextAttachments, ...prev]);
@@ -349,6 +359,13 @@ export const WritePage = () => {
             const nextPostId = response.data.postId;
             navigate(`/community/post/${nextPostId}`);
         } catch (error) {
+            if (error instanceof Error && error.name === 'UploadLimitError') {
+                setErrorPopUp({
+                    title: '작성 오류',
+                    content: '업로드 가능한 파일 개수 제한을 초과했습니다.',
+                });
+                return;
+            }
             console.error('게시글 업로드/등록에 실패했습니다.', error);
         } finally {
             setIsSubmitting(false);
@@ -704,6 +721,15 @@ export const WritePage = () => {
                 onLeftClick={handleCancelConfirm}
                 onRightClick={handleCancelDismiss}
             />
+            {errorPopUp && (
+                <PopUp
+                    isOpen={true}
+                    type='confirm'
+                    title={errorPopUp.title}
+                    content={errorPopUp.content}
+                    onClick={() => setErrorPopUp(null)}
+                />
+            )}
 
             <TagsFilterModal
                 isOpen={isFilterOpen}

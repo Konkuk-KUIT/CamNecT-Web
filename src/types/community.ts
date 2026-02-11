@@ -9,7 +9,7 @@ export type AuthorProfile = {
 };
 
 export type CommentAuthor = AuthorProfile & {
-  profileImageUrl?: string;
+  profileImageUrl?: string | null;
 };
 
 export type CommentItem = {

@@ -100,7 +100,7 @@ const CommunityPostPage = () => {
       setMyPoints(selectedPost.myPoints ?? 0);
     }, 0);
     return () => window.clearTimeout(resetTimer);
-  }, [selectedPost?.id, selectedPost?.myPoints]);
+  }, [selectedPost]);
 
   // 상세 데이터 기준으로 좋아요/북마크 상태 동기화
   useEffect(() => {
@@ -109,7 +109,7 @@ const CommunityPostPage = () => {
     setBookmarkCount(selectedPost.saveCount ?? 0);
     setIsLiked(likedByMe);
     setIsBookmarked(Boolean(selectedPost.bookmarked));
-  }, [selectedPost?.id, selectedPost?.likes, selectedPost?.saveCount, likedByMe]);
+  }, [selectedPost, likedByMe]);
 
   // 댓글 목록 1회 로딩 (중복 호출 방지 포함)
   useEffect(() => {

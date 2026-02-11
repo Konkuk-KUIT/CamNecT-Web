@@ -22,7 +22,7 @@ communityAxiosInstance.interceptors.response.use(
       };
     } else if (status === 404) {
       popUpConfig = {
-        title: "원하시는 페이지를 찾을 수 없습니다",
+        title: "페이지를 찾을 수 없습니다",
         content:
           "요청하신 페이지는 존재하지 않는 주소입니다.\\n주소를 다시 한번 확인해 주세요.",
       };
@@ -34,7 +34,7 @@ communityAxiosInstance.interceptors.response.use(
       };
     } else if (status) {
       popUpConfig = {
-        title: "서비스 이용에 불편을 드려 죄송합니다",
+        title: "이용에 불편을 드려 죄송합니다",
         content:
           "일시적인 오류로 요청을 처리하지 못했습니다.\\n잠시 후 다시 시도해 주세요.",
       };

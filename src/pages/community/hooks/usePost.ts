@@ -27,7 +27,6 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
     if (!Number.isFinite(numericUserId)) return;
     if (isFetchingRef.current) return;
 
-    setIsLoading(true);
     isFetchingRef.current = true;
     getCommunityPostDetail({
       postId,
@@ -51,7 +50,10 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
   }, [postId, userId]);
 
   useEffect(() => {
-    refetchPost();
+    const timer = window.setTimeout(() => {
+      refetchPost();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [refetchPost]);
 
   if (!selectedPost) {

@@ -244,61 +244,63 @@ export const CommunityPage = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'info') {
-      const state = getTabState('INFO');
-      const apiSort = mapSortKeyToApiSort(infoSortKey);
-      const lastRequest = lastRequestRef.current.INFO;
-      const isNewRequest =
-        lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
-      if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchCommunityPosts('INFO', { keyword: debouncedQuery, sort: apiSort });
+    const timer = window.setTimeout(() => {
+      if (activeTab === 'info') {
+        const state = getTabState('INFO');
+        const apiSort = mapSortKeyToApiSort(infoSortKey);
+        const lastRequest = lastRequestRef.current.INFO;
+        const isNewRequest =
+          lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
+        if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+          fetchCommunityPosts('INFO', { keyword: debouncedQuery, sort: apiSort });
+        }
       }
-    }
-    if (activeTab === 'question') {
-      const state = getTabState('QUESTION');
-      const apiSort = mapSortKeyToApiSort(questionSortKey);
-      const lastRequest = lastRequestRef.current.QUESTION;
-      const isNewRequest =
-        lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
-      if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchCommunityPosts('QUESTION', { keyword: debouncedQuery, sort: apiSort });
+      if (activeTab === 'question') {
+        const state = getTabState('QUESTION');
+        const apiSort = mapSortKeyToApiSort(questionSortKey);
+        const lastRequest = lastRequestRef.current.QUESTION;
+        const isNewRequest =
+          lastRequest.keyword !== debouncedQuery || lastRequest.sort !== apiSort;
+        if (isNewRequest || (!state.isLoading && state.items.length === 0 && !state.error)) {
+          fetchCommunityPosts('QUESTION', { keyword: debouncedQuery, sort: apiSort });
+        }
       }
-    }
-    if (activeTab === 'all') {
-      if (
-        !mainState.isLoading &&
-        !mainState.hasFetched &&
-        !mainState.error
-      ) {
-        setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
-        getCommunityHome()
-          .then((response) => {
-            const recommendedByTag = response.data.recommendedByTag ?? [];
-            const recommendedByInterest = response.data.recommendedByInterest ?? [];
-            const waitingQuestions = response.data.waitingQuestions ?? [];
-            setMainState({
-              tagId: response.data.tagId,
-              tagName: response.data.tagName,
-              recommendedByTag,
-              recommendedByInterest,
-              waitingQuestions,
-              isLoading: false,
-              error: null,
-              hasFetched: true,
+      if (activeTab === 'all') {
+        if (
+          !mainState.isLoading &&
+          !mainState.hasFetched &&
+          !mainState.error
+        ) {
+          setMainState((previous) => ({ ...previous, isLoading: true, error: null }));
+          getCommunityHome()
+            .then((response) => {
+              const recommendedByTag = response.data.recommendedByTag ?? [];
+              const recommendedByInterest = response.data.recommendedByInterest ?? [];
+              const waitingQuestions = response.data.waitingQuestions ?? [];
+              setMainState({
+                tagId: response.data.tagId,
+                tagName: response.data.tagName,
+                recommendedByTag,
+                recommendedByInterest,
+                waitingQuestions,
+                isLoading: false,
+                error: null,
+                hasFetched: true,
+              });
+            })
+            .catch(() => {
+              setMainState((previous) => ({
+                ...previous,
+                isLoading: false,
+                error: '커뮤니티 메인 정보를 불러오지 못했어요.',
+                hasFetched: true,
+              }));
             });
-          })
-          .catch(() => {
-            setMainState((previous) => ({
-              ...previous,
-              isLoading: false,
-              error: '커뮤니티 메인 정보를 불러오지 못했어요.',
-              hasFetched: true,
-            }));
-          });
+        }
       }
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [
     activeTab,
     debouncedQuery,
