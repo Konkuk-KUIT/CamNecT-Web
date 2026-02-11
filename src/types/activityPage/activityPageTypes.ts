@@ -32,8 +32,6 @@ export type ActivityPost = {
 export type ActivityPostDetail = ActivityPost & {
   // 대외활동/취업정보에만 있는 필드들
   location?: string;
-  employType?:string;
-  payment?:string;
   target?: string;
   applyPeriod?: {
     start: string;
