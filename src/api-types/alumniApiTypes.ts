@@ -48,8 +48,8 @@ export type AlumniProfileBasics = {
   isEducationVisible: boolean;
   isExperienceVisible: boolean;
   isCertificateVisible: boolean;
-  profileImageUrl: string;
-  studentNo: string;
+  profileImageUrl: string | null;
+  studentNo: string | null;
   institutionId: number;
   majorId: number;
 };
@@ -65,12 +65,10 @@ export type AlumniProfilePortfolio = {
 export type AlumniProfileEducation = {
   educationId: number;
   schoolName: string;
-  majorName: string;
-  degree: string;
   startDate: string;
-  endDate: string;
+  endDate: string | null;
   status: string;
-  description: string;
+  description: string | null;
 };
 
 export type AlumniProfileExperience = {
@@ -92,8 +90,7 @@ export type AlumniProfileCertificate = {
 export type AlumniProfileTag = {
   id: number;
   name: string;
-  category: string;
-  attribute: string;
+  categoryCode: string;
 };
 
 export type AlumniProfileDetail = {
@@ -102,6 +99,7 @@ export type AlumniProfileDetail = {
   basics: AlumniProfileBasics;
   following: number;
   follower: number;
+  myPoint?: number;
   portfolioProjectList: AlumniProfilePortfolio[];
   educations: AlumniProfileEducation[];
   experience: AlumniProfileExperience[];
@@ -132,6 +130,47 @@ export type AlumniPortfolioListResponse = {
   status: number;
   message: string;
   data: AlumniPortfolioListPayload;
+};
+
+export type AlumniPortfolioDetailItem = {
+  portfolioId: number;
+  userId: number;
+  title: string;
+  thumbnailUrl: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  isPublic: boolean;
+  isFavorite: boolean;
+  projectField: string[];
+  assignedRole: string[];
+  techStack: string[];
+  review: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AlumniPortfolioAsset = {
+  assetId: number;
+  type: string;
+  fileKey: string;
+  fileUrl: string;
+  sortOrder: number;
+  createdAt: string;
+};
+
+export type AlumniPortfolioDetailPayload = {
+  isMine: boolean;
+  data: {
+    portfolio: AlumniPortfolioDetailItem;
+    portfolioAssets: AlumniPortfolioAsset[];
+  };
+};
+
+export type AlumniPortfolioDetailResponse = {
+  status: number;
+  message: string;
+  data: AlumniPortfolioDetailPayload;
 };
 
 export type AlumniEducationItem = {

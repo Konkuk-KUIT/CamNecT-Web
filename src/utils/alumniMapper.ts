@@ -105,9 +105,9 @@ export const mapAlumniProfileDetailToProfile = (
       })),
     educationItems: detail.educations.map((item) => ({
       id: String(item.educationId),
-      period: formatPeriod(item.startDate, item.endDate),
+      period: formatPeriod(item.startDate, item.endDate ?? undefined),
       school: item.schoolName,
-      status: item.degree || item.status,
+      status: item.status,
     })),
     careerItems: detail.experience.map((item) => ({
       id: String(item.experienceId),

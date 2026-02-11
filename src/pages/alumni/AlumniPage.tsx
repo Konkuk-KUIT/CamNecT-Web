@@ -22,6 +22,7 @@ export const AlumniSearchPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
 
+  // 검색어/태그 변경 시 디바운스 + 이전 요청 취소로 중복 호출을 줄입니다.
   useEffect(() => {
     const trimmedName = searchTerm.trim();
     let isActive = true;
@@ -31,6 +32,7 @@ export const AlumniSearchPage = () => {
     const timer = window.setTimeout(async () => {
       try {
         setIsLoading(true);
+        // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
         const response = await getAlumniList({
           name: trimmedName || undefined,
           tags: mapTagNamesToIds(selectedTags),

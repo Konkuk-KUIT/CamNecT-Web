@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AxiosError } from 'axios';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
+import FollowButton from './components/FollowButton';
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import type { AlumniProfile } from './data';
@@ -32,10 +33,13 @@ export const AlumniProfilePage = ({
 }: AlumniProfilePageProps) => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const loginUserId = useAuthStore((state) => state.user?.id);
   const [profile, setProfile] = useState<AlumniProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileError, setIsProfileError] = useState(false);
 
+  // URL 파라미터에서 숫자 userId만 안전하게 추출합니다.
   const resolveProfileUserId = (rawId?: string) => {
     if (!rawId) return undefined;
     const normalized = rawId.startsWith('alumni-') ? rawId.slice('alumni-'.length) : rawId;
@@ -43,6 +47,7 @@ export const AlumniProfilePage = ({
     return Number.isFinite(parsed) ? parsed : undefined;
   };
 
+  // 프로필 상세 조회 및 로딩/에러 상태를 관리합니다.
   useEffect(() => {
     const profileUserId = resolveProfileUserId(id);
     const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
@@ -55,6 +60,7 @@ export const AlumniProfilePage = ({
 
     let isActive = true;
     setIsLoading(true);
+    setIsProfileError(false);
     getAlumniProfileDetail({
       loginUserId: loginUserIdValue,
       profileUserId,
@@ -64,7 +70,9 @@ export const AlumniProfilePage = ({
         setProfile(mapAlumniProfileDetailToProfile(response.data));
       })
       .catch((error) => {
+        if (!isActive) return;
         console.error('Failed to fetch alumni profile:', error);
+        setIsProfileError(true);
       })
       .finally(() => {
         if (!isActive) return;
@@ -77,18 +85,30 @@ export const AlumniProfilePage = ({
   }, [id, loginUserId]);
 
   if (isLoading) {
-    return null;
+    // 상세 조회 진행 중 로딩 팝업 표시.
+    return <PopUp isOpen={true} type="loading" />;
+  }
+
+  if (isProfileError) {
+    // 네트워크/서버 오류 시 안내 팝업.
+    return (
+      <PopUp
+        isOpen={true}
+        type="confirm"
+        title="일시적 오류"
+        content="잠시 후 다시 시도해주세요."
+        onClick={() => navigate('/alumni', { replace: true })}
+      />
+    );
   }
 
   if (!profile) {
     return <Navigate to='/alumni' replace />;
   }
   const shouldOpenCoffeeChat = searchParams.get('coffeeChat') === '1';
-  const modalKey = `${profile.id}-${enableCoffeeChatModal ? '1' : '0'}-${shouldOpenCoffeeChat ? '1' : '0'}`;
 
   return (
     <AlumniProfileContent
-      key={modalKey}
       profile={profile}
       enableCoffeeChatModal={enableCoffeeChatModal}
       shouldOpenCoffeeChat={shouldOpenCoffeeChat}
@@ -112,15 +132,33 @@ const AlumniProfileContent = ({
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
+  const [isFollowPending, setIsFollowPending] = useState(false);
   const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
   // 쿼리 파라미터에 따라 커피챗 모달을 초기 상태로 열 수 있습니다.
   const canRequestCoffeeChat = profile.privacy.openToCoffeeChat;
-  const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(
-    enableCoffeeChatModal && shouldOpenCoffeeChat && canRequestCoffeeChat,
-  );
+  const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(false);
+  const hasOpenedCoffeeChatRef = useRef(false);
 
-  // 팔로우/언팔로우 토글과 카운트 반영.
+  // 다른 프로필로 이동 시 로컬 상태를 초기화합니다.
+  useEffect(() => {
+    setIsFollowing(profile.isFollowing);
+    setFollowerCount(profile.followerCount);
+    setIsFollowPending(false);
+    setPopUpConfig(null);
+    setIsCoffeeChatOpen(false);
+    hasOpenedCoffeeChatRef.current = false;
+  }, [profile.id, profile.isFollowing, profile.followerCount]);
+
+  useEffect(() => {
+    if (!enableCoffeeChatModal || !canRequestCoffeeChat) return;
+    if (!shouldOpenCoffeeChat || hasOpenedCoffeeChatRef.current) return;
+    setIsCoffeeChatOpen(true);
+    hasOpenedCoffeeChatRef.current = true;
+  }, [shouldOpenCoffeeChat, enableCoffeeChatModal, canRequestCoffeeChat]);
+
+  // 팔로우/언팔로우 토글: Optimistic 업데이트 + 실패 시 롤백.
   const handleFollowToggle = async () => {
+    if (isFollowPending) return;
     const next = !isFollowing;
     const prevFollow = isFollowing;
     const prevCount = followerCount;
@@ -131,6 +169,16 @@ const AlumniProfileContent = ({
     const followingId = Number(profile.userId);
 
     try {
+      if (!loginUserIdValue) {
+        setPopUpConfig({
+          title: '로그인 필요',
+          content: '팔로우는 로그인 후 이용할 수 있습니다',
+        });
+        setIsFollowing(prevFollow);
+        setFollowerCount(prevCount);
+        return;
+      }
+      setIsFollowPending(true);
       if (next) {
         await followUser({ userId: loginUserIdValue, followingId });
       } else {
@@ -140,10 +188,12 @@ const AlumniProfileContent = ({
       console.error('Failed to update follow status:', error);
       setIsFollowing(prevFollow);
       setFollowerCount(prevCount);
+    } finally {
+      setIsFollowPending(false);
     }
   };
 
-  // 커피챗 요청 모달 제출 처리.
+  // 커피챗 요청 모달 제출 처리 (실패 사유에 따라 팝업 메시지 분기).
   const handleCoffeeChatSubmit = async (payload: { categories: string[]; message: string }) => {
     const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
     const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
@@ -223,53 +273,11 @@ const AlumniProfileContent = ({
                 </div>
 
                 {/* 팔로우 토글 버튼 */}
-                <button
-                  type='button'
+                <FollowButton
+                  isFollowing={isFollowing}
+                  isPending={isFollowPending}
                   onClick={handleFollowToggle}
-                  className={`flex items-center justify-center border border-[var(--ColorMain,#00C56C)] [width:clamp(54px,18cqw,62px)] [height:clamp(22px,7cqw,25px)] [padding:clamp(2px,1cqw,3px)_clamp(5px,2cqw,7px)] [gap:clamp(3px,1.5cqw,5px)] rounded-[clamp(4px,1.6cqw,6px)] ${isFollowing ? 'bg-[var(--ColorMain,#00C56C)]' : 'bg-transparent'
-                    }`}
-                >
-                  {isFollowing ? (
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      width='9'
-                      height='9'
-                      viewBox='0 0 17 15'
-                      fill='none'
-                      aria-hidden
-                    >
-                      <path
-                        d='M0.75 7.97222L6.75 13.75L15.75 0.75'
-                        stroke='#FFFFFF'
-                        strokeWidth='1.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      width='10'
-                      height='10'
-                      viewBox='0 0 10 10'
-                      fill='none'
-                      aria-hidden
-                    >
-                      <path
-                        d='M8 2.75V4.25M8 4.25V5.74999M8 4.25H9.5M8 4.25H6.5M5.375 2.1875C5.375 2.63505 5.19721 3.06427 4.88074 3.38074C4.56427 3.69721 4.13505 3.875 3.6875 3.875C3.23995 3.875 2.81072 3.69721 2.49426 3.38074C2.17779 3.06427 2 2.63505 2 2.1875C2 1.73995 2.17779 1.31072 2.49426 0.994257C2.81072 0.67779 3.23995 0.5 3.6875 0.5C4.13505 0.5 4.56427 0.67779 4.88074 0.994257C5.19721 1.31072 5.375 1.73995 5.375 2.1875ZM0.5 8.61749V8.56249C0.5 7.71712 0.835825 6.90636 1.4336 6.30859C2.03137 5.71082 2.84212 5.375 3.6875 5.375C4.53288 5.375 5.34363 5.71082 5.9414 6.30859C6.53918 6.90636 6.875 7.71712 6.875 8.56249V8.61699C5.91274 9.19654 4.81031 9.50189 3.687 9.49999C2.5215 9.49999 1.431 9.17749 0.5 8.61699V8.61749Z'
-                        stroke='#00C56C'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
-                  )}
-                  <span
-                    className={`font-normal leading-normal [font-size:clamp(9px,2.8cqw,10px)] ${isFollowing ? 'text-[color:var(--ColorWhite,#FFF)]' : 'text-[color:var(--ColorMain,#00C56C)]'
-                      }`}
-                  >
-                    {isFollowing ? '팔로잉' : '팔로우'}
-                  </span>
-                </button>
+                />
               </div>
 
               <div className='flex flex-wrap [gap:clamp(3px,1.5cqw,5px)]'>
@@ -317,7 +325,7 @@ const AlumniProfileContent = ({
 
             {/* 소개글 영역 */}
             <p
-              className='line-clamp-3 text-r-14 text-[color:var(--ColorGray2,#A1A1A1)] [padding-top:clamp(8px,3cqw,11px)] [grid-column:2/3] [grid-row:2/3]'
+              className='line-clamp-3 whitespace-pre-line text-r-14 text-[color:var(--ColorGray2,#A1A1A1)] [padding-top:clamp(8px,3cqw,11px)] [grid-column:2/3] [grid-row:2/3]'
             >
               {profile.intro}
             </p>

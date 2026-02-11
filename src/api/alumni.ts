@@ -4,6 +4,7 @@ import type {
   AlumniCertificateListResponse,
   AlumniEducationListResponse,
   AlumniPortfolioListResponse,
+  AlumniPortfolioDetailResponse,
   AlumniProfileDetailResponse,
   CoffeeChatRequestBody,
   CoffeeChatRequestResponse,
@@ -54,6 +55,12 @@ export type AlumniPortfolioParams = {
   portfolioUserId: number;
 };
 
+export type AlumniPortfolioDetailParams = {
+  userId: number;
+  portfolioUserId: number;
+  portfolioId: number;
+};
+
 export const getAlumniPortfolioList = async (
   params: AlumniPortfolioParams
 ): Promise<AlumniPortfolioListResponse> => {
@@ -63,6 +70,22 @@ export const getAlumniPortfolioList = async (
       params: {
         userId: params.userId,
         portfolioUserId: params.portfolioUserId,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getAlumniPortfolioDetail = async (
+  params: AlumniPortfolioDetailParams
+): Promise<AlumniPortfolioDetailResponse> => {
+  const response = await axiosInstance.get<AlumniPortfolioDetailResponse>(
+    `/api/portfolio/${params.portfolioUserId}/${params.portfolioId}`,
+    {
+      params: {
+        userId: params.userId,
+        portfolioUserId: params.portfolioUserId,
+        portfolioId: params.portfolioId,
       },
     }
   );
