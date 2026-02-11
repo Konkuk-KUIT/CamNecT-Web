@@ -1,12 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { verifySchoolDocument } from "../../api/auth";
+import type { SchoolDocType } from "../../api-types/authApiTypes";
+import { requestSchoolVerification, requestSchoolVerificationPresign } from "../../api/auth";
 import Button from "../../components/Button";
 import ButtonWhite from "../../components/ButtonWhite";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useSignupStore } from "../../store/useSignupStore";
+import { uploadFileToS3 } from "../../utils/s3Upload";
 
 interface SchoolVerificationStepProps {
     onNext: () => void;
@@ -17,11 +20,14 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const [showPreview, setShowPreview] = useState(false);
     const [showPopUp, setShowPopUp] = useState(false);
     const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
+    const [showMountPopUp, setShowMountPopUp] = useState(true);
+    const [showErrorPopUp, setShowErrorPopUp] = useState(false);
+    const [docType, setDocType] = useState<SchoolDocType>('ENROLLMENT_CERTIFICATE');
+    const [isSubmitting, setIsSubmitting] = useState(false); // 전체 제출 상태 관리
 
-    const { email, verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
+    const { verificationFile, setVerificationFile, isVerificationSubmitted, setIsVerificationSubmitted } = useSignupStore(
         useShallow((state) => {
             return {
-                email: state.email,
                 verificationFile: state.verificationFile,
                 setVerificationFile: state.setVerificationFile,
                 isVerificationSubmitted: state.isVerificationSubmitted,
@@ -30,28 +36,16 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         } )
     );
 
-    const mutation = useMutation({
-        mutationFn: verifySchoolDocument,
-        onSuccess: () => {
-            setShowPopUp(false);
-            setShowConfirmPopUp(true);
-            setIsVerificationSubmitted(true);
-        },
-        onError: (error) => {
-            console.error("인증 요청 실패:", error);
-        }
-    });
+    // 로그인/가입 세션에서 유저 ID 가져오기
+    const userId = useAuthStore((state) => state.user?.id ? Number(state.user.id) : null);
 
     // selectedFile 변경 시 previewUrl 생성 
-    // useMemo : 같은 의존성에 대해 같은 결과 캐싱 
     const previewUrl = useMemo(() => {
         return verificationFile ? URL.createObjectURL(verificationFile) : null;
     }, [verificationFile]);
 
     // URL cleanup (메모리 누수 방지)
     useEffect(() => {
-
-        // cleanup : 언마운트 or 의존성 변경 시 실행
         return () => {
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
@@ -69,7 +63,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
 
     // 미리보기 클릭
     const handlePreviewClick = () => {  
-        setShowPreview(true);  // 이미지든 PDF든 팝업으로 표시
+        setShowPreview(true);  
     };
 
     // 첨부파일 삭제
@@ -90,15 +84,57 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
         setShowConfirmPopUp(false);
     };
 
-    const handleVerificationSubmit = () => {
-        // if (!verificationFile || !email) return;
-        if (!verificationFile) return;
+    // presign api 연동
+    const presignMutation = useMutation({
+        mutationFn: requestSchoolVerificationPresign,
+    });
 
-        mutation.mutate({
-            email,
-            docType: 'ENROLLMENT_CERTIFICATE',
-            documents: [verificationFile]
-        });
+    // 인증서 제출 api 연동 
+    const verifyRequestMutation = useMutation({
+        mutationFn: requestSchoolVerification,
+    });
+
+    // 인증서 제출 함수 
+    const handleVerificationSubmit = async () => {
+        if (!verificationFile || !userId) {
+            console.error("제출 실패: 파일 또는 유저 ID가 없습니다.", { verificationFile, userId });
+            return;
+        }
+
+        setIsSubmitting(true);
+        setShowPopUp(false);
+
+        try {
+            // Step 1: Presigned URL 발급 요청
+            const presignData = await presignMutation.mutateAsync({
+                userId,
+                contentType: verificationFile.type,
+                size: verificationFile.size,
+                originalFilename: verificationFile.name
+            });
+
+            // Step 2: S3에 파일 직접 업로드
+            await uploadFileToS3(
+                presignData.uploadUrl,
+                verificationFile,
+                presignData.requiredHeaders
+            );
+
+            // Step 3: 백엔드에 업로드 완료 및 검증 요청
+            await verifyRequestMutation.mutateAsync({
+                userId,
+                docType: docType,
+                documentKey: presignData.fileKey
+            });
+
+            // 모든 단계 성공 시
+            setShowConfirmPopUp(true);
+            setIsVerificationSubmitted(true);
+        } catch {
+            setShowErrorPopUp(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -108,18 +144,18 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             </h1>
 
             <h2 className="pt-[10px] text-m-14 text-gray-750 tracking-[-0.56px] leading-[140%]">
-                학생증, 재학증명서 또는 등록금 납부서를 첨부해주세요<br/>
+                {docType === 'GRADUATION_CERTIFICATE' 
+                    ? "졸업증명서를 첨부해주세요" 
+                    : "학생증, 재학증명서 또는 등록금 납부서를 첨부해주세요"}
+                <br/>
                 인증에 사용되며 인증완료후에 폐기됩니다
             </h2>
 
             <p className="pt-[29px] text-m-16 text-gray-750 tracking-[-0.56px] leading-[140%]">파일첨부</p>
             
-            {/* 파일 업로드 영역 */}
             <div className="pt-[10px]">
                 {!verificationFile ? (
-                    // 파일 선택 전: 업로드 영역
                     <>
-                        {/* htmlFor : file-upload값의 태그와 연결 */}
                         <label 
                             htmlFor="file-upload"
                             className="flex items-center justify-center gap-[12px] w-full h-[54px] bg-gray-150 rounded-[10px] border-2 border-dashed border-gray-200 cursor-pointer"
@@ -129,7 +165,6 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                                 인증 파일 첨부 (png, jpg, pdf)
                             </span>
                         </label>
-                        {/* hidden : input태그 가리고 label태그만 화면에 보이게 */}
                         <input
                             id="file-upload"
                             type="file"
@@ -139,7 +174,6 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                         />
                     </>
                 ) : (
-                    // 파일 선택 후: 파일 정보 + 미리보기/삭제 버튼
                     <div className="p-[16px] bg-gray-50 rounded-[10px] flex items-center gap-[12px]">
                         <Icon name="folder" className="flex-none"/>
                         <div className="flex-1 min-w-0">
@@ -167,16 +201,15 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
             
             <div className="flex-1" />
 
-            {/* 인증요청 / 다음 버튼 */}
             <div className="flex-none pb-[60px]">
                 <div className="flex flex-col items-center gap-[10px]">
                     <ButtonWhite 
-                        label={mutation.isPending ? "제출 중..." : "인증 요청"} 
+                        label={isSubmitting ? "제출 중..." : "인증 요청"} 
                         onClick={handleShowPopup} 
-                        disabled={(!verificationFile) || isVerificationSubmitted || mutation.isPending}
+                        disabled={(!verificationFile) || isVerificationSubmitted || isSubmitting}
                     />
                     <Button 
-                        disabled={!isVerificationSubmitted}
+                        disabled={!isVerificationSubmitted || isSubmitting}
                         label="다음"
                         onClick={onNext}
                         className="mx-auto"
@@ -184,7 +217,6 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 </div>
             </div>
 
-            {/* 인증요청 확인 팝업 */}
             {showPopUp && (
                 <PopUp
                     isOpen={showPopUp}
@@ -207,8 +239,37 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     onClick={handleConfirmPopUpClose}
                 />
             )}
+
+            {showErrorPopUp && (
+                <PopUp
+                    isOpen={showErrorPopUp}
+                    type="error"
+                    title="제출 실패"
+                    content="인증 파일 제출 중 오류가 발생했습니다\n다시 시도해 주세요"
+                    buttonText="확인"
+                    onClick={() => setShowErrorPopUp(false)}
+                />
+            )}
+
+            {showMountPopUp && (
+                <PopUp
+                    isOpen={showMountPopUp}
+                    type="info"
+                    title="본인의 현재 상태를 선택해주세요"
+                    content="상태에 따라 제출 서류가 달라질 수 있습니다"
+                    leftButtonText="졸업생"
+                    rightButtonText="재학/휴학생"
+                    onLeftClick={() => {
+                        setDocType('GRADUATION_CERTIFICATE');
+                        setShowMountPopUp(false);
+                    }}
+                    onRightClick={() => {
+                        setDocType('ENROLLMENT_CERTIFICATE');
+                        setShowMountPopUp(false);
+                    }}
+                />
+            )}
             
-            {/* 파일 미리보기 팝업 (이미지 + PDF) */}
             {showPreview && previewUrl && (
                 <div 
                     className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
@@ -229,7 +290,6 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                                 className="max-w-[90vw] max-h-[90dvh] rounded-[10px]"
                             />
                         ) : (
-                            // iframe : 웹 페이지 내부의 웹 페이지
                             <iframe 
                                 src={previewUrl} 
                                 className="w-[90vw] h-[90dvh] max-w-[800px] max-h-[600px] rounded-[10px] bg-white"
@@ -240,5 +300,5 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                 </div>
             )}
         </div>
-    )
-}
+    );
+};

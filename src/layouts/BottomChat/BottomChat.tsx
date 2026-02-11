@@ -79,7 +79,7 @@ export const BottomChat = ({
 
   return (
     <div
-      className='fixed left-0 right-0 z-50 bg-white'
+      className='fixed left-0 right-0 z-50 bg-white pb-[40px]'
       style={{ bottom: bottomOffset }}
     >
       <div

@@ -5,6 +5,7 @@ type BottomSheetModalProps = {
     isOpen: boolean;
     onClose: () => void;
     height?: number | string;
+    bottomOffset?: number | string;
     children: ReactNode;
 };
 
@@ -12,6 +13,7 @@ const BottomSheetModal = ({
     isOpen,
     onClose,
     height = 'auto',
+    bottomOffset = 0,
     children,
 }: BottomSheetModalProps) => {
     // 모달이 열려있을 때 body 스크롤 방지 (브라우저 스크롤 막기)
@@ -35,14 +37,15 @@ const BottomSheetModal = ({
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[1001] flex items-end justify-center">
+                <div className="fixed inset-0 z-[1001] flex items-end justify-center pointer-events-none">
                     {/* 배경 어둡게 처리 (단순 투명도 조절) */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/30"
+                        className="absolute left-0 right-0 top-0 bg-black/30 pointer-events-auto"
+                        style={{ bottom: bottomOffset }}
                     />
 
                     {/* 바텀 시트 본체 */}
@@ -60,11 +63,12 @@ const BottomSheetModal = ({
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ duration: 0.2 }} // 애니메이션 속도 빠르게 (0.2초)
-                        className="relative flex w-full max-w-[430px] flex-col bg-white overflow-hidden"
+                        className="relative flex w-full max-w-[430px] flex-col bg-white overflow-hidden pointer-events-auto"
                         style={{
                             height: height,
                             borderRadius: "20px 20px 0 0",
                             boxShadow: "0 -4px 10px rgba(0,0,0,0.1)",
+                            marginBottom: bottomOffset,
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >

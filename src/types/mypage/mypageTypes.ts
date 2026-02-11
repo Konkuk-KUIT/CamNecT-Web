@@ -13,7 +13,8 @@ export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" |
 //   point: number; 
 // }
 
-export type UserPreview = Omit<User, "userTags"|"introduction"|"point">;
+export type UserPreview = Omit<User, "userTags"|"introduction"|"point"|"univ">;
+export type UserMini = Pick<UserPreview, "id" | "name" | "major" | "gradeNumber">;
 
 export interface UserProfile extends User {
   following: UserPreview[];

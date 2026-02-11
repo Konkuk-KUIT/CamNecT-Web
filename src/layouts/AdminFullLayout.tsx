@@ -1,0 +1,24 @@
+import type { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
+import { AdminBottomNav } from "../layouts/AdminBottomNav/AdminBottomNav";
+
+// Admin페이지 Header (O) BottomNav (O) 레이아웃
+type FullLayoutProps = {
+  headerSlot?: ReactNode;
+  children?: ReactNode;
+};
+
+export const AdminFullLayout = ({ headerSlot, children }: FullLayoutProps) => {
+  return (
+    <div className="w-full min-h-[100dvh] relative bg-white">
+      {headerSlot ?? null}
+      
+      {/* 컨텐츠 하단이 BottomNav에 가려지지 않도록 패딩 추가 */}
+      <main className="w-full" style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}>
+        {children ?? <Outlet />}
+      </main>
+      
+      <AdminBottomNav />
+    </div>
+  );
+};

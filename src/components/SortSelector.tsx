@@ -31,7 +31,10 @@ const SortSelector = <SortKey extends string>({
       </div>
 
       <BottomSheetModal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <div className='flex flex-col gap-[30px] px-[25px] pb-[50px] pt-[45px]'>
+        <div
+          className='flex flex-col gap-[30px] px-[25px] pt-[45px]'
+          style={{ paddingBottom: 'calc(50px + 56px + env(safe-area-inset-bottom))' }}
+        >
           <div className='text-b-18 text-[var(--ColorBlack,#202023)]'>{modalTitle}</div>
           <div className='flex flex-col gap-[20px] px-[7px]'>
             {sortKeys.map((key) => (

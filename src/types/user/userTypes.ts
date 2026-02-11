@@ -3,6 +3,7 @@ export interface User {
   id: string; 
   name: string; 
   profileImg: string; 
+  univ: string;
   major: string; 
   gradeNumber: string; 
   userTags: string[]; 

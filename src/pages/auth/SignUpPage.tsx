@@ -35,8 +35,6 @@ export const SignUpPage = () => {
     }
   }
 
-  // todo 주소창에 한번에 쳐서 갔을때 못가도록 방어
-  // todo 인증 거부 화면은 추후에 생각 
   return (
     <>
       {step < 8 ? (
