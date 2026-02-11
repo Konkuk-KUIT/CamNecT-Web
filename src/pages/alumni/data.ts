@@ -14,6 +14,7 @@ export type AlumniProfile = {
     showEducation: boolean;
     showCareer: boolean;
     showCertificates: boolean;
+    openToCoffeeChat: boolean;
   };
   portfolioItems: {
     id: string;
@@ -61,6 +62,7 @@ export const alumniList: AlumniProfile[] = [
       showEducation: true,
       showCareer: true,
       showCertificates: true,
+      openToCoffeeChat: true,
     },
     portfolioItems: [
       { id: 'pf_001_1', title: '나의 프로젝트 1', image: undefined },
@@ -105,6 +107,7 @@ export const alumniList: AlumniProfile[] = [
       showEducation: true,
       showCareer: true,
       showCertificates: true,
+      openToCoffeeChat: true,
     },
     portfolioItems: [
       { id: 'pf_002_1', title: '프로젝트 11111111111111111', image: undefined },
@@ -142,6 +145,7 @@ export const alumniList: AlumniProfile[] = [
       showEducation: true,
       showCareer: false,
       showCertificates: true,
+      openToCoffeeChat: true,
     },
     portfolioItems: [
       { id: 'pf_003_1', title: '모바일 앱 리디자인', image: undefined },
@@ -175,6 +179,7 @@ export const alumniList: AlumniProfile[] = [
       showEducation: false,
       showCareer: true,
       showCertificates: false,
+      openToCoffeeChat: true,
     },
     portfolioItems: [
       { id: 'pf_004_1', title: '브랜드 필름 제작', image: undefined },

@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
+import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import type { AlumniProfile } from './data';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useAuthStore } from '../../store/useAuthStore';
-import { getAlumniProfileDetail, sendCoffeeChatRequest } from '../../api/alumni';
+import {
+  followUser,
+  getAlumniProfileDetail,
+  sendCoffeeChatRequest,
+  unfollowUser,
+} from '../../api/alumni';
 import { mapAlumniProfileDetailToProfile } from '../../utils/alumniMapper';
 import { mapTagNamesToIds } from '../../utils/tagMapper';
 
@@ -105,17 +112,35 @@ const AlumniProfileContent = ({
   // 팔로우 상태 및 팔로워 수는 즉시 반영하기 위해 로컬 상태로 관리합니다.
   const [isFollowing, setIsFollowing] = useState(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState(profile.followerCount);
+  const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
   // 쿼리 파라미터에 따라 커피챗 모달을 초기 상태로 열 수 있습니다.
+  const canRequestCoffeeChat = profile.privacy.openToCoffeeChat;
   const [isCoffeeChatOpen, setIsCoffeeChatOpen] = useState(
-    enableCoffeeChatModal && shouldOpenCoffeeChat,
+    enableCoffeeChatModal && shouldOpenCoffeeChat && canRequestCoffeeChat,
   );
 
   // 팔로우/언팔로우 토글과 카운트 반영.
-  const handleFollowToggle = () => {
+  const handleFollowToggle = async () => {
     const next = !isFollowing;
+    const prevFollow = isFollowing;
+    const prevCount = followerCount;
     setIsFollowing(next);
     setFollowerCount((count) => Math.max(0, count + (next ? 1 : -1)));
-    // TODO: sync follow/unfollow state with API and refetch counts.
+    const parsedLoginUserId = loginUserId ? Number(loginUserId) : NaN;
+    const loginUserIdValue = Number.isFinite(parsedLoginUserId) ? parsedLoginUserId : 0;
+    const followingId = Number(profile.userId);
+
+    try {
+      if (next) {
+        await followUser({ userId: loginUserIdValue, followingId });
+      } else {
+        await unfollowUser({ userId: loginUserIdValue, followingId });
+      }
+    } catch (error) {
+      console.error('Failed to update follow status:', error);
+      setIsFollowing(prevFollow);
+      setFollowerCount(prevCount);
+    }
   };
 
   // 커피챗 요청 모달 제출 처리.
@@ -133,6 +158,23 @@ const AlumniProfileContent = ({
       });
       return true;
     } catch (error) {
+      const status = error instanceof AxiosError ? error.response?.status : undefined;
+      if (status === 400) {
+        setPopUpConfig({
+          title: '전송 실패',
+          content: '상대방이 커피챗 요청을 받지 않는 상태입니다',
+        });
+      } else if (status === 409) {
+        setPopUpConfig({
+          title: '전송 실패',
+          content: '이미 대기 중인 커피챗 요청이 존재합니다',
+        });
+      } else {
+        setPopUpConfig({
+          title: '전송 실패',
+          content: '요청 처리 중 문제가 발생했습니다',
+        });
+      }
       console.error('Failed to send coffee chat request:', error);
       return false;
     }
@@ -284,14 +326,16 @@ const AlumniProfileContent = ({
         </section>
 
         {/* 커피챗 요청 버튼 영역 */}
-        <section className='flex [padding:0_clamp(18px,7cqw,25px)_clamp(24px,8cqw,30px)]'>
-          <CoffeeChatButton
-            onClick={() => {
-              if (!enableCoffeeChatModal) return;
-              setIsCoffeeChatOpen(true);
-            }}
-          />
-        </section>
+        {canRequestCoffeeChat && (
+          <section className='flex [padding:0_clamp(18px,7cqw,25px)_clamp(24px,8cqw,30px)]'>
+            <CoffeeChatButton
+              onClick={() => {
+                if (!enableCoffeeChatModal) return;
+                setIsCoffeeChatOpen(true);
+              }}
+            />
+          </section>
+        )}
 
         {/* 구분선 */}
         <div className='h-[10px] bg-gray-150' />
@@ -424,13 +468,23 @@ const AlumniProfileContent = ({
         </section>
       </div>
 
-      {enableCoffeeChatModal && (
+      {enableCoffeeChatModal && canRequestCoffeeChat && (
         <CoffeeChatModal
           key={isCoffeeChatOpen ? 'open' : 'closed'}
           isOpen={isCoffeeChatOpen}
           onClose={() => setIsCoffeeChatOpen(false)}
           categories={profile.categories}
           onSubmit={handleCoffeeChatSubmit}
+        />
+      )}
+
+      {popUpConfig && (
+        <PopUp
+          isOpen={true}
+          type="confirm"
+          title={popUpConfig.title}
+          content={popUpConfig.content}
+          onClick={() => setPopUpConfig(null)}
         />
       )}
     </HeaderLayout>

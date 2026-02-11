@@ -13,7 +13,10 @@ const resolveName = (item: AlumniApiItem) => {
 const resolveMajor = (majorId: number | null) => mapMajorIdToName(majorId);
 
 const resolveStudentId = (studentNo: string | null, yearLevel: number | null) => {
-  if (studentNo?.trim()) return studentNo.trim();
+  const trimmedStudentNo = studentNo?.trim();
+  if (trimmedStudentNo) {
+    return trimmedStudentNo.length >= 4 ? trimmedStudentNo.slice(2, 4) : trimmedStudentNo;
+  }
   if (yearLevel) return String(yearLevel);
   return "";
 };
@@ -41,6 +44,7 @@ export const mapAlumniApiItemToProfile = (item: AlumniApiItem): AlumniProfile =>
       showEducation: userProfile.isEducationVisible,
       showCareer: userProfile.isExperienceVisible,
       showCertificates: userProfile.isCertificateVisible,
+      openToCoffeeChat: userProfile.openToCoffeeChat,
     },
     portfolioItems: [],
     educationItems: [],
@@ -55,7 +59,9 @@ export const mapAlumniApiItemToProfile = (item: AlumniApiItem): AlumniProfile =>
 };
 
 export const mapAlumniApiListToProfiles = (items: AlumniApiItem[]): AlumniProfile[] =>
-  items.map(mapAlumniApiItemToProfile);
+  items
+    .filter((item) => item.userId !== 2)
+    .map(mapAlumniApiItemToProfile);
 
 const formatPeriod = (startDate: string, endDate?: string, isCurrent?: boolean) => {
   if (isCurrent) return `${startDate}~현재`;
@@ -67,6 +73,12 @@ export const mapAlumniProfileDetailToProfile = (
   detail: AlumniProfileDetail
 ): AlumniProfile => {
   const userIdString = String(detail.userId);
+  const showEducation =
+    detail.basics.isEducationVisible && detail.educations.length > 0;
+  const showCareer =
+    detail.basics.isExperienceVisible && detail.experience.length > 0;
+  const showCertificates =
+    detail.basics.isCertificateVisible && detail.certificate.length > 0;
   return {
     id: `alumni-${userIdString}`,
     userId: userIdString,
@@ -79,9 +91,10 @@ export const mapAlumniProfileDetailToProfile = (
     privacy: {
       showFollowStats: detail.basics.isFollowerVisible,
       showPortfolio: true,
-      showEducation: detail.educations.length > 0,
-      showCareer: detail.experience.length > 0,
-      showCertificates: detail.certificate.length > 0,
+      showEducation,
+      showCareer,
+      showCertificates,
+      openToCoffeeChat: detail.basics.openToCoffeeChat,
     },
     portfolioItems: detail.portfolioProjectList
       .filter((item) => item.isPublic)

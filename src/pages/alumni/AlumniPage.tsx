@@ -154,7 +154,7 @@ export const AlumniSearchPage = () => {
                           {alumni.author.name}
                         </div>
                         <div className='text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]'>
-                          {alumni.author.major} {alumni.author.studentId}
+                          {alumni.author.major} {alumni.author.studentId}학번
                         </div>
                       </div>
                     </div>
@@ -174,26 +174,28 @@ export const AlumniSearchPage = () => {
                       ))}
                   </div>
 
-                  <p className='line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
+                  <p className='line-clamp-3 whitespace-pre-line text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
                     {alumni.intro}
                   </p>
                 </div>
               </Link>
 
               {/* 3그룹: 커피챗 요청 버튼 */}
-              <CoffeeChatButton
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
+              {alumni.privacy.openToCoffeeChat && (
+                <CoffeeChatButton
+                  onClick={(event) => {
                     event.preventDefault();
                     navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
-                  }
-                }}
-                aria-label={`${alumni.author.name} 커피챗 요청하기`}
-              />
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
+                    }
+                  }}
+                  aria-label={`${alumni.author.name} 커피챗 요청하기`}
+                />
+              )}
             </div>
           ))}
         </div>

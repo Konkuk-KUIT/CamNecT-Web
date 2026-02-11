@@ -108,6 +108,11 @@ export type CoffeeChatRequestParams = {
   content: string;
 };
 
+export type FollowRequestParams = {
+  userId: number;
+  followingId: number;
+};
+
 export const sendCoffeeChatRequest = async (
   params: CoffeeChatRequestParams
 ): Promise<CoffeeChatRequestResponse> => {
@@ -123,6 +128,35 @@ export const sendCoffeeChatRequest = async (
     {
       params: {
         userId: params.userId,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const followUser = async (params: FollowRequestParams): Promise<unknown> => {
+  const response = await axiosInstance.post(
+    `/api/follow/${params.followingId}`,
+    null,
+    {
+      params: {
+        userId: params.userId,
+        followingId: params.followingId,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const unfollowUser = async (params: FollowRequestParams): Promise<unknown> => {
+  const response = await axiosInstance.delete(
+    `/api/follow/${params.followingId}`,
+    {
+      params: {
+        userId: params.userId,
+        followingId: params.followingId,
       },
     }
   );

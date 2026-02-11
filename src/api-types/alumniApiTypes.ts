@@ -45,6 +45,9 @@ export type AlumniProfileBasics = {
   bio: string;
   openToCoffeeChat: boolean;
   isFollowerVisible: boolean;
+  isEducationVisible: boolean;
+  isExperienceVisible: boolean;
+  isCertificateVisible: boolean;
   profileImageUrl: string;
   studentNo: string;
   institutionId: number;
