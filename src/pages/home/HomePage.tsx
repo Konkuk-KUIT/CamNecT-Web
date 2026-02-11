@@ -1,17 +1,20 @@
-import {FullLayout} from '../../layouts/FullLayout';
-import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
+import { FullLayout } from '../../layouts/FullLayout';
+import { HomeHeader } from '../../layouts/headers/HomeHeader';
 
+import { useEffect, useState } from 'react';
 import Card from '../../components/Card';
-import CheckScheduleBox from './components/CheckScheduleBox';
-import PointBox from './components/PointBox';
-import CommunityBox from './components/CommunityBox';
-import RecommendBox from './components/RecommendBox';
-import CoffeeChatBox from './components/CoffeeChatBox';
-import ContestBox from './components/ContestBox';
-import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
-import { useNotificationStore } from '../../store/useNotificationStore';
+import PopUp from '../../components/Pop-up';
+import { useFcmToken } from '../../hooks/useFcmNotification';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useNotificationStore } from '../../store/useNotificationStore';
+import CheckScheduleBox from './components/CheckScheduleBox';
+import CoffeeChatBox from './components/CoffeeChatBox';
+import CommunityBox from './components/CommunityBox';
+import ContestBox from './components/ContestBox';
+import PointBox from './components/PointBox';
+import RecommendBox from './components/RecommendBox';
+import { coffeeChatRequests, contests, homeGreetingUser, recommendList } from './homeData';
 
 export const HomePage = () => {
     const navigate = useNavigate();
@@ -20,6 +23,38 @@ export const HomePage = () => {
         state.items.some((notice) => !notice.isRead),
     );
     const userName = useAuthStore((state) => state.user?.name) ?? homeGreetingUser.name;
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const { handleRequestPermission } = useFcmToken();
+    const [isNotificationPopupOpen, setIsNotificationPopupOpen] = useState(false);
+
+    useEffect(() => {
+
+        const hasSeenPopup = localStorage.getItem('HAS_SEEN_FCM_PROMPT');
+        
+        // 로그인 상태이고 알림 권한이 아직 요청되지 않았을 때 팝업 표시
+        if (isAuthenticated && Notification.permission === 'default' && !hasSeenPopup) {
+
+            // cascading 방지
+            const timer = setTimeout(() => {
+                setIsNotificationPopupOpen(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isAuthenticated]);
+
+    const handleClosePopup = () => {
+        setIsNotificationPopupOpen(false);
+
+        // 이번 브라우저에서는 다시 질문 X
+        localStorage.setItem('HAS_SEEN_FCM_PROMPT', 'true');
+    }
+
+    const handleConfirmNotification = async () => {
+        setIsNotificationPopupOpen(false);
+        // 이번 브라우저에서는 다시 질문 X
+        localStorage.setItem('HAS_SEEN_FCM_PROMPT', 'true');
+        await handleRequestPermission();
+    };
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
@@ -103,6 +138,18 @@ export const HomePage = () => {
                     />
                 </section>
             </div>
+
+            {/* FCM 알림 권한 요청 팝업 (Soft Prompt) */}
+            <PopUp
+                isOpen={isNotificationPopupOpen}
+                type="info"
+                title="실시간 채팅 알림"
+                content="새로운 메시지 알림을 받으시겠어요?\n언제든 설정에서 변경할 수 있습니다."
+                leftButtonText="나중에"
+                rightButtonText="알림 켜기"
+                onLeftClick={handleClosePopup}
+                onRightClick={handleConfirmNotification}
+            />
         </FullLayout>
     );
 };

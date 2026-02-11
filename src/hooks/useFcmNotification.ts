@@ -3,9 +3,10 @@ import { getToken } from "firebase/messaging";
 import { installations, messaging } from "../shared/firebase";
 
 export const useFcmToken = () => {
+
+    // 브라우저 알림 권한 요청
     const handleRequestPermission = async () => {
 
-        // 브라우저 알림 권한 요청
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
             console.log("알림 권한 거부");
