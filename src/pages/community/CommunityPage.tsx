@@ -134,6 +134,7 @@ export const CommunityPage = () => {
     [],
   );
 
+  // 탭별 목록을 서버에서 조회 (페이징 포함)
   const fetchCommunityPosts = useCallback(
     async (
       tab: Tab,
@@ -228,6 +229,7 @@ export const CommunityPage = () => {
     [waitingQuestionsFromApi],
   );
 
+  // 탭/검색/정렬 변경 시 데이터 로딩
   useEffect(() => {
     sessionStorage.setItem('communityActiveTab', activeTab);
   }, [activeTab]);

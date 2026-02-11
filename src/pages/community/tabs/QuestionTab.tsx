@@ -29,6 +29,7 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // 태그/채택 상태 기준으로 목록 필터링
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
     const adoptionTags = ['채택 전', '채택 완료'];
@@ -73,9 +74,8 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 질문글 리스트 API 연결 */}
         {filteredPosts.map((post) => {
-          const isPointRequired = post.accessType
-            ? post.accessType === 'POINT_REQUIRED'
-            : post.accessStatus !== 'GRANTED';
+          // 구매 상태에 따라 미리보기/포인트 표시 분기
+          const isLocked = post.accessStatus !== 'GRANTED';
           const requiredPoints = post.requiredPoints;
           return (
             <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
@@ -117,7 +117,7 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
 
                     <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-                    {isPointRequired ? (
+                    {isLocked ? (
                       <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
                         {requiredPoints} P
                       </div>

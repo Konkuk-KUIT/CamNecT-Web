@@ -30,6 +30,7 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // 선택된 태그 기준으로 목록 필터링
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
     return posts.filter((post) =>

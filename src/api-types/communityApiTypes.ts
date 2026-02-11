@@ -152,6 +152,7 @@ export type CommunityPostDetailResponse = {
   content: string;
   anonymous: boolean;
   authorId: number;
+  bookmarked?: boolean;
   attachments?: {
     attachmentId: number;
     sortOrder: number;

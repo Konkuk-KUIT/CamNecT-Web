@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AxiosError } from 'axios';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { getCommunityPostDetail } from '../../../api/community';
@@ -17,13 +17,18 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
   const [isLoading, setIsLoading] = useState(true);
   const [likedByMe, setLikedByMe] = useState(false);
   const [detailError, setDetailError] = useState(false);
+  // 동일 마운트 사이클에서 중복 호출을 방지하기 위한 플래그
+  const isFetchingRef = useRef(false);
 
+  // 게시글 상세를 재조회하는 공용 함수
   const refetchPost = useCallback(() => {
     if (!postId) return;
     const numericUserId = Number(userId);
     if (!Number.isFinite(numericUserId)) return;
+    if (isFetchingRef.current) return;
 
     setIsLoading(true);
+    isFetchingRef.current = true;
     getCommunityPostDetail({
       postId,
       params: { userId: numericUserId },
@@ -41,6 +46,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
       })
       .finally(() => {
         setIsLoading(false);
+        isFetchingRef.current = false;
       });
   }, [postId, userId]);
 

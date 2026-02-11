@@ -62,6 +62,7 @@ export type CommunityPostDetail = {
   likes: number;
   comments: number;
   saveCount: number;
+  bookmarked?: boolean;
   isAdopted: boolean;
   adoptedCommentId?: string;
   createdAt: string;

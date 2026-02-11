@@ -102,6 +102,7 @@ export const WritePage = () => {
         Boolean(boardType) ||
         selectedTags.length > 0;
 
+    // 이미지 업로드 전 가로/세로 사이즈 측정
     const getImageSize = (file: File) =>
         new Promise<{ width: number; height: number }>((resolve) => {
             const url = URL.createObjectURL(file);
@@ -117,6 +118,7 @@ export const WritePage = () => {
             image.src = url;
         });
 
+    // Presign 발급 → S3 PUT → 서버에 넘길 첨부 메타 생성
     const uploadAttachments = async (
         attachments: { file: File; kind: 'image' | 'pdf' }[],
         ownerId: number,
@@ -283,6 +285,7 @@ export const WritePage = () => {
     };
 
     // 확인 모달에서 "네" 클릭 시 메인으로 이동
+    // 작성/수정 확정 처리
     const handleConfirm = async () => {
         // TODO: 수정 모드인 경우 변경된 데이터만 전송
         if (!userId) {

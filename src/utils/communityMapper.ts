@@ -28,7 +28,7 @@ const mapAuthorFromApi = (post: CommunityPostItem) => {
 
 const mapTagIdToName = (tagId: number) => {
   const match = MOCK_ALL_TAGS.find((tag) => tag.id.endsWith(`_${tagId}`));
-  return match?.name ?? `tag-${tagId}`;
+  return match?.name;
 };
 
 export const mapToInfoPost = (post: CommunityPostItem): InfoPost => ({
@@ -74,6 +74,7 @@ export const mapToCommunityPostDetail = (
   likes: post.likeCount,
   comments: 0,
   saveCount: 0,
+  bookmarked: post.bookmarked ?? false,
   isAdopted: Boolean(post.acceptedCommentId),
   adoptedCommentId: post.acceptedCommentId ? String(post.acceptedCommentId) : undefined,
   createdAt: new Date().toISOString(),
@@ -89,7 +90,9 @@ export const mapToCommunityPostDetail = (
     profileImageUrl: post.author?.profileImageUrl,
   },
   content: post.content,
-  categories: post.tagIds.map(mapTagIdToName),
+  categories: post.tagIds
+    .map(mapTagIdToName)
+    .filter((tagName): tagName is string => Boolean(tagName)),
   attachments: post.attachments ?? [],
   postImages: post.attachments
     ?.filter((attachment) => {
