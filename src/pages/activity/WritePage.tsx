@@ -53,8 +53,8 @@ export const ActivityWritePage = () => {
   const authUser = useAuthStore((state) => state.user);
   const userId = authUser?.id ? parseInt(authUser.id) : null;
 
-  // ===== 수정 모드: 기존 데이터 로드 =====
-  const { data: editDetailResponse } = useQuery({
+  //수정일 경우 기존 데이터 로드
+  const { data: editDetailResponse, isLoading: isLoadingEdit } = useQuery({
     queryKey: ['activityDetail', activityId],
     queryFn: () => getActivityDetail(userId!, activityId!),
     enabled: isEditMode && !!userId && !!activityId,
@@ -62,13 +62,34 @@ export const ActivityWritePage = () => {
 
   const editPost = editDetailResponse?.data;
 
-  // ===== 폼 상태 =====
+  //수정 모드 초기값 계산
+  const initialValues = useMemo(() => {
+    if (!editPost) return null;
+    const { activity, attachment, tagList } = editPost;
+    const categoryToBoardType: Partial<Record<ActivityCategory, BoardType>> = {
+      CLUB: '동아리',
+      STUDY: '스터디',
+    };
+    return {
+      boardType: categoryToBoardType[activity.category] ?? null,
+      title: activity.title,
+      content: activity.context,
+      tags: tagList,
+      photos: (attachment ?? []).map((a) => ({
+        id: `existing-${a.id}`,
+        url: a.fileUrl,
+        isExisting: true,
+      })),
+    };
+  }, [editPost]);
+
+  //폼 상태
   const [isBoardOpen, setIsBoardOpen] = useState(false);
-  const [boardType, setBoardType] = useState<BoardType | null>(null);
+  const [boardType, setBoardType] = useState<BoardType | null>(() => initialValues?.boardType ?? null);
   const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(null);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [title, setTitle] = useState(() => initialValues?.title ?? '');
+  const [content, setContent] = useState(() => initialValues?.content ?? '');
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => initialValues?.tags ?? []);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
@@ -76,30 +97,10 @@ export const ActivityWritePage = () => {
   // 이미지: { id, url(preview), file(원본 File), isExisting(기존 이미지) }
   const [photoPreviews, setPhotoPreviews] = useState<
     { id: string; url: string; file?: File; isExisting?: boolean }[]
-  >([]);
+  >(() => initialValues?.photos ?? []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 수정 모드 초기값 세팅
-  useEffect(() => {
-    if (!editPost) return;
-    const { activity, attachment, tagList } = editPost;
-    const categoryToBoardType: Partial<Record<ActivityCategory, BoardType>> = {
-      CLUB: '동아리',
-      STUDY: '스터디',
-    };
-    setBoardType(categoryToBoardType[activity.category] ?? null);
-    setTitle(activity.title);
-    setContent(activity.context);
-    setSelectedTags(tagList);
-    setPhotoPreviews(
-      attachment.map((a) => ({
-        id: `existing-${a.id}`,
-        url: a.fileUrl,
-        isExisting: true,
-      })),
-    );
-  }, [editPost]);
-
   const boardLabel = boardType ?? '게시판';
   const boardLabelColor = boardType ? 'var(--ColorMain, #00C56C)' : 'var(--ColorGray2, #A1A1A1)';
   const confirmTitle = isEditMode ? `${boardType ?? '게시글'}을 수정하시겠습니까?` : '게시글을 등록하시겠습니까?';
@@ -152,8 +153,6 @@ export const ActivityWritePage = () => {
     });
   };
 
-  // ===== 등록/수정 mutation =====
-  // ===== 태그 목록 조회 =====
   const { data: tagData } = useQuery({
     queryKey: ['tags', 'DEFAULT'],
     queryFn: () => getTags('DEFAULT'),
@@ -171,6 +170,15 @@ export const ActivityWritePage = () => {
   const tagCategories = useMemo(() => tagData?.data.map(mapApiTagCategoryToUiTagCategory) ?? [], [tagData]);
 
   const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
+
+  if (isEditMode && isLoadingEdit) {
+    return (
+      <PopUp
+        type="loading"
+        isOpen={true}
+      />
+    );
+  }
 
   const submitMutation = useMutation({
     mutationFn: async () => {

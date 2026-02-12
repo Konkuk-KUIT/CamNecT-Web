@@ -6,13 +6,16 @@ import { getTeamRecruitDetail } from '../../mock/teamRecruit';
 import PopUp from '../../components/Pop-up';
 import Card from '../../components/Card';
 import Icon from '../../components/Icon';
+import { useAuthStore } from '../../store/useAuthStore';
+import { createRecruitment, getRecruitmentDetail } from '../../api/activityApi';
+import { useQueryClient } from '@tanstack/react-query';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export const RecruitWritePage = () => {
     const navigate = useNavigate();
-    const { recruitId } = useParams();
-    //const { activityId } = useParams();
+    const queryClient = useQueryClient();
+    const { activityId, recruitId } = useParams();
     const isEditMode = Boolean(recruitId);
     const currentYear = new Date().getFullYear();
     

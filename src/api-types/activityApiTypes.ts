@@ -128,9 +128,9 @@ export interface ActivityDetail {
 export interface ActivityDetailData {
   isMine: boolean;
   activity: ActivityDetail;
-  attachment: ActivityAttachment[];
-  tagList: string[];
-  recruitmentList: RecruitmentItem[];
+  attachment: ActivityAttachment[] | null;
+  tagList: string[] | null;
+  recruitmentList: RecruitmentItem[] | null;
   bookmarkCount: number;
   isBookmarked: boolean;
 }

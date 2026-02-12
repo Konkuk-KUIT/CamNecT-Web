@@ -92,19 +92,22 @@ export const mapListItemToActivityPost = (item: ActivityListItem, category: Acti
 export const mapDetailToActivityPost = (detailData: ActivityDetailData): ActivityPostDetail => {
   const { activity, attachment, tagList, isBookmarked, bookmarkCount } = detailData;
 
+    const safeAttachment = attachment ?? [];
+    const safeTagList = tagList ?? [];
+
   return {
     id: String(activity.activityId),
     tab: categoryToTab(activity.category),
     title: activity.title,
     content: activity.context,
-    categories: tagList,
+    categories: safeTagList,
     saveCount: bookmarkCount,
     createdAt: activity.createdAt,
     organizer: activity.organizer,
     deadline: activity.applyEndDate ?? null,
     thumbnailUrl: activity.thumbnailUrl ?? null,
     // ⚠️ 임시처리: attachment를 postImages로 사용 (파일 타입 구분 없음)
-    postImages: attachment.map((a) => a.fileUrl),
+    postImages: safeAttachment.map((a) => a.fileUrl),
     status: activity.status,
     isBookmarked,
     target: activity.targetDescription ?? null,
