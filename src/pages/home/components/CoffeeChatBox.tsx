@@ -50,7 +50,9 @@ const CoffeeChatBox = ({ requests, totalCount, onViewAll }: CoffeeChatBoxProps) 
             </div>
 
             <div className="flex flex-col gap-[8px]">
-                {visibleRequests.map((request) => (
+                {visibleRequests.map((request) => {
+                    const shortStudentId = request.studentId?.slice(2, 4) ?? '';
+                    return (
                     <Card
                         key={`${request.name}-${request.studentId}`}
                         width="100%"
@@ -58,7 +60,7 @@ const CoffeeChatBox = ({ requests, totalCount, onViewAll }: CoffeeChatBoxProps) 
                         className="flex min-h-[47px] items-center justify-between p-[15px]"
                     >
                         <span className="text-m-12 text-gray-750 tracking-[-0.04em]">
-                            {request.name} ( {request.major} {request.studentId}학번 )
+                            {request.name} ( {request.major} {shortStudentId}학번 )
                         </span>
                         <button
                             type="button"
@@ -70,7 +72,8 @@ const CoffeeChatBox = ({ requests, totalCount, onViewAll }: CoffeeChatBoxProps) 
                             요청확인
                         </button>
                     </Card>
-                ))}
+                );
+                })}
             </div>
         </Card>
     );
