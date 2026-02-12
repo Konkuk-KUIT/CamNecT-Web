@@ -100,7 +100,7 @@ export const mapToCommunityPostDetail = (
   bookmarked: post.bookmarked ?? false,
   isAdopted: Boolean(post.acceptedCommentId),
   adoptedCommentId: post.acceptedCommentId ? String(post.acceptedCommentId) : undefined,
-  createdAt: new Date().toISOString(),
+  createdAt: post.createdAt,
   accessStatus: post.accessStatus,
   requiredPoints: post.requiredPoints,
   myPoints: post.myPoints,
@@ -143,7 +143,7 @@ export const mapFlatCommentsToTree = (
       id: String(comment.commentId),
       author: mapCommentAuthorFromApi(comment),
       content: comment.content,
-      createdAt: new Date().toISOString(),
+      createdAt: comment.createdAt,
       replies: [],
     });
   });

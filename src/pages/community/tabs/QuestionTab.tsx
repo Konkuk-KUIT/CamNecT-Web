@@ -128,7 +128,6 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
                     )}
                   </div>
 
-                  {null}
                 </div>
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>

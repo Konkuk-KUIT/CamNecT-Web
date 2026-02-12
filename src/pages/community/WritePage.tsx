@@ -322,13 +322,23 @@ export const WritePage = () => {
 
         setIsSubmitting(true);
         try {
-            const attachments = await uploadAttachments(
+            const uploadedAttachments = await uploadAttachments(
                 newAttachments.map((attachment) => ({
                     file: attachment.file,
                     kind: attachment.kind,
                 })),
                 numericUserId,
             );
+            const existingAttachments = (editPost?.attachments ?? [])
+                .slice()
+                .sort((a, b) => a.sortOrder - b.sortOrder)
+                .map((attachment) => ({
+                    fileKey: attachment.fileKey,
+                    width: attachment.width,
+                    height: attachment.height,
+                    fileSize: attachment.fileSize,
+                }));
+            const mergedAttachments = [...existingAttachments, ...uploadedAttachments];
 
             if (isEditMode && postId) {
                 await updateCommunityPost({
@@ -339,7 +349,9 @@ export const WritePage = () => {
                         content: content.trim(),
                         anonymous: false,
                         tagIds,
-                        attachments,
+                        ...(mergedAttachments.length > 0
+                            ? { attachments: mergedAttachments }
+                            : {}),
                     },
                 });
                 navigate(`/community/post/${postId}`);
@@ -353,7 +365,7 @@ export const WritePage = () => {
                     content: content.trim(),
                     anonymous: false,
                     tagIds,
-                    attachments,
+                    attachments: uploadedAttachments,
                 },
             });
             const nextPostId = response.data.postId;

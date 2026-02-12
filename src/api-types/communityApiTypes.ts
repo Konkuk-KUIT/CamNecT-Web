@@ -153,6 +153,7 @@ export type CommunityPostDetailResponse = {
   content: string;
   anonymous: boolean;
   authorId: number;
+  createdAt: string;
   bookmarked?: boolean;
   attachments?: {
     attachmentId: number;
@@ -191,6 +192,7 @@ export type CommunityPostCommentResponse = {
   parentCommentId: number | null;
   content: string;
   likeCount: number;
+  createdAt: string;
   author?: {
     userId: number;
     name: string;

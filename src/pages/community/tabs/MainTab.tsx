@@ -67,11 +67,12 @@ const MainTab = ({ tagName, recommendedPosts, unansweredQuestions }: MainTabProp
             const isLast = index === unansweredQuestions.length - 1;
             return (
               <Card
+                key={question.id}
                 width="100%"
                 height="flex"
                 className="flex flex-col"
               >
-                <Link key={question.id} to={`/community/post/${question.id}`} className='block'>
+                <Link to={`/community/post/${question.id}`} className='block'>
                   <div
                     className='flex flex-col'
                     style={{

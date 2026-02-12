@@ -42,9 +42,13 @@ type PopUpConfig = {
 const CommunityPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const currentUser = loggedInUserProfile;
-  const authUserId = useAuthStore((state) => state.user?.id) ?? loggedInUserProfile.id;
-  const currentUserIdForOwnership = authUserId;
+  const authUser = useAuthStore((state) => state.user);
+  const currentUser = {
+    ...loggedInUserProfile,
+    id: authUser?.id ?? loggedInUserProfile.id,
+    name: authUser?.name ?? loggedInUserProfile.name,
+  };
+  const currentUserIdForOwnership = authUser?.id ?? loggedInUserProfile.id;
   // 옵션/팝업/이미지 실패 등 화면 단일 상태
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
