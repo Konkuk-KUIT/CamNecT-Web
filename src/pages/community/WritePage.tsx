@@ -6,8 +6,8 @@ import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { useImageUpload } from '../../hooks/useImageUpload';
+import { useTagList } from '../../hooks/useTagList';
 import type { CommunityPostDetail } from '../../types/community';
 import {
     communityPostData,
@@ -24,6 +24,7 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
+    const { filterCategories, filterTags } = useTagList();
 
     // 편집 진입 시 기존 글 데이터 매핑
     const editPost = useMemo<CommunityPostDetail | null>(() => {
@@ -537,8 +538,8 @@ export const WritePage = () => {
                     setSelectedTags(next);
                     setIsFilterOpen(false);
                 }}
-                categories={TAG_CATEGORIES}
-                allTags={MOCK_ALL_TAGS}
+                categories={filterCategories}
+                allTags={filterTags}
             />
         </EmptyLayout>
     );

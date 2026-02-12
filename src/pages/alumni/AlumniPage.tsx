@@ -1,41 +1,102 @@
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import Icon from '../../components/Icon';
 import {FullLayout} from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { alumniList } from './data';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
+import { getAlumniList } from '../../api/alumni';
+import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
+import { useTagList } from '../../hooks/useTagList';
+import PopUp from '../../components/Pop-up';
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
-  // 검색 입력값과 지연된 검색값으로 필터링 부담을 줄입니다.
   const [searchTerm, setSearchTerm] = useState('');
-  const deferredSearchTerm = useDeferredValue(searchTerm);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [alumniItems, setAlumniItems] = useState<ReturnType<typeof mapAlumniApiListToProfiles> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const abortRef = useRef<AbortController | null>(null);
+  const { filterCategories, filterTags, mapTagNamesToIds } = useTagList();
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  const isTagSearch = useMemo(() => {
+    if (!normalizedSearchTerm) return false;
+    return filterTags.some((tag) =>
+      tag.name.toLowerCase().includes(normalizedSearchTerm),
+    );
+  }, [filterTags, normalizedSearchTerm]);
+  const selectedTagIds = useMemo(
+    () => mapTagNamesToIds(selectedTags),
+    [mapTagNamesToIds, selectedTags],
+  );
+
+  // 검색어/태그 변경 시 디바운스 + 이전 요청 취소로 중복 호출을 줄입니다.
+  useEffect(() => {
+    const trimmedName = searchTerm.trim();
+    let isActive = true;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timer = window.setTimeout(async () => {
+      try {
+        setIsLoading(true);
+        // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
+        const response = await getAlumniList({
+          name: isTagSearch ? undefined : trimmedName || undefined,
+          tags: selectedTagIds,
+          signal: controller.signal,
+        });
+        if (isActive) {
+          setAlumniItems(mapAlumniApiListToProfiles(response.data));
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error('Failed to fetch alumni list:', error);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isActive = false;
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [isTagSearch, searchTerm, selectedTagIds, selectedTags]);
 
   // 선택된 태그만 만족하는 동문만 추립니다.
   const filteredList = useMemo(() => {
-    if (selectedTags.length === 0) return alumniList;
-    return alumniList.filter((alumni) =>
-      selectedTags.every((tag) => alumni.categories.includes(tag)),
-    );
-  }, [selectedTags]);
-
-  // 검색어와 필터 결과를 조합해 최종 리스트를 생성합니다.
-  const visibleList = useMemo(() => {
-    const keyword = deferredSearchTerm.trim();
-    if (!keyword) return filteredList;
-    return filteredList.filter((alumni) => {
-      const nameMatch = alumni.author.name.includes(keyword);
-      const tagMatch = alumni.categories.some((category) => category.includes(keyword));
-      return nameMatch || tagMatch;
+    if (!alumniItems) return [];
+    let nextList = alumniItems;
+    if (selectedTags.length > 0) {
+      nextList = nextList.filter((alumni) =>
+        selectedTags.every((tag) => alumni.categories.includes(tag)),
+      );
+    }
+    if (!normalizedSearchTerm) return nextList;
+    return nextList.filter((alumni) => {
+      const name = alumni.author.name.toLowerCase();
+      const major = alumni.author.major.toLowerCase();
+      const intro = alumni.intro.toLowerCase();
+      const matchesTag = alumni.categories.some((category) =>
+        category.toLowerCase().includes(normalizedSearchTerm),
+      );
+      return (
+        name.includes(normalizedSearchTerm) ||
+        major.includes(normalizedSearchTerm) ||
+        intro.includes(normalizedSearchTerm) ||
+        matchesTag
+      );
     });
-  }, [deferredSearchTerm, filteredList]);
+  }, [alumniItems, normalizedSearchTerm, selectedTags]);
+
+  const visibleList = filteredList;
 
 
   return (
@@ -136,31 +197,35 @@ export const AlumniSearchPage = () => {
                   className='flex min-w-0 flex-col gap-[10px] pl-[7px]'
                 >
                   <div className='flex flex-wrap gap-[5px]'>
-                    {alumni.categories.map((category) => (
-                      <Category key={`${alumni.id}-${category}`} label={category} />
-                    ))}
+                    {alumni.categories
+                      .filter((category): category is string => Boolean(category))
+                      .map((category) => (
+                        <Category key={`${alumni.id}-${category}`} label={category} />
+                      ))}
                   </div>
 
-                  <p className='line-clamp-3 text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
+                  <p className='line-clamp-3 whitespace-pre-line text-r-14 text-[color:var(--ColorGray3,#646464)] tracking-[-0.56px]'>
                     {alumni.intro}
                   </p>
                 </div>
               </Link>
 
               {/* 3그룹: 커피챗 요청 버튼 */}
-              <CoffeeChatButton
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
+              {alumni.privacy.openToCoffeeChat && (
+                <CoffeeChatButton
+                  onClick={(event) => {
                     event.preventDefault();
                     navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
-                  }
-                }}
-                aria-label={`${alumni.author.name} 커피챗 요청하기`}
-              />
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      navigate(`/alumni/profile/${alumni.id}?coffeeChat=1`);
+                    }
+                  }}
+                  aria-label={`${alumni.author.name} 커피챗 요청하기`}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -175,9 +240,10 @@ export const AlumniSearchPage = () => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={filterCategories}
+        allTags={filterTags}
       />
+      <PopUp isOpen={isLoading} type="loading" />
     </FullLayout>
   );
 };

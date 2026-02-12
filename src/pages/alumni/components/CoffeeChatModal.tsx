@@ -41,7 +41,7 @@ const CoffeeChatModal = ({ isOpen, onClose, categories, onSubmit }: CoffeeChatMo
   }, [isOpen]);
 
   // 최소 조건 충족 여부 및 글자수 표시.
-  const isSubmitEnabled = selectedCategories.length > 0 && message.trim().length > 0;
+  const isSubmitEnabled = message.trim().length > 0;
   const countText = useMemo(() => `${message.length}/${maxLength}`, [message.length]);
 
   // 카테고리 활성/비활성 토글.
