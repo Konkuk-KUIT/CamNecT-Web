@@ -21,7 +21,7 @@ const messaging = firebase.messaging();
 
 // 4. 백그라운드 메시지 핸들러
 messaging.onBackgroundMessage((payload) => {
-    console.log('[firebase-messaging-sw.js] 백그라운드 메시지 수신: ', payload);
+    console.log('💤 [백그라운드] FCM 메시지 도착:', payload);
     
     // 서버에서 보낸 데이터 
     const notificationTitle = payload.notification.title;

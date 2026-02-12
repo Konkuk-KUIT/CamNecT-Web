@@ -30,9 +30,13 @@ export const HomePage = () => {
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        // 1. 이미 알림 권한이 허용된 상태라면 (전체 서비스 진입 시마다 토큰 최신화)
-        if (Notification.permission === 'granted') {
+        // 세션 내에 이미 등록을 시도했는지 확인
+        const isRegisteredInSession = sessionStorage.getItem('FCM_REGISTERED_IN_SESSION');
+
+        // 1. 이미 알림 권한이 허용된 상태라면 (이번 세션 최초 1회만 등록/최신화)
+        if (Notification.permission === 'granted' && !isRegisteredInSession) {
             handleRequestPermission();
+            sessionStorage.setItem('FCM_REGISTERED_IN_SESSION', 'true');
             return;
         }
 

@@ -1,6 +1,6 @@
 import { getId } from "firebase/installations";
-import { getToken } from "firebase/messaging";
-import { useCallback } from "react";
+import { getToken, onMessage } from "firebase/messaging";
+import { useCallback, useEffect } from "react";
 import { registerFcmToken } from "../api/push";
 import { installations, messaging } from "../shared/firebase";
 import { useAuthStore } from "../store/useAuthStore";
@@ -20,9 +20,13 @@ export const useFcmToken = () => {
         }
 
         try {
-            // FCM Token 발급 (브라우저 식별)
+            // 서비스 워커가 등록될 때까지 대기
+            const registration = await navigator.serviceWorker.ready;
+
+            // FCM Token 발급 (서비스 워커 객체를 직접 전달하여 에러 방지)
             const fcmToken = await getToken(messaging, {
                 vapidKey: import.meta.env.VITE_FCM_VAPID_KEY,
+                serviceWorkerRegistration: registration,
             });
 
             // FID 발급 (기기 아이디)
@@ -45,6 +49,15 @@ export const useFcmToken = () => {
         } catch (error) {
             console.error("FCM 토큰 발급 및 등록 실패", error);
         }
+    }, []);
+
+    // 포그라운드(앱을 보고 있을 때) 메시지 수신 로그
+    useEffect(() => {
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log("🔔 [포그라운드] FCM 메시지 도착:", payload);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     return { handleRequestPermission };
