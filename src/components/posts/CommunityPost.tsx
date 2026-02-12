@@ -29,7 +29,12 @@ export const CommunityPost = (post: CommunityPostProps) => {
                     <div className="w-full flex flex-col gap-[7px]">
                         <div className="flex items-center gap-[3px]">
                             <span className="text-sb-14-hn text-gray-900">{post.author.name}</span>
-                            <span className="text-r-12-hn text-gray-750">· {post.author.major} {post.author.studentId}학번</span>
+                            <span className="text-r-12-hn text-gray-750">
+                                · {post.author.major}
+                                {post.author.studentId
+                                  ? ` ${post.author.studentId}학번`
+                                  : ''}
+                            </span>
                         </div>
                         <span className="text-sb-16-hn text-gray-900 truncate">
                             {post.title}

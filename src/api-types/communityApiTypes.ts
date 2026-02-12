@@ -20,6 +20,7 @@ export type CommunityPostItem = {
     userId: number;
     name: string;
     profileImageUrl: string | null;
+    studentNo?: string;
     majorName: string;
     yearLevel: number;
   };
@@ -166,6 +167,7 @@ export type CommunityPostDetailResponse = {
     userId: number;
     name: string;
     profileImageUrl: string | null;
+    studentNo?: string;
     majorName: string;
     yearLevel: number;
   };
@@ -189,6 +191,14 @@ export type CommunityPostCommentResponse = {
   parentCommentId: number | null;
   content: string;
   likeCount: number;
+  author?: {
+    userId: number;
+    name: string;
+    profileImageUrl?: string | null;
+    studentNo?: string;
+    majorName?: string;
+    yearLevel?: number;
+  };
 };
 
 export type CreateCommunityCommentParams = {

@@ -22,6 +22,7 @@ import { formatPostDisplayDate } from './utils/post';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
 import { useAuthStore } from '../../store/useAuthStore';
+import type { AxiosError } from 'axios';
 import { acceptCommunityComment, createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, purchaseCommunityPostAccess, updateCommunityComment } from '../../api/community';
 import { mapFlatCommentsToTree } from '../../utils/communityMapper';
 
@@ -359,7 +360,14 @@ const CommunityPostPage = () => {
       const response = await postCommunityLike(selectedPost.id, { userId });
       setIsLiked(response.data.liked);
       setLikeCount(response.data.likeCount);
-    } catch {
+    } catch (error) {
+      const axiosError = error as AxiosError<{ code?: number; message?: string }>;
+      const status = axiosError.response?.status;
+      const code = axiosError.response?.data?.code;
+      if (status === 409 || code === 43927) {
+        setToastMessage('본인의 글에 좋아요를 누를 수 없습니다.');
+        openToast();
+      }
       setIsLiked(prev.liked);
       setLikeCount(prev.count);
     } finally {
@@ -664,10 +672,10 @@ const CommunityPostPage = () => {
                     {selectedPost.author.name}
                   </div>
                   <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major}{' '}
-                    {selectedPost.author.yearLevel
-                      ? `${selectedPost.author.yearLevel}학년`
-                      : `${selectedPost.author.studentId}학번`}
+                    {selectedPost.author.major}
+                    {selectedPost.author.studentId
+                      ? ` ${selectedPost.author.studentId}학번`
+                      : ''}
                   </div>
                 </div>
               </button>

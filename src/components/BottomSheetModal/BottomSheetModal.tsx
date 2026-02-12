@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
 type BottomSheetModalProps = {
     isOpen: boolean;
@@ -16,21 +16,30 @@ const BottomSheetModal = ({
     bottomOffset = 0,
     children,
 }: BottomSheetModalProps) => {
+    const scrollYRef = useRef(0);
     // 모달이 열려있을 때 body 스크롤 방지 (브라우저 스크롤 막기)
     useEffect(() => {
         if (isOpen) {
+            scrollYRef.current = window.scrollY;
             document.body.style.overflow = 'hidden';
             document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollYRef.current}px`;
             document.body.style.width = '100%';
         } else {
             document.body.style.overflow = '';
             document.body.style.position = '';
+            document.body.style.top = '';
             document.body.style.width = '';
+            window.scrollTo(0, scrollYRef.current);
         }
         return () => {
             document.body.style.overflow = '';
             document.body.style.position = '';
+            document.body.style.top = '';
             document.body.style.width = '';
+            if (scrollYRef.current) {
+                window.scrollTo(0, scrollYRef.current);
+            }
         };
     }, [isOpen]);
 

@@ -14,13 +14,36 @@ const buildAuthor = () => ({
   studentId: "",
 });
 
+const sliceStudentNo = (studentNo?: string | null) => {
+  if (!studentNo) return "";
+  const value = String(studentNo);
+  if (value.length < 4) return "";
+  return value.slice(2, 4);
+};
+
+const mapCommentAuthorFromApi = (comment: CommunityPostCommentResponse) => {
+  const fallback = buildAuthor();
+  if (!comment.author) {
+    return { ...fallback, id: String(comment.userId) };
+  }
+  return {
+    ...fallback,
+    id: String(comment.author.userId ?? comment.userId),
+    name: comment.author.name ?? fallback.name,
+    major: comment.author.majorName ?? fallback.major,
+    studentId: sliceStudentNo(comment.author.studentNo),
+    yearLevel: comment.author.yearLevel,
+    profileImageUrl: comment.author.profileImageUrl ?? null,
+  };
+};
+
 const mapAuthorFromApi = (post: CommunityPostItem) => {
   if (!post.author) return buildAuthor();
   return {
     id: String(post.author.userId),
     name: post.author.name,
     major: post.author.majorName,
-    studentId: "",
+    studentId: sliceStudentNo(post.author.studentNo),
     yearLevel: post.author.yearLevel,
     profileImageUrl: post.author.profileImageUrl,
   };
@@ -85,7 +108,7 @@ export const mapToCommunityPostDetail = (
     id: post.author ? String(post.author.userId) : String(post.authorId),
     name: post.author?.name ?? "익명",
     major: post.author?.majorName ?? loggedInUserMajor,
-    studentId: "",
+    studentId: sliceStudentNo(post.author?.studentNo),
     yearLevel: post.author?.yearLevel,
     profileImageUrl: post.author?.profileImageUrl,
   },
@@ -118,10 +141,7 @@ export const mapFlatCommentsToTree = (
   comments.forEach((comment) => {
     nodes.set(comment.commentId, {
       id: String(comment.commentId),
-      author: {
-        ...buildAuthor(),
-        id: String(comment.userId),
-      },
+      author: mapCommentAuthorFromApi(comment),
       content: comment.content,
       createdAt: new Date().toISOString(),
       replies: [],

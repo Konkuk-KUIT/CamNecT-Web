@@ -82,10 +82,10 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
                   <div className='flex items-center gap-[6px]'>
                     <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
                     <span className='text-r-12 text-gray-750'>
-                      · {post.author.major}{' '}
-                      {post.author.yearLevel
-                        ? `${post.author.yearLevel}학년`
-                        : `${post.author.studentId}학번`}
+                      · {post.author.major}
+                      {post.author.studentId
+                        ? ` ${post.author.studentId}학번`
+                        : ''}
                     </span>
                   </div>
 

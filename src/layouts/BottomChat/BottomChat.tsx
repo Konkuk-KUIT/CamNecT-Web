@@ -126,7 +126,7 @@ export const BottomChat = ({
             ) : null}
           </form>
         </div>
-        <div className='flex shrink-0 items-center gap-[clamp(8px,3vw,13px)]'>
+        <div className='flex shrink-0 items-center gap-[clamp(8px,3vw,13px)] self-end'>
           <div
             className='flex items-center justify-center gap-[clamp(4px,1.5vw,5px)]'
             style={{ paddingLeft: isLiked ? '2px' : '0px' }}

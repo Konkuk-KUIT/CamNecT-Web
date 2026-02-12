@@ -57,6 +57,42 @@ const CommentItem = ({
   if (isQuestionPost && isReply) return null;
   // 채택된 댓글 표시 여부 계산
   const isAdoptedComment = isQuestionPost && isAdopted && adoptedCommentId === comment.id;
+  const isDeletedComment = comment.content === '삭제된 댓글입니다.';
+  const replyItems =
+    !isQuestionPost && comment.replies && comment.replies.length > 0
+      ? comment.replies.map((reply) => renderReply(reply))
+      : null;
+  if (isDeletedComment) {
+    return (
+      <Fragment>
+        <div
+          className={`flex flex-col border-b border-[var(--ColorGray1,#ECECEC)] ${
+            isReply
+              ? 'bg-[var(--Color_Gray_B,#FCFCFC)]'
+              : isHighlighted
+                ? 'bg-[var(--ColorSub2,#F2FCF8)]'
+                : isAdoptedComment
+                  ? 'bg-[var(--ColorSub2,#F2FCF8)]'
+                  : ''
+          }`}
+        >
+          <div
+            className='flex gap-[10px]'
+            style={{
+              padding: '20px 25px',
+              paddingLeft: isReply ? '35px' : '25px',
+            }}
+          >
+            {isReply ? <Icon name='reply' className='h-6 w-6 shrink-0' /> : null}
+            <div className='text-[16px] leading-[160%] text-[var(--ColorGray2,#A1A1A1)]'>
+              {comment.content}
+            </div>
+          </div>
+        </div>
+        {replyItems}
+      </Fragment>
+    );
+  }
   return (
     <Fragment>
       <div
@@ -83,17 +119,20 @@ const CommentItem = ({
                   {comment.author.name}
                 </div>
                 <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                  {comment.author.major} · {comment.author.studentId}학번
+                  {comment.author.major}
+                  {comment.author.studentId ? ` · ${comment.author.studentId}학번` : ''}
                 </div>
               </div>
-              <button
-                type='button'
-                className='shrink-0'
-                onClick={() => onOpenCommentOptions(comment)}
-                aria-label='댓글 옵션 열기'
-              >
-                <Icon name='option' className='h-6 w-6' />
-              </button>
+              {comment.content !== '삭제된 댓글입니다.' ? (
+                <button
+                  type='button'
+                  className='shrink-0'
+                  onClick={() => onOpenCommentOptions(comment)}
+                  aria-label='댓글 옵션 열기'
+                >
+                  <Icon name='option' className='h-6 w-6' />
+                </button>
+              ) : null}
             </div>
 
             {isEditing ? (
@@ -196,9 +235,7 @@ const CommentItem = ({
           </div>
         </div>
       </div>
-      {!isQuestionPost && comment.replies && comment.replies.length > 0
-        ? comment.replies.map((reply) => renderReply(reply))
-        : null}
+      {replyItems}
     </Fragment>
   );
 };

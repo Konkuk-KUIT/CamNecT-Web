@@ -32,12 +32,6 @@ communityAxiosInstance.interceptors.response.use(
         content:
           "서비스 이용에 불편을 드려 죄송합니다.\\n잠시 후 다시 시도해 주세요.",
       };
-    } else if (status) {
-      popUpConfig = {
-        title: "이용에 불편을 드려 죄송합니다",
-        content:
-          "일시적인 오류로 요청을 처리하지 못했습니다.\\n잠시 후 다시 시도해 주세요.",
-      };
     }
 
     if (popUpConfig) {
