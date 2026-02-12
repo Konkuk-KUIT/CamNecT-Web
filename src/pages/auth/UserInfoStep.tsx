@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 import { checkIdDuplicate } from '../../api/auth';
@@ -70,7 +70,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
 
     // React Hook Form : 여러개의 input 값 관리 (유효성 검사, 에러처리, submit처리)
     // isValid : 입력된 데이터들 유효확인
-    const { register, handleSubmit, watch,
+    const { register, handleSubmit, control,
         setError, clearErrors, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(userInfoSchema), // 검증은 zod로
         mode: "onChange", // 입력될 때 마다 검사
@@ -84,7 +84,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     });
 
     // SingleInput에 입력되는 아이디 값 실시간 감지
-    const userNameValue = watch("username");
+    const userNameValue = useWatch({ control, name: "username" });
 
     const idCheckMutation = useMutation({
         mutationFn: checkIdDuplicate,
@@ -127,9 +127,6 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     };
 
     //
-    useEffect(() => {
-        setIsUserNameChecked(false);
-    }, [userNameValue])
 
 
     // handleSubmit : 모든 input값을 zod로 검증한 후 onSubmit 실행
@@ -150,7 +147,9 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             className="flex-1"
                             label='아이디' 
                             placeholder='아이디를 입력해 주세요' 
-                            {...register("username")} 
+                            {...register("username", {
+                                onChange: () => setIsUserNameChecked(false),
+                            })} 
                             error={errors.username?.message}
                             successMessage={isUserNameChecked ? "사용 가능한 아이디입니다" : ""}
                         />
