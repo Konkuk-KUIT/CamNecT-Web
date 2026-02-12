@@ -77,8 +77,8 @@ export const CommunityPage = () => {
   const [questionState, setQuestionState] = useState<CommunityListState>(() =>
     createInitialState(),
   );
-  const [infoSortKey, setInfoSortKey] = useState<SortKey>('recommended');
-  const [questionSortKey, setQuestionSortKey] = useState<SortKey>('recommended');
+  const [infoSortKey, setInfoSortKey] = useState<SortKey>('latest');
+  const [questionSortKey, setQuestionSortKey] = useState<SortKey>('latest');
   const [mainState, setMainState] = useState<{
     tagId?: number;
     tagName?: string;
@@ -100,8 +100,8 @@ export const CommunityPage = () => {
   });
   const requestSeq = useRef({ INFO: 0, QUESTION: 0 });
   const lastRequestRef = useRef({
-    INFO: { keyword: '', sort: 'RECOMMENDED' as Sort },
-    QUESTION: { keyword: '', sort: 'RECOMMENDED' as Sort },
+    INFO: { keyword: '', sort: 'LATEST' as Sort },
+    QUESTION: { keyword: '', sort: 'LATEST' as Sort },
   });
   const infoStateRef = useRef(infoState);
   const questionStateRef = useRef(questionState);

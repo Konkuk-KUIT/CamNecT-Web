@@ -88,7 +88,7 @@ const CommunityPostPage = () => {
     detailError,
     refetchPost,
     isLoading: isDetailLoading,
-  } = usePost({ postId, currentUserId: currentUserIdForOwnership });
+  } = usePost({ postId });
   const accessStatus =
     accessStatusOverride ??
     selectedPost?.accessStatus ??
@@ -633,9 +633,27 @@ const CommunityPostPage = () => {
                       <Icon name='like' className='h-[14px] w-[14px]' />
                       <span>{likeCount}</span>
                     </div>
+                    
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='comment' className='h-[14px] w-[14px]' />
                       <span>{commentCount}</span>
+                    </div>
+                    <div className='flex items-center gap-[3px]'>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='11'
+                        height='12'
+                        viewBox='0 0 11 12'
+                        fill='none'
+                      >
+                        <path
+                          d='M9.22867 0.697692C9.962 0.775908 10.5 1.3558 10.5 2.03286V11.5L5.5 9.20853L0.5 11.5V2.03286C0.5 1.3558 1.03733 0.775908 1.77133 0.697692C4.24879 0.434103 6.75121 0.434103 9.22867 0.697692Z'
+                          stroke='#646464'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                      <span>{bookmarkCount}</span>
                     </div>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>

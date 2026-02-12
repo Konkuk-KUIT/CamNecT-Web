@@ -4,15 +4,16 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { getCommunityPostDetail } from '../../../api/community';
 import { mapToCommunityPostDetail } from '../../../utils/communityMapper';
 import type { CommunityPostDetail } from '../../../types/community';
+import { useTagList } from '../../../hooks/useTagList';
 
 type UsePostParams = {
   postId?: string;
-  currentUserId: string;
 };
 
 // 게시글 선택 및 파생 상태 계산을 캡슐화
-export const usePost = ({ postId, currentUserId }: UsePostParams) => {
+export const usePost = ({ postId }: UsePostParams) => {
   const userId = useAuthStore((state) => state.user?.id);
+  const { mapTagIdToName } = useTagList();
   const [selectedPost, setSelectedPost] = useState<CommunityPostDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedByMe, setLikedByMe] = useState(false);
@@ -33,7 +34,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
       params: { userId: numericUserId },
     })
       .then((response) => {
-        setSelectedPost(mapToCommunityPostDetail(response.data));
+        setSelectedPost(mapToCommunityPostDetail(response.data, mapTagIdToName));
         setLikedByMe(Boolean(response.data.likedByMe));
         setDetailError(false);
       })
@@ -47,7 +48,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
         setIsLoading(false);
         isFetchingRef.current = false;
       });
-  }, [postId, userId]);
+  }, [postId, userId, mapTagIdToName]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -77,7 +78,7 @@ export const usePost = ({ postId, currentUserId }: UsePostParams) => {
 
   const isQuestionPost = selectedPost.boardType === '질문';
   const isInfoPost = !isQuestionPost;
-  const isPostMine = selectedPost.author.id === currentUserId;
+  const isPostMine = userId ? selectedPost.author.id === userId : false;
   const isAdopted = selectedPost.isAdopted;
   const showAdoptButton = isQuestionPost && isPostMine && !isAdopted;
   const accessStatus =

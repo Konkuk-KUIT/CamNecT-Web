@@ -3,6 +3,7 @@ import type { AxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
+import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
 import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
@@ -24,7 +25,7 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
-    const { filterCategories, filterTags, mapTagNamesToIds } = useTagList();
+    const { filterCategories, filterTags, mapTagNamesToIds, mapTagIdToName, mapTagIdsToNames } = useTagList();
 
     const [editPost, setEditPost] = useState<CommunityPostDetail | null>(null);
     const didInitEditRef = useRef(false);
@@ -236,25 +237,30 @@ export const WritePage = () => {
         if (!Number.isFinite(numericUserId)) return;
         getCommunityPostDetail({ postId, params: { userId: numericUserId } })
             .then((response) => {
-                setEditPost(mapToCommunityPostDetail(response.data));
+                setEditPost(mapToCommunityPostDetail(response.data, mapTagIdToName));
             })
             .catch(() => {
                 setEditPost(mapToCommunityPost(postId));
             });
-    }, [isEditMode, postId, userId]);
+    }, [isEditMode, postId, userId, mapTagIdToName]);
 
     useEffect(() => {
         if (!isEditMode || !editPost || didInitEditRef.current) return;
+        const mappedTags = editPost.tagIds
+            ? mapTagIdsToNames(editPost.tagIds)
+            : editPost.categories ?? [];
+        const needsTags = Boolean(editPost.tagIds && editPost.tagIds.length > 0);
+        if (needsTags && mappedTags.length === 0) return;
         const nextBoardType = editPost.boardType as BoardType;
         setBoardType(nextBoardType);
         setDraftBoardType(nextBoardType);
         setTitle(editPost.title);
         setContent(editPost.content);
-        setSelectedTags(editPost.categories ?? []);
+        setSelectedTags(mappedTags);
         setExistingPhotoUrls(editPost.postImages ?? []);
         setNewAttachments([]);
         didInitEditRef.current = true;
-    }, [isEditMode, editPost]);
+    }, [isEditMode, editPost, mapTagIdsToNames]);
 
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
     const handleAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -337,7 +343,7 @@ export const WritePage = () => {
             if (isEditMode && postId) {
                 await updateCommunityPost({
                     postId,
-                    params: { userId: numericUserId, postId },
+                    params: { userId: numericUserId },
                     body: {
                         title: title.trim(),
                         content: content.trim(),
@@ -657,30 +663,16 @@ export const WritePage = () => {
             </div>
 
             {/* 게시판 선택 모달 */}
-            {!isEditMode && isBoardOpen && (
-                <div
-                    className='fixed inset-0 z-50 flex items-end justify-center'
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-                    onClick={() => closeBoardSelector(true)}
-                >
+            {!isEditMode && (
+                <BottomSheetModal isOpen={isBoardOpen} onClose={() => closeBoardSelector(true)} height='235px'>
                     <div
-                        className='flex w-[clamp(320px,100vw,540px)] flex-col'
+                        className='flex w-full flex-col'
                         style={{
-                            height: '235px',
                             padding: '10px 24px 56px',
-                            borderRadius: '10px 10px 0 0',
                             background: 'var(--Color_Gray_B, #FCFCFC)',
-                            boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
                             gap: '20px',
                         }}
-                        onClick={(event) => event.stopPropagation()}
                     >
-                        <div className='flex justify-center'>
-                            <svg xmlns='http://www.w3.org/2000/svg' width='78' height='5' viewBox='0 0 78 5' fill='none'>
-                                <path d='M2.5 2.5H75.5' stroke='#A1A1A1' strokeWidth='5' strokeLinecap='round' />
-                            </svg>
-                        </div>
-
                         <div className='flex flex-col' style={{ gap: '20px' }}>
                             <span className='text-b-18' style={{ color: 'var(--ColorBlack, #202023)' }}>
                                 게시판 선택
@@ -706,7 +698,7 @@ export const WritePage = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </BottomSheetModal>
             )}
 
             {/* 완료 확인 모달 */}

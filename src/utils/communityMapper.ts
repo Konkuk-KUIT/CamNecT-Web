@@ -5,7 +5,6 @@ import type {
 } from "../api-types/communityApiTypes";
 import type { CommentItem, CommunityPostDetail, InfoPost, QuestionPost } from "../types/community";
 import { loggedInUserMajor } from "../mock/community";
-import { MOCK_ALL_TAGS } from "../mock/tags";
 
 const buildAuthor = () => ({
   id: "unknown",
@@ -49,11 +48,6 @@ const mapAuthorFromApi = (post: CommunityPostItem) => {
   };
 };
 
-const mapTagIdToName = (tagId: number) => {
-  const match = MOCK_ALL_TAGS.find((tag) => tag.id.endsWith(`_${tagId}`));
-  return match?.name;
-};
-
 export const mapToInfoPost = (post: CommunityPostItem): InfoPost => ({
   id: String(post.postId),
   author: {
@@ -90,6 +84,7 @@ export const mapToQuestionPost = (post: CommunityPostItem): QuestionPost => ({
 
 export const mapToCommunityPostDetail = (
   post: CommunityPostDetailResponse,
+  mapTagIdToName?: (tagId: number) => string | undefined,
 ): CommunityPostDetail => ({
   id: String(post.postId),
   boardType: post.boardCode === "INFO" ? "정보" : "질문",
@@ -104,6 +99,7 @@ export const mapToCommunityPostDetail = (
   accessStatus: post.accessStatus,
   requiredPoints: post.requiredPoints,
   myPoints: post.myPoints,
+  tagIds: post.tagIds,
   author: {
     id: post.author ? String(post.author.userId) : String(post.authorId),
     name: post.author?.name ?? "익명",
@@ -113,9 +109,11 @@ export const mapToCommunityPostDetail = (
     profileImageUrl: post.author?.profileImageUrl,
   },
   content: post.content,
-  categories: post.tagIds
-    .map(mapTagIdToName)
-    .filter((tagName): tagName is string => Boolean(tagName)),
+  categories: mapTagIdToName
+    ? post.tagIds
+        .map(mapTagIdToName)
+        .filter((tagName): tagName is string => Boolean(tagName))
+    : [],
   attachments: post.attachments ?? [],
   postImages: post.attachments
     ?.filter((attachment) => {

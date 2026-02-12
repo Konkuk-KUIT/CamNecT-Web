@@ -165,8 +165,7 @@ export const useCommentActions = ({
 
   // 댓글 삭제
   const deleteComment = (commentId: string) => {
-    if (onDeleteCommentApi) {
-      onDeleteCommentApi(commentId);
+    const cleanup = () => {
       if (editingCommentId === commentId) {
         setEditingCommentId(null);
         setEditingCommentContent('');
@@ -175,17 +174,14 @@ export const useCommentActions = ({
         setReplyTarget(null);
         setHighlightedCommentId(null);
       }
+    };
+
+    if (onDeleteCommentApi) {
+      onDeleteCommentApi(commentId).finally(cleanup);
       return;
     }
     setCommentList((prev) => removeCommentById(prev, commentId));
-    if (editingCommentId === commentId) {
-      setEditingCommentId(null);
-      setEditingCommentContent('');
-    }
-    if (replyTarget?.id === commentId) {
-      setReplyTarget(null);
-      setHighlightedCommentId(null);
-    }
+    cleanup();
   };
 
   // 편집 대상 댓글 본문 로드

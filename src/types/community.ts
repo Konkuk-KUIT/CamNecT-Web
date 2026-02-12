@@ -68,6 +68,7 @@ export type CommunityPostDetail = {
   createdAt: string;
   author: CommentAuthor;
   content: string;
+  tagIds?: number[];
   categories: string[];
   postImages?: string[];
   attachments?: {

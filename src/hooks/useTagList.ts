@@ -40,6 +40,8 @@ export const useTagList = () => {
     filterCategories,
     filterTags,
     mapTagNamesToIds,
+    mapTagIdToName,
+    mapTagIdsToNames,
   } = useMemo(() => {
     if (!tagData) {
       return {
@@ -50,6 +52,14 @@ export const useTagList = () => {
         mapTagNamesToIds: (names: string[]) => {
           void names;
           return [] as number[];
+        },
+        mapTagIdToName: (id: number) => {
+          void id;
+          return undefined as string | undefined;
+        },
+        mapTagIdsToNames: (ids: number[]) => {
+          void ids;
+          return [] as string[];
         },
       };
     }
@@ -67,6 +77,9 @@ export const useTagList = () => {
     const signupTags = signupCategories.flatMap((category) => category.tags);
     const tagNameToId = new Map(
       signupTags.map((tag) => [tag.name, tag.id] as const),
+    );
+    const tagIdToName = new Map(
+      signupTags.map((tag) => [tag.id, tag.name] as const),
     );
 
     const filterCategories: FilterTagCategory[] = signupCategories.map((category) => ({
@@ -86,12 +99,21 @@ export const useTagList = () => {
         .map((name) => tagNameToId.get(name))
         .filter((id): id is number => typeof id === "number");
 
+    const mapTagIdToName = (id: number) => tagIdToName.get(id);
+
+    const mapTagIdsToNames = (ids: number[]) =>
+      ids
+        .map((id) => tagIdToName.get(id))
+        .filter((name): name is string => typeof name === "string");
+
     return {
       signupCategories,
       signupTags,
       filterCategories,
       filterTags,
       mapTagNamesToIds,
+      mapTagIdToName,
+      mapTagIdsToNames,
     };
   }, [tagData]);
 
@@ -101,6 +123,8 @@ export const useTagList = () => {
     filterCategories,
     filterTags,
     mapTagNamesToIds,
+    mapTagIdToName,
+    mapTagIdsToNames,
     isLoading,
     isError,
   };
