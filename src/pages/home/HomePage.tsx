@@ -28,19 +28,24 @@ export const HomePage = () => {
     const [isNotificationPopupOpen, setIsNotificationPopupOpen] = useState(false);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
 
+        // 1. 이미 알림 권한이 허용된 상태라면 (전체 서비스 진입 시마다 토큰 최신화)
+        if (Notification.permission === 'granted') {
+            handleRequestPermission();
+            return;
+        }
+
+        // 2. 권한이 아직 '기본' 상태이고 안내 팝업을 본 적 없다면 우리 서비스 팝업 띄우기
         const hasSeenPopup = localStorage.getItem('HAS_SEEN_FCM_PROMPT');
-        
-        // 로그인 상태이고 알림 권한이 아직 요청되지 않았을 때 팝업 표시
-        if (isAuthenticated && Notification.permission === 'default' && !hasSeenPopup) {
-
+        if (Notification.permission === 'default' && !hasSeenPopup) {
             // cascading 방지
             const timer = setTimeout(() => {
                 setIsNotificationPopupOpen(true);
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, handleRequestPermission]);
 
     const handleClosePopup = () => {
         setIsNotificationPopupOpen(false);
