@@ -141,7 +141,7 @@ export type UpdateCommunityPostBody = {
   content: string;
   anonymous: boolean;
   tagIds: number[];
-  attachments: CommunityAttachment[];
+  attachments?: CommunityAttachment[];
 };
 
 export type UpdateCommunityPostResult = string;
