@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
@@ -7,10 +7,58 @@ import {
   type NotificationItem,
   type NotificationType,
 } from './notificationData';
-import { requestNotifications } from '../../api/notifications';
+import { requestNotificationRead, requestNotifications } from '../../api/notifications';
+import PopUp from '../../components/Pop-up';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { mapNotificationResponseToItems } from './notificationMapper';
+
+type PopUpConfig = {
+  title: string;
+  content: string;
+};
+
+const resolveUserIdParam = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed;
+};
+
+const getErrorStatus = (error: unknown) => {
+  if (!error || typeof error !== 'object') return null;
+  const response = (error as { response?: { status?: number } }).response;
+  return typeof response?.status === 'number' ? response.status : null;
+};
+
+const getErrorPopUpConfig = (status: number | null): PopUpConfig | null => {
+  if (!status) return null;
+  if (status === 403) {
+    return {
+      title: '접근 권한이 없습니다',
+      content:
+        '요청하신 페이지를 볼 수 있는 권한이 없어요.\\n관리자에게 문의하시거나 권한을 확인해 주세요.',
+    };
+  }
+  if (status === 404) {
+    return {
+      title: '페이지를 찾을 수 없습니다',
+      content:
+        '요청하신 페이지는 존재하지 않는 주소입니다.\\n주소를 다시 한번 확인해 주세요.',
+    };
+  }
+  if (status === 500) {
+    return {
+      title: '시스템 오류가 발생했습니다',
+      content:
+        '서비스 이용에 불편을 드려 죄송합니다.\\n잠시 후 다시 시도해 주세요.',
+    };
+  }
+  return null;
+};
 
 const titleMap: Record<NotificationType, string> = {
   coffeeChatRequest: '커피챗 요청',
@@ -142,16 +190,18 @@ const renderIcon = (notification: NotificationItem) => {
 };
 
 export const NotificationPage = () => {
+  const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
+  const [isErrorDismissed, setIsErrorDismissed] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
-  const numericUserId = userId ? Number(userId) : null;
-  const hasValidUserId = Number.isFinite(numericUserId) && Number(numericUserId) > 0;
+  const userIdParam = resolveUserIdParam(userId);
+  const hasValidUserId = userIdParam !== null;
   const items = useNotificationStore((state) => state.items);
   const markAsRead = useNotificationStore((state) => state.markAsRead);
   const setItems = useNotificationStore((state) => state.setItems);
 
-  const { data: notificationResponse } = useQuery({
-    queryKey: ['notifications', numericUserId],
-    queryFn: () => requestNotifications({ userId: Number(numericUserId), size: 20 }),
+  const { data: notificationResponse, error: notificationError } = useQuery({
+    queryKey: ['notifications', userIdParam],
+    queryFn: () => requestNotifications({ userId: userIdParam as string | number, size: 20 }),
     enabled: hasValidUserId,
     staleTime: 30 * 1000,
   });
@@ -162,8 +212,31 @@ export const NotificationPage = () => {
     setItems(mappedItems);
   }, [notificationResponse, setItems]);
 
-  const handleNotificationClick = (notification: NotificationItem) => {
+  useEffect(() => {
+    if (isErrorDismissed) return;
+    const status = getErrorStatus(notificationError);
+    const config = getErrorPopUpConfig(status);
+    if (config) {
+      setPopUpConfig(config);
+    }
+  }, [notificationError, isErrorDismissed]);
+
+  const handleNotificationClick = async (notification: NotificationItem) => {
     markAsRead(notification.id);
+    if (hasValidUserId) {
+      try {
+        await requestNotificationRead({
+          userId: userIdParam as string | number,
+          id: notification.id,
+        });
+      } catch (error) {
+        const status = getErrorStatus(error);
+        const config = getErrorPopUpConfig(status);
+        if (config) {
+          setPopUpConfig(config);
+        }
+      }
+    }
 
     switch (notification.type) {
       case 'coffeeChatRequest':
@@ -223,6 +296,18 @@ export const NotificationPage = () => {
           </div>
         ))}
       </section>
+      {popUpConfig && (
+        <PopUp
+          isOpen={!!popUpConfig}
+          type="error"
+          title={popUpConfig.title}
+          content={popUpConfig.content}
+          onClick={() => {
+            setPopUpConfig(null);
+            setIsErrorDismissed(true);
+          }}
+        />
+      )}
     </HeaderLayout>
   );
 };

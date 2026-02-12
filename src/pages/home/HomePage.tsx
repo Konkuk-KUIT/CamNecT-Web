@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react';
 import {FullLayout} from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
 import Card from '../../components/Card';
-import CheckScheduleBox from './components/CheckScheduleBox';
+import PopUp from '../../components/Pop-up';
 import PointBox from './components/PointBox';
 import CommunityBox from './components/CommunityBox';
 import RecommendBox from './components/RecommendBox';
@@ -17,15 +18,64 @@ import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { mapHomeResponseToViewModel } from './homeMapper';
 
+type PopUpConfig = {
+    title: string;
+    content: string;
+};
+
+const resolveUserIdParam = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return null;
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed;
+};
+
+const getErrorStatus = (error: unknown) => {
+    if (!error || typeof error !== 'object') return null;
+    const response = (error as { response?: { status?: number } }).response;
+    return typeof response?.status === 'number' ? response.status : null;
+};
+
+const getErrorPopUpConfig = (status: number | null): PopUpConfig | null => {
+    if (!status) return null;
+    if (status === 403) {
+        return {
+            title: '접근 권한이 없습니다',
+            content:
+                '요청하신 페이지를 볼 수 있는 권한이 없어요.\\n관리자에게 문의하시거나 권한을 확인해 주세요.',
+        };
+    }
+    if (status === 404) {
+        return {
+            title: '페이지를 찾을 수 없습니다',
+            content:
+                '요청하신 페이지는 존재하지 않는 주소입니다.\\n주소를 다시 한번 확인해 주세요.',
+        };
+    }
+    if (status === 500) {
+        return {
+            title: '시스템 오류가 발생했습니다',
+            content:
+                '서비스 이용에 불편을 드려 죄송합니다.\\n잠시 후 다시 시도해 주세요.',
+        };
+    }
+    return null;
+};
+
 export const HomePage = () => {
     const navigate = useNavigate();
+    const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
+    const [isErrorDismissed, setIsErrorDismissed] = useState(false);
     const hasUnreadNotificationsFromStore = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
     );
     const storedUserName = useAuthStore((state) => state.user?.name);
     const storedUserId = useAuthStore((state) => state.user?.id);
-    const numericUserId = storedUserId ? Number(storedUserId) : null;
-    const hasValidUserId = Number.isFinite(numericUserId) && Number(numericUserId) > 0;
+    const userIdParam = resolveUserIdParam(storedUserId);
+    const hasValidUserId = userIdParam !== null;
 
     const fallbackViewModel = {
         userName: storedUserName ?? homeGreetingUser.name,
@@ -36,16 +86,17 @@ export const HomePage = () => {
         contests,
     };
 
-    const { data: homeResponse } = useQuery({
-        queryKey: ['home', numericUserId],
-        queryFn: () => requestHome({ userId: Number(numericUserId) }),
+    const { data: homeResponse, error: homeError } = useQuery({
+        queryKey: ['home', userIdParam],
+        queryFn: () => requestHome({ userId: userIdParam as string | number }),
         enabled: hasValidUserId,
         staleTime: 60 * 1000,
     });
 
-    const { data: unreadCountResponse } = useQuery({
-        queryKey: ['notificationsUnreadCount', numericUserId],
-        queryFn: () => requestNotificationUnreadCount({ userId: Number(numericUserId) }),
+    const { data: unreadCountResponse, error: unreadCountError } = useQuery({
+        queryKey: ['notificationsUnreadCount', userIdParam],
+        queryFn: () =>
+            requestNotificationUnreadCount({ userId: userIdParam as string | number }),
         enabled: hasValidUserId,
         staleTime: 30 * 1000,
     });
@@ -56,6 +107,15 @@ export const HomePage = () => {
     const unreadCount = unreadCountResponse?.data?.unreadCount;
     const hasUnreadNotifications =
         typeof unreadCount === 'number' ? unreadCount > 0 : hasUnreadNotificationsFromStore;
+
+    useEffect(() => {
+        if (isErrorDismissed) return;
+        const status = getErrorStatus(homeError) ?? getErrorStatus(unreadCountError);
+        const config = getErrorPopUpConfig(status);
+        if (config) {
+            setPopUpConfig(config);
+        }
+    }, [homeError, unreadCountError, isErrorDismissed]);
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
@@ -143,6 +203,18 @@ export const HomePage = () => {
                     />
                 </section>
             </div>
+            {popUpConfig && (
+                <PopUp
+                    isOpen={!!popUpConfig}
+                    type="error"
+                    title={popUpConfig.title}
+                    content={popUpConfig.content}
+                    onClick={() => {
+                        setPopUpConfig(null);
+                        setIsErrorDismissed(true);
+                    }}
+                />
+            )}
         </FullLayout>
     );
 };

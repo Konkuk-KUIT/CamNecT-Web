@@ -7,13 +7,18 @@ export type NotificationApiType =
   | 'COMMENT_REPLIED';
 
 export interface NotificationListRequest {
-  userId: number;
+  userId: number | string;
   cursorId?: number;
   size?: number;
 }
 
 export interface NotificationUnreadCountRequest {
-  userId: number;
+  userId: number | string;
+}
+
+export interface NotificationReadRequest {
+  userId: number | string;
+  id: number | string;
 }
 
 export interface NotificationListResponse {
@@ -29,6 +34,8 @@ export interface NotificationUnreadCountResponse {
     unreadCount: number;
   };
 }
+
+export type NotificationReadResponse = void;
 
 export interface NotificationListData {
   items: NotificationApiItem[];

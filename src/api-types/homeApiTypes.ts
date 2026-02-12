@@ -1,5 +1,5 @@
 export interface HomeRequest {
-    userId: number;
+    userId: number | string;
 }
 
 export interface HomeResponse {
@@ -47,7 +47,7 @@ export interface AlumniItem {
         studentNo: string;
         majorId: number;
     };
-    tagList: TagItem[];
+    tagList: Array<TagItem | string>;
 }
 
 export interface TagItem {
