@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
@@ -212,13 +212,10 @@ export const NotificationPage = () => {
     setItems(mappedItems);
   }, [notificationResponse, setItems]);
 
-  useEffect(() => {
-    if (isErrorDismissed) return;
+  const queryErrorConfig = useMemo(() => {
+    if (isErrorDismissed) return null;
     const status = getErrorStatus(notificationError);
-    const config = getErrorPopUpConfig(status);
-    if (config) {
-      setPopUpConfig(config);
-    }
+    return getErrorPopUpConfig(status);
   }, [notificationError, isErrorDismissed]);
 
   const handleNotificationClick = async (notification: NotificationItem) => {
@@ -262,6 +259,8 @@ export const NotificationPage = () => {
     }
   };
 
+  const activePopUpConfig = popUpConfig ?? queryErrorConfig;
+
   return (
     <HeaderLayout headerSlot={<MainHeader title="알림" />}>
       <section className="w-full bg-white">
@@ -296,12 +295,12 @@ export const NotificationPage = () => {
           </div>
         ))}
       </section>
-      {popUpConfig && (
+      {activePopUpConfig && (
         <PopUp
-          isOpen={!!popUpConfig}
+          isOpen={!!activePopUpConfig}
           type="error"
-          title={popUpConfig.title}
-          content={popUpConfig.content}
+          title={activePopUpConfig.title}
+          content={activePopUpConfig.content}
           onClick={() => {
             setPopUpConfig(null);
             setIsErrorDismissed(true);

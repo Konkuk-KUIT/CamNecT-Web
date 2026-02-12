@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {FullLayout} from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +67,6 @@ const getErrorPopUpConfig = (status: number | null): PopUpConfig | null => {
 
 export const HomePage = () => {
     const navigate = useNavigate();
-    const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
     const [isErrorDismissed, setIsErrorDismissed] = useState(false);
     const hasUnreadNotificationsFromStore = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
@@ -108,13 +107,10 @@ export const HomePage = () => {
     const hasUnreadNotifications =
         typeof unreadCount === 'number' ? unreadCount > 0 : hasUnreadNotificationsFromStore;
 
-    useEffect(() => {
-        if (isErrorDismissed) return;
+    const popUpConfig = useMemo(() => {
+        if (isErrorDismissed) return null;
         const status = getErrorStatus(homeError) ?? getErrorStatus(unreadCountError);
-        const config = getErrorPopUpConfig(status);
-        if (config) {
-            setPopUpConfig(config);
-        }
+        return getErrorPopUpConfig(status);
     }, [homeError, unreadCountError, isErrorDismissed]);
 
     return (
@@ -210,7 +206,6 @@ export const HomePage = () => {
                     title={popUpConfig.title}
                     content={popUpConfig.content}
                     onClick={() => {
-                        setPopUpConfig(null);
                         setIsErrorDismissed(true);
                     }}
                 />
