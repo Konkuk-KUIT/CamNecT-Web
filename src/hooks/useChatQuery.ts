@@ -4,6 +4,27 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
 
+// 1-1. 전체 안 읽은 메시지 개수 조회 전용 쿼리
+export const useUnreadCountQuery = () => {
+    const { user, isAuthenticated } = useAuthStore();
+    const { setTotalUnreadCount } = useChatStore();
+
+    return useQuery({
+        queryKey: ['chatUnreadCount', user?.id],
+        queryFn: async () => {
+            if (!user?.id) return 0;
+            const response = await viewChatRoomList({
+                userId: Number(user?.id)
+            });
+            const count = response.data.totalUnreadCount;
+            setTotalUnreadCount(count);
+            return count;
+        },
+        enabled: isAuthenticated && !!user?.id,
+        staleTime: 1000 * 60, // 1분간 신선도 유지
+    });
+};
+
 // 1. 채팅방 목록 조회 API [GET] (/api/chat/rooms)
 export const useChatRooms = (type: ChatRoomListItemType) => {
     const { user } = useAuthStore(); // 1. 유저 정보 가져오기 

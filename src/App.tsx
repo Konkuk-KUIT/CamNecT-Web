@@ -1,10 +1,12 @@
 import { Outlet } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
-import './styles/global.css';
+import { useUnreadCountQuery } from './hooks/useChatQuery';
 import { useSocketInitializer } from './hooks/useSocketInitializer';
+import './styles/global.css';
 
 function App() {
   useSocketInitializer(); 
+  useUnreadCountQuery(); // 전역 안 읽은 개수 동기화
 
   return (
     // 전역 레이아웃 적용 (반응형)

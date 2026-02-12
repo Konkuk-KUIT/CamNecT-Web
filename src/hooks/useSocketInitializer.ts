@@ -33,6 +33,11 @@ export const useSocketInitializer = () => {
                     exact: false, // 'chatRooms'로 시작하는 모든 키를 포함
                     refetchType: 'all' // 전부 리프레시
                 });
+
+                // BottomNav badge(totalUnreadCount 최신화)
+                queryClient.invalidateQueries({
+                    queryKey: ['chatUnreadCount', user?.id]
+                });
             });
 
         }
