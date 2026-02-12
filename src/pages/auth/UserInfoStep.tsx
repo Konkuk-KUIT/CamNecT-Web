@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
@@ -127,10 +127,6 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     };
 
     //
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIsUserNameChecked(false);
-    }, [userNameValue])
 
 
     // handleSubmit : 모든 input값을 zod로 검증한 후 onSubmit 실행
@@ -151,7 +147,9 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             className="flex-1"
                             label='아이디' 
                             placeholder='아이디를 입력해 주세요' 
-                            {...register("username")} 
+                            {...register("username", {
+                                onChange: () => setIsUserNameChecked(false),
+                            })} 
                             error={errors.username?.message}
                             successMessage={isUserNameChecked ? "사용 가능한 아이디입니다" : ""}
                         />

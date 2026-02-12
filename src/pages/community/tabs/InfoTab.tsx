@@ -8,7 +8,7 @@ import WriteButton from '../components/WriteButton';
 import type { InfoPost } from '../../../types/community';
 import { formatTimeAgo } from '../time';
 import TagsFilterModal from '../../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
+import { useTagList } from '../../../hooks/useTagList';
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
@@ -29,6 +29,7 @@ type InfoTabProps = {
 const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { filterCategories, filterTags } = useTagList();
 
   // 선택된 태그 기준으로 목록 필터링
   const filteredPosts = useMemo(() => {
@@ -132,8 +133,8 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={filterCategories}
+        allTags={filterTags}
       />
 
       {/* TODO: 글쓰기 라우터 연결 (버튼 클릭 / 현재는 임시) */}

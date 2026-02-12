@@ -6,7 +6,7 @@ import WriteButton from '../components/WriteButton';
 import type { QuestionPost } from '../../../types/community';
 import { formatTimeAgo } from '../time';
 import TagsFilterModal from '../../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
+import { useTagList } from '../../../hooks/useTagList';
 import SortSelector from '../../../components/SortSelector';
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
@@ -28,6 +28,7 @@ type QuestionTabProps = {
 const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const { filterCategories, filterTags } = useTagList();
 
   // 태그/채택 상태 기준으로 목록 필터링
   const filteredPosts = useMemo(() => {
@@ -150,8 +151,8 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={filterCategories}
+        allTags={filterTags}
         extraCategories={[
           {
             id: 'community-adoption',

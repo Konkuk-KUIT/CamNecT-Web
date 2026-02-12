@@ -52,7 +52,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     type EmailFormData = z.infer<typeof emailSchema>;
 
     // RHF로 폼 제어
-    const {register, handleSubmit, control, formState : {errors}} = useForm<EmailFormData>({
+    const { register, handleSubmit, control, formState : { errors } } = useForm<EmailFormData>({
         resolver: zodResolver(emailSchema),
         mode: "onChange",
         defaultValues: {

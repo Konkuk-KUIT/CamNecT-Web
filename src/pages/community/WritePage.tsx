@@ -7,8 +7,8 @@ import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { useTagList } from '../../hooks/useTagList';
 import { useAuthStore } from '../../store/useAuthStore';
 import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
 import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
@@ -24,6 +24,7 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
+    const { filterCategories, filterTags, mapTagNamesToIds } = useTagList();
 
     const [editPost, setEditPost] = useState<CommunityPostDetail | null>(null);
     const didInitEditRef = useRef(false);
@@ -311,14 +312,7 @@ export const WritePage = () => {
 
         const isQuestionBoard = boardType === '질문';
         const boardCode = isQuestionBoard ? 'QUESTION' : 'INFO';
-        const tagIds = selectedTags
-            .map((tagName) => MOCK_ALL_TAGS.find((tag) => tag.name === tagName)?.id)
-            .map((tagId) => {
-                if (!tagId) return null;
-                const match = /_(\d+)$/.exec(tagId);
-                return match ? Number(match[1]) : null;
-            })
-            .filter((tagId): tagId is number => Number.isFinite(tagId));
+        const tagIds = mapTagNamesToIds(selectedTags);
 
         setIsSubmitting(true);
         try {
@@ -751,8 +745,8 @@ export const WritePage = () => {
                     setSelectedTags(next);
                     setIsFilterOpen(false);
                 }}
-                categories={TAG_CATEGORIES}
-                allTags={MOCK_ALL_TAGS}
+                categories={filterCategories}
+                allTags={filterTags}
             />
         </EmptyLayout>
     );
