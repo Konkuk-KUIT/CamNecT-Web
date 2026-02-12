@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
 import { useChatRoom } from "../../hooks/useChatQuery";
+import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -11,7 +12,6 @@ import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
 import { TypingArea } from "./components/TypingArea";
-import { useStompChat } from "../../hooks/useStompChat";
 
 // todo 읽었을때 읽은 시각으로 보여줘야 함 (읽음 표시와 함께)
 export const ChatRoomPage = () => {
@@ -30,6 +30,32 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     const [isSearching, setIsSearching] = useState(false);
     const [roomSearchQuery, setRoomSearchQuery] = useState("");
     
+    // 메뉴 관련 상태
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // 메뉴 바깥 클릭/터치 시 닫기
+    useEffect(() => {
+        const handleOutsideAction = (event: MouseEvent | TouchEvent) => {
+            const target = event.target as Node;
+            // 메뉴 영역 외부이면서, 옵션 버튼(aria-label="option")이 아닐 때만 닫기
+            const isOptionButton = (target as HTMLElement).closest('[aria-label="option"]');
+            
+            if (menuRef.current && !menuRef.current.contains(target) && !isOptionButton) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        if (isMenuOpen) {
+            document.addEventListener("mousedown", handleOutsideAction);
+            document.addEventListener("touchstart", handleOutsideAction);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideAction);
+            document.removeEventListener("touchstart", handleOutsideAction);
+        };
+    }, [isMenuOpen]);
+
     // 초기 진입 시 깜빡임 방지를 위한 상태
     const [isReady, setIsReady] = useState(false);
 
@@ -111,13 +137,33 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         <HeaderLayout
             headerSlot={
                 !isSearching ? (
-                    <MainHeader
-                        title={roomInfo?.name}
-                        rightActions={[
-                            { icon: 'search', onClick: () => setIsSearching(true) },
-                            { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
-                        ]}
-                    />
+                    <div className="relative">
+                        <MainHeader
+                            title={roomInfo?.name}
+                            rightActions={[
+                                { icon: 'search', onClick: () => setIsSearching(true) },
+                                { icon: 'option', onClick: () => setIsMenuOpen(!isMenuOpen) }
+                            ]}
+                        />
+                        {/* 더보기 메뉴 드롭다운 */}
+                        {isMenuOpen && (
+                            <div 
+                                ref={menuRef}
+                                className="absolute right-[25px] top-[calc(100%+10px)] z-[60] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
+                            >
+                                <button 
+                                    onClick={() => {
+                                        console.log('채팅 종료하기');
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
+                                >
+                                    <Icon name="logOut" className="w-[24px] h-[24px]" />
+                                    <span className="text-r-16 text-[#FF3838] tracking-[-0.64px]">채팅 종료하기</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <header 
                         className="fixed left-0 right-0 top-0 z-50 flex items-center bg-white px-[25px] py-[10px]"
