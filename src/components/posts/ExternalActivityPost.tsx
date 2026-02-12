@@ -68,7 +68,6 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
           </div>
         </div>
 
-        {/* Thumbnail with Bookmark Indicator */}
         {thumbnailUrl && (
           <div className='relative'>
             <img

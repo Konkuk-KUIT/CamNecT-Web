@@ -1,14 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { getActivityPosts } from '../../mock/activityCommunity';
 import ClubTab from './tabs/ClubTab';
 import ExternalTab from './tabs/ExternalTab';
 import JobTab from './tabs/JobTab';
 import StudyTab from './tabs/StudyTab';
-import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
+import type { ActivityPostTab } from '../../types/activityPage/activityPageTypes';
 
 const tabItems: TabItem[] = [
   { id: 'club', label: '동아리' },
@@ -17,65 +16,19 @@ const tabItems: TabItem[] = [
   { id: 'job', label: '취업정보' },
 ];
 
-const filterByQuery = (posts: ActivityPost[], query: string) => {
-  if (!query) return posts;
-  return posts.filter((post) => {
-    const title = post.title.toLowerCase();
-    const content = post.content ? post.content.toLowerCase() : '';
-    const categories = post.categories.some((category) =>
-      category.toLowerCase().includes(query),
-    );
-    return title.includes(query) || content.includes(query) || categories;
-  });
-};
-
 export const ActivityPage = () => {
   const [activeTab, setActiveTab] = useState<ActivityPostTab>('club');
-
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-
-  const [posts] = useState<ActivityPost[]>(() => getActivityPosts());
-
-  const postsByTab = useMemo(() => {
-    return posts.reduce<Record<ActivityPostTab, ActivityPost[]>>(
-      (acc, post) => {
-        acc[post.tab].push(post);
-        return acc;
-      },
-      {
-        club: [],
-        study: [],
-        external: [],
-        job: [],
-      },
-    );
-  }, [posts]);
-
-  const filteredClubPosts = useMemo(
-    () => filterByQuery(postsByTab.club, normalizedQuery),
-    [postsByTab.club, normalizedQuery],
-  );
-  const filteredStudyPosts = useMemo(
-    () => filterByQuery(postsByTab.study, normalizedQuery),
-    [postsByTab.study, normalizedQuery],
-  );
-  const filteredExternalPosts = useMemo(
-    () => filterByQuery(postsByTab.external, normalizedQuery),
-    [postsByTab.external, normalizedQuery],
-  );
-  const filteredJobPosts = useMemo(
-    () => filterByQuery(postsByTab.job, normalizedQuery),
-    [postsByTab.job, normalizedQuery],
-  );
-
   const renderTab = () => {
-    if (activeTab === 'club') return <ClubTab posts={filteredClubPosts} />;
-    if (activeTab === 'study') return <StudyTab posts={filteredStudyPosts} />;
-    if (activeTab === 'external') return <ExternalTab posts={filteredExternalPosts} />;
-    return <JobTab posts={filteredJobPosts} />;
+    if (activeTab === 'club')
+      return <ClubTab searchQuery={searchQuery} />;
+    if (activeTab === 'study')
+      return <StudyTab searchQuery={searchQuery} />;
+    if (activeTab === 'external')
+      return <ExternalTab searchQuery={searchQuery} />;
+    return <JobTab searchQuery={searchQuery} />;
   };
 
   return (
@@ -99,7 +52,7 @@ export const ActivityPage = () => {
                   type='text'
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder='제목, 내용, 태그, 검색'
+                  placeholder='제목 검색'
                   className='flex-1 bg-transparent text-r-16 text-[var(--ColorBlack,#202023)] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none'
                 />
               </div>

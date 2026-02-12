@@ -6,7 +6,7 @@ export type ActivityPostAuthor = {
   name: string;
   major: string;
   studentId: string;
-  profileImageUrl?: string;
+  profileImageUrl: string | null;
 };
 
 // 공통 기본 타입
@@ -22,7 +22,6 @@ export type ActivityPost = {
   status?: ActivityPostStatus;
   postImages?: string[];
   thumbnailUrl?: string;
-  isBookmarked?: boolean;
   organizer?: string;
   deadline?: string;
   descriptionTitle?: string;
@@ -31,12 +30,14 @@ export type ActivityPost = {
 // 대외활동 상세 정보 포함 타입
 export type ActivityPostDetail = ActivityPost & {
   // 대외활동/취업정보에만 있는 필드들
+  isMine?: boolean;
+  isBookmarked?: boolean;
   location?: string;
   target?: string;
-  applyPeriod?: {
+  applyPeriod: {
     start: string;
     end: string;
-  };
+  } | null;
   announceDate?: string;
   applyUrl?: string;
   descriptionBody?: string;

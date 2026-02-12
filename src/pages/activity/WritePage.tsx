@@ -1,99 +1,111 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
 import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
-import { useImageUpload } from '../../hooks/useImageUpload';
-import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
+import { getTags } from '../../api/activityApi';
+import { mapApiTagCategoryToUiTagCategory } from './utils/activityMapper';
+import { useAuthStore } from '../../store/useAuthStore';
 import {
-  activityLoggedInUser,
-  addActivityPost,
-  getActivityPosts,
-  updateActivityPost,
-} from '../../mock/activityCommunity';
+  createActivity,
+  updateActivity,
+  getActivityDetail,
+  getActivityThumbnailPresignUrl,
+  getActivityAttachmentsPresignUrl,
+} from '../../api/activityApi';
+import type { ActivityCategory } from '../../api-types/activityApiTypes';
 
 const boardTypes = ['동아리', '스터디'] as const;
 type BoardType = (typeof boardTypes)[number];
 
-type BoardTypeMap = Record<ActivityPost['tab'], BoardType | null>;
-const boardTypeByTab: BoardTypeMap = {
-  club: '동아리',
-  study: '스터디',
-  external: null,
-  job: null,
+const boardTypeToCategory: Record<BoardType, ActivityCategory> = {
+  동아리: 'CLUB',
+  스터디: 'STUDY',
 };
 
-const tabByBoardType: Record<BoardType, ActivityPost['tab']> = {
-  동아리: 'club',
-  스터디: 'study',
+// S3 Presigned URL로 파일 업로드
+const uploadFileToS3 = async (
+  uploadUrl: string,
+  file: File,
+  requiredHeaders: Record<string, string>,
+): Promise<void> => {
+  await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': file.type,
+      ...requiredHeaders,
+    },
+    body: file,
+  });
 };
 
 export const ActivityWritePage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { postId } = useParams();
   const isEditMode = Boolean(postId);
+  const activityId = postId ? parseInt(postId) : null;
+  
+  const authUser = useAuthStore((state) => state.user);
+  const userId = authUser?.id ? parseInt(authUser.id) : null;
 
-  const editPost = useMemo<ActivityPost | null>(() => {
-    if (!postId) return null;
-    return getActivityPosts().find((post) => post.id === postId) ?? null;
-  }, [postId]);
+  // ===== 수정 모드: 기존 데이터 로드 =====
+  const { data: editDetailResponse } = useQuery({
+    queryKey: ['activityDetail', activityId],
+    queryFn: () => getActivityDetail(userId!, activityId!),
+    enabled: isEditMode && !!userId && !!activityId,
+  });
 
-  const initialBoardType = editPost ? boardTypeByTab[editPost.tab] : null;
-  const initialTitle = editPost?.title ?? '';
-  const initialContent = editPost?.content ?? '';
-  const initialPhotos =
-    editPost?.postImages?.map((url, index) => ({
-      id: `edit-${editPost.id}-${index}`,
-      url,
-    })) ?? [];
+  const editPost = editDetailResponse?.data;
 
+  // ===== 폼 상태 =====
   const [isBoardOpen, setIsBoardOpen] = useState(false);
-  const [boardType, setBoardType] = useState<BoardType | null>(initialBoardType);
-  const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(initialBoardType);
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
-  const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
+  const [boardType, setBoardType] = useState<BoardType | null>(null);
+  const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(null);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-  const [photoPreviews, setPhotoPreviews] = useState<{ id: string; url: string }[]>(
-    initialPhotos,
-  );
-  const [selectedTags, setSelectedTags] = useState<string[]>(editPost?.categories ?? []);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
+  // 이미지: { id, url(preview), file(원본 File), isExisting(기존 이미지) }
+  const [photoPreviews, setPhotoPreviews] = useState<
+    { id: string; url: string; file?: File; isExisting?: boolean }[]
+  >([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { prepareImage } = useImageUpload();
 
-  const openBoardSelector = () => {
-    setDraftBoardType(boardType);
-    setIsBoardOpen(true);
-  };
-
-  const closeBoardSelector = (shouldApply: boolean) => {
-    if (shouldApply && draftBoardType) {
-      setBoardType(draftBoardType);
-    }
-    setIsBoardOpen(false);
-  };
+  // 수정 모드 초기값 세팅
+  useEffect(() => {
+    if (!editPost) return;
+    const { activity, attachment, tagList } = editPost;
+    const categoryToBoardType: Partial<Record<ActivityCategory, BoardType>> = {
+      CLUB: '동아리',
+      STUDY: '스터디',
+    };
+    setBoardType(categoryToBoardType[activity.category] ?? null);
+    setTitle(activity.title);
+    setContent(activity.context);
+    setSelectedTags(tagList);
+    setPhotoPreviews(
+      attachment.map((a) => ({
+        id: `existing-${a.id}`,
+        url: a.fileUrl,
+        isExisting: true,
+      })),
+    );
+  }, [editPost]);
 
   const boardLabel = boardType ?? '게시판';
-  const boardLabelColor = boardType
-    ? 'var(--ColorMain, #00C56C)'
-    : 'var(--ColorGray2, #A1A1A1)';
-  const confirmTitle = isEditMode
-    ? `${boardType ?? '게시글'}을 수정하시겠습니까?`
-    : '게시글을 등록하시겠습니까?';
-  const confirmContent = isEditMode
-    ? '수정된 내용으로 저장됩니다.'
-    : '등록 후에도 수정/삭제가 가능합니다.';
+  const boardLabelColor = boardType ? 'var(--ColorMain, #00C56C)' : 'var(--ColorGray2, #A1A1A1)';
+  const confirmTitle = isEditMode ? `${boardType ?? '게시글'}을 수정하시겠습니까?` : '게시글을 등록하시겠습니까?';
+  const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
   const isSubmitEnabled =
-    Boolean(boardType) &&
-    title.trim().length > 0 &&
-    content.trim().length > 0 &&
-    selectedTags.length > 0;
+    Boolean(boardType) && title.trim().length > 0 && content.trim().length > 0 && selectedTags.length > 0;
   const hasDraftContent =
     title.trim().length > 0 ||
     content.trim().length > 0 ||
@@ -104,20 +116,14 @@ export const ActivityWritePage = () => {
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
-
     const updateOffset = () => {
-      const keyboardHeight = Math.max(
-        0,
-        window.innerHeight - viewport.height - viewport.offsetTop,
-      );
+      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
       setPhotoButtonOffset(keyboardHeight > 0 ? keyboardHeight + 16 : 0);
     };
-
     updateOffset();
     viewport.addEventListener('resize', updateOffset);
     viewport.addEventListener('scroll', updateOffset);
     window.addEventListener('resize', updateOffset);
-
     return () => {
       viewport.removeEventListener('resize', updateOffset);
       viewport.removeEventListener('scroll', updateOffset);
@@ -128,77 +134,144 @@ export const ActivityWritePage = () => {
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
-    const nextPreviews = Array.from(files)
-      .map((file, index) => {
-        const result = prepareImage(file);
-        if (!result) return null;
-        return {
-          id: `${file.name}-${file.lastModified}-${index}`,
-          url: result.previewUrl,
-        };
-      })
-      .filter((preview): preview is { id: string; url: string } => preview !== null);
-
+    const nextPreviews = Array.from(files).map((file, index) => ({
+      id: `new-${file.name}-${file.lastModified}-${index}`,
+      url: URL.createObjectURL(file),
+      file,
+      isExisting: false,
+    }));
     setPhotoPreviews((prev) => [...prev, ...nextPreviews]);
     event.target.value = '';
   };
 
   const handleRemovePhoto = (id: string) => {
     setPhotoPreviews((prev) => {
-      const target = prev.find((preview) => preview.id === id);
-      if (target) {
-        URL.revokeObjectURL(target.url);
-      }
-      return prev.filter((preview) => preview.id !== id);
+      const target = prev.find((p) => p.id === id);
+      if (target && !target.isExisting) URL.revokeObjectURL(target.url);
+      return prev.filter((p) => p.id !== id);
     });
   };
 
-  const handleSubmit = () => {
-    setIsConfirmOpen(true);
+  // ===== 등록/수정 mutation =====
+  // ===== 태그 목록 조회 =====
+  const { data: tagData } = useQuery({
+    queryKey: ['tags', 'DEFAULT'],
+    queryFn: () => getTags('DEFAULT'),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const tagNameToIdMap = useMemo(() => {
+    const map = new Map<string, number>();
+    tagData?.data.forEach((cat) => {
+      cat.tags.forEach((tag) => map.set(tag.name, tag.id));
+    });
+    return map;
+  }, [tagData]);
+
+  const tagCategories = useMemo(() => tagData?.data.map(mapApiTagCategoryToUiTagCategory) ?? [], [tagData]);
+
+  const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
+
+  const submitMutation = useMutation({
+    mutationFn: async () => {
+      if (!boardType || !userId) throw new Error('필수 값 누락');
+
+      const category: ActivityCategory = boardTypeToCategory[boardType];
+      const newFiles = photoPreviews.filter((p) => !p.isExisting && p.file);
+
+      // selectedTags(name[]) → tagIds(number[]) 변환
+      const tagIds = selectedTags
+        .map((name) => tagNameToIdMap.get(name))
+        .filter((id): id is number => id !== undefined);
+
+      // 1. 썸네일 업로드 (첫 번째 새 이미지를 썸네일로)
+      let thumbnailKey = '';
+      const thumbnailFile = newFiles[0]?.file;
+      if (thumbnailFile) {
+        const presignRes = await getActivityThumbnailPresignUrl(userId, {
+          contentType: thumbnailFile.type,
+          size: thumbnailFile.size,
+          originalFilename: thumbnailFile.name,
+        });
+        await uploadFileToS3(
+          presignRes.data.uploadUrl,
+          thumbnailFile,
+          presignRes.data.requiredHeaders,
+        );
+        thumbnailKey = presignRes.data.fileKey;
+      } else if (isEditMode && editPost?.activity.thumbnailUrl) {
+        // ⚠️ 임시처리: 수정 시 기존 썸네일 key를 URL에서 추출
+        // → BE에서 기존 fileKey를 상세 응답에 포함시켜주면 더 정확한 처리 가능
+        thumbnailKey = editPost.activity.thumbnailUrl.split('/').pop() ?? '';
+      }
+
+      // 2. 첨부파일 업로드 (썸네일 제외 나머지)
+      const attachmentFiles = newFiles.slice(1).map((p) => p.file!);
+      let attachmentKeys: string[] = [];
+      if (attachmentFiles.length > 0) {
+        const presignRes = await getActivityAttachmentsPresignUrl(userId, {
+          items: attachmentFiles.map((f) => ({
+            contentType: f.type,
+            size: f.size,
+            originalFilename: f.name,
+          })),
+        });
+        await Promise.all(
+          presignRes.data.items.map((item, i) =>
+            uploadFileToS3(item.uploadUrl, attachmentFiles[i], item.requiredHeaders),
+          ),
+        );
+        attachmentKeys = presignRes.data.items.map((item) => item.fileKey);
+      }
+
+      // 기존 첨부파일 key 유지
+      const existingAttachmentKeys = photoPreviews
+        .filter((p) => p.isExisting)
+        .map((p) => p.url.split('/').pop() ?? '');
+
+      const payload = {
+        category,
+        title: title.trim(),
+        tagIds,
+        content: content.trim(),
+        thumbnailKey,
+        attachmentKey: [...existingAttachmentKeys, ...attachmentKeys],
+      };
+
+      if (isEditMode && activityId) {
+        return updateActivity(userId, activityId, payload);
+      }
+      return createActivity(userId, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+      if (isEditMode && activityId) {
+        queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+        navigate(`/activity/post/${activityId}`);
+      } else {
+        navigate('/activity');
+      }
+    },
+  });
+
+  const openBoardSelector = () => {
+    setDraftBoardType(boardType);
+    setIsBoardOpen(true);
   };
 
+  const closeBoardSelector = (shouldApply: boolean) => {
+    if (shouldApply && draftBoardType) setBoardType(draftBoardType);
+    setIsBoardOpen(false);
+  };
+
+  const handleSubmit = () => setIsConfirmOpen(true);
   const handleConfirm = () => {
-    if (!boardType) return;
-    const tab = tabByBoardType[boardType];
-    const nextPost: ActivityPost = {
-      id: isEditMode && postId ? postId : `${tab}-${Date.now()}`,
-      tab,
-      title: title.trim(),
-      content: content.trim(),
-      categories: selectedTags,
-      saveCount: editPost?.saveCount ?? 0,
-      createdAt: editPost?.createdAt ?? new Date().toISOString(),
-      author: editPost?.author ?? activityLoggedInUser,
-      status: editPost?.status ?? 'OPEN',
-      postImages: photoPreviews.map((preview) => preview.url),
-    };
-
-    if (isEditMode && postId) {
-      updateActivityPost(postId, nextPost);
-      navigate(`/activity/post/${postId}`);
-      return;
-    }
-
-    addActivityPost(nextPost);
-    navigate('/activity');
+    setIsConfirmOpen(false);
+    submitMutation.mutate();
   };
-
   const handleCancelClick = () => {
-    if (hasDraftContent) {
-      setIsCancelWarningOpen(true);
-      return;
-    }
+    if (hasDraftContent) { setIsCancelWarningOpen(true); return; }
     navigate(-1);
-  };
-
-  const handleCancelConfirm = () => {
-    setIsCancelWarningOpen(false);
-    navigate(-1);
-  };
-
-  const handleCancelDismiss = () => {
-    setIsCancelWarningOpen(false);
   };
 
   return (
@@ -249,7 +322,7 @@ export const ActivityWritePage = () => {
               onClick={handleSubmit}
               disabled={!isSubmitEnabled}
             >
-              완료
+              {submitMutation.isPending ? '저장 중..' : '완료'}
             </button>
           </div>
         </header>
@@ -463,8 +536,8 @@ export const ActivityWritePage = () => {
         type='warning'
         title={'작성된 내용이 있습니다.\n삭제하시겠습니까?'}
         content='삭제된 내용은 복구 불가능 합니다.'
-        onLeftClick={handleCancelConfirm}
-        onRightClick={handleCancelDismiss}
+        onLeftClick={() => {setIsCancelWarningOpen(false); navigate(-1);}}
+        onRightClick={() => setIsCancelWarningOpen(false)}
       />
 
       <TagsFilterModal
@@ -475,8 +548,8 @@ export const ActivityWritePage = () => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={tagCategories}
+        allTags={allTags}
       />
     </EmptyLayout>
   );

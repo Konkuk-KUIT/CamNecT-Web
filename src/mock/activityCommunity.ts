@@ -60,7 +60,7 @@ const buildPost = (
   deadline: overrides.deadline,
   location: overrides.location,
   target: overrides.target,
-  applyPeriod: overrides.applyPeriod,
+  applyPeriod: overrides.applyPeriod ?? null,
   announceDate: overrides.announceDate,
   applyUrl: overrides.applyUrl,
   descriptionTitle: overrides.descriptionTitle,

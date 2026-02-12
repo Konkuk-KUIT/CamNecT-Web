@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
@@ -7,13 +7,12 @@ import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import BottomReact from './components/BottomReact';
-import {
-  activityLoggedInUser,
-  getActivityPostStatusLabel,
-  mapToActivityPost,
-} from '../../mock/activityCommunity';
 import type { ActivityPostStatus } from '../../types/activityPage/activityPageTypes';
 import { formatPostDisplayDate } from './utils/post';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getActivityDetail, deleteActivity, toggleActivityBookmark } from '../../api/activityApi';
+import { mapDetailToActivityPost } from './utils/activityMapper';
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
 
@@ -25,35 +24,111 @@ type OptionItem = {
 
 const ActivityPostPage = () => {
   const { postId } = useParams();
-  const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
+  const navigate = useNavigate();
+  const authUser = useAuthStore((state) => state.user);
+  const userId = authUser?.id ? parseInt(authUser.id) : null;
+  const activityId = postId ? parseInt(postId) : null;
 
-  return <ActivityPostContent key={selectedPost.id} selectedPost={selectedPost} />;
+  const { data: detailResponse, isLoading, isError } = useQuery({
+    queryKey: ['activityDetail', activityId],
+    queryFn: () => getActivityDetail(userId!, activityId!),
+    enabled: !!userId && !!activityId,
+  });
+
+  if (isLoading) {
+    return (
+      <PopUp
+        type="loading"
+        isOpen={true}
+      />
+    );
+  }
+
+  if (isError || !detailResponse?.data) {
+    return (
+      <PopUp
+        type="error"
+        title="게시글을 찾을 수 없습니다."
+        isOpen={true}
+        rightButtonText="확인"
+        onClick={() => navigate(-1)}
+      />
+    );
+  }
+
+  const selectedPost = mapDetailToActivityPost(detailResponse.data);
+  return (
+    <ActivityPostContent 
+      key={selectedPost.id} 
+      selectedPost={selectedPost}
+      isMine={detailResponse.data.isMine}
+      activityId={activityId!}
+      userId={userId!}
+      initialIsBookmarked={detailResponse.data.isBookmarked}
+      initialStatus={detailResponse.data.activity.status}
+    />
+  );
 };
 
 type ActivityPostContentProps = {
-  selectedPost: ReturnType<typeof mapToActivityPost>;
+  selectedPost: ReturnType<typeof mapDetailToActivityPost>;
+  isMine: boolean;
+  activityId: number;
+  userId: number;
+  initialIsBookmarked: boolean;
+  initialStatus: 'OPEN' | 'CLOSED';
 };
 
-const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
+const ActivityPostContent = ({ 
+  selectedPost,
+  isMine,
+  activityId,
+  userId,
+  initialIsBookmarked,
+  initialStatus,
+ }: ActivityPostContentProps) => {
   const navigate = useNavigate();
-  const currentUser = activityLoggedInUser;
+  const queryClient = useQueryClient();
 
-  const [status, setStatus] = useState<ActivityPostStatus>(selectedPost.status ?? 'OPEN');
+  const [status, setStatus] = useState<ActivityPostStatus>(initialStatus);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
+  const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
+  
+  //북마크 토글
+  const bookmarkMutation = useMutation({
+    mutationFn: () => toggleActivityBookmark(userId, activityId),
+    onMutate: () => {
+      setIsBookmarked((prev) => !prev);
+    },
+    onError: () => {
+      setIsBookmarked((prev) => !prev);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+    },
+  });
 
-  const handleBookmarkToggle = (checked: boolean) => {
-    setIsBookmarked(checked);
+  //삭제 -> 동아리/스터디에서만 사용됨
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteActivity(userId, activityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+      navigate(-1);
+    },
+  });
+
+  // ⚠️ 임시처리: 모집 완료 처리 API 없음
+  // → 모집 상태 변경 API가 있다면 연동 필요. 현재는 클라이언트 상태만 변경
+  const handleRecruitComplete = () => {
+    setStatus('CLOSED');
+    setIsRecruitPopupOpen(false);
   };
 
-  const isPostMine = selectedPost.author.id === currentUser.id;
-  const statusLabel = getActivityPostStatusLabel(status);
-
-  const optionItems: OptionItem[] = isPostMine
+  const optionItems: OptionItem[] = isMine
     ? [
         { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
         { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
@@ -65,7 +140,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
 
   const handleOptionClick = async (item: OptionItem) => {
     if (item.id === 'copy-url') {
-      const postUrl = `${window.location.origin}/activity/post/${selectedPost.id}`;
+      const postUrl = `${window.location.origin}/activity/post/${activityId}`;
       try {
         await navigator.clipboard.writeText(postUrl);
       } catch {
@@ -79,21 +154,14 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         document.body.removeChild(textarea);
       }
     }
-
-    if (item.id === 'report-post') {
-      setIsReportPopupOpen(true);
-    }
-
-    if (item.id === 'edit-post') {
-      navigate(`/activity/edit/${selectedPost.id}`);
-    }
-
-    if (item.id === 'delete-post') {
-      setIsDeletePopupOpen(true);
-    }
-
+    if (item.id === 'report-post') setIsReportPopupOpen(true);
+    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`);
+    if (item.id === 'delete-post') setIsDeletePopupOpen(true);
     setIsOptionOpen(false);
   };
+
+  const statusLabel = status === 'CLOSED' ? '모집 완료' : '모집 중';
+
 
   return (
     <HeaderLayout
@@ -175,7 +243,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
               <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
                 {selectedPost.content}
               </div>
-              {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
+              {selectedPost.postImages && selectedPost.postImages.length > 0 && (
                 <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
                   <div className='flex w-max gap-[5px] pr-[20px]'>
                     {selectedPost.postImages.map((imageUrl: string, index: number) => {
@@ -203,7 +271,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
                     })}
                   </div>
                 </div>
-              ) : null}
+              )}
               <div className='flex flex-wrap gap-[5px]'>
                 {selectedPost.categories.map((category: string) => (
                   <Category key={category} label={category} />
@@ -216,10 +284,10 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
       </div>
 
       <BottomReact
-        isMine={isPostMine}
+        isMine={isMine}
         status={status}
         isBookmarked={isBookmarked}
-        onBookmarkToggle={handleBookmarkToggle}
+        onBookmarkToggle={() => bookmarkMutation.mutate()}
         onOpenCompletePopup={() => setIsRecruitPopupOpen(true)}
       />
 
@@ -260,7 +328,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         type='warning'
         title='정말 삭제하시겠습니까?'
         content='삭제된 내용은 복구 불가능합니다.'
-        onLeftClick={() => setIsDeletePopupOpen(false)}
+        onLeftClick={() => {setIsDeletePopupOpen(false); deleteMutation.mutate();}}
         onRightClick={() => setIsDeletePopupOpen(false)}
       />
 

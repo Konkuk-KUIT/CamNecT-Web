@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
@@ -12,138 +12,187 @@ import { getTeamRecruitsByActivityId } from '../../mock/teamRecruit';
 import { formatOnlyDate } from '../../utils/formatDate';
 import { RecruitPost } from '../../components/posts/RecruitPost';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getActivityDetail, deleteActivity, toggleActivityBookmark } from '../../api/activityApi';
+import { mapDetailToActivityPost, mapRecruitmentItemToTeamRecruitPost } from './utils/activityMapper';
 
-type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
+type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'close-post';
 
 type OptionItem = {
-  id: OptionId;
-  icon: 'edit' | 'delete' | 'url' | 'report';
-  label: string;
+    id: OptionId;
+    icon: 'edit' | 'close' | 'url' | 'report';
+    label: string;
 };
 
 type TabType = 'detail' | 'team';
 
 export const ExternalActivityPostPage = () => {
     const { postId } = useParams();
-    const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const authUser = useAuthStore(state => state.user);
     const userId = authUser?.id ? parseInt(authUser.id) : null;
+    const activityId = postId ? parseInt(postId) : null;
 
     const [activeTab, setActiveTab] = useState<TabType>('detail');
-    const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const [isOptionOpen, setIsOptionOpen] = useState(false);
-    const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+    const [isClosePopupOpen, setIsClosePopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
+  //상세 조회
+  const {
+    data: detailResponse,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['activityDetail', activityId],
+    queryFn: () => getActivityDetail(userId!, activityId!),
+    enabled: !!userId && !!activityId,
+  });
 
-    const canControll = userId === 2; //todo: 현재 관리자 id가 2이라서 이렇게 설정. id 바뀔 시 여기도 바뀌어야 함.
-    const thumbnailUrl = selectedPost.thumbnailUrl ?? selectedPost.postImages?.[0];
-
-    // 팀원 모집 데이터 가져오기
-    const teamRecruits = useMemo(
-        () => getTeamRecruitsByActivityId(selectedPost.id),
-        [selectedPost.id]
-    );
-
-    const handleBookmarkToggle = (checked: boolean) => {
-        setIsBookmarked(checked);
-    };
-
-    const optionItems: OptionItem[] = canControll
-        ? [
-            { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
-            { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
-        ]
-        : [
-            { id: 'copy-url', icon: 'url', label: 'URL 복사' },
-            { id: 'report-post', icon: 'report', label: '게시글 신고' },
-        ];
-
-    const handleOptionClick = async (item: OptionItem) => {
-        if (item.id === 'copy-url') {
-            const postUrl = `${window.location.origin}/activity/post/${selectedPost.id}`;
-            try {
-                await navigator.clipboard.writeText(postUrl);
-            } catch {
-                const textarea = document.createElement('textarea');
-                textarea.value = postUrl;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-            }
-        }
-
-        if (item.id === 'report-post') {
-            setIsReportPopupOpen(true);
-        }
-
-        if (item.id === 'edit-post') {
-            if (selectedPost.tab === "external")
-                navigate(`/admin/post/external/${selectedPost.id}`);
-            else navigate(`/admin/post/job/${selectedPost.id}`);
-        }
-
-        if (item.id === 'delete-post') {
-            setIsDeletePopupOpen(true);
-        }
-
-        setIsOptionOpen(false);
-    };
-
-    const renderDetailTab = () => (
-        <div className='flex flex-col px-[25px] py-[30px]'>
-        {/* 상세 정보 블록 */}
-        {(selectedPost.descriptionTitle && selectedPost.descriptionBody) && (
-            <div className='flex flex-col gap-[20px]'>
-                <span className='text-b-16-hn text-gray-900'>
-                    {selectedPost.descriptionTitle}
-                </span>
-                <p className='text-r-14 text-gray-900 whitespace-pre-line'>
-                    {selectedPost.descriptionBody}
-                </p>
-            </div>
-        )}
-        </div>
-    );
-
-    const renderTeamTab = () => (
-        <div className='flex flex-col justify-center'>
-            {teamRecruits.length === 0 ? (
-                <span className='py-[40px] text-center text-r-14-hn text-gray-650'>
-                    아직 팀원 모집 글이 없습니다.
-                </span>
-            ) : (
-                <>
-                    {teamRecruits.map((recruit) => (
-                        <RecruitPost key={recruit.id} {...recruit} />
-                    ))}
-                </>
-            )}
-
-            {/* 팀원 모집하기 버튼 */}
-            <div className='w-full flex justify-end px-[15px] py-[15px]'>
-                <button
-                    className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30'
-                    onClick={() => navigate(`/activity/${selectedPost.id}/recruit-write`)}
-                >
-                    <Icon name='edit'/>
-                    팀원 모집하기
-                </button>
-            </div>
-        </div>
-    );
-
-    if (!selectedPost) {
-        return (
-            <div className='flex items-center justify-center min-h-screen'>
-            <p className='text-[16px] text-gray-650'>게시글을 찾을 수 없습니다.</p>
-            </div>
-        );
+  //초기 북마크 상태
+  useEffect(() => {
+    if (detailResponse?.data) {
+      setIsBookmarked(detailResponse.data.isBookmarked);
     }
+  }, [detailResponse?.data]);
+
+  const selectedPost = useMemo(() => {
+    if (!detailResponse?.data) return null;
+    return mapDetailToActivityPost(detailResponse.data);
+  }, [detailResponse]);
+
+  //북마크 토글
+  const bookmarkMutation = useMutation({
+    mutationFn: () => toggleActivityBookmark(userId!, activityId!),
+    onMutate: () => {
+      // 낙관적 업데이트
+      setIsBookmarked((prev) => !prev);
+    },
+    onError: () => {
+      // 실패 시 롤백
+      setIsBookmarked((prev) => !prev);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+    },
+  });
+
+  //삭제
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteActivity(userId!, activityId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+      navigate(-1);
+    },
+  });
+
+  //팀원 모집 데이터
+  const teamRecruits = useMemo(() => {
+    if (!detailResponse?.data?.recruitmentList) return [];
+    return detailResponse.data.recruitmentList.map(mapRecruitmentItemToTeamRecruitPost);
+  }, [detailResponse]);
+
+  const isMine = detailResponse?.data?.isMine ?? false;
+
+  const optionItems: OptionItem[] = isMine
+    ? [
+        { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
+        { id: 'close-post', icon: 'close', label: '모집 중지하기' },
+      ]
+    : [
+        { id: 'copy-url', icon: 'url', label: 'URL 복사' },
+        { id: 'report-post', icon: 'report', label: '게시글 신고' },
+      ];
+
+  const handleOptionClick = async (item: OptionItem) => {
+    if (item.id === 'copy-url') {
+      const postUrl = `${window.location.origin}/activity/post/${activityId}`;
+      try {
+        await navigator.clipboard.writeText(postUrl);
+      } catch {
+        const textarea = document.createElement('textarea');
+        textarea.value = postUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+    }
+    if (item.id === 'report-post') setIsReportPopupOpen(true);
+    if (item.id === 'edit-post') {
+      if (selectedPost?.tab === 'external') navigate(`/admin/post/external/${activityId}`);
+      else navigate(`/admin/post/job/${activityId}`);
+    }
+    if (item.id === 'close-post') setIsClosePopupOpen(true);
+    setIsOptionOpen(false);
+  };
+
+  // ===== 로딩 / 에러 처리 =====
+  if (isLoading) {
+    return (
+      <PopUp
+        type="loading"
+        isOpen={true}
+      />
+    );
+  }
+
+  if (isError || !selectedPost) {
+    return (
+      <PopUp
+        type="error"
+        title="게시글을 찾을 수 없습니다."
+        isOpen={true}
+        rightButtonText="확인"
+        onClick={() => navigate(-1)}
+      />
+    );
+  }
+
+  const thumbnailUrl = selectedPost.thumbnailUrl ?? selectedPost.postImages?.[0];
+
+  const renderDetailTab = () => (
+    <div className='flex flex-col px-[25px] py-[30px]'>
+      {selectedPost.descriptionBody && (
+        <div className='flex flex-col gap-[20px]'>
+          {selectedPost.descriptionTitle && (
+            <span className='text-b-16-hn text-gray-900'>{selectedPost.descriptionTitle}</span>
+          )}
+          <p className='text-r-14 text-gray-900 whitespace-pre-line'>
+            {selectedPost.descriptionBody}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderTeamTab = () => (
+    <div className='flex flex-col justify-center'>
+      {teamRecruits.length === 0 ? (
+        <span className='py-[40px] text-center text-r-14-hn text-gray-650'>
+          아직 팀원 모집 글이 없습니다.
+        </span>
+      ) : (
+        teamRecruits.map((recruit) => <RecruitPost key={recruit.id} {...recruit} />)
+      )}
+      <div className='w-full flex justify-end px-[15px] py-[15px]'>
+        <button
+          className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30'
+          onClick={() => navigate(`/activity/${activityId}/recruit-write`)}
+        >
+          <Icon name='edit' />
+          팀원 모집하기
+        </button>
+      </div>
+    </div>
+  );
+
+  // 팀원 모집 탭의 카운트: API recruitmentList 사용
+  const recruitCount = detailResponse?.data?.recruitmentList?.length ?? teamRecruits.length;
 
     return (
         <HeaderLayout
@@ -164,7 +213,7 @@ export const ExternalActivityPostPage = () => {
                         width={24} 
                         height={24} 
                         isActive={isBookmarked} 
-                        onToggle={handleBookmarkToggle}
+                        onToggle={() => bookmarkMutation.mutate()}
                         />
                         <button type='button' onClick={() => setIsOptionOpen(true)} aria-label='게시글 옵션 열기'>
                             <Icon name='option'/>
@@ -316,12 +365,12 @@ export const ExternalActivityPostPage = () => {
         </BottomSheetModal>
 
         <PopUp
-            isOpen={isDeletePopupOpen}
+            isOpen={isClosePopupOpen}
             type='warning'
-            title='정말 삭제하시겠습니까?'
-            content='삭제된 내용은 복구 불가능합니다.'
-            onLeftClick={() => setIsDeletePopupOpen(false)}
-            onRightClick={() => setIsDeletePopupOpen(false)}
+            title='정말 모집 마감하시겠습니까?'
+            content='다시 모집 중 상태로 되돌리지 못합니다.'
+            onLeftClick={() => setIsClosePopupOpen(false)}
+            onRightClick={() => setIsClosePopupOpen(false)}
         />
 
         <PopUp

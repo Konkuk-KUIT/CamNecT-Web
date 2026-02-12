@@ -27,6 +27,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
             await logout(loginUserId);
         } catch (e) {
             // 401이어도 일단 로그아웃 처리
+            console.warn("로그아웃 실패:", e);
         } finally {
             setLogout();
             onClose();
