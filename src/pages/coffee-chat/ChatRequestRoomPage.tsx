@@ -48,7 +48,7 @@ export const ChatRequestRoomPage = () => {
         >
             {/* 75px : ChatRequestButton 높이, 20px : ChatRoomInfo 하단 여백, env(safe-area-inset-bottom) : 하단 안전영역 */}
             <div className="flex flex-col min-h-[calc(100dvh-60px)] justify-end pb-[calc(75px+20px+env(safe-area-inset-bottom))]">
-                <ChatRoomInfo chatRoom={requestInfo} />
+                <ChatRoomInfo partner={requestInfo.partner} requestInfo={requestInfo.requestInfo} />
             </div>
             <ChatRequestButton 
                 onAccept={handleAcceptChatRequest}

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getChatRequestDetail, getChatRequests, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
+import { viewChatRoomDetail, viewChatRoomList, viewChatRequestList, viewChatRequestDetail } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
@@ -111,18 +111,76 @@ export const useChatRoom = (roomId: string) => {
     });
 };
 
-// 교체 예정
-export const useChatRequests = () => {
-    return useQuery({
+// 3. 커피챗 요청 목록 조회 API [GET] (/api/request/list)
+export const useChatRequests = (type: ChatRoomListItemType) => {
+
+    const { user } = useAuthStore();
+
+    return useQuery<ChatRoomListItem[]>({
         queryKey: ['chatRequests'],
-        queryFn: getChatRequests
+        queryFn: async () => { 
+
+            // API 호출
+            const response = await viewChatRequestList({
+                userId: Number(user?.id),
+                type:type
+            })
+
+            // 응답 매핑
+            return response.data.chatRequestList.map((room): ChatRoomListItem => ({
+                roomId: String(room.requestId), // 요청 ID를 채팅방 ID로 사용 (식별자)
+                type: type,
+                partner: {
+                    id: String(room.opponentId), 
+                    name: room.opponentName,
+                    major: room.opponentMajor,
+                    studentId: room.opponentStudentYear,
+                    profileImg: room.opponentProfileImg,
+                },
+                lastMessage: room.requestContent,
+                lastMessageDate: room.createdAt,
+                unreadCount: 0, // 요청은 1번 밖에 못보내므로 
+            }));
+        }
     });
 };
 
-export const useChatRequestRoom = (roomId: string) => {
+// 4. 커피챗 요청 상세 조회 API [GET] (/api/request/{requestId})
+export const useChatRequestRoom = (requestId: string) => {
+
+    const { user } = useAuthStore();
+
     return useQuery({
-        queryKey: ['chatRequestRoom', roomId],
-        queryFn: () => getChatRequestDetail(roomId),
-        enabled: !!roomId
+        queryKey: ['chatRequestRoom', requestId],
+        queryFn: async () => {
+
+            const response = await viewChatRequestDetail({
+                userId: Number(user?.id),
+                requestId: Number(requestId)
+            })
+
+            const { data } = response;
+
+            // 4. API DTO -> UI DTO 매핑
+            return {
+                // 커피챗 상대 정보
+                partner: {
+                    id: String(data.opponentId),
+                    name: data.opponentName,
+                    major: data.opponentMajor,
+                    studentId: data.opponentStudentYear,
+                    profileImg: data.opponentProfileImg,
+                    tags: data.opponentTags, // 상대방 전문 분야
+                },
+                // 커피챗 요청 상세 정보 (카드 영역)
+                requestInfo: {
+                    createdAt: data.createdAt,
+                    type: data.requestType,
+                    tags: data.requestTags || [], 
+                    content: data.requestContent,
+                }
+            };
+        },
+        enabled: !!requestId
     });
 };

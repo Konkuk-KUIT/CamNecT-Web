@@ -92,34 +92,6 @@ export interface ChatRespondResponse {
     data: string;
 }
 
-// 커피챗 요청 상세 조회 DTO (api/request/{requestId})
-export interface ChatRequestDetailRequest {
-    userId: number;
-    requestId: number;
-}
-
-export interface ChatRequestDetailResponse {
-    status: number;
-    message: string;
-    data: {
-        myId: number;
-        opponentId: number;
-        opponentName: string;
-        opponentMajor: string;
-        opponentStudentYear: string;
-        opponentProfileImg: string;
-        opponentTags: string[];
-        requestId: number;
-        requestType: string;
-        requestTags: string[];
-        requestContent: string;
-        createdAt: string;
-        recruitmentTitle: string;
-        activityId: number;
-        recruitmentId: number;
-    };
-}
-
 // 커피챗 요청 목록 조회 DTO (api/request/list)
 export interface ChatRequestListRequest {
     userId: number;
@@ -146,6 +118,34 @@ export interface ChatRequestListResponse {
     message: string;
     data: {
         chatRequestList: ChatRequestInfo[];
+    };
+}
+
+// 커피챗 요청 상세 조회 DTO (api/request/{requestId})
+export interface ChatRequestDetailRequest {
+    userId: number;
+    requestId: number;
+}
+
+export interface ChatRequestDetailResponse {
+    status: number;
+    message: string;
+    data: {
+        myId: number;
+        opponentId: number;
+        opponentName: string;
+        opponentMajor: string;
+        opponentStudentYear: string;
+        opponentProfileImg: string;
+        opponentTags: string[];
+        requestId: number;
+        requestType: string;
+        requestTags: string[];
+        requestContent: string;
+        createdAt: string;
+        recruitmentTitle: string;
+        activityId: number;
+        recruitmentId: number;
     };
 }
 
