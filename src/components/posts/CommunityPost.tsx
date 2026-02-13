@@ -8,7 +8,6 @@ type CommunityPostProps = {
   post: CommunityPostItem;
 };
 
-
 export const CommunityPost = ({post}: CommunityPostProps) => {
     const isLocked = post.accessStatus !== 'GRANTED';
     if (post.boardCode === "INFO") {

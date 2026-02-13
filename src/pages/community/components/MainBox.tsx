@@ -47,7 +47,10 @@ const MainBox = ({ post }: MainBoxProps) => {
                   {post.author.name}
                 </div>
                 <div className='text-r-12' style={{ color: 'var(--ColorGray3, #646464)' }}>
-                  {post.author.major} {post.author.studentId}학번
+                  {post.author.major}
+                  {post.author.studentId
+                    ? ` ${post.author.studentId}학번`
+                    : ''}
                 </div>
               </div>
             </div>
@@ -67,7 +70,7 @@ const MainBox = ({ post }: MainBoxProps) => {
                 >
                   {post.title}
                 </div>
-                <div className='line-clamp-2 text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
+                <div className='line-clamp-2 whitespace-pre-wrap text-r-14' style={{ color: 'var(--ColorGray3, #646464)' }}>
                   {post.content}
                 </div>
               </div>
