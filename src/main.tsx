@@ -21,10 +21,18 @@ if ('serviceWorker' in navigator) {
 
 const queryClient = new QueryClient(); // 서버 데이터 저장소 -> 저장 / 캐싱 / 관리
 
-createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>
-  </QueryClientProvider>
-)
+const renderApp = () => {
+  createRoot(document.getElementById('root')!).render(
+    <QueryClientProvider client={queryClient}>
+      <StrictMode>
+        <RouterProvider router={router} />
+      </StrictMode>
+    </QueryClientProvider>
+  )
+};
+
+const start = async () => {
+  renderApp();
+};
+
+start();

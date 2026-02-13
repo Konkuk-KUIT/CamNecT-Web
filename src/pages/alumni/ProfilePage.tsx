@@ -195,6 +195,10 @@ const AlumniProfileContent = ({
         tagIds: mapTagNamesToIds(payload.categories),
         content: payload.message,
       });
+      setPopUpConfig({
+        title: '요청 성공',
+        content: '커피챗 요청이 전송되었습니다',
+      });
       return true;
     } catch (error) {
       const status = error instanceof AxiosError ? error.response?.status : undefined;
