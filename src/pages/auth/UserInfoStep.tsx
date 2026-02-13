@@ -39,7 +39,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     
     // 비밀번호 정규화 
     // 문자열로 사용할 경우 (예: new RegExp 사용 시)
-    const passwordPattern = "^(?=.*\\d)[A-Za-z0-9!@#$%^&*()_+={}[\\]|\\\\:;\"'<>,.?/~`-]{8,16}$";
+    const passwordPattern = "^(?=.*\\\\d)(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+={}\\\\[\\\\]|\\\\\\\\:;\\\"'<>,.?/~`-]{8,16}$";
 
     // zod : input 데이터 규칙 검사기 
     // .refine() : 추가적인 검증 로직 (비밀번호 확인 검사)
@@ -56,7 +56,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
             .string()
             .regex(
                 new RegExp(passwordPattern),
-                "비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다"
+                "비밀번호는 8~16자, 숫자 1개 이상, 소문자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다"
             ),
         confirmPassword: z.string(),
     })

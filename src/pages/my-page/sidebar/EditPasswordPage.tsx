@@ -58,7 +58,7 @@ export const EditPasswordPage = () => {
         }
 
         if (!PASSWORD_PATTERN.test(newPassword)) {
-            setNewPasswordError('비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다');
+            setNewPasswordError('비밀번호는 8~16자, 숫자 1개 이상, 소문자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다');
         } else {
             setNewPasswordError('');
         }
