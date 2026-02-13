@@ -187,7 +187,7 @@ export const MypageEditPage = () => {
                                     <img
                                     src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
                                     onError={(e) => {
-                                        e.currentTarget.onerror = null; //이미지 깨짐 방지->S3에서 403
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
                                         e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                                     }}
                                     alt="프로필"
@@ -245,23 +245,27 @@ export const MypageEditPage = () => {
                             <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
                                 <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
                                 <button
-                                    onClick={() => setData((prev) => {
-                                        if (!prev) return prev;
-                                        return {
-                                            ...prev,
-                                            visibility: {
-                                                ...prev.visibility,
-                                                isFollowerVisible: !prev.visibility.isFollowerVisible
-                                            }
-                                        };
-                                    })}
+                                    onClick={() => {
+                                        console.log("toggle clicked");
+                                        setData((prev) => {
+                                            const base = prev ?? data;
+                                            if (!base) return prev;
+                                            return {
+                                                ...base,
+                                                visibility: {
+                                                    ...base.visibility,
+                                                    isFollowerVisible: !base.visibility.isFollowerVisible
+                                                }
+                                            };
+                                        }
+                                    )}}
                                     className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
-                                        visibility.isFollowerVisible ? 'bg-gray-300' : 'bg-primary'
+                                        data.visibility.isFollowerVisible ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] rounded-full bg-white transition-transform duration-300 ease-in-out ${
-                                            visibility.isFollowerVisible ? "translate-x-0" : "translate-x-[26px]"
+                                            data.visibility.isFollowerVisible ? "translate-x-0" : "translate-x-[26px]"
                                         }`}
                                     />
                                 </button>

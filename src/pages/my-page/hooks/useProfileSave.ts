@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { getMyProfile } from "../../../api/profileApi";
 import { useAuthStore } from "../../../store/useAuthStore";
 import axios from "axios";
 import { 
@@ -38,7 +37,7 @@ interface SaveResult {
   error?: string;
 }
 
-const DEBUG_DRY_RUN = true;
+const DEBUG_DRY_RUN = false;
 
 export function useProfileSave() {
   const user = useAuthStore(state => state.user);
@@ -90,9 +89,6 @@ const dryRun = async (req: DryRunRequest) => {
   const deleteProfileImage = async (): Promise<void> => {
     if (!userId) throw new Error("userId is missing");
     await updateProfileImage(userId, { profileImageKey: null });
-    //todo: 아래 코드 삭제. 디버깅용
-    const fresh = await getMyProfile({ loginUserId: userId });
-    console.log("[after delete] profileImageUrl:", fresh.data.basics.profileImageUrl);
   };
 
   /**
