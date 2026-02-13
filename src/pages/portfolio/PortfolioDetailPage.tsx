@@ -9,7 +9,6 @@ import ModalIcon from '../../components/BottomSheetModal/Icon'
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
 
 type PortfolioDetailPageProps = {
     ownerId?: string;
