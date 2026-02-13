@@ -1,30 +1,30 @@
+import type { AxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Category from '../../components/Category';
-import Icon from '../../components/Icon';
-import PopUp from '../../components/Pop-up';
-import Toast from '../../components/Toast';
-import ImagePopUp from '../../components/ImagePopUp';
+import { acceptCommunityComment, createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, purchaseCommunityPostAccess, updateCommunityComment } from '../../api/community';
 import BottomSheetModalPost, {
   type ActionItem,
 } from '../../components/BottomSheetModal/BottomSheetModal-post';
+import Category from '../../components/Category';
+import Icon from '../../components/Icon';
+import ImagePopUp from '../../components/ImagePopUp';
+import PopUp from '../../components/Pop-up';
+import Toast from '../../components/Toast';
+import { useToast } from '../../hooks/useToast';
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { useToast } from '../../hooks/useToast';
+import { loggedInUserProfile } from '../../mock/community';
+import { useAuthStore } from '../../store/useAuthStore';
+import type { CommentItem } from '../../types/community';
+import { mapFlatCommentsToTree } from '../../utils/communityMapper';
 import CommentListItem from './components/CommentItem';
 import LockedQuestionCard from './components/LockedQuestionCard';
-import type { CommentItem } from '../../types/community';
-import { loggedInUserProfile } from '../../mock/community';
 import { useCommentActions } from './hooks/useCommentActions';
 import { usePost } from './hooks/usePost';
-import { formatPostDisplayDate } from './utils/post';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
-import { useAuthStore } from '../../store/useAuthStore';
-import type { AxiosError } from 'axios';
-import { acceptCommunityComment, createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, purchaseCommunityPostAccess, updateCommunityComment } from '../../api/community';
-import { mapFlatCommentsToTree } from '../../utils/communityMapper';
+import { formatPostDisplayDate } from './utils/post';
 
 type PopUpConfig = {
   type: 'info' | 'warning' | 'confirm' | 'error' | 'loading';

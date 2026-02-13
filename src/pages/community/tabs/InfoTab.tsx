@@ -117,6 +117,10 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
                     <Icon name='comment' className='h-[12px] w-[12px]' />
                     {post.comments}
                   </span>
+                  <span className='flex items-center gap-[4px]'>
+                    <Icon name='save' className='h-[12px] w-[12px]' />
+                    {post.saveCount}
+                  </span>
                   <span>{formatTimeAgo(post.createdAt)}</span>
                 </div>
               </div>

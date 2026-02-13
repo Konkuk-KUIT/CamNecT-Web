@@ -134,6 +134,8 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
                   <span>답변 {post.answers}</span>
                   <span className='h-[14px] w-0 border-l border-[var(--ColorGray2,#A1A1A1)]' aria-hidden />
+                  <span>북마크 {post.saveCount}</span>
+                  <span className='h-[14px] w-0 border-l border-[var(--ColorGray2,#A1A1A1)]' aria-hidden />
                   <span>{formatTimeAgo(post.createdAt)}</span>
                 </div>
               </div>

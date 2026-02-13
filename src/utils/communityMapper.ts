@@ -1,10 +1,10 @@
 import type {
-  CommunityPostCommentResponse,
-  CommunityPostDetailResponse,
-  CommunityPostItem,
+    CommunityPostCommentResponse,
+    CommunityPostDetailResponse,
+    CommunityPostItem,
 } from "../api-types/communityApiTypes";
-import type { CommentItem, CommunityPostDetail, InfoPost, QuestionPost } from "../types/community";
 import { loggedInUserMajor } from "../mock/community";
+import type { CommentItem, CommunityPostDetail, InfoPost, QuestionPost } from "../types/community";
 
 const buildAuthor = () => ({
   id: "unknown",

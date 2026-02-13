@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
-import MainBoxCarousel from '../components/MainBoxCarousel';
 import type { InfoPost, QuestionPost } from '../../../types/community';
+import MainBoxCarousel from '../components/MainBoxCarousel';
 import { formatTimeAgo } from '../time';
 
 type MainTabProps = {
@@ -97,7 +97,11 @@ const MainTab = ({ tagName, recommendedPosts, unansweredQuestions }: MainTabProp
                         className='flex items-center justify-between text-r-12'
                         style={{ color: 'var(--ColorGray3, #646464)' }}
                       >
-                        <span>답변 {question.answers}</span>
+                        <div className='flex items-center gap-[5px]'>
+                          <span>답변 {question.answers}</span>
+                          <span className='h-[12px] w-0 border-l border-[var(--ColorGray2, #A1A1A1)]' aria-hidden />
+                          <span>북마크 {question.saveCount}</span>
+                        </div>
                         <span>{formatTimeAgo(question.createdAt)}</span>
                       </div>
                     </div>
