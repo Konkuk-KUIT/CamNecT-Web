@@ -10,7 +10,8 @@ import type {
   ProfilePrivacyUpdateRequest,
   ProfilePrivacyUpdateResponse,
   FollowListResponse,
-  SettingInfoResponse
+  SettingInfoResponse,
+  ChangePasswordRequest,
 } from "../api-types/profileApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
@@ -95,4 +96,11 @@ export const logout = async (loginUserId: number) => {
     params: { loginUserId },
   });
   return response.data;
+};
+
+// PATCH /api/profile/password
+export const changePassword = async (userId: number, data: ChangePasswordRequest) => {
+  await axiosInstance.patch("/api/profile/password", data, {
+    params: { userId },
+  });
 };

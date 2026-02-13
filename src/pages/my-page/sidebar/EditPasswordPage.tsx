@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
 import PopUp from "../../../components/Pop-up";
-
-// TODO: 임시 저장된 비밀번호 지우기
-const TEMP_CURRENT_PASSWORD = "test1234";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { changePassword } from "../../../api/profileApi";
+import axios from "axios";
 
 // 비밀번호 정규식 패턴
 const PASSWORD_PATTERN = /^(?=.*\d)[A-Za-z0-9!@#$%^&*()_+={}[\]|\\:;"'<>,.?/~`-]{8,16}$/;
@@ -28,13 +28,14 @@ const EyeClosedIcon = () => {
 
 export const EditPasswordPage = () => {
     const navigate = useNavigate();
+    const authUser = useAuthStore((s) => s.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
     
     // 현재 비밀번호
     const [currentPassword, setCurrentPassword] = useState('');
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [currentPasswordError, setCurrentPasswordError] = useState('');
-    const [isCurrentPasswordVerified, setIsCurrentPasswordVerified] = useState(false);
-    
+
     // 새 비밀번호
     const [newPassword, setNewPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -46,31 +47,8 @@ export const EditPasswordPage = () => {
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
     const [confirm, setConfirm] = useState(false);
-
-    // 현재 비밀번호 확인
-    const handleCurrentPasswordBlur = () => {
-        if (!currentPassword) return;
-        
-        if (currentPassword === TEMP_CURRENT_PASSWORD) {
-            setCurrentPasswordError('');
-            setIsCurrentPasswordVerified(true);
-        } else {
-            setCurrentPasswordError('비밀번호가 일치하지 않습니다.');
-            setIsCurrentPasswordVerified(false);
-            setNewPassword('');
-            setConfirmPassword('');
-        }
-    };
-
-    const handleCurrentPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCurrentPassword(e.target.value);
-        setCurrentPasswordError('');
-        setIsCurrentPasswordVerified(false);
-        setNewPassword('');
-        setConfirmPassword('');
-        setNewPasswordError('');
-        setConfirmPasswordError('');
-    };
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [unknownErrorOpen, setUnknownErrorOpen] = useState(false);
 
     // 새 비밀번호 검증
     const handleNewPasswordBlur = () => {
@@ -85,7 +63,7 @@ export const EditPasswordPage = () => {
             setNewPasswordError('');
         }
 
-        // 확인 비밀번호가 있으면 일치 검사
+        // 확인 비밀번호 일치 검사
         if (confirmPassword) {
             if (newPassword !== confirmPassword) {
                 setConfirmPasswordError('비밀번호가 일치하지 않습니다');
@@ -108,7 +86,6 @@ export const EditPasswordPage = () => {
         }
     };
 
-    // 비밀번호 확인 검증
     const handleConfirmPasswordBlur = () => {
         if (!confirmPassword) {
             setConfirmPasswordError('');
@@ -133,32 +110,64 @@ export const EditPasswordPage = () => {
         }
     };
 
-    const handleSubmit = () => {
-        if (!isCurrentPasswordVerified) {
-            setCurrentPasswordError('현재 비밀번호를 먼저 확인해주세요.');
-            return;
-        }
-
-        if (!PASSWORD_PATTERN.test(newPassword)) {
-            setNewPasswordError('비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다');
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            setConfirmPasswordError('비밀번호가 일치하지 않습니다');
-            return;
-        }
-
-        // TODO: 비밀번호 변경 API 호출
-        setConfirm(true);
+    const handleCurrentPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCurrentPassword(e.target.value);
+        setCurrentPasswordError("");
     };
 
-    const isValid = isCurrentPasswordVerified &&
+    const isValid = !!currentPassword &&
                    PASSWORD_PATTERN.test(newPassword) &&
+                   !!confirmPassword &&
                    newPassword === confirmPassword &&
-                   confirmPassword !== '' &&
                    !newPasswordError &&
                    !confirmPasswordError;
+
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+
+        if (!userId) {
+            setUnknownErrorOpen(true);
+            return;
+        }
+        if (!currentPassword) {
+            setCurrentPasswordError("현재 비밀번호를 입력해주세요.");
+            return;
+        }
+        if (!PASSWORD_PATTERN.test(newPassword)) {
+            setNewPasswordError("비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setConfirmPasswordError("비밀번호가 일치하지 않습니다");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await changePassword(userId, {
+                currentPassword,
+                newPassword,
+            });
+            setConfirm(true);
+        } catch (e) {
+        if (axios.isAxiosError(e)) {
+            const status = e.response?.status;
+            const code = (e.response?.data as any)?.code ?? (e.response?.data as any)?.statusCode;
+
+            if (status === 401 || code === 41101) {
+                setCurrentPasswordError("현재 비밀번호와 일치하지 않습니다.");
+                return;
+            }
+
+            setUnknownErrorOpen(true);
+            return;
+        }
+
+        setUnknownErrorOpen(true);
+        } finally {
+        setIsSubmitting(false);
+        }
+    };
 
     return (
         <>
@@ -183,13 +192,11 @@ export const EditPasswordPage = () => {
                                     type={showCurrentPassword ? "text" : "password"}
                                     value={currentPassword}
                                     onChange={handleCurrentPasswordChange}
-                                    onBlur={handleCurrentPasswordBlur}
                                     maxLength={16}
                                     className={`w-full p-[15px] rounded-[5px] border bg-gray-100 ${
-                                        currentPasswordError ? 'border-red' : 
-                                        isCurrentPasswordVerified ? 'border-primary' : 'border-gray-150'
+                                        currentPasswordError ? "border-red" : "border-gray-150"
                                     } text-sb-16-hn text-gray-750 focus:outline-none ${
-                                        currentPasswordError ? 'focus:border-red' : 'focus:border-primary'
+                                        currentPasswordError ? "focus:border-red" : "focus:border-primary"
                                     }`}
                                 />
                                 <button
@@ -209,15 +216,10 @@ export const EditPasswordPage = () => {
                                     {currentPasswordError}
                                 </span>
                             )}
-                            {isCurrentPasswordVerified && (
-                                <span className="text-r-12-hn text-primary">
-                                    비밀번호가 확인되었습니다.
-                                </span>
-                            )}
                         </div>
 
                         {/* 비밀번호 그룹: 라벨 하나에 인풋 두 개 */}
-                        <div className={`flex flex-col gap-[12px] ${!isCurrentPasswordVerified ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <div className="flex flex-col gap-[12px]">
                             {/* 변경 할 비밀번호 */}
                             <div className="flex flex-col gap-[8px]">
                                 <span className="text-m-14-hn text-gray-900">
@@ -230,7 +232,6 @@ export const EditPasswordPage = () => {
                                         onChange={handleNewPasswordChange}
                                         onBlur={handleNewPasswordBlur}
                                         maxLength={16}
-                                        disabled={!isCurrentPasswordVerified}
                                         className={`w-full p-[15px] rounded-[5px] border bg-gray-100 ${
                                             newPasswordError ? 'border-red' : 'border-gray-150'
                                         } text-sb-16-hn text-gray-750 focus:outline-none focus:border-primary disabled:bg-gray-100`}
@@ -238,7 +239,6 @@ export const EditPasswordPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowNewPassword(!showNewPassword)}
-                                        disabled={!isCurrentPasswordVerified}
                                         className="absolute right-[16px] top-1/2 -translate-y-1/2"
                                     >
                                         {showNewPassword ? (
@@ -272,7 +272,6 @@ export const EditPasswordPage = () => {
                                         onChange={handleConfirmPasswordChange}
                                         onBlur={handleConfirmPasswordBlur}
                                         maxLength={16}
-                                        disabled={!isCurrentPasswordVerified}
                                         className={`w-full p-[15px] rounded-[5px] border bg-gray-100 ${
                                             confirmPasswordError ? 'border-red' : 'border-gray-150'
                                         } text-sb-16-hn text-gray-750 focus:outline-none focus:border-primary disabled:bg-gray-100`}
@@ -280,7 +279,6 @@ export const EditPasswordPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        disabled={!isCurrentPasswordVerified}
                                         className="absolute right-[16px] top-1/2 -translate-y-1/2"
                                     >
                                         {showConfirmPassword ? (
@@ -301,10 +299,10 @@ export const EditPasswordPage = () => {
 
                     <button
                         onClick={handleSubmit}
-                        disabled={!isValid}
+                        disabled={!isValid || isSubmitting}
                         className="w-full py-[12px] rounded-full bg-primary disabled:bg-gray-300 flex items-center justify-center transition-colors"
                     >
-                        <span className="text-sb-16-hn text-white">비밀번호 변경하기</span>
+                        <span className="text-sb-16-hn text-white">{isSubmitting ? "변경 중..." : "비밀번호 변경하기"}</span>
                     </button>
                 </div>
             </HeaderLayout>
@@ -317,6 +315,14 @@ export const EditPasswordPage = () => {
                     setConfirm(false);
                     navigate(-1);
                 }}
+            />
+            <PopUp
+                isOpen={unknownErrorOpen}
+                type="error"
+                title="일시적 오류로 인해 비밀번호 변경에 실패했습니다."
+                titleSecondary="잠시 후 다시 시도해주세요"
+                rightButtonText="확인"
+                onClick={() => setUnknownErrorOpen(false)}
             />
         </>
     );
