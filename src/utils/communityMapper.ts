@@ -1,7 +1,7 @@
 import type {
-    CommunityPostCommentResponse,
-    CommunityPostDetailResponse,
-    CommunityPostItem,
+  CommunityPostCommentResponse,
+  CommunityPostDetailResponse,
+  CommunityPostItem,
 } from "../api-types/communityApiTypes";
 import { loggedInUserMajor } from "../mock/community";
 import type { CommentItem, CommunityPostDetail, InfoPost, QuestionPost } from "../types/community";
@@ -91,7 +91,7 @@ export const mapToCommunityPostDetail = (
   title: post.title,
   likes: post.likeCount,
   comments: 0,
-  saveCount: 0,
+  saveCount: post.bookmarkCount,
   bookmarked: post.bookmarked ?? false,
   isAdopted: Boolean(post.acceptedCommentId),
   adoptedCommentId: post.acceptedCommentId ? String(post.acceptedCommentId) : undefined,

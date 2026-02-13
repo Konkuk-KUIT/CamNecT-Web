@@ -172,6 +172,7 @@ export type CommunityPostDetailResponse = {
     yearLevel: number;
   };
   viewCount: number;
+  bookmarkCount: number;
   likeCount: number;
   likedByMe: boolean;
   acceptedCommentId: number | null;
