@@ -1,49 +1,76 @@
-import { useEffect, useState } from 'react';
+import type { AxiosError } from 'axios';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Category from '../../components/Category';
-import Icon from '../../components/Icon';
-import PopUp from '../../components/Pop-up';
-import Toast from '../../components/Toast';
+import { acceptCommunityComment, createCommunityComment, deleteCommunityComment, deleteCommunityPost, getCommunityPostComments, postCommunityBookmark, postCommunityLike, purchaseCommunityPostAccess, updateCommunityComment } from '../../api/community';
 import BottomSheetModalPost, {
   type ActionItem,
 } from '../../components/BottomSheetModal/BottomSheetModal-post';
+import Category from '../../components/Category';
+import Icon from '../../components/Icon';
+import ImagePopUp from '../../components/ImagePopUp';
+import PopUp from '../../components/Pop-up';
+import Toast from '../../components/Toast';
+import { useToast } from '../../hooks/useToast';
 import { BottomChat } from '../../layouts/BottomChat/BottomChat';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { useToast } from '../../hooks/useToast';
+import { loggedInUserProfile } from '../../mock/community';
+import { useAuthStore } from '../../store/useAuthStore';
+import type { CommentItem } from '../../types/community';
+import { mapFlatCommentsToTree } from '../../utils/communityMapper';
 import CommentListItem from './components/CommentItem';
 import LockedQuestionCard from './components/LockedQuestionCard';
-import type { CommentItem } from '../../types/community';
-import { loggedInUserProfile } from '../../mock/community';
 import { useCommentActions } from './hooks/useCommentActions';
 import { usePost } from './hooks/usePost';
-import { formatPostDisplayDate } from './utils/post';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
+import { formatPostDisplayDate } from './utils/post';
+
+type PopUpConfig = {
+  type: 'info' | 'warning' | 'confirm' | 'error' | 'loading';
+  title: string;
+  content?: string;
+  titleSecondary?: string;
+  leftButtonText?: string;
+  rightButtonText?: string;
+  buttonText?: string;
+  onLeftClick?: () => void;
+  onRightClick?: () => void;
+  onClick?: () => void;
+};
 
 const CommunityPostPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const currentUser = loggedInUserProfile;
+  const authUser = useAuthStore((state) => state.user);
+  const currentUser = {
+    ...loggedInUserProfile,
+    id: authUser?.id ?? loggedInUserProfile.id,
+    name: authUser?.name ?? loggedInUserProfile.name,
+  };
+  const currentUserIdForOwnership = authUser?.id ?? loggedInUserProfile.id;
   // 옵션/팝업/이미지 실패 등 화면 단일 상태
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [selectedIsMine, setSelectedIsMine] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<'post' | 'comment'>('comment');
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-  const [isAdoptPopupOpen, setIsAdoptPopupOpen] = useState(false);
-  const [isAdoptedPostPopupOpen, setIsAdoptedPostPopupOpen] = useState(false);
-  const [isAdoptedCommentPopupOpen, setIsAdoptedCommentPopupOpen] = useState(false);
-  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
-  const [isDeleteCommentPopupOpen, setIsDeleteCommentPopupOpen] = useState(false);
-  const [isPurchasePopupOpen, setIsPurchasePopupOpen] = useState(false);
-  const [isInsufficientPointsPopupOpen, setIsInsufficientPointsPopupOpen] = useState(false);
-  const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
+  const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState('URL 복사가 완료되었습니다');
   const [accessStatusOverride, setAccessStatusOverride] = useState<
     'GRANTED' | 'LOCKED' | null
   >(null);
   const [myPoints, setMyPoints] = useState(0);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+  const [commentListFromApi, setCommentListFromApi] = useState<CommentItem[]>([]);
+  const isFetchingCommentsRef = useRef(false);
+  const closePopUp = () => setPopUpConfig(null);
   // 토스트 표시 제어
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
   // 게시글 파생 상태
@@ -57,17 +84,54 @@ const CommunityPostPage = () => {
     requiredPoints,
     textCount,
     imageCount,
-  } = usePost({ postId, currentUserId: currentUser.id });
-  const accessStatus = accessStatusOverride ?? selectedPost.accessStatus ?? 'GRANTED';
-  const isLockedQuestion = isQuestionPost && accessStatus !== 'GRANTED';
+    likedByMe,
+    detailError,
+    refetchPost,
+    isLoading: isDetailLoading,
+  } = usePost({ postId });
+  const accessStatus =
+    accessStatusOverride ??
+    selectedPost?.accessStatus ??
+    (isPostMine ? 'GRANTED' : 'LOCKED');
+  const isLockedQuestion =
+    isQuestionPost && !isPostMine && accessStatus !== 'GRANTED';
+  const userId = useAuthStore((state) => state.user?.id);
 
+  // 구매/접근 상태 변동 후 포인트 및 접근 상태를 초기화
   useEffect(() => {
+    if (!selectedPost) return;
     const resetTimer = window.setTimeout(() => {
       setAccessStatusOverride(null);
       setMyPoints(selectedPost.myPoints ?? 0);
     }, 0);
     return () => window.clearTimeout(resetTimer);
-  }, [selectedPost.id, selectedPost.myPoints]);
+  }, [selectedPost]);
+
+  // 상세 데이터 기준으로 좋아요/북마크 상태 동기화
+  useEffect(() => {
+    if (!selectedPost) return;
+    setLikeCount(selectedPost.likes ?? 0);
+    setBookmarkCount(selectedPost.saveCount ?? 0);
+    setIsLiked(likedByMe);
+    setIsBookmarked(Boolean(selectedPost.bookmarked));
+  }, [selectedPost, likedByMe]);
+
+  // 댓글 목록 1회 로딩 (중복 호출 방지 포함)
+  useEffect(() => {
+    if (!postId) return;
+    if (isFetchingCommentsRef.current) return;
+    isFetchingCommentsRef.current = true;
+    getCommunityPostComments(postId)
+      .then((response) => {
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      })
+      .catch(() => {
+        setCommentListFromApi([]);
+      })
+      .finally(() => {
+        isFetchingCommentsRef.current = false;
+      });
+  }, [postId]);
 
   // 댓글 상태/액션 묶음
   const {
@@ -91,41 +155,246 @@ const CommunityPostPage = () => {
     formatCommentDisplayDate,
   } = useCommentActions({
     currentUser,
+    initialComments: commentListFromApi,
     resetKey: postId,
     isInfoPost,
     isLockedQuestion,
     isQuestionPost,
     isAdopted,
-    adoptedCommentId: selectedPost.adoptedCommentId,
+    adoptedCommentId: selectedPost?.adoptedCommentId,
+    onSubmitCommentApi: async ({ content, parentCommentId }) => {
+      if (!userId || !postId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericParentId = parentCommentId ? Number(parentCommentId) : null;
+      await createCommunityComment({
+        postId,
+        params: { userId: numericUserId },
+        body: {
+          content,
+          parentCommentId: Number.isFinite(numericParentId ?? NaN)
+            ? numericParentId
+            : null,
+        },
+      });
+      const response = await getCommunityPostComments(postId);
+      setCommentListFromApi(mapFlatCommentsToTree(response.data));
+    },
+    onDeleteCommentApi: async (commentId) => {
+      if (!userId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericCommentId = Number(commentId);
+      if (!Number.isFinite(numericCommentId)) return;
+      await deleteCommunityComment({
+        commentId: numericCommentId,
+        params: { userId: numericUserId },
+      });
+      if (postId) {
+        const response = await getCommunityPostComments(postId);
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      }
+    },
+    onUpdateCommentApi: async ({ commentId, content }) => {
+      if (!userId) return;
+      const numericUserId = Number(userId);
+      if (!Number.isFinite(numericUserId)) return;
+      const numericCommentId = Number(commentId);
+      if (!Number.isFinite(numericCommentId)) return;
+      await updateCommunityComment({
+        commentId: numericCommentId,
+        params: { userId: numericUserId },
+        body: { content },
+      });
+      if (postId) {
+        const response = await getCommunityPostComments(postId);
+        setCommentListFromApi(mapFlatCommentsToTree(response.data));
+      }
+    },
   });
+
+  // 로딩 중에는 단일 PopUp만 노출
+  const activePopUpConfig: PopUpConfig | null = isDetailLoading
+    ? {
+        type: 'loading',
+        title: '게시글을 불러오는 중입니다',
+      }
+    : popUpConfig;
+
+  if (!selectedPost) {
+    return (
+      <HeaderLayout
+        headerSlot={
+          <MainHeader
+            title='커뮤니티'
+            leftAction={{
+              onClick: () => navigate('/community', { replace: true }),
+              ariaLabel: '커뮤니티로 이동',
+            }}
+            rightActions={[
+              { icon: 'option', onClick: () => {}, ariaLabel: '게시글 옵션 열기' },
+            ]}
+          />
+        }
+      >
+        {activePopUpConfig && (
+          <PopUp
+            isOpen={true}
+            type={activePopUpConfig.type}
+            title={activePopUpConfig.title}
+            titleSecondary={activePopUpConfig.titleSecondary}
+            content={activePopUpConfig.content}
+            leftButtonText={activePopUpConfig.leftButtonText}
+            rightButtonText={activePopUpConfig.rightButtonText}
+            buttonText={activePopUpConfig.buttonText}
+            onLeftClick={activePopUpConfig.onLeftClick}
+            onRightClick={activePopUpConfig.onRightClick}
+            onClick={activePopUpConfig.onClick ?? closePopUp}
+          />
+        )}
+      </HeaderLayout>
+    );
+  }
 
   // 게시글/댓글 옵션 열기
   const handleOpenCommentOptions = (comment: CommentItem) => {
-    setSelectedIsMine(comment.author.id === currentUser.id);
+    setSelectedIsMine(comment.author.id === currentUserIdForOwnership);
     setSelectedTarget('comment');
     setSelectedCommentId(comment.id);
     setIsOptionOpen(true);
   };
 
   const handleOpenPostOptions = () => {
-    setSelectedIsMine(selectedPost.author.id === currentUser.id);
+    setSelectedIsMine(selectedPost.author.id === currentUserIdForOwnership);
     setSelectedTarget('post');
     setSelectedCommentId(null);
     setIsOptionOpen(true);
   };
 
   // 채택/구매 팝업 제어
-  const handleOpenAdoptPopup = () => setIsAdoptPopupOpen(true);
-  const handleCloseAdoptPopup = () => setIsAdoptPopupOpen(false);
-  const handleConfirmAdopt = () => {
-    // TODO: 채택 이후 라우터 연결 예정
-    setIsAdoptPopupOpen(false);
+  const handleOpenAdoptPopup = (comment: CommentItem) => {
+    setSelectedCommentId(comment.id);
+    setPopUpConfig({
+      type: 'info',
+      title: '정말 채택하시겠습니까?',
+      content: '답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.',
+      onLeftClick: closePopUp,
+      onRightClick: async () => {
+        if (!userId || !postId) {
+          closePopUp();
+          return;
+        }
+        const numericUserId = Number(userId);
+        const numericCommentId = Number(comment.id);
+        if (!Number.isFinite(numericUserId) || !Number.isFinite(numericCommentId)) {
+          closePopUp();
+          return;
+        }
+        try {
+          await acceptCommunityComment({
+            postId,
+            commentId: numericCommentId,
+            params: { userId: numericUserId },
+          });
+          refetchPost();
+          const response = await getCommunityPostComments(postId);
+          setCommentListFromApi(mapFlatCommentsToTree(response.data));
+        } finally {
+          closePopUp();
+        }
+      },
+    });
   };
+
+  // 구매 확인 및 포인트 검증 플로우
   const handleOpenPurchasePopup = () => {
     setMyPoints(selectedPost.myPoints ?? 0);
-    setIsPurchasePopupOpen(true);
+    setPopUpConfig({
+      type: 'info',
+      title: '질문을 구매하시겠습니까?',
+      content: '구매 시 포인트가 즉시 차감되며, \n결제 후에는 취소나 환불이 불가능합니다.',
+      onLeftClick: closePopUp,
+      onRightClick: async () => {
+        if (!userId || !postId) return;
+        const numericUserId = Number(userId);
+        if (!Number.isFinite(numericUserId)) return;
+        if (selectedPost.myPoints == null) {
+          setPopUpConfig({
+            type: 'confirm',
+            title: '구매 오류',
+            content: '포인트 정보를 가져오는데 실패했습니다',
+            onClick: closePopUp,
+          });
+          return;
+        }
+        const currentPoints = selectedPost.myPoints ?? myPoints;
+        if (currentPoints < requiredPoints) {
+          setPopUpConfig({
+            type: 'confirm',
+            title: '앗, 포인트가 조금 부족하네요!',
+            content: '다양한 활동으로 포인트를 채워보세요!',
+            onClick: closePopUp,
+          });
+          return;
+        }
+        try {
+          const response = await purchaseCommunityPostAccess({
+            postId,
+            params: { userId: numericUserId },
+          });
+          setMyPoints(response.data.remainingPoints);
+          setAccessStatusOverride(response.data.accessStatus);
+          refetchPost();
+          closePopUp();
+          setToastMessage('구매 성공! 이제 질문글을 열람할 수 있어요');
+          openToast();
+        } catch {
+          closePopUp();
+        }
+      },
+    });
   };
-  const handleClosePurchasePopup = () => setIsPurchasePopupOpen(false);
+
+  const handleLikeChange = async (next: boolean) => {
+    if (!userId || isLikeLoading) return;
+    const prev = { liked: isLiked, count: likeCount };
+    setIsLikeLoading(true);
+    setIsLiked(next);
+    try {
+      const response = await postCommunityLike(selectedPost.id, { userId });
+      setIsLiked(response.data.liked);
+      setLikeCount(response.data.likeCount);
+    } catch (error) {
+      const axiosError = error as AxiosError<{ code?: number; message?: string }>;
+      const status = axiosError.response?.status;
+      const code = axiosError.response?.data?.code;
+      if (status === 409 || code === 43927) {
+        setToastMessage('본인의 글에 좋아요를 누를 수 없습니다.');
+        openToast();
+      }
+      setIsLiked(prev.liked);
+      setLikeCount(prev.count);
+    } finally {
+      setIsLikeLoading(false);
+    }
+  };
+
+  const handleBookmarkChange = async (next: boolean) => {
+    if (!userId || isBookmarkLoading) return;
+    const prev = { bookmarked: isBookmarked, count: bookmarkCount };
+    setIsBookmarkLoading(true);
+    setIsBookmarked(next);
+    try {
+      const response = await postCommunityBookmark(selectedPost.id, { userId });
+      setIsBookmarked(response.data.bookmarked);
+      setBookmarkCount(response.data.bookmarkCount);
+    } catch {
+      setIsBookmarked(prev.bookmarked);
+      setBookmarkCount(prev.count);
+    } finally {
+      setIsBookmarkLoading(false);
+    }
+  };
 
   // URL 복사: 클립보드 실패 시 fallback 적용
   const copyPostUrl = async () => {
@@ -150,18 +419,28 @@ const CommunityPostPage = () => {
   };
 
   // 옵션 id 기반 동작 매핑
+  // 옵션 버튼별 동작 매핑
   const optionHandlers: Record<OptionItemId, () => Promise<void> | void> = {
     'copy-url': async () => {
       await copyPostUrl();
     },
-    'report-post': () => setIsReportPopupOpen(true),
-    'report-comment': () => setIsReportPopupOpen(true),
-    'view-author-profile': () => {
-      if (!selectedCommentId) return;
-      const authorId = findCommentAuthorId(commentList, selectedCommentId);
-      if (!authorId) return;
-      navigate(`/alumni/profile/${authorId}`);
+    'report-post': () => {
+      setPopUpConfig({
+        type: 'confirm',
+        title: '현재 제작 중이에요!',
+        content: '유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!',
+        onClick: closePopUp,
+      });
     },
+    'report-comment': () => {
+      setPopUpConfig({
+        type: 'confirm',
+        title: '현재 제작 중이에요!',
+        content: '유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!',
+        onClick: closePopUp,
+      });
+    },
+    'view-author-profile': () => {},
     'edit-post': () => {
       if (!selectedIsMine) return;
       navigate(`/community/edit/${selectedPost.id}`);
@@ -170,13 +449,43 @@ const CommunityPostPage = () => {
       if (!selectedIsMine || !selectedCommentId) return;
       startEditingComment(selectedCommentId);
     },
-    'delete-post': () => {
+    'delete-post': async () => {
       if (!selectedIsMine) return;
-      setIsDeletePopupOpen(true);
+      setPopUpConfig({
+        type: 'warning',
+        title: '정말 삭제하시겠습니까?',
+        content: '삭제된 내용은 복구 불가능합니다.',
+        onLeftClick: async () => {
+          if (!userId) return;
+          const numericUserId = Number(userId);
+          if (!Number.isFinite(numericUserId)) return;
+          try {
+            await deleteCommunityPost({
+              postId: selectedPost.id,
+              params: { userId: numericUserId },
+            });
+            navigate('/community', { replace: true });
+          } finally {
+            closePopUp();
+          }
+        },
+        onRightClick: closePopUp,
+      });
     },
     'delete-comment': () => {
       if (!selectedIsMine || !selectedCommentId) return;
-      setIsDeleteCommentPopupOpen(true);
+      setPopUpConfig({
+        type: 'warning',
+        title: '정말 삭제하시겠습니까?',
+        content: '삭제된 내용은 복구 불가능합니다.',
+        onLeftClick: () => {
+          if (selectedCommentId) {
+            deleteComment(selectedCommentId);
+          }
+          closePopUp();
+        },
+        onRightClick: closePopUp,
+      });
     },
   };
 
@@ -185,6 +494,31 @@ const CommunityPostPage = () => {
     item: ActionItem,
     target: 'post' | 'comment',
   ) => {
+    if (item.id === 'view-author-profile') {
+      const authorId =
+        target === 'post'
+          ? selectedPost.author.id
+          : selectedCommentId
+            ? findCommentAuthorId(commentList, selectedCommentId)
+            : null;
+      if (authorId) {
+        navigate(`/alumni/profile/${authorId}`, {
+          state:
+            target === 'post'
+              ? {
+                  author: {
+                    name: selectedPost.author.name,
+                    major: selectedPost.author.major,
+                    studentId: selectedPost.author.studentId,
+                    profileImageUrl: selectedPost.author.profileImageUrl,
+                  },
+                }
+              : undefined,
+        });
+      }
+      setIsOptionOpen(false);
+      return;
+    }
     if (!isEditOption(item.id)) {
       await optionHandlers[item.id]();
       setIsOptionOpen(false);
@@ -192,7 +526,13 @@ const CommunityPostPage = () => {
     }
 
     if (target === 'post' && isQuestionPost && isAdopted && isPostMine) {
-      setIsAdoptedPostPopupOpen(true);
+      setPopUpConfig({
+        type: 'confirm',
+        title: '이미 채택된 게시물입니다.',
+        content:
+          '채택이 완료된 게시물의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다',
+        onClick: closePopUp,
+      });
       setIsOptionOpen(false);
       return;
     }
@@ -204,7 +544,13 @@ const CommunityPostPage = () => {
       selectedIsMine &&
       selectedCommentId === selectedPost.adoptedCommentId
     ) {
-      setIsAdoptedCommentPopupOpen(true);
+      setPopUpConfig({
+        type: 'confirm',
+        title: '이미 채택된 댓글입니다.',
+        content:
+          '채택이 완료된 댓글의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다',
+        onClick: closePopUp,
+      });
       setIsOptionOpen(false);
       return;
     }
@@ -244,18 +590,23 @@ const CommunityPostPage = () => {
       headerSlot={
         <MainHeader
           title='커뮤니티'
+          leftAction={{
+            onClick: () => navigate('/community', { replace: true }),
+            ariaLabel: '커뮤니티로 이동',
+          }}
           rightActions={[
             { icon: 'option', onClick: handleOpenPostOptions, ariaLabel: '게시글 옵션 열기' },
           ]}
         />
       }
     >
-      <main
-        className='flex w-full justify-center bg-white'
-        style={{ paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}
-      >
-        <div className='flex w-full max-w-[720px] flex-col sm:px-[25px]'>
-          <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
+      {selectedPost && !detailError ? (
+        <main
+          className='flex w-full justify-center bg-white'
+          style={{ paddingBottom: 'calc(90px + env(safe-area-inset-bottom))' }}
+        >
+          <div className='flex w-full max-w-[720px] flex-col sm:px-[25px]'>
+            <section className='flex flex-col gap-[35px] border-b border-[#ECECEC] px-5 pb-[30px] pt-[22px] sm:px-[25px]'>
             <div className='flex flex-col items-start gap-[20px]'>
               {isQuestionPost ? (
                 <div
@@ -280,11 +631,29 @@ const CommunityPostPage = () => {
                   <div className='flex items-center gap-[5px]'>
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='like' className='h-[14px] w-[14px]' />
-                      <span>{selectedPost.likes}</span>
+                      <span>{likeCount}</span>
                     </div>
+                    
                     <div className='flex items-center gap-[3px]'>
                       <Icon name='comment' className='h-[14px] w-[14px]' />
                       <span>{commentCount}</span>
+                    </div>
+                    <div className='flex items-center gap-[3px]'>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='11'
+                        height='12'
+                        viewBox='0 0 11 12'
+                        fill='none'
+                      >
+                        <path
+                          d='M9.22867 0.697692C9.962 0.775908 10.5 1.3558 10.5 2.03286V11.5L5.5 9.20853L0.5 11.5V2.03286C0.5 1.3558 1.03733 0.775908 1.77133 0.697692C4.24879 0.434103 6.75121 0.434103 9.22867 0.697692Z'
+                          stroke='#646464'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        />
+                      </svg>
+                      <span>{bookmarkCount}</span>
                     </div>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>
@@ -295,7 +664,22 @@ const CommunityPostPage = () => {
             </div>
 
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
-              <div className='flex items-center gap-[10px]'>
+              <button
+                type='button'
+                className='flex items-center gap-[10px] text-left'
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
+              >
                 {selectedPost.author.profileImageUrl ? (
                   <img
                     src={selectedPost.author.profileImageUrl}
@@ -310,14 +694,28 @@ const CommunityPostPage = () => {
                     {selectedPost.author.name}
                   </div>
                   <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major} {selectedPost.author.studentId}학번
+                    {selectedPost.author.major}
+                    {selectedPost.author.studentId
+                      ? ` ${selectedPost.author.studentId}학번`
+                      : ''}
                   </div>
                 </div>
-              </div>
+              </button>
               <button
                 type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
-                onClick={() => navigate(`/alumni/profile/${selectedPost.author.id}`)}
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}?coffeeChat=1`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
               >
                 커피챗 보내기
               </button>
@@ -333,7 +731,7 @@ const CommunityPostPage = () => {
                 />
               ) : (
                 <>
-                  <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+                  <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] whitespace-pre-wrap'>
                     {selectedPost.content}
                   </div>
                   {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
@@ -356,6 +754,7 @@ const CommunityPostPage = () => {
                               src={imageUrl}
                               alt={`${selectedPost.title} 이미지 ${index + 1}`}
                               className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
+                              onClick={() => setSelectedImageUrl(imageUrl)}
                               onError={() =>
                                 setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
                               }
@@ -388,18 +787,30 @@ const CommunityPostPage = () => {
                 {sortedComments.map((comment) => renderComment(comment))}
               </div>
             )}
-          </section>
-        </div>
-      </main>
-      <BottomChat
-        likeCount={selectedPost.likes}
-        placeholder={isLockedQuestion ? '구매 후 입력 가능' : '댓글을 입력해 주세요'}
-        content={commentContent}
-        onChange={setCommentContent}
-        onSubmit={handleSubmitComment}
-        disabled={isLockedQuestion}
-        replyTargetName={replyTarget?.name}
-        focusToken={replyFocusToken}
+            </section>
+          </div>
+        </main>
+      ) : null}
+      {selectedPost && !detailError ? (
+        <BottomChat
+          likeCount={likeCount}
+          isLiked={isLiked}
+          onLikeChange={handleLikeChange}
+          isSaved={isBookmarked}
+          onSaveChange={handleBookmarkChange}
+          placeholder={isLockedQuestion ? '구매 후 입력 가능' : '댓글을 입력해 주세요'}
+          content={commentContent}
+          onChange={setCommentContent}
+          onSubmit={handleSubmitComment}
+          disabled={isLockedQuestion}
+          replyTargetName={replyTarget?.name}
+          focusToken={replyFocusToken}
+        />
+      ) : null}
+      <ImagePopUp
+        isOpen={Boolean(selectedImageUrl)}
+        imageUrl={selectedImageUrl}
+        onClose={() => setSelectedImageUrl(null)}
       />
       <BottomSheetModalPost
         isOpen={isOptionOpen}
@@ -408,98 +819,21 @@ const CommunityPostPage = () => {
         isMine={selectedIsMine}
         onItemClick={handleOptionItemClick}
       />
-      <PopUp
-        isOpen={isAdoptPopupOpen}
-        type='info'
-        title='정말 채택하시겠습니까?'
-        content={'답변 채택 후 게시물의\n수정 및 삭제가 불가능 합니다.'}
-        onLeftClick={handleCloseAdoptPopup}
-        onRightClick={handleConfirmAdopt}
-      />
-      <PopUp
-        isOpen={isAdoptedPostPopupOpen}
-        type='confirm'
-        title='이미 채택된 게시물입니다.'
-        content={
-          '채택이 완료된 게시물의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
-        }
-        onRightClick={() => setIsAdoptedPostPopupOpen(false)}
-      />
-      <PopUp
-        isOpen={isAdoptedCommentPopupOpen}
-        type='confirm'
-        title='이미 채택된 댓글입니다.'
-        content={
-          '채택이 완료된 댓글의\n수정 및 삭제를 원하실 경우,\n[문의하기]를 통해 접수 부탁드립니다'
-        }
-        onRightClick={() => setIsAdoptedCommentPopupOpen(false)}
-      />
-      <PopUp
-        isOpen={isDeletePopupOpen}
-        type='warning'
-        title='정말 삭제하시겠습니까?'
-        content='삭제된 내용은 복구 불가능합니다.'
-        onLeftClick={() => {
-          // TODO: 삭제 API 요청 연결 예정
-          setIsDeletePopupOpen(false);
-        }}
-        onRightClick={() => setIsDeletePopupOpen(false)}
-      />
-      <PopUp
-        isOpen={isDeleteCommentPopupOpen}
-        type='warning'
-        title='정말 삭제하시겠습니까?'
-        content='삭제된 내용은 복구 불가능합니다.'
-        onLeftClick={() => {
-          if (selectedCommentId) {
-            deleteComment(selectedCommentId);
-          }
-          setIsDeleteCommentPopupOpen(false);
-        }}
-        onRightClick={() => setIsDeleteCommentPopupOpen(false)}
-      />
-      <PopUp
-        isOpen={isPurchasePopupOpen}
-        type='info'
-        title='질문을 구매하시겠습니까?'
-        content={'구매 시 포인트가 즉시 차감되며, \n결제 후에는 취소나 환불이 불가능합니다.'}
-        onLeftClick={handleClosePurchasePopup}
-        onRightClick={() => {
-          const currentPoints = selectedPost.myPoints ?? myPoints;
-          if (currentPoints < requiredPoints) {
-            setIsPurchasePopupOpen(false);
-            setIsInsufficientPointsPopupOpen(true);
-            return;
-          }
-          // TODO: 결제 및 포인트 차감 API 연동 필요
-          setMyPoints((prev) => {
-            const basePoints = selectedPost.myPoints ?? prev;
-            return basePoints - requiredPoints;
-          });
-          setAccessStatusOverride('GRANTED');
-          // TODO: 구매 API 성공 시 상세/리스트 재조회로 accessStatus 갱신 필요
-          // TODO: 서버 응답 remainingPoints로 전역 포인트 상태 동기화 필요
-          setIsPurchasePopupOpen(false);
-          setToastMessage('구매 성공! 이제 질문글을 열람할 수 있어요');
-          openToast();
-        }}
-      />
-      <PopUp
-        isOpen={isInsufficientPointsPopupOpen}
-        type='confirm'
-        title='앗, 포인트가 조금 부족하네요!'
-        content='다양한 활동으로 포인트를 채워보세요!'
-        onClick={() => setIsInsufficientPointsPopupOpen(false)}
-      />
-      <PopUp
-        isOpen={isReportPopupOpen}
-        type='confirm'
-        title='현재 제작 중이에요!'
-        content={
-          '유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!'
-        }
-        onClick={() => setIsReportPopupOpen(false)}
-      />
+      {activePopUpConfig && (
+        <PopUp
+          isOpen={true}
+          type={activePopUpConfig.type}
+          title={activePopUpConfig.title}
+          titleSecondary={activePopUpConfig.titleSecondary}
+          content={activePopUpConfig.content}
+          leftButtonText={activePopUpConfig.leftButtonText}
+          rightButtonText={activePopUpConfig.rightButtonText}
+          buttonText={activePopUpConfig.buttonText}
+          onLeftClick={activePopUpConfig.onLeftClick}
+          onRightClick={activePopUpConfig.onRightClick}
+          onClick={activePopUpConfig.onClick ?? closePopUp}
+        />
+      )}
       <Toast
         isOpen={isToastOpen}
         isFading={isToastFading}

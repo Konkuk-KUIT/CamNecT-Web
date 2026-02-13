@@ -25,7 +25,7 @@ export const useImageUpload = () => {
         try {
             // 1. 유효성 검사 (타입)
             if (!image.type.startsWith('image/')) {
-                alert("이미지 파일만 업로드 가능합니다.");
+                console.warn("이미지 파일만 업로드 가능합니다.");
                 return null;
             }
 
@@ -43,7 +43,6 @@ export const useImageUpload = () => {
             
         } catch (error) {
             console.error("이미지 처리 중 오류 발생:", error);
-            alert("이미지 업로드 처리에 실패했습니다.");
             return null;
         } finally {
             setIsLoading(false);
