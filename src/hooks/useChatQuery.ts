@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { viewChatRoomDetail, viewChatRoomList, viewChatRequestList, viewChatRequestDetail } from "../api/chat";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { requestChatRespond, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
@@ -182,5 +182,24 @@ export const useChatRequestRoom = (requestId: string) => {
             };
         },
         enabled: !!requestId
+    });
+};
+
+// 5. 커피챗 요청 수락/거절 API [POST] (/api/request/respond)
+export const useChatRequestRespond = () => {
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (variables: { requestId: number; isAccepted: boolean }) => 
+            requestChatRespond({
+                userId: Number(user?.id),
+                ...variables
+            }),
+        onSuccess: () => {
+            // 요청 목록, 채팅 목록 최신화
+            queryClient.invalidateQueries({ queryKey: ['chatRequests'] });
+            queryClient.invalidateQueries({ queryKey: ['chatRooms'] });
+        }
     });
 };
