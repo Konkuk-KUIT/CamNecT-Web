@@ -39,6 +39,7 @@ export const MypageEditPage = () => {
     const [confirm, setConfirm] = useState(false);
     const [leaveOpen, setLeaveOpen] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [imageSizeErrorOpen, setImageSizeErrorOpen] = useState(false);
 
     // 태그 리스트 조회
     const { data: tagList } = useQuery({
@@ -106,6 +107,17 @@ export const MypageEditPage = () => {
             document.body.style.overflow = "";
         };
     }, [currentModal]);
+
+    const MAX_BYTES = 5 * 1024 * 1024;
+    const handleSelectImage = (file: File) => {
+    if (file.size > MAX_BYTES) {
+        setImageSizeErrorOpen(true);
+        return; 
+    }
+
+  // 5MB이하의 이미지만 기존 로직 실행
+  handleImageUpload(file);
+};
 
     const handleImageUpload = (file: File) => {
         const previewUrl = URL.createObjectURL(file);
@@ -310,7 +322,7 @@ export const MypageEditPage = () => {
             <ImageEditModal
                 isOpen={currentModal === 'image'}
                 onClose={closeModal}
-                onSelect={handleImageUpload}
+                onSelect={handleSelectImage}
                 onDelete={() => {
                     setData((prev) => {
                         const base = prev ?? data;
@@ -434,6 +446,15 @@ export const MypageEditPage = () => {
                 buttonText="확인"
                 onClick={() => setSaveError(null)}
             />
+            <PopUp
+                isOpen={imageSizeErrorOpen}
+                type="error"
+                title="파일 용량 초과"
+                content="프로필 사진은 최대 5MB까지 업로드할 수 있습니다."
+                buttonText="확인"
+                onClick={() => setImageSizeErrorOpen(false)}
+            />
+
         </div>
     );
 };
