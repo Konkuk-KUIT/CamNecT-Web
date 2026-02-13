@@ -3,9 +3,12 @@ import { formatTimeAgo } from "../../utils/formatDate";
 import Category from "../Category";
 import Icon from "../Icon";
 import { Link } from "react-router-dom";
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type CommunityPostProps = {
-  post: CommunityPostItem;
+    post: CommunityPostItem;
 };
 
 export const CommunityPost = ({post}: CommunityPostProps) => {
@@ -14,10 +17,10 @@ export const CommunityPost = ({post}: CommunityPostProps) => {
         return (
             <Link key={post.postId} to={`/community/post/${post.postId}`} className='block'>
                 <article
-                className='flex flex-col px-[25px] pt-[10px]'
+                className='flex flex-col px-[25px] pt-[15px]'
                 style={{
                     gap: '10px',
-                    paddingBottom: '10px',
+                    paddingBottom: '15px',
                     borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
                 }}
                 >
@@ -53,6 +56,10 @@ export const CommunityPost = ({post}: CommunityPostProps) => {
                                     src={post.thumbnailUrl}
                                     alt=''
                                     className='h-full w-full object-cover'
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                        e.currentTarget.src = REPLACE_IMAGE;
+                                    }}
                                 />
                                 </div>
                             )}
@@ -77,10 +84,10 @@ export const CommunityPost = ({post}: CommunityPostProps) => {
     return (
         <Link key={post.postId} to={`/community/post/${post.postId}`} className='block'>
             <article
-            className='flex flex-col px-[25px] pt-[10px]'
+            className='flex flex-col px-[25px] pt-[15px]'
             style={{
                 gap: '10px',
-                paddingBottom: '10px',
+                paddingBottom: '15px',
                 borderBottom: '1px solid var(--ColorGray2,rgb(239, 239, 239))',
             }}
             >
@@ -116,7 +123,7 @@ export const CommunityPost = ({post}: CommunityPostProps) => {
 
                             {isLocked ? (
                             <div className='text-r-12 text-[var(--ColorMain,#00C56C)]'>
-                                {500} P
+                            
                             </div>
                             ) : (
                             <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>

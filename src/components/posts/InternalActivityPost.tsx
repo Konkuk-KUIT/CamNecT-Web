@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
 import { formatTimeAgo } from '../../utils/formatDate';
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type InternalActivityPostProps = {
   post: ActivityPost;
@@ -76,6 +79,10 @@ const InternalActivityPost = ({
             src={thumbnailUrl}
             alt={post.title}
             className='w-[95px] h-[95px] rounded-[5px] object-cover flex-shrink-0'
+            onError={(e) => {
+              e.currentTarget.onerror = null; //이미지 깨짐 방지
+              e.currentTarget.src = REPLACE_IMAGE;
+            }}
           />
         )}
       </div>
