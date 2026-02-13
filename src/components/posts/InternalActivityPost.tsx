@@ -47,7 +47,7 @@ const InternalActivityPost = ({
             <span className='text-sb-16-hn text-gray-900 truncate'>
               {post.title}
             </span>
-            <div className='text-r-16 text-gray-750 whitespace-pre-line break-keep line-clamp-2 [overflow-wrap:anywhere]'>
+            <div className='h-[45px] text-r-16 text-gray-750 whitespace-pre-line break-keep line-clamp-2 [overflow-wrap:anywhere]'>
               {post.content}
             </div>
           </div>

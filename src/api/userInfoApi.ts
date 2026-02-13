@@ -14,6 +14,8 @@ import type {
   CertificateAddResponse,
   CertificateUpdateResponse,
   CertificateDeleteResponse,
+  PostListParams,
+  PostListResponse
 } from "../api-types/userInfoApiTypes";
 import { axiosInstance } from "./axiosInstance";
 
@@ -125,5 +127,61 @@ export const deleteCertificate = async (userId: number, certificateId: number) =
     `/api/user/me/certificates/${certificateId}`,
     { params: { userId } }
   );
+  return response.data;
+};
+
+
+
+// 커뮤니티 작성글 [GET] /api/profile/myposts/community
+export const getMyPostsCommunity = async (params: PostListParams) => {
+  const { userId, sort = 'LATEST', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/myposts/community', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
+  return response.data;
+};
+
+// 대외활동 작성글 [GET] /api/profile/myposts/external
+export const getMyPostsExternal = async (params: PostListParams) => {
+  const { userId, sort = 'LATEST', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/myposts/external', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
+  return response.data;
+};
+
+// 팀원모집 작성글 [GET] /api/profile/myposts/recruitment
+export const getMyPostsRecruitment = async (params: PostListParams) => {
+  const { userId, sort = 'LATEST', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/myposts/recruitment', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
+  return response.data;
+};
+
+// 커뮤니티 북마크 [GET] /api/profile/bookmarks/community
+export const getMyBookmarksCommunity = async (params: PostListParams) => {
+  const { userId, sort = 'RECOMMENDED', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/bookmarks/community', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
+  return response.data;
+};
+
+// 대외활동 북마크 [GET] /api/profile/bookmarks/external
+export const getMyBookmarksExternal = async (params: PostListParams) => {
+  const { userId, sort = 'RECOMMENDED', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/bookmarks/external', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
+  return response.data;
+};
+
+// 팀원모집 북마크 [GET] /api/profile/bookmarks/recruitment
+export const getMyBookmarksRecruitment = async (params: PostListParams) => {
+  const { userId, sort = 'RECOMMENDED', cursorId, cursorValue, size = 20 } = params;
+  const response = await axiosInstance.get<PostListResponse>('/api/profile/bookmarks/recruitment', {
+    params: { userId, sort, cursorId, cursorValue, size },
+  });
   return response.data;
 };

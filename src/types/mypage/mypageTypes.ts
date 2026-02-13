@@ -70,3 +70,28 @@ export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
   DROPPED_OUT: "중퇴",
   TRANSFERRED: "편입"
 };
+
+//작성/북마크한 글(커뮤니티)
+export type CommunityPostItem = {
+    postId: number;
+    boardCode: "INFO" | "QUESTION";
+    title: string;
+    preview: string;
+    createdAt: string;
+    likeCount: number;
+    answerCount: number;
+    commentCount: number;
+    bookmarkCount: number;
+    acceptedBadge?: boolean;
+    tags: string[];
+    thumbnailUrl?: string | null;
+    author: {
+      userId: number;
+      name: string;
+      profileImageUrl: string | null;
+      studentNo: string;
+      majorName: string;
+    };
+    accessType?: "FREE" | "POINT_REQUIRED";
+    accessStatus?: "GRANTED" | "LOCKED";
+};
