@@ -152,7 +152,13 @@ export const EditPasswordPage = () => {
         } catch (e) {
         if (axios.isAxiosError(e)) {
             const status = e.response?.status;
-            const code = (e.response?.data as any)?.code ?? (e.response?.data as any)?.statusCode;
+            const data = e.response?.data as Record<string, unknown> | undefined;
+            const code =
+            typeof data?.code === "number"
+                ? data.code
+                : typeof data?.statusCode === "number"
+                    ? data.statusCode
+                    : undefined;
 
             if (status === 401 || code === 41101) {
                 setCurrentPasswordError("현재 비밀번호와 일치하지 않습니다.");
