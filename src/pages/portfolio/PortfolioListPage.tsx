@@ -107,12 +107,12 @@ export const PortfolioListPage = ({
                     />
                 }
             >
-                <div className="max-w-screen-sm mx-auto">
+                <div className="h-full w-full">
                     {/* 콘텐츠 */}
                     <div className="h-full w-full">
                         {/* 전체 비공개 토글 */}
                         {isMine && (
-                            <div className="flex items-center justify-between px-[25px] py-[15px] border-t border-b border-gray-150">
+                            <div className="w-full flex items-center justify-between px-[25px] py-[15px] border-t border-b border-gray-150">
                                 <div className="text-sb-14-hn text-gray-900">포트폴리오 전체 비공개</div>
                                 <button
                                 onClick={handleToggleAllPublic}
