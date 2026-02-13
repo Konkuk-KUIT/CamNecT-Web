@@ -98,7 +98,7 @@ export const logout = async (loginUserId: number) => {
   return response.data;
 };
 
-// PATCH /api/profile/password
+// 비밀번호 변경 [PATCH] (/api/profile/password)
 export const changePassword = async (userId: number, data: ChangePasswordRequest) => {
   await axiosInstance.patch("/api/profile/password", data, {
     params: { userId },
