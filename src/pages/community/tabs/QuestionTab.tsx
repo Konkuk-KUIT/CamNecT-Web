@@ -2,18 +2,18 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
-import WriteButton from '../components/WriteButton';
-import type { QuestionPost } from '../../../types/community';
-import { formatTimeAgo } from '../time';
+import SortSelector from '../../../components/SortSelector';
 import TagsFilterModal from '../../../components/TagsFilterModal';
 import { useTagList } from '../../../hooks/useTagList';
-import SortSelector from '../../../components/SortSelector';
+import type { QuestionPost } from '../../../types/community';
+import WriteButton from '../components/WriteButton';
+import { formatTimeAgo } from '../time';
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
-  recommended: '추천순',
   latest: '최신순',
+  recommended: '추천순',
   likes: '좋아요 많은 순',
   bookmarks: '북마크 많은 순',
 };
