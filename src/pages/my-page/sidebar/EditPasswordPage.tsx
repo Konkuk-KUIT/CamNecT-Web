@@ -8,7 +8,7 @@ import { changePassword } from "../../../api/profileApi";
 import axios from "axios";
 
 // 비밀번호 정규식 패턴
-const PASSWORD_PATTERN = /^(?=.*\d)[A-Za-z0-9!@#$%^&*()_+={}[\]|\\:;"'<>,.?/~`-]{8,16}$/;
+const PASSWORD_PATTERN = /^(?=.*\d)(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+={}[\]|\\:;"'<>,.?/~`-]{8,16}$/;
 
 const EyeClosedIcon = () => {
         return (
