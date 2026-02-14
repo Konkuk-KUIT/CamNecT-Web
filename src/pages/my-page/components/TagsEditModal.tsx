@@ -145,28 +145,6 @@ export default function TagEditModal({ tagIds, onClose, onSave }: TagEditModalPr
 
     const filteredCategories = getFilteredCategories();
 
-    if (isLoading) {
-        return (
-            <PopUp
-                type="loading"
-                isOpen={true}
-            />
-        );
-    }
-
-    if (isError) {
-        return (
-            <PopUp 
-                isOpen={isError} 
-                type="error" 
-                title="오류 발생" 
-                content="태그 목록을 불러오는 중 문제가 발생했습니다" 
-                buttonText="닫기"
-                onClick={() => navigate(-1)}
-            />
-        );
-    }
-
     return (
         <div className="flex items-center justify-center fixed inset-0 z-50 bg-white">
             <div className="w-full max-w-[430px] h-full bg-white flex flex-col">

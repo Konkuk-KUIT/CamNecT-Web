@@ -164,7 +164,7 @@ export const FollowerPage = () => {
                                     <div className="flex items-center gap-[15px]">
                                         {/* 프로필 이미지 */}
                                         <button
-                                            onClick={() =>  navigate(`/alumni/profile/${user.userId}`)} //TODO: 프로필로 navigate
+                                            onClick={() => navigate(`/alumni/profile/${user.userId}`)}
                                             className="flex-shrink-0"
                                         >
                                             <img
@@ -180,7 +180,7 @@ export const FollowerPage = () => {
 
                                         {/* 유저 정보 */}
                                         <button
-                                            onClick={() => alert(`${user.userId}의 프로필로 이동`)}
+                                            onClick={() => navigate(`/alumni/profile/${user.userId}`)}
                                             className="flex-1 flex flex-col gap-[3px] items-start"
                                         >
                                             <span className="text-b-18-hn text-gray-900">{user.name}</span>

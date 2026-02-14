@@ -160,7 +160,7 @@ export interface FollowListResponse {
 export interface SettingInfoData {
   userId: number;
   name: string;
-  profileImageUrl: string;
+  profileImageUrl: string | null;
   phoneNum: string;
   email: string;
 }

@@ -193,6 +193,8 @@ export function useProfileSave() {
         const institution = searchResult.data.institutions.find(i => i.nameKor === schoolName);
         if (institution) {
           institutionMap.set(schoolName, institution.id);
+        } else {
+          throw new Error(`학교 ID를 찾을 수 없음: ${schoolName}`);
         }
       }
 

@@ -48,18 +48,14 @@ export const MypageEditPage = () => {
     });
 
     // 태그 데이터 포맷팅
-    const allTags = tagList?.data?.flatMap(cat => 
-        cat.tags.map(tag => ({
-            id: tag.id,
-            name: tag.name,
-        }))
-    ) || [];
-
-    const tagIdToName = useMemo(() => {
+    const { tagIdToName } = useMemo(() => {
+        const tags = tagList?.data?.flatMap(cat =>
+            cat.tags.map(tag => ({ id: tag.id, name: tag.name }))
+        ) ?? [];
         const m = new Map<number, string>();
-        allTags.forEach(t => m.set(t.id, t.name));
-        return m;
-    }, [allTags]);
+        for (const t of tags) m.set(t.id, t.name);
+        return { allTags: tags, tagIdToName: m };
+    }, [tagList]);
 
     const handleSave = async () => {
         if (!hasChanges || !data || !userId || !originalData) return;
@@ -125,7 +121,7 @@ export const MypageEditPage = () => {
             return; 
         }
 
-        // 5MB이하의 이미지만 기존 로직 실행
+        // 20MB이하의 이미지만 기존 로직 실행
         handleImageUpload(file);
     };
 
@@ -459,7 +455,7 @@ export const MypageEditPage = () => {
                 isOpen={imageSizeErrorOpen}
                 type="error"
                 title="파일 용량 초과"
-                content="프로필 사진은 최대 5MB까지 업로드할 수 있습니다."
+                content="프로필 사진은 최대 20MB까지 업로드할 수 있습니다."
                 buttonText="확인"
                 onClick={() => setImageSizeErrorOpen(false)}
             />
