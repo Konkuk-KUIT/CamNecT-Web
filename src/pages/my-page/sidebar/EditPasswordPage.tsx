@@ -261,7 +261,7 @@ export const EditPasswordPage = () => {
                                 )}
                                 {!newPasswordError && newPassword && (
                                     <span className="text-r-12-hn text-gray-650">
-                                        비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다
+                                        비밀번호는 8~16자, 숫자 1개 이상, 소문자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다
                                     </span>
                                 )}
                             </div>
