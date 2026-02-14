@@ -48,9 +48,8 @@ export const useStompChat = (roomId: number) => {
             setMessages((prev) => [...prev, data]);
         });
 
-        // ✅ 핵심: 채팅방을 나갈 때(언마운트) 구독 해제와 나가기 신호를 한꺼번에 처리
+        // 핵심: 채팅방을 나갈 때(언마운트) 구독 해제와 나가기 신호를 한꺼번에 처리
         return () => {
-            console.log(`채팅방 ${roomId} 구독 해제 및 퇴장 신호 전송`);
             subscription.unsubscribe();
             leaveChatRoom();
         };

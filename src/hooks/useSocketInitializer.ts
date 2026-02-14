@@ -24,8 +24,6 @@ export const useSocketInitializer = () => {
         };
 
         const setUpSubscriptions = () => {
-            console.log("전역 구독 중");
-
             // 전역 채팅 목록 destination
             stompClient.subscribe(`/sub/user/${user?.id}/rooms`, () => {
                 queryClient.invalidateQueries({ 
@@ -43,7 +41,6 @@ export const useSocketInitializer = () => {
         }
         // 연결 성공 후
         stompClient.onConnect = () => {
-            console.log("socket 연결 성공");
             setUpSubscriptions();
         }
         

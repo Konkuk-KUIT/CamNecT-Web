@@ -51,7 +51,10 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         phoneNum: z
             .string() 
             .regex(/^01[0-9]\d{8}$/, "전화번호 형식이 올바르지 않습니다"),
-        username: z.string().min(1, "아이디를 입력해 주세요"),
+        username: z
+            .string()
+            .min(1, "아이디를 입력해 주세요")
+            .regex(/^[a-z0-9]+$/, "아이디는 영문 소문자와 숫자만 입력 가능합니다"),
         password: z
             .string()
             .regex(
@@ -83,8 +86,10 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     }
     });
 
-    // SingleInput에 입력되는 아이디 값 실시간 감지
+    // SingleInput에 입력되는 값들 실시간 감지
     const userNameValue = useWatch({ control, name: "username" });
+    const passwordValue = useWatch({ control, name: "password" });
+    const confirmPasswordValue = useWatch({ control, name: "confirmPassword" });
 
     const idCheckMutation = useMutation({
         mutationFn: checkIdDuplicate,
@@ -178,6 +183,15 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             helperText="비밀번호를 한번 더 입력해 주세요"
                             {...register("confirmPassword")}
                             error={errors.confirmPassword?.message}
+                            successMessage={
+                                passwordValue && 
+                                confirmPasswordValue && 
+                                passwordValue === confirmPasswordValue && 
+                                !errors.confirmPassword &&
+                                !errors.password
+                                    ? "비밀번호 설정이 완료되었습니다." 
+                                    : ""
+                            }
                         /> 
                     </div>
 
