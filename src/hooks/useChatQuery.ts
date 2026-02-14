@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { requestChatRespond, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList, deleteAllChatRequest, deleteAllTeamRecruit } from "../api/chat";
+import { deleteAllChatRequest, deleteAllTeamRecruit, requestChatRespond, requestChatRoomOut, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
@@ -238,3 +238,22 @@ export const useDeleteAllChatRequest = () => {
         }
     });
 };
+
+// 8. 개별 채팅방 대화종료 API [PATCH] (/api/chat/room/{roomId}/out)
+export const useChatRoomOut = () => {
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (variables: { roomId: number }) => 
+            requestChatRoomOut({
+                userId: Number(user?.id),
+                ...variables
+            }),
+        onSuccess: () => {
+            // 채팅 목록 최신화
+            queryClient.invalidateQueries({ queryKey: ['chatRooms'] });
+        }
+    });
+};
+    

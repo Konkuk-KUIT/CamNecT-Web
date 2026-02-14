@@ -33,7 +33,7 @@ export const viewChatRoomDetail = async (data: ChatRoomDetailRequest) => {
     return response.data;
 }
 
-// 3. 개별 채팅방 나가기 API [PATCH] (/api/chat/room/{roomId}/out)
+// 3. 개별 채팅방 대화종료 API [PATCH] (/api/chat/room/{roomId}/out)
 export const requestChatRoomOut = async (data: ChatRoomOutRequest) => {
     const { roomId, userId } = data;
     

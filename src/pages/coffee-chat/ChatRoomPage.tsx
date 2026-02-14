@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useParams } from "react-router-dom";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
-import { useChatRoom } from "../../hooks/useChatQuery";
+import { useChatRoom, useChatRoomOut } from "../../hooks/useChatQuery";
 import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
@@ -23,6 +23,7 @@ export const ChatRoomPage = () => {
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     const { user } = useAuthStore();
     const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
+    const { mutate: endChat } = useChatRoomOut();
 
     const {messages: socketMessages, sendMessage} = useStompChat(Number(roomId));
     
@@ -32,6 +33,8 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     
     // 메뉴 관련 상태
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isEndPopUpOpen, setIsEndPopUpOpen] = useState(false);
+    const [isTerminated, setIsTerminated] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     // 메뉴 바깥 클릭/터치 시 닫기
@@ -127,10 +130,25 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         }
     }, [localMessages.length, isReady]);
 
-    // 메시지 전송 함수 (임시 로직 - 추후 useStompChat과 교체)
+    // 메시지 전송 함수 
     const handleSendMessage = (text: string) => {
         sendMessage(text);
-        // setSentMessages((prev) => [...prev, newMessage]);
+    }
+
+    // 채팅 종료 함수
+    const handleEndChat = () => {
+        setIsMenuOpen(false);
+        setIsEndPopUpOpen(true);
+    }
+
+    const handleEndChatConfirm = () => {
+        setIsEndPopUpOpen(false);
+        endChat({ roomId: Number(roomId) }, {
+            onSuccess: () => {
+                // 채팅 종료 UI 표시
+                setIsTerminated(true);
+            }
+        });
     }
 
     return (
@@ -152,10 +170,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                 className="absolute right-[25px] top-[calc(100%+10px)] z-[60] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
                             >
                                 <button 
-                                    onClick={() => {
-                                        console.log('채팅 종료하기');
-                                        setIsMenuOpen(false);
-                                    }}
+                                    onClick={handleEndChat}
                                     className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
                                 >
                                     <Icon name="logOut" className="w-[24px] h-[24px]" />
@@ -291,14 +306,35 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                             </React.Fragment>
                         );
                     })}
+                    {/* 채팅 종료 구분선 */}
+                    {isTerminated && (
+                        <div className="flex items-center gap-[15px] my-[20px]">
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                            <div className="text-r-12 text-gray-650 tracking-[-0.24px] shrink-0">
+                                채팅이 종료되었습니다
+                            </div>
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
             </div>
 
             {/* 고정된 입력창 */}
-            <TypingArea onSend={handleSendMessage} />
+            {!isTerminated && <TypingArea onSend={handleSendMessage} />}
             
             <PopUp isOpen={isLoading} type="loading" />
+            
+            <PopUp 
+                isOpen={isEndPopUpOpen}
+                type="warning"
+                title="채팅을 종료하시겠습니까?"
+                content="채팅을 종료하면 다시 복구할 수 없습니다."
+                leftButtonText="종료하기"
+                onLeftClick={handleEndChatConfirm}
+                onRightClick={() => setIsEndPopUpOpen(false)}
+            />
+
             {!isLoading && !roomInfo && (
                 <div className="fixed inset-0 flex justify-center items-center bg-white z-[60] text-gray-400">
                     채팅방 정보를 찾을 수 없습니다.
