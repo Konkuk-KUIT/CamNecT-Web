@@ -42,7 +42,6 @@ const buildPost = (
   title: overrides.title,
   content: overrides.content,
   categories: overrides.categories ?? ['기획', '모집'],
-  likes: overrides.likes ?? 12,
   saveCount: overrides.saveCount ?? 6,
   createdAt: overrides.createdAt ?? new Date().toISOString(),
   author: overrides.author ?? {
@@ -56,7 +55,6 @@ const buildPost = (
   postImages: overrides.postImages,
   thumbnailUrl: overrides.thumbnailUrl,
   isBookmarked: overrides.isBookmarked ?? false,
-  isLiked: overrides.isLiked ?? false,
   // 대외활동 전용 필드
   organizer: overrides.organizer,
   deadline: overrides.deadline,
@@ -64,8 +62,6 @@ const buildPost = (
   target: overrides.target,
   applyPeriod: overrides.applyPeriod,
   announceDate: overrides.announceDate,
-  employType: overrides.employType,
-  payment: overrides.payment,
   applyUrl: overrides.applyUrl,
   descriptionTitle: overrides.descriptionTitle,
   descriptionBody: overrides.descriptionBody,
@@ -79,11 +75,9 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '제품 기획과 UI 설계를 함께 경험할 동아리원을 모집합니다. 매주 스터디와 실전 프로젝트가 있어요.',
     categories: ['디자인', '기획', '동아리'],
-    likes: 34,
     saveCount: 14,
     createdAt: '2026-02-05T01:00:00.000Z',
     status: 'OPEN',
-    isLiked: true,
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail1,
     postImages: [samplePostImage, samplePostImage2, samplePostImage3],
@@ -95,7 +89,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       'Node.js 기반 백엔드 실습 위주로 진행합니다. 경험은 없어도 괜찮아요!',
     categories: ['개발', '동아리'],
-    likes: 21,
     saveCount: 9,
     createdAt: '2026-01-31T10:00:00.000Z',
     status: 'CLOSED',
@@ -108,7 +101,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '프로젝트 기획 경험을 쌓고 싶은 분들을 모집합니다. 지원서 제출 후 간단한 인터뷰가 있어요.',
     categories: ['기획', '동아리'],
-    likes: 6,
     saveCount: 2,
     createdAt: '2026-02-04T16:00:00.000Z',
     author: activityLoggedInUser,
@@ -122,7 +114,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       'React와 테스트 코드 중심으로 주 2회 오프라인 스터디를 진행합니다.',
     categories: ['개발', '스터디'],
-    likes: 18,
     saveCount: 11,
     createdAt: '2026-02-04T10:00:00.000Z',
     status: 'OPEN',
@@ -137,7 +128,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '매주 1편 논문을 읽고 토론합니다. 최근 트렌드 위주로 진행해요.',
     categories: ['AI', '스터디'],
-    likes: 12,
     saveCount: 4,
     createdAt: '2026-01-26T13:00:00.000Z',
     status: 'OPEN',
@@ -149,7 +139,6 @@ const baseActivityPosts: ActivityPostDetail[] = [
     content:
       '주 2회 문제풀이와 코드리뷰를 진행합니다. 백준/프로그래머스 위주로 진행해요.',
     categories: ['개발', '스터디'],
-    likes: 9,
     saveCount: 3,
     createdAt: '2026-02-04T08:00:00.000Z',
     author: activityLoggedInUser,
@@ -232,8 +221,7 @@ const baseActivityPosts: ActivityPostDetail[] = [
       start: '2026-02-15T00:00:00.000Z',
       end: '2026-03-31T23:59:59.000Z',
     },
-    employType: "채용연계형 인턴, 체험형 인턴",
-    payment: "연봉 4900만원~6000만원",
+    target: "채용연계형 인턴, 체험형 인턴",
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail2,
@@ -253,8 +241,7 @@ const baseActivityPosts: ActivityPostDetail[] = [
       start: '2026-02-05T00:00:00.000Z',
       end: '2026-04-30T23:59:59.000Z',
     },
-    employType: "정직원",
-    payment: "연봉 2000만원~3000만원",
+    target: "정직원",
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: false,
     thumbnailUrl: sampleThumbnail1,

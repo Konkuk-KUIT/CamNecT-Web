@@ -167,7 +167,6 @@ export const ActivityWritePage = () => {
       title: title.trim(),
       content: content.trim(),
       categories: selectedTags,
-      likes: editPost?.likes ?? 0,
       saveCount: editPost?.saveCount ?? 0,
       createdAt: editPost?.createdAt ?? new Date().toISOString(),
       author: editPost?.author ?? activityLoggedInUser,

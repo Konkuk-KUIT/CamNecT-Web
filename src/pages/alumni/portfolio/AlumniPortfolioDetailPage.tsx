@@ -58,7 +58,7 @@ const mapPortfolioDetail = (
   const { images, pdfs, links } = mapAssets(assets);
 
   return {
-    id: String(portfolio.userId),
+    uid: String(portfolio.userId),
     portfolioId: String(portfolio.portfolioId),
     title: portfolio.title,
     portfolioThumbnail: portfolio.thumbnailUrl,
@@ -154,7 +154,7 @@ export const AlumniPortfolioDetailPage = () => {
 
   return (
     <PortfolioDetailPage
-      ownerId={portfolio.id}
+      ownerId={portfolio.uid}
       isMine={isMine}
       portfolioId={portfolio.portfolioId}
       initialPortfolio={portfolio}

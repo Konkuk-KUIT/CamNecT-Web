@@ -7,10 +7,11 @@ import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal
 import Icon from '../../components/Icon';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
-import { activityLoggedInUser, mapToActivityPost } from '../../mock/activityCommunity';
+import { mapToActivityPost } from '../../mock/activityCommunity';
 import { getTeamRecruitsByActivityId } from '../../mock/teamRecruit';
 import { formatOnlyDate } from '../../utils/formatDate';
 import { RecruitPost } from '../../components/posts/RecruitPost';
+import { useAuthStore } from '../../store/useAuthStore';
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
 
@@ -23,39 +24,41 @@ type OptionItem = {
 type TabType = 'detail' | 'team';
 
 export const ExternalActivityPostPage = () => {
-  const { postId } = useParams();
-  const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
-  const navigate = useNavigate();
-  const currentUser = activityLoggedInUser;
+    const { postId } = useParams();
+    const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
+    const navigate = useNavigate();
+    const authUser = useAuthStore(state => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
 
-  const [activeTab, setActiveTab] = useState<TabType>('detail');
-  const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
-  const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
-  const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<TabType>('detail');
+    const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
+    const [isOptionOpen, setIsOptionOpen] = useState(false);
+    const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+    const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
-  const canControll = currentUser.id === "admin";
-  const thumbnailUrl = selectedPost.thumbnailUrl ?? selectedPost.postImages?.[0];
 
-  // 팀원 모집 데이터 가져오기
-  const teamRecruits = useMemo(
-    () => getTeamRecruitsByActivityId(selectedPost.id),
-    [selectedPost.id]
-  );
+    const canControll = userId === 2; //todo: 현재 관리자 id가 2이라서 이렇게 설정. id 바뀔 시 여기도 바뀌어야 함.
+    const thumbnailUrl = selectedPost.thumbnailUrl ?? selectedPost.postImages?.[0];
 
-  const handleBookmarkToggle = (checked: boolean) => {
-    setIsBookmarked(checked);
-  };
+    // 팀원 모집 데이터 가져오기
+    const teamRecruits = useMemo(
+        () => getTeamRecruitsByActivityId(selectedPost.id),
+        [selectedPost.id]
+    );
 
-  const optionItems: OptionItem[] = canControll
-    ? [
-        { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
-        { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
-      ]
-    : [
-        { id: 'copy-url', icon: 'url', label: 'URL 복사' },
-        { id: 'report-post', icon: 'report', label: '게시글 신고' },
-      ];
+    const handleBookmarkToggle = (checked: boolean) => {
+        setIsBookmarked(checked);
+    };
+
+    const optionItems: OptionItem[] = canControll
+        ? [
+            { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
+            { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
+        ]
+        : [
+            { id: 'copy-url', icon: 'url', label: 'URL 복사' },
+            { id: 'report-post', icon: 'report', label: '게시글 신고' },
+        ];
 
     const handleOptionClick = async (item: OptionItem) => {
         if (item.id === 'copy-url') {
@@ -233,19 +236,14 @@ export const ExternalActivityPostPage = () => {
                         </>
                     ) : (
                         <>
-                            {selectedPost.employType && (
+                            {selectedPost.target && (
                                 <span>
-                                    채용 형태 : {selectedPost.employType}
+                                    채용 형태 : {selectedPost.target}
                                 </span>
                             )}
                             {selectedPost.applyPeriod && (
                                 <span>
                                     접수 기간 : {formatOnlyDate(selectedPost.applyPeriod.start)} ~ {formatOnlyDate(selectedPost.applyPeriod.end)}
-                                </span>
-                            )}
-                            {selectedPost.payment && (
-                                <span>
-                                    급여 : {selectedPost.payment}
                                 </span>
                             )}
                         </>

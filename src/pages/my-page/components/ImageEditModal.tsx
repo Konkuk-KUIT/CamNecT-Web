@@ -2,14 +2,14 @@ import Icon from "../../../components/BottomSheetModal/Icon";
 import { useRef } from "react";
 import BottomSheetModal from "../../../components/BottomSheetModal/BottomSheetModal";
 
-interface ProfileImageModalProps {
+interface ImageEditModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSelect: (file: File, source: "album" | "camera") => void;
     onDelete: () => void;
 }
 
-export default function ProfileImageModal({ isOpen, onClose, onSelect, onDelete }: ProfileImageModalProps) {
+export default function ImageEditModal({ isOpen, onClose, onSelect, onDelete }: ImageEditModalProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 

@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
 import { formatOnlyDate, getDDay } from '../../utils/formatDate';
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type ExternalActivityPostProps = {
   post: ActivityPost;
@@ -68,29 +71,17 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
           </div>
         </div>
 
-        {/* Thumbnail with Bookmark Indicator */}
         {thumbnailUrl && (
           <div className='relative'>
             <img
               src={thumbnailUrl}
               alt={post.title}
               className='w-[94px] h-[134px] object-cover flex-shrink-0'
+              onError={(e) => {
+                  e.currentTarget.onerror = null; //이미지 깨짐 방지
+                  e.currentTarget.src = REPLACE_IMAGE;
+              }}
             />
-            <svg
-              viewBox='0 0 30 30'
-              className='w-[30px] h-[30px] absolute top-[3px] right-[3px]'
-            >
-              <path
-                d='M23.75 26.25L15 20L6.25 26.25V6.25C6.25 5.58696 6.51339 4.95107 6.98223 4.48223C7.45107 4.01339 8.08696 3.75 8.75 3.75H21.25C21.913 3.75 22.5489 4.01339 23.0178 4.48223C23.4866 4.95107 23.75 5.58696 23.75 6.25V26.25Z'
-                fill={post.isBookmarked ? '#00C56C' : '#000000'}
-                fillOpacity={post.isBookmarked ? 1 : 0.2}
-                stroke='white'
-                strokeWidth={1.5}
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                shapeRendering='crispEdges'
-              />
-            </svg>
           </div>
         )}
       </div>
