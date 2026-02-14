@@ -155,7 +155,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         <HeaderLayout
             headerSlot={
                 !isSearching ? (
-                    <div className="relative">
+                    <div className="fixed left-0 right-0 top-0 z-50 bg-white">
                         <MainHeader
                             title={roomInfo?.name}
                             rightActions={[
@@ -214,7 +214,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 )
             }
         >
-            <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
+            <div className={`flex flex-col pt-[calc(74px+env(safe-area-inset-top,0px))] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
                 {/* 상단 정보 영역 */}
                 {roomInfo && requestInfo && (
                     <ChatRoomInfo 
