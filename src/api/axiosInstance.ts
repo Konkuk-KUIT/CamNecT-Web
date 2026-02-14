@@ -34,9 +34,12 @@ axiosInstance.interceptors.response.use(
     },
     (error) => {
         const status = error.response?.status;
+        //비밀번호 변경 시의 401은 강제 로그아웃 안 되도록 예외처리
+        const url = error.config?.url ?? "";
+        const isPasswordChange = url.includes("/api/profile/password");
 
         // Unauthorized (비 로그인 접근 or Token 오류)
-        if (status === 401) {
+        if (status === 401 && !isPasswordChange) {
             console.log("Unauthorized(401)");
             // 토큰 만료 시 강제 로그아웃
             useAuthStore.getState().setLogout();

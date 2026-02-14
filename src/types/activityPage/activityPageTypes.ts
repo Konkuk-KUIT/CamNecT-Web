@@ -1,6 +1,13 @@
 export type ActivityPostTab = 'club' | 'study' | 'external' | 'job';
 export type ActivityPostStatus = 'OPEN' | 'CLOSED';
 
+export const categoryToTab: Record<"CLUB" | "STUDY" | "EXTERNAL" | "RECRUITMENT", ActivityPostTab> = {
+    CLUB: "club",
+    STUDY: "study",
+    EXTERNAL: "external",
+    RECRUITMENT: "job",
+};
+
 export type ActivityPostAuthor = {
   id: string;
   name: string;

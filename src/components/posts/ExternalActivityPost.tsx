@@ -1,6 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import type { ActivityPost } from '../../types/activityPage/activityPageTypes';
 import { formatOnlyDate, getDDay } from '../../utils/formatDate';
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type ExternalActivityPostProps = {
   post: ActivityPost;
@@ -74,6 +77,10 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
               src={thumbnailUrl}
               alt={post.title}
               className='w-[94px] h-[134px] object-cover flex-shrink-0'
+              onError={(e) => {
+                  e.currentTarget.onerror = null; //이미지 깨짐 방지
+                  e.currentTarget.src = REPLACE_IMAGE;
+              }}
             />
           </div>
         )}

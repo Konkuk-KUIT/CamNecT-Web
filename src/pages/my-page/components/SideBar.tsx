@@ -1,12 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { type User } from "../../../types/mypage/mypageTypes";
 import { logout } from "../../../api/profileApi";
 import { useAuthStore } from "../../../store/useAuthStore";
+
+type SideBarUser = {
+  uid: string;
+  name: string;
+  univ: string;
+  major: string;
+  gradeNumber: string;
+  point: number | null;
+};
 
 interface SideBarProps {
     isOpen: boolean;
     onClose: () => void;
-    user: User;
+    user: SideBarUser;
 }
 
 export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
@@ -27,7 +35,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
             await logout(loginUserId);
         } catch (e) {
             // 401이어도 일단 로그아웃 처리
-            console.warn("로그아웃 실패:", e);
+            console.warn("logout failed:", e);
         } finally {
             setLogout();
             onClose();

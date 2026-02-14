@@ -43,10 +43,10 @@ export function useProfileEdit(userId: number | null) {
     const majorData = majorResponse?.data;
 
     const initialData = useMemo<ProfileEditData | null>(() => {
-        if (!profileData || !institutionData || !majorData) return null;
+        if (!profileData) return null;
 
-        const schoolName = institutionData.nameKor || "";
-        const majorName = majorData.nameKor || "";
+        const schoolName = institutionData?.nameKor || "";
+        const majorName = majorData?.nameKor || "";
 
         return {
             user: {
@@ -56,17 +56,17 @@ export function useProfileEdit(userId: number | null) {
                 univ: schoolName,
                 major: majorName,
                 gradeNumber: profileData.basics.studentNo.slice(2, 4),
-                userTags: profileData.tags.map((t) => t.name),
+                userTags: profileData.tags.map((t) => t.id),
                 introduction: profileData.basics.bio || "",
                 following: profileData.following,
                 follower: profileData.follower,
-                point: 0,
+                point: profileData.myPoint,
             },
             visibility: {
                 isFollowerVisible: profileData.basics.isFollowerVisible,
-                educationVisibility: true,
-                careerVisibility: true,
-                certificateVisibility: true,
+                educationVisibility: profileData.basics.isEducationVisible,
+                careerVisibility: profileData.basics.isExperienceVisible,
+                certificateVisibility: profileData.basics.isCertificateVisible,
             },
             educations: mapToEducations(profileData),
             careers: mapToCareers(profileData),
@@ -78,7 +78,8 @@ export function useProfileEdit(userId: number | null) {
     // 현재 수정 중인 데이터
     const [data, setData] = useState<ProfileEditData | null>(null);
 
- 
+    const resetToServer = () => setData(null);
+
     const effectiveData = data ?? initialData;
 
     const hasChanges = useMemo(() => {
@@ -88,7 +89,8 @@ export function useProfileEdit(userId: number | null) {
 
     return { 
         data: effectiveData, 
-        setData, 
+        setData,
+        resetToServer,
         hasChanges,
         originalData: initialData,
         isLoading,
