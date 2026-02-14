@@ -61,8 +61,8 @@ const ActivityListTab = ({
   const sortKey = isExternalTab ? sortExternalKey : sortInternalKey;
   const apiSortType = sortKeyToApiSortType(sortKey, isExternalTab);
 
-  // ===== 태그 목록 조회 =====
-  // scope: 동아리/스터디는 ACTIVITY_RECRUIT (모집 상태 카테고리 추가), 대외활동/취업은 DEFAULT
+  //태그 목록 조회
+  //scope: 동아리/스터디는 ACTIVITY_RECRUIT (모집 상태 카테고리 추가), 대외활동/취업은 DEFAULT
   const tagScope = showRecruitStatus ? 'ACTIVITY_RECRUIT' : 'DEFAULT';
   const { data: tagData } = useQuery({
     queryKey: ['tags', tagScope],
@@ -117,7 +117,7 @@ const ActivityListTab = ({
       getActivityList({
         userId: userId!,
         category,
-        sortType: apiSortType as any,
+        sortType: apiSortType,
         title: searchQuery || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
         page: pageParam as number,

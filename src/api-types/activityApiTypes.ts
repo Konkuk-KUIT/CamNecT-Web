@@ -1,5 +1,3 @@
-// ===== 공통 =====
-
 export type ActivityCategory = 'STUDY' | 'CLUB' | 'EXTERNAL' | 'RECRUITMENT';
 
 export type ActivitySortType = 'RECOMMEND' | 'DEADLINE' | 'BOOKMARK' | 'RECRUIT' | 'LATEST';
@@ -8,18 +6,27 @@ export type ActivityStatus = 'OPEN' | 'CLOSED';
 
 export type RecruitStatus = 'RECRUITING' | 'CLOSED';
 
-// ===== 목록 조회 =====
+//작성자 정보
+export interface ProfilePreview {
+  userId: number;
+  userName: string;
+  majorName: string;
+  studentNo: string;
+  profileImageKey: string;
+}
 
+//목록 조회
 export interface ActivityListItem {
   activityId: number;
   title: string;
-  context: string;
+  contextPreview: string;
   thumbnailUrl: string;
   tags: string[];
   bookmarkCount: number;
   organizer: string;
   applyEndDate: string; // "YYYY-MM-DD"
-  createdAt: string;    // ISO8601
+  status: ActivityStatus;
+  createdAt: string; //ISO
 }
 
 export interface ActivityListPageable {
@@ -67,8 +74,7 @@ export interface ActivityListRequest {
   size?: number;
 }
 
-// ===== 등록 =====
-
+//등록(동아리/스터디)
 export interface ActivityCreateRequest {
   category: ActivityCategory;
   title: string;
@@ -84,20 +90,46 @@ export interface ActivityCreateResponse {
   data: ActivityListItem;
 }
 
-// ===== 상세 조회 =====
+//등록(대외활동/취업정보)
+
+export interface ActivityAdminCreateRequest {
+  category: ActivityCategory;
+  title: string;
+  organizer: string;
+  targetDescription: string;
+  applyStartDate: string; // "YYYY-MM-DD"
+  applyEndDate: string;
+  resultAnnounceDate: string;
+  officialUrl: string;
+  thumbnailKey: string;
+  contextTitle: string;
+  content: string;
+  // TODO: tagIds 필드 추가 필요
+}
+
+export interface ActivityAdminCreateResponse {
+  status: number;
+  message: string;
+  data: ActivityListItem;
+}
+
+//상세 조회
 
 export interface ActivityAttachment {
   id: number;
   activityId: number;
+  fileKey: string;
   fileUrl: string;
   createdAt: string;
 }
 
 export interface RecruitmentItem {
   recruitId: number;
-  activityId: number;
   userId: number;
-  recruitStatus: RecruitStatus;
+  activityId: number;
+  activityTitle: string;
+  userName: string;
+  recruitStatus: string;  // "RECRUITING" | "CLOSED"
   title: string;
   content: string;
   recruitDeadline: string; // "YYYY-MM-DD"
@@ -122,15 +154,17 @@ export interface ActivityDetail {
   officialUrl: string;
   status: ActivityStatus;
   createdAt: string;
+  contextTitle: string;
   context: string;
 }
 
 export interface ActivityDetailData {
   isMine: boolean;
+  profilePreview: ProfilePreview;
   activity: ActivityDetail;
-  attachment: ActivityAttachment[] | null;
-  tagList: string[] | null;
-  recruitmentList: RecruitmentItem[] | null;
+  attachment: ActivityAttachment[];
+  tagList: string[];
+  recruitmentList: RecruitmentItem[];
   bookmarkCount: number;
   isBookmarked: boolean;
 }
@@ -141,7 +175,7 @@ export interface ActivityDetailResponse {
   data: ActivityDetailData;
 }
 
-// ===== 수정 =====
+//수정(동아리/스터디)
 
 export interface ActivityUpdateRequest {
   category: ActivityCategory;
@@ -158,24 +192,50 @@ export interface ActivityUpdateResponse {
   data: string;
 }
 
-// ===== 삭제 =====
+//수정(대외활동/취업정보)
+export interface ActivityAdminUpdateRequest {
+  category: ActivityCategory;
+  title: string;
+  organizer: string;
+  targetDescription: string;
+  applyStartDate: string;
+  applyEndDate: string;
+  resultAnnounceDate: string;
+  officialUrl: string;
+  thumbnailKey: string;
+  contextTitle: string;
+  content: string;
+  // TODO: tagIds 필드 추가 필요
+}
 
+export interface ActivityAdminUpdateResponse {
+  status: number;
+  message: string;
+  data: string;
+}
+
+//삭제
 export interface ActivityDeleteResponse {
   status: number;
   message: string;
   data: number;
 }
 
-// ===== 북마크 =====
+//모집 중지
+export interface ActivityCloseResponse {
+  status: number;
+  message: string;
+  data: string;
+}
 
+//북마크
 export interface ActivityBookmarkResponse {
   status: number;
   message: string;
   data: string;
 }
 
-// ===== Presigned URL (썸네일) =====
-
+//Presigned URL
 export interface PresignedUrlItem {
   fileKey: string;
   uploadUrl: string;
@@ -195,8 +255,6 @@ export interface ThumbnailPresignResponse {
   data: PresignedUrlItem;
 }
 
-// ===== Presigned URL (첨부파일 배치) =====
-
 export interface AttachmentPresignRequest {
   items: ThumbnailPresignRequest[];
 }
@@ -209,7 +267,7 @@ export interface AttachmentPresignResponse {
   };
 }
 
-// ===== 태그 =====
+//태그
 
 export type TagScope = 'DEFAULT' | 'COMMUNITY_QUESTION' | 'ACTIVITY_RECRUIT';
 
@@ -231,7 +289,7 @@ export interface TagListResponse {
   data: TagCategory[];
 }
 
-// ===== 팀원 모집 =====
+//팀원 모집
 
 export interface RecruitmentCreateRequest {
   activityId: number;
@@ -247,58 +305,24 @@ export interface RecruitmentCreateResponse {
   data: RecruitmentItem;
 }
 
-export interface RecruitmentDetailData {
-  userId: number;
-  major_kor: string;
-  grade: number;
-  recruitment: RecruitmentItem;
-  isMine: boolean;
-  isBookmarked: boolean;
+export interface RecruitmentUpdateRequest {
+  activityId: number;
+  title: string;
+  recruitDeadline: string;
+  recruitCount: number;
+  content: string;
 }
 
-export interface RecruitmentDetailResponse {
-  status: number;
-  message: string;
-  data: RecruitmentDetailData;
-}
-
-export interface RecruitmentBookmarkResponse {
+export interface RecruitmentUpdateResponse {
   status: number;
   message: string;
   data: string;
 }
 
-export interface RecruitmentApplyRequest {
-  content: string;
-}
-
-export interface RecruitmentApplyResponse {
-  status: number;
-  message: string;
-  data: number;
-}
-
-// ===== 팀원 모집 =====
-
-export interface RecruitmentCreateRequest {
-  activityId: number;
-  title: string;
-  recruitDeadline: string; // "YYYY-MM-DD"
-  recruitCount: number;
-  content: string;
-}
-
-export interface RecruitmentCreateResponse {
-  status: number;
-  message: string;
-  data: RecruitmentItem;
-}
-
 export interface RecruitmentDetailData {
-  userId: number;
-  major_kor: string;
-  grade: number;
+  profilePreview: ProfilePreview;
   recruitment: RecruitmentItem;
+  activityTitle: string;
   isMine: boolean;
   isBookmarked: boolean;
 }
@@ -307,6 +331,12 @@ export interface RecruitmentDetailResponse {
   status: number;
   message: string;
   data: RecruitmentDetailData;
+}
+
+export interface RecruitmentCloseResponse {
+  status: number;
+  message: string;
+  data: string;
 }
 
 export interface RecruitmentBookmarkResponse {
