@@ -119,7 +119,7 @@ export const MypageEditPage = () => {
     }, [currentModal]);
 
     const MAX_BYTES = 20 * 1024 * 1024;
-    const handleSelectImage = (file: File, _source: "album" | "camera") => {
+    const handleSelectImage = (file: File) => {
         if (file.size > MAX_BYTES) {
             setImageSizeErrorOpen(true);
             return; 

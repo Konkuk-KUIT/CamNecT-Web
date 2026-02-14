@@ -142,7 +142,7 @@ export interface FollowUser {
   name: string;
   majorName: string;
   studentNo: string;
-  profileImageUrl: string;
+  profileImageUrl: string | null;
 }
 
 export interface FollowListData {
