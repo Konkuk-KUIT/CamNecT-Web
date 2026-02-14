@@ -3,10 +3,15 @@ import type {
   ActivityListResponse,
   ActivityCreateRequest,
   ActivityCreateResponse,
+  ActivityAdminCreateRequest,
+  ActivityAdminCreateResponse,
   ActivityDetailResponse,
   ActivityUpdateRequest,
   ActivityUpdateResponse,
+  ActivityAdminUpdateRequest,
+  ActivityAdminUpdateResponse,
   ActivityDeleteResponse,
+  ActivityCloseResponse,
   ActivityBookmarkResponse,
   ThumbnailPresignRequest,
   ThumbnailPresignResponse,
@@ -16,7 +21,10 @@ import type {
   TagScope,
   RecruitmentCreateRequest,
   RecruitmentCreateResponse,
+  RecruitmentUpdateRequest,
+  RecruitmentUpdateResponse,
   RecruitmentDetailResponse,
+  RecruitmentCloseResponse,
   RecruitmentBookmarkResponse,
   RecruitmentApplyRequest,
   RecruitmentApplyResponse,
@@ -35,7 +43,6 @@ export const getActivityList = async (params: ActivityListRequest): Promise<Acti
       page: params.page ?? 0,
       size: params.size ?? 10,
     },
-    // tagIds 배열을 ?tagIds=1&tagIds=2 형태로 직렬화
     paramsSerializer: (p) => {
       const searchParams = new URLSearchParams();
       Object.entries(p).forEach(([key, value]) => {
@@ -60,6 +67,19 @@ export const createActivity = async (
   const response = await axiosInstance.post<ActivityCreateResponse>('/api/activity', data, {
     params: { userId },
   });
+  return response.data;
+};
+
+// 대외활동/취업정보 등록 (관리자) [POST] (/api/activity/admin)
+export const createAdminActivity = async (
+  userId: number,
+  data: ActivityAdminCreateRequest,
+): Promise<ActivityAdminCreateResponse> => {
+  const response = await axiosInstance.post<ActivityAdminCreateResponse>(
+    '/api/activity/admin',
+    data,
+    { params: { userId } },
+  );
   return response.data;
 };
 
@@ -89,6 +109,18 @@ export const updateActivity = async (
   return response.data;
 };
 
+// 대외활동/취업정보 수정 (관리자) [PATCH] (/api/activity/admin/{activityId})
+export const updateAdminActivity = async (
+  activityId: number,
+  data: ActivityAdminUpdateRequest,
+): Promise<ActivityAdminUpdateResponse> => {
+  const response = await axiosInstance.patch<ActivityAdminUpdateResponse>(
+    `/api/activity/admin/${activityId}`,
+    data,
+  );
+  return response.data;
+};
+
 // 대외활동 삭제 [DELETE] (/api/activity/{activityId})
 export const deleteActivity = async (
   userId: number,
@@ -97,6 +129,29 @@ export const deleteActivity = async (
   const response = await axiosInstance.delete<ActivityDeleteResponse>(
     `/api/activity/${activityId}`,
     { params: { userId } },
+  );
+  return response.data;
+};
+
+// 대외활동 모집 중지 [PATCH] (/api/activity/{activityId}/close)
+export const closeActivity = async (
+  userId: number,
+  activityId: number,
+): Promise<ActivityCloseResponse> => {
+  const response = await axiosInstance.patch<ActivityCloseResponse>(
+    `/api/activity/${activityId}/close`,
+    null,
+    { params: { userId } },
+  );
+  return response.data;
+};
+
+// 대외활동/취업정보 모집 중지 (관리자) [PATCH] (/api/activity/admin/{activityId}/close)
+export const closeAdminActivity = async (
+  activityId: number,
+): Promise<ActivityCloseResponse> => {
+  const response = await axiosInstance.patch<ActivityCloseResponse>(
+    `/api/activity/admin/${activityId}/close`,
   );
   return response.data;
 };
@@ -161,6 +216,20 @@ export const createRecruitment = async (
   return response.data;
 };
 
+// 팀원 모집글 수정 [PATCH] (/api/activity/recruitment/{recruitmentId})
+export const updateRecruitment = async (
+  userId: number,
+  recruitmentId: number,
+  data: RecruitmentUpdateRequest,
+): Promise<RecruitmentUpdateResponse> => {
+  const response = await axiosInstance.patch<RecruitmentUpdateResponse>(
+    `/api/activity/recruitment/${recruitmentId}`,
+    data,
+    { params: { userId } },
+  );
+  return response.data;
+};
+
 // 팀원 모집글 상세 조회 [GET] (/api/activity/recruitment/{recruitmentId})
 export const getRecruitmentDetail = async (
   userId: number,
@@ -168,6 +237,19 @@ export const getRecruitmentDetail = async (
 ): Promise<RecruitmentDetailResponse> => {
   const response = await axiosInstance.get<RecruitmentDetailResponse>(
     `/api/activity/recruitment/${recruitmentId}`,
+    { params: { userId } },
+  );
+  return response.data;
+};
+
+// 팀원 모집 마감 [PATCH] (/api/activity/recruitment/{recruitmentId}/close)
+export const closeRecruitment = async (
+  userId: number,
+  recruitmentId: number,
+): Promise<RecruitmentCloseResponse> => {
+  const response = await axiosInstance.patch<RecruitmentCloseResponse>(
+    `/api/activity/recruitment/${recruitmentId}/close`,
+    null,
     { params: { userId } },
   );
   return response.data;

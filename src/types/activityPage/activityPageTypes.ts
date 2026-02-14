@@ -44,55 +44,7 @@ export type ActivityPostDetail = ActivityPost & {
 };
 
 
-
-
-// // 공모전 공통 인터페이스
-// export interface Activity {
-//   id: string;          
-//   title: string;       
-//   organizer?: string;
-//   location?: string; 
-//   deadline?: string; // 2025.12.11
-//   posterImg?: string; 
-//   bookmarkCount: number;
-//   commentCount?: number;
-// }
-
-//대외활동 데이터
-// export interface userInfo {
-//     authorProfile:string;
-//     authorName:string;
-//     authorMajor:string;
-//     authorGrade: string;
-// }
-
-// export interface ActivityListItem extends Activity{
-//     authorId: string;
-//     authorInfo?: userInfo;
-//     tab: string;
-//     content?: string;
-//     tags: string[];
-//     createdAt: string;
-//     isBookmarked: boolean;
-// }
-
-// export interface ActivityDetail extends ActivityListItem {
-//   images?: string[];
-//   target: string; //모집대상
-//   applyPeriod: { 
-//     start: string; 
-//     end: string 
-//   };
-//   announceDate?: string;
-
-//   applyUrl: string; //해당 공모전 홈페이지 url
-//   descriptionTitle: string;
-//   descriptionBody: string;
-// }
-
-
-
-// // 팀원 모집 인터페이스
+//팀원 모집 인터페이스
 export interface TeamPost {
 	id : string,
 	title : string
@@ -110,7 +62,6 @@ export interface TeamRecruitPost extends TeamPost{
 
 export interface TeamRecruitDetail extends TeamRecruitPost{
     isBookmarked: boolean;
-    applyUrl: string;
 
     authorMajor: string;
     authorGrade: string;
