@@ -1,4 +1,3 @@
-import LikeToggle from '../../../layouts/BottomChat/components/LikeToggle';
 import SaveToggle from '../../../layouts/BottomChat/components/SaveToggle';
 import type { ActivityPostStatus } from '../../../types/activityPage/activityPageTypes';
 
@@ -6,10 +5,7 @@ type BottomReactProps = {
   isMine: boolean;
   status: ActivityPostStatus;
   onOpenCompletePopup: () => void;
-  likeCount?: number;
-  isLiked?: boolean;
   isBookmarked?: boolean;
-  onLikeToggle: (checked: boolean) => void;
   onBookmarkToggle: (checked: boolean) => void;
 };
 
@@ -17,10 +13,7 @@ const BottomReact = ({
   isMine,
   status,
   onOpenCompletePopup,
-  likeCount = 0,
-  isLiked = false,
   isBookmarked = false,
-  onLikeToggle,
   onBookmarkToggle,
 }: BottomReactProps) => {
   const isClosed = status === 'CLOSED';
@@ -48,12 +41,6 @@ const BottomReact = ({
           )}
         </div>
         <div className='flex shrink-0 items-center gap-[clamp(8px,3vw,13px)]'>
-          <div className='flex items-center gap-[clamp(4px,1.5vw,5px)]'>
-            <LikeToggle width={24} height={24} aria-label='좋아요' isActive={isLiked} onToggle={(checked) => onLikeToggle(checked)}/>
-            <span className='text-[16px] text-[var(--ColorGray2,#A1A1A1)]'>
-              {likeCount}
-            </span>
-          </div>
           <SaveToggle width={24} height={24} aria-label='저장' isActive={isBookmarked} onToggle={(checked) => onBookmarkToggle(checked)}/>
         </div>
       </div>

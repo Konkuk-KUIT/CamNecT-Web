@@ -21,21 +21,26 @@ type OptionItem = {
 };
 
 export const RecruitDetailPage = () => {
-    const { recruitId } = useParams();
+    const { recruitId } = useParams<{recruitId: string}>();
+
     const navigate = useNavigate();
     const currentUser = activityLoggedInUser;
-    const recruitDetail = useMemo(() => getTeamRecruitDetail(recruitId || ''), [recruitId]);
+    const recruitDetail = useMemo(
+        () => (recruitId ? getTeamRecruitDetail(recruitId) : undefined),
+        [recruitId]
+    );
 
-    const [isBookmarked, setIsBookmarked] = useState(recruitDetail?.isBookmarked ?? false);
     const [isOptionOpen, setIsOptionOpen] = useState(false);
     const [isStopRecruitPopupOpen, setIsStopRecruitPopupOpen] = useState(false);
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-    const [isRecruitNow, setIsRecruitNow] = useState(recruitDetail?.recruitNow ?? false);
-    const [isSubmitted, setIsSubmitted] = useState(recruitDetail?.isSubmitted ?? false);
 
-    if (!recruitDetail) {
+    const [isBookmarked, setIsBookmarked] = useState(() => recruitDetail?.isBookmarked ?? false);
+    const [isRecruitNow, setIsRecruitNow] = useState(() => recruitDetail?.recruitNow ?? false);
+    const [isSubmitted, setIsSubmitted] = useState(() => recruitDetail?.isSubmitted ?? false);
+
+    if (!recruitId || !recruitDetail) {
         return (
         <div className='flex items-center justify-center min-h-screen'>
             <p className='text-[16px] text-[var(--ColorGray3,#646464)]'>

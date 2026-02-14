@@ -6,7 +6,7 @@ export const teamRecruitPosts: TeamRecruitPost[] = [
     id: 'team-recruit-1',
     activityId: 'external-1',
     title: '기획 포지션 한 분 구합니다. 같이 성장하실 분!',
-    authorId: 'user-park-wonbin-20',
+    authorId: 'user_002',
     authorName: '박원빈',
     activityName: '2025 공공기관 데이터 아이디어 공모전',
     recruitNow: true,
@@ -38,12 +38,12 @@ export const teamRecruitPosts: TeamRecruitPost[] = [
 ];
 
 // 팀원 모집 상세 데이터
-export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
-  'team-recruit-1': {
+export const teamRecruitDetails: TeamRecruitDetail[] = [
+  {
     id: 'team-recruit-1',
     activityId: 'external-1',
     title: '기획 포지션 한 분 구합니다. 같이 성장하실 분!',
-    authorId: 'user-park-wonbin-20',
+    authorId: 'user_002',
     authorName: '박원빈',
     authorMajor: '컴퓨터공학부',
     authorGrade: "20",
@@ -69,7 +69,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 - 적극적이고 책임감 있으신 분
 `,
   },
-  'team-recruit-2': {
+  {
     id: 'team-recruit-2',
     activityId: 'external-1',
     title: '두 분 구합니다. 열심히 하실 분!',
@@ -96,7 +96,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 
 함께 성장하고 좋은 결과 만들어봐요!`,
   },
-  'team-recruit-3': {
+  {
     id: 'team-recruit-3',
     activityId: 'external-2',
     title: '영상 편집 가능하신 분 찾습니다!',
@@ -128,7 +128,7 @@ export const teamRecruitDetails: Record<string, TeamRecruitDetail> = {
 활동비 지급 및 포트폴리오 제작 가능합니다!`,
   isSubmitted: true,
   },
-};
+];
 
 // 특정 활동에 대한 팀원 모집 게시글 가져오기
 export const getTeamRecruitsByActivityId = (activityId: string): TeamRecruitPost[] => {
@@ -136,8 +136,8 @@ export const getTeamRecruitsByActivityId = (activityId: string): TeamRecruitPost
 };
 
 // 팀원 모집 상세 정보 가져오기
-export const getTeamRecruitDetail = (recruitId: string): TeamRecruitDetail | undefined => {
-  return teamRecruitDetails[recruitId];
+export const getTeamRecruitDetail = (id: string): TeamRecruitDetail | undefined => {
+  return teamRecruitDetails.find((post) => post.id === id);
 };
 
 // 특정 활동의 팀원 모집 개수 가져오기

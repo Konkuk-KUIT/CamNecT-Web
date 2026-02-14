@@ -6,6 +6,8 @@ import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 import { generateId } from "../../../utils/uuid";
+import { searchInstitutions } from "../../../api/institutionApi";
+import { useQuery } from "@tanstack/react-query";
 
 interface EducationModalProps {
     educations: EducationItem[];
@@ -21,28 +23,17 @@ const STATUS_OPTIONS = Object.entries(EDUCATION_STATUS_KR).map(([value, label]) 
     label
 }));
 
-// 학교 추천 목록 (임시 데이터)
-//TODO: api 연결하고 삭제
-const allSchools = [
-    '건국대학교',
-    '건욱대학교',
-    '세종대학교',
-    '서울대학교',
-    '카이스트',
-    '이화여자대학교',
-    '동경미술대학'
-];
-
 export default function EducationModal({ educations, initialShowPublic, onClose, onSave }: EducationModalProps) {
     const [currentView, setCurrentView] = useState<View>('list');
     const [listEducations, setListEducations] = useState<EducationItem[]>(educations);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showPublic, setShowPublic] = useState(initialShowPublic);
     const [showWarning, setShowWarning] = useState(false);
+    const [showSchoolInvalid, setShowSchoolInvalid] = useState(false);
 
     const [formData, setFormData] = useState<Partial<EducationItem>>({
         school: '',
-        status: 'ENROLLED',
+        status: 'ATTENDING',
         startYear: new Date().getFullYear(),
         endYear: undefined,
     });
@@ -55,20 +46,23 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
     const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
+    const [schoolSearchQuery, setSchoolSearchQuery] = useState("");
+
+    // 학교 검색 API 호출
+    const { data: schoolSearchResult, isLoading: isSearching } = useQuery({
+        queryKey: ["searchInstitutions", schoolSearchQuery],
+        queryFn: () => searchInstitutions({ keyword: schoolSearchQuery }),
+        enabled: schoolSearchQuery.length > 0,
+    });
+
+    const filteredSchools = useMemo(() => {
+        if (!schoolSearchResult?.data.institutions) return [];
+        return schoolSearchResult.data.institutions;
+    }, [schoolSearchResult]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
-    //검색 필터링
-    const filteredSchools = useMemo(() => {
-        if (!formData.school || formData.school.trim() === '') {
-            return [];
-        }
-        return allSchools.filter(s => 
-            s.toLowerCase().includes(formData.school!.toLowerCase())
-        );
-    }, [formData.school]);
 
     //변경사항 추적 (리스트 전체 추적)
     const hasListChanges: boolean = useMemo(() => {
@@ -83,7 +77,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
             return false;
         }
         if (currentView === 'add') {
-            return !!(formData.school.trim() || formData.status !== 'ENROLLED' || formData.startYear !== currentYear);
+            return !!(formData.school.trim() || formData.status !== 'ATTENDING' || formData.startYear !== currentYear);
         }
         if (currentView === 'edit' && editingId !== null) {
             const original = listEducations.find(e => e.id === editingId);
@@ -109,10 +103,11 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     const handleAddEducation = () => {
         setFormData({
             school: '',
-            status: 'ENROLLED',
+            status: 'ATTENDING',
             startYear: currentYear,
             endYear: undefined,
         });
+        setSchoolSearchQuery("");
         setCurrentView('add');
     };
 
@@ -121,12 +116,21 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
         const edu = listEducations.find(e => e.id === id);
         if (edu) {
             setFormData(edu);
+            setSchoolSearchQuery(edu.school);
             setCurrentView('edit');
         }
     };
 
     const handleSaveForm = () => {
-        if (!formData.school || !formData.school.trim()) {
+        const school = (formData.school ?? "").trim();
+        if (!school) return;
+
+        // 완료 눌렀을 때: 검색 결과 목록(nameKor) 중 완전일치하는 경우만 통과
+        const institutions = filteredSchools; // 현재 query 기준으로 받은 목록
+        const isExactMatch = institutions.some(i => i.nameKor.trim() === school);
+        if (!isExactMatch) {
+            setShowSchoolInvalid(true);
+            setShowSchoolSuggestions(true); 
             return;
         }
         
@@ -146,6 +150,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                 e.id === editingId ? { ...e, ...formData } : e
             ));
         }
+        setShowSchoolSuggestions(false); 
         setCurrentView('list');
     };
 
@@ -232,11 +237,9 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                 {listEducations
                                     .slice()
                                     .sort((a, b) => {
-                                        // 시작 연도 비교
                                         if (b.startYear !== a.startYear) {
                                             return b.startYear - a.startYear;
                                         }
-                                        // 종료 연도 비교 (현재 재학중이면 undefined)
                                         const aEnd = a.endYear || 9999;
                                         const bEnd = b.endYear || 9999;
                                         return bEnd - aEnd;
@@ -324,7 +327,6 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                         />
                     }
                 >
-                    {/* 수정/삭제 */}
                     <div className="w-full h-full flex-1 overflow-y-auto px-[25px] py-[20px] border-t border-gray-150">
                         <div className="flex flex-col gap-[15px]">
                             {/* 학교 이름 */}
@@ -332,34 +334,43 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                 <span className="text-sb-16-hn text-gray-900">학교 이름</span>
                                 <input
                                     type="text"
-                                    value={formData.school || ''}
+                                    value={schoolSearchQuery}
                                     onChange={(e) => {
-                                        setFormData({ ...formData, school: e.target.value });
-                                        setShowSchoolSuggestions(e.target.value.length > 0);
+                                        const value = e.target.value;
+                                        setSchoolSearchQuery(value);
+                                        setFormData(prev => ({ ...prev, school: value }));
+                                        setShowSchoolSuggestions(value.length > 0);
                                     }}
-                                    onFocus={() => setShowSchoolSuggestions((formData.school?.length || 0) > 0)}
+                                    onFocus={() => setShowSchoolSuggestions(schoolSearchQuery.length > 0)}
                                     placeholder="학교 이름을 입력해 주세요"
                                     className="w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none"
                                 />
 
                                 {showSchoolSuggestions && filteredSchools.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10">
-                                        {filteredSchools.map((suggestion, idx) => (
+                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 max-h-[200px] overflow-y-auto">
+                                        {filteredSchools.map((institution) => (
                                             <button
-                                                key={idx}
+                                                key={institution.id}
                                                 onClick={() => {
-                                                    setFormData({ ...formData, school: suggestion });
+                                                    const name = institution.nameKor.trim();
+                                                    setFormData(prev => ({ ...prev, school: name }));
+                                                    setSchoolSearchQuery(name);
                                                     setShowSchoolSuggestions(false);
                                                 }}
-                                                className="w-full flex p-[15px] text-r-16-hn text-gray-650 border-b border-gray-150 last:border-b-0"
+                                                className="w-full flex p-[15px] text-r-16-hn text-gray-650 border-b border-gray-150 last:border-b-0 hover:bg-gray-200"
                                             >
-                                                {suggestion}
+                                                {institution.nameKor}
                                             </button>
                                         ))}
                                     </div>
                                 )}
-                            </div> {/* TODO: 대학 데이터 내에서 선택할 수 있게 설정 */}
-                            
+
+                                {isSearching && schoolSearchQuery.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 p-[15px]">
+                                        <div className="text-r-14 text-gray-650">검색 중...</div>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* education 상태 */}
                             <div className="relative flex flex-col gap-[10px]">
@@ -414,7 +425,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                                 {years
                                                     .filter(year => {
                                                         if (formData.endYear) {
-                                                            return year <= formData.endYear; // 종료 연도 이하만
+                                                            return year <= formData.endYear;
                                                         }
                                                         return true;
                                                     })
@@ -465,7 +476,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                                 {years
                                                     .filter(year => {
                                                         if (formData.startYear !== undefined) {
-                                                            return year >= formData.startYear; // 시작 연도 이상만
+                                                            return year >= formData.startYear;
                                                         }
                                                         return true;
                                                     })
@@ -513,6 +524,14 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                     setCurrentView('list');
                 }}
                 onRightClick={() => setShowWarning(false)}
+            />
+            <PopUp
+                isOpen={showSchoolInvalid}
+                type="error"
+                title="해당 학교의 데이터가 없습니다."
+                content="원하는 학교의 입력이 불가하다면\n문의사항에 남겨주세요."
+                buttonText="확인"
+                onClick={() => setShowSchoolInvalid(false)}
             />
         </div>
     );

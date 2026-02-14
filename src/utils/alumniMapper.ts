@@ -63,10 +63,35 @@ export const mapAlumniApiListToProfiles = (items: AlumniApiItem[]): AlumniProfil
     .filter((item) => item.userId !== 2)
     .map(mapAlumniApiItemToProfile);
 
-const formatPeriod = (startDate: string, endDate?: string, isCurrent?: boolean) => {
-  if (isCurrent) return `${startDate}~현재`;
-  if (endDate) return `${startDate}~${endDate}`;
-  return startDate;
+const formatEducationPeriod = (startDate: string, endDate?: string) => {
+  const startYear = parseInt(startDate.split('-')[0]);
+  const endYear = endDate ? parseInt(endDate.split('-')[0]) : undefined;
+  return `${startYear}${endYear ? `-${endYear}` : '-현재'}`;
+};
+
+const formatCareerPeriod = (startDate: string, endDate?: string) => {
+  const [startYear, startMonth] = startDate.split('-').map(Number);
+  const endYear = endDate ? parseInt(endDate.split('-')[0]) : undefined;
+  const endMonth = endDate ? parseInt(endDate.split('-')[1]) : undefined;
+  return `${startYear}.${String(startMonth).padStart(2, '0')}-${
+            endYear && endMonth 
+            ? `${endYear}.${String(endMonth).padStart(2, '0')}`
+            : '현재'
+        }`;
+};
+
+const formatCertificatePeriod = (acquiredDate: string) => {
+  const [year, month] = acquiredDate.split('-').map(Number);
+  return `${year}.${String(month || 1).padStart(2, '0')}`
+};
+
+export const EDUCATION_STATUS_KR: Record<string, string> = {
+  "ATTENDING": "재학",
+  "LEAVE_OF_ABSENCE": "휴학",
+  "EXCHANGE": "교환",
+  "GRADUATED": "졸업",
+  "DROPPED_OUT": "중퇴",
+  "TRANSFERRED": "편입"
 };
 
 export const mapAlumniProfileDetailToProfile = (
@@ -105,19 +130,19 @@ export const mapAlumniProfileDetailToProfile = (
       })),
     educationItems: detail.educations.map((item) => ({
       id: String(item.educationId),
-      period: formatPeriod(item.startDate, item.endDate ?? undefined),
+      period: formatEducationPeriod(item.startDate, item.endDate ?? undefined),
       school: item.schoolName,
-      status: item.status,
+      status: EDUCATION_STATUS_KR[item.status] ?? item.status,
     })),
     careerItems: detail.experience.map((item) => ({
       id: String(item.experienceId),
-      period: formatPeriod(item.startDate, item.endDate, item.isCurrent),
+      period: formatCareerPeriod(item.startDate, item.endDate),
       company: item.companyName,
       tasks: item.responsibilities,
     })),
     certificateItems: detail.certificate.map((item) => ({
       id: String(item.certificateId),
-      date: item.acquiredDate,
+      date: formatCertificatePeriod(item.acquiredDate),
       name: item.certificateName,
     })),
     isFollowing: false,
