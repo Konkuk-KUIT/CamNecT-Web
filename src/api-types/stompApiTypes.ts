@@ -19,7 +19,7 @@ export interface StompReadReceiptResponse {
     roomId: number;
     lastReadMessageId: number;
     readAt: string;
-    type: 'READ'; // 읽었을때만 type필드 추가 
+    type?: 'READ'; // 읽었을때만 type필드 추가 
 }
 
 // 3. [발행] 메시지 보내기 (/pub/chat/message)

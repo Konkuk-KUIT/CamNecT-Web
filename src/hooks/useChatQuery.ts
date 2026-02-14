@@ -2,7 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteAllChatRequest, deleteAllTeamRecruit, requestChatRespond, requestChatRoomOut, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
+import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType, ChatUser } from "../types/coffee-chat/coffeeChatTypes";
+
+// API 응답 데이터를 가공한 최종 상세 데이터 타입
+export interface ChatRoomDetailData {
+    partner: ChatUser & { tags: string[] };
+    requestInfo: {
+        createdAt: string;
+        type: string;
+        tags: string[];
+        content: string;
+    };
+    messages: ChatMessage[];
+}
 
 // 1-1. 전체 안 읽은 메시지 개수 조회 전용 쿼리
 export const useUnreadCountQuery = () => {

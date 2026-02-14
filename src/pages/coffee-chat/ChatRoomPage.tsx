@@ -2,9 +2,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import type { StompChatResponse } from "../../api-types/stompApiTypes";
+import { isReadReceipt } from "../../api-types/stompApiTypes";
+import { stompClient } from "../../api/stompClient";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
-import { useChatRoom, useChatRoomOut } from "../../hooks/useChatQuery";
+import { useChatRoom, useChatRoomOut, type ChatRoomDetailData } from "../../hooks/useChatQuery";
 import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
@@ -43,7 +46,6 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     useEffect(() => {
         const handleOutsideAction = (event: MouseEvent | TouchEvent) => {
             const target = event.target as Node;
-            // 메뉴 영역 외부이면서, 옵션 버튼(aria-label="option")이 아닐 때만 닫기
             const isOptionButton = (target as HTMLElement).closest('[aria-label="option"]');
             
             if (menuRef.current && !menuRef.current.contains(target) && !isOptionButton) {
@@ -60,6 +62,30 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             document.removeEventListener("touchstart", handleOutsideAction);
         };
     }, [isMenuOpen]);
+
+    // todo (복습) 실시간 읽음 처리 (Read Receipt) 감시 및 캐시 동기화
+    useEffect(() => {
+        const subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+            const data: StompChatResponse = JSON.parse(message.body);
+
+            if (isReadReceipt(data)) {
+                // TanStack Query 캐시에 저장된 과거 메시지들을 실시간으로 '읽음' 상태로 업데이트
+                queryClient.setQueryData(['chatRoom', roomId], (oldData: ChatRoomDetailData | undefined) => {
+                    if (!oldData) return oldData;
+                    return {
+                        ...oldData,
+                        messages: oldData.messages.map((msg: ChatMessage) => 
+                            Number(msg.id) <= data.lastReadMessageId 
+                                ? { ...msg, isRead: true, readAt: data.readAt } 
+                                : msg
+                        )
+                    };
+                });
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [roomId, queryClient]);
 
     // 초기 진입 시 깜빡임 방지를 위한 상태
     const [isReady, setIsReady] = useState(false);
@@ -102,6 +128,14 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             msg.content.toLowerCase().includes(roomSearchQuery.toLowerCase())
         );
     }, [allMessages, isSearching, roomSearchQuery]);
+
+    // todo 내가 보낸 제일 마지막 메시지 인덱스 (읽음 표시용)
+    const lastMyMessageIndex = useMemo(() => {
+        for (let i = localMessages.length - 1; i >= 0; i--) {
+            if (String(localMessages[i].senderId) === myId) return i;
+        }
+        return -1;
+    }, [localMessages, myId]);
 
     // 가장 아래로 스크롤하는 함수 (전체 문서 기준)
     const scrollToBottom = () => {
@@ -301,15 +335,30 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                             </div>
                                         </div>
 
-                                        {/* 
-                                        시간 표시: 묶음의 마지막 메시지일 때만 노출 
-                                        읽음 표시도...
-                                        */}
-                                        {!isSameAsNext && (
-                                            <span className="text-r-12 text-gray-750 tracking-[-0.24px] shrink-0 mb-[2px]">
-                                                {formatTime(msg.createdAt)}
-                                            </span>
-                                        )}
+                                        {/* todo 시간 및 읽음 상태 표시 영역 */}
+                                        <div className={`flex flex-col justify-end gap-[2px] mb-[2px] ${isMe ? 'items-end' : 'items-start'}`}>
+                                            {/* 1. 내 메시지이고 안 읽었을 때 & "내가 보낸 전체 메시지 중 마지막"일 때만 '1' 표시 */}
+                                            {isMe && !msg.isRead && index === lastMyMessageIndex && (
+                                                <span className="text-[11px] text-primary font-bold leading-none mb-[1px]">1</span>
+                                            )}
+
+                                            {/* 2. 내 메시지이고 읽었을 때 & "내가 보낸 전체 메시지 중 마지막"일 때만 '읽음' 표시 */}
+                                            {isMe && msg.isRead && index === lastMyMessageIndex && (
+                                                <span className="text-[11px] text-gray-400 font-medium leading-none mb-[1px]">읽음</span>
+                                            )}
+                                            
+                                            {/* 3. 시간 표시: 묶음의 마지막 메시지일 때만 노출 
+                                                상대가 읽었으면 읽은 시간(readAt), 안 읽었으면 보낸 시간(createdAt) 표시
+                                            */}
+                                            {!isSameAsNext && (
+                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] shrink-0">
+                                                    {msg.isRead && msg.readAt 
+                                                        ? formatTime(msg.readAt) 
+                                                        : formatTime(msg.createdAt)
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </React.Fragment>
