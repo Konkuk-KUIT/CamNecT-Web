@@ -1,25 +1,117 @@
+import { useMemo, useState } from 'react';
 import {FullLayout} from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 import Card from '../../components/Card';
-import CheckScheduleBox from './components/CheckScheduleBox';
+import PopUp from '../../components/Pop-up';
 import PointBox from './components/PointBox';
 import CommunityBox from './components/CommunityBox';
 import RecommendBox from './components/RecommendBox';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import ContestBox from './components/ContestBox';
 import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
+import { requestHome } from '../../api/home';
+import { requestNotificationUnreadCount } from '../../api/notifications';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { mapHomeResponseToViewModel } from './homeMapper';
+
+type PopUpConfig = {
+    title: string;
+    content: string;
+};
+
+const resolveUserIdParam = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return null;
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed;
+};
+
+const getErrorStatus = (error: unknown) => {
+    if (!error || typeof error !== 'object') return null;
+    const response = (error as { response?: { status?: number } }).response;
+    return typeof response?.status === 'number' ? response.status : null;
+};
+
+const getErrorPopUpConfig = (status: number | null): PopUpConfig | null => {
+    if (!status) return null;
+    if (status === 403) {
+        return {
+            title: '접근 권한이 없습니다',
+            content:
+                '요청하신 페이지를 볼 수 있는 권한이 없어요.\\n관리자에게 문의하시거나 권한을 확인해 주세요.',
+        };
+    }
+    if (status === 404) {
+        return {
+            title: '페이지를 찾을 수 없습니다',
+            content:
+                '요청하신 페이지는 존재하지 않는 주소입니다.\\n주소를 다시 한번 확인해 주세요.',
+        };
+    }
+    if (status === 500) {
+        return {
+            title: '시스템 오류가 발생했습니다',
+            content:
+                '서비스 이용에 불편을 드려 죄송합니다.\\n잠시 후 다시 시도해 주세요.',
+        };
+    }
+    return null;
+};
 
 export const HomePage = () => {
     const navigate = useNavigate();
-    const visibleRecommands = recommendList.slice(0, 2);
-    const hasUnreadNotifications = useNotificationStore((state) =>
+    const [isErrorDismissed, setIsErrorDismissed] = useState(false);
+    const hasUnreadNotificationsFromStore = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
     );
-    const userName = useAuthStore((state) => state.user?.name) ?? homeGreetingUser.name;
+    const storedUserName = useAuthStore((state) => state.user?.name);
+    const storedUserId = useAuthStore((state) => state.user?.id);
+    const userIdParam = resolveUserIdParam(storedUserId);
+    const hasValidUserId = userIdParam !== null;
+
+    const fallbackViewModel = {
+        userName: storedUserName ?? homeGreetingUser.name,
+        coffeeChatRequests,
+        coffeeChatTotalCount: coffeeChatRequests.length,
+        pointBalance: 1230,
+        recommendList,
+        contests,
+    };
+
+    const { data: homeResponse, error: homeError } = useQuery({
+        queryKey: ['home', userIdParam],
+        queryFn: () => requestHome({ userId: userIdParam as string | number }),
+        enabled: hasValidUserId,
+        staleTime: 60 * 1000,
+    });
+
+    const { data: unreadCountResponse, error: unreadCountError } = useQuery({
+        queryKey: ['notificationsUnreadCount', userIdParam],
+        queryFn: () =>
+            requestNotificationUnreadCount({ userId: userIdParam as string | number }),
+        enabled: hasValidUserId,
+        staleTime: 30 * 1000,
+    });
+
+    const homeViewModel = mapHomeResponseToViewModel(homeResponse, fallbackViewModel);
+    const visibleRecommands = homeViewModel.recommendList.slice(0, 2);
+    const userName = homeViewModel.userName;
+    const unreadCount = unreadCountResponse?.data?.unreadCount;
+    const hasUnreadNotifications =
+        typeof unreadCount === 'number' ? unreadCount > 0 : hasUnreadNotificationsFromStore;
+
+    const popUpConfig = useMemo(() => {
+        if (isErrorDismissed) return null;
+        const status = getErrorStatus(homeError) ?? getErrorStatus(unreadCountError);
+        return getErrorPopUpConfig(status);
+    }, [homeError, unreadCountError, isErrorDismissed]);
 
     return (
         // 홈 1번 영역: 인사말, 커피챗 요청, 일정 카드, 포인트/커뮤니티 카드 틀 구성
@@ -38,12 +130,16 @@ export const HomePage = () => {
                         </p>
                     </div>
 
-                    <CoffeeChatBox requests={coffeeChatRequests} onViewAll={() => navigate('/chat/requests')} />
+                    <CoffeeChatBox
+                        requests={homeViewModel.coffeeChatRequests}
+                        totalCount={homeViewModel.coffeeChatTotalCount}
+                        onViewAll={() => navigate('/chat/requests')}
+                    />
                     {/* 1-2: 일정 박스 + 포인트/커뮤니티 박스 */}
                     <div className="flex w-full flex-col gap-[15px]">
-                        <CheckScheduleBox />
+                        {/*<CheckScheduleBox />*/}
                         <div className="flex w-full justify-between gap-[20px]">
-                            <PointBox />
+                            <PointBox points={homeViewModel.pointBalance} />
                             <CommunityBox />
                         </div>
                     </div>
@@ -97,12 +193,23 @@ export const HomePage = () => {
                 {/* 홈 3번 영역: 주목받은 공모전 리스트 */}
                 <section className="flex w-full flex-col gap-[10px] bg-white p-[25px]">
                     <ContestBox
-                        contests={contests}
+                        contests={homeViewModel.contests}
                         onTitleClick={() => navigate('/activity')}
                         onItemClick={(contest) => navigate(`/activity/external/${contest.id}`)}
                     />
                 </section>
             </div>
+            {popUpConfig && (
+                <PopUp
+                    isOpen={!!popUpConfig}
+                    type="error"
+                    title={popUpConfig.title}
+                    content={popUpConfig.content}
+                    onClick={() => {
+                        setIsErrorDismissed(true);
+                    }}
+                />
+            )}
         </FullLayout>
     );
 };
