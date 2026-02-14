@@ -1,12 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { type User } from "../../../types/mypage/mypageTypes";
 import { logout } from "../../../api/profileApi";
 import { useAuthStore } from "../../../store/useAuthStore";
+
+type SideBarUser = {
+  uid: string;
+  name: string;
+  univ: string;
+  major: string;
+  gradeNumber: string;
+  point: number | null;
+};
 
 interface SideBarProps {
     isOpen: boolean;
     onClose: () => void;
-    user: User;
+    user: SideBarUser;
 }
 
 export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {

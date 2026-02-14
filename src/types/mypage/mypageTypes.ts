@@ -7,7 +7,7 @@ export interface User {
   univ: string;
   major: string; 
   gradeNumber: string; 
-  userTags: string[]; 
+  userTags: number[]; 
   introduction: string;
   following: number;
   follower: number;

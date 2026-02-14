@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
@@ -32,7 +32,7 @@ export const MypageEditPage = () => {
     const imageActionRef = useRef<ImageAction>("KEEP");
     const imageFileRef = useRef<File | null>(null);
 
-    const { data, setData, hasChanges, originalData, isLoading, isError } = useProfileEdit(userId);
+    const { data, setData, resetToServer, hasChanges, originalData, isLoading, isError } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
     const { saveProfile, isSaving } = useProfileSave();
 
@@ -55,6 +55,12 @@ export const MypageEditPage = () => {
         }))
     ) || [];
 
+    const tagIdToName = useMemo(() => {
+        const m = new Map<number, string>();
+        allTags.forEach(t => m.set(t.id, t.name));
+        return m;
+    }, [allTags]);
+
     const handleSave = async () => {
         if (!hasChanges || !data || !userId || !originalData) return;
 
@@ -76,7 +82,7 @@ export const MypageEditPage = () => {
             imageChange = { action: "KEEP" };
         }
 
-        const result = await saveProfile(data, originalData, imageChange, allTags);
+        const result = await saveProfile(data, originalData, imageChange);
 
         if (result.success) {
             imageActionRef.current = "KEEP";
@@ -84,6 +90,10 @@ export const MypageEditPage = () => {
             setConfirm(true);
         } else {
             setSaveError(result.error || "저장에 실패했습니다.");
+            //저장 실패 시 서버값으로 되돌림
+            imageActionRef.current = "KEEP";
+            imageFileRef.current = null;
+            resetToServer();
         }
     };
 
@@ -108,16 +118,16 @@ export const MypageEditPage = () => {
         };
     }, [currentModal]);
 
-    const MAX_BYTES = 5 * 1024 * 1024;
-    const handleSelectImage = (file: File) => {
-    if (file.size > MAX_BYTES) {
-        setImageSizeErrorOpen(true);
-        return; 
-    }
+    const MAX_BYTES = 20 * 1024 * 1024;
+    const handleSelectImage = (file: File, _source: "album" | "camera") => {
+        if (file.size > MAX_BYTES) {
+            setImageSizeErrorOpen(true);
+            return; 
+        }
 
-  // 5MB이하의 이미지만 기존 로직 실행
-  handleImageUpload(file);
-};
+        // 5MB이하의 이미지만 기존 로직 실행
+        handleImageUpload(file);
+    };
 
     const handleImageUpload = (file: File) => {
         const previewUrl = URL.createObjectURL(file);
@@ -229,12 +239,12 @@ export const MypageEditPage = () => {
                                         </button>
                                     </div>
                                     <div className="w-full flex flex-wrap gap-[5px] pl-[4px]">
-                                        {user.userTags.map((t: string) => (
+                                        {user.userTags.map((id: number) => (
                                             <span
-                                                key={t}
+                                                key={id}
                                                 className="flex justify-center items-center rounded-[3px] border border-primary bg-green-50 px-[5px] py-[3px] text-R-12-hn text-primary"
                                             >
-                                                {t}
+                                                {tagIdToName.get(id) ?? `#${id}`}
                                             </span>
                                         ))}
                                     </div>
@@ -258,7 +268,6 @@ export const MypageEditPage = () => {
                                 <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
                                 <button
                                     onClick={() => {
-                                        console.log("toggle clicked");
                                         setData((prev) => {
                                             const base = prev ?? data;
                                             if (!base) return prev;
@@ -271,7 +280,7 @@ export const MypageEditPage = () => {
                                             };
                                         }
                                     )}}
-                                    className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
+                                    className={`relative w-[50px] h-[24px] rounded-full transition-colors duration-300 ease-in-out ${
                                         data.visibility.isFollowerVisible ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
@@ -344,10 +353,10 @@ export const MypageEditPage = () => {
             />
             {currentModal === 'tags' && (
                 <TagsEditModal
-                    tags={user.userTags || []}
+                    tagIds={user.userTags || []}
                     onClose={closeModal}
-                    onSave={(newTags) => { 
-                        setData({ ...data, user: { ...user, userTags: newTags } }); 
+                    onSave={(newTagIds) => { 
+                        setData({ ...data, user: { ...user, userTags: newTagIds } }); 
                         closeModal(); 
                     }}
                 />

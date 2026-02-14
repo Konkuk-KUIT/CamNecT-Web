@@ -20,6 +20,7 @@ import {
 } from "../../../api/userInfoApi";
 import { requestProfilePresign } from "../../../api/auth";
 import { searchInstitutions } from "../../../api/institutionApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 // 타입 import
 import type { EducationItem, CareerItem, CertificateItem } from "../../../types/mypage/mypageTypes";
@@ -40,32 +41,51 @@ interface SaveResult {
 const DEBUG_DRY_RUN = false;
 
 export function useProfileSave() {
+  const queryClient = useQueryClient();
   const user = useAuthStore(state => state.user);
   const userId = user?.id ? parseInt(user.id) : null;
   const [isSaving, setIsSaving] = useState(false);
   const isServerId = (id: string) => /^\d+$/.test(id);
 
   type ImageChange =
-  | { action: "KEEP" }
-  | { action: "UPLOAD"; file: File }
-  | { action: "DELETE" };
+    | { action: "KEEP" }
+    | { action: "UPLOAD"; file: File }
+    | { action: "DELETE" };
 
   type DryRunRequest = {
-  name: string;
-  method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
-  url: string;
-  params?: Record<string, unknown>;
-  body?: unknown;
-};
+    name: string;
+    method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
+    url: string;
+    params?: Record<string, unknown>;
+    body?: unknown;
+  };
 
-const dryRun = async (req: DryRunRequest) => {
-  console.groupCollapsed(`[DRY RUN] ${req.name}`);
-  console.log("method:", req.method);
-  console.log("url:", req.url);
-  if (req.params !== undefined) console.log("params:", req.params);
-  if (req.body !== undefined) console.log("body:", req.body);
-  console.groupEnd();
-};
+  const dryRun = async (req: DryRunRequest) => {
+    console.groupCollapsed(`[DRY RUN] ${req.name}`);
+    console.log("method:", req.method);
+    console.log("url:", req.url);
+    if (req.params !== undefined) console.log("params:", req.params);
+    if (req.body !== undefined) console.log("body:", req.body);
+    console.groupEnd();
+  };
+
+  //저장 후 서버 상태 동기화
+  const syncAfterSave = async (mode: "invalidate" | "refetch") => {
+    if (!userId) return;
+
+    if (mode === "refetch") {
+      // 실패 시에는 즉시 서버 상태를 다시 불러와서 불일치 제거
+      await queryClient.refetchQueries({ queryKey: ["myProfile", userId] });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["myProfile", userId] });
+    }
+
+    // (옵션) 학교/전공 캐시도 안전하게 stale 처리
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["institution"] }),
+      queryClient.invalidateQueries({ queryKey: ["major"] }),
+    ]);
+  };
 
   /**
    * 프로필 이미지 업로드 및 저장
@@ -108,15 +128,10 @@ const dryRun = async (req: DryRunRequest) => {
   /**
    * 태그 저장
    */
-  const saveTags = async (tagNames: string[], allTags: { id: number; name: string }[]): Promise<void> => {
+  const saveTags = async (tagIds: number[]): Promise<void> => {
     if (!userId) throw new Error("userId is missing");
 
     try {
-      // 태그 이름을 태그 ID로 변환
-      const tagIds = tagNames
-        .map(name => allTags.find(t => t.name === name)?.id)
-        .filter((id): id is number => id !== undefined);
-
       await updateProfileTags(userId, { tagIds });
     } catch (error) {
       console.error("태그 저장 실패:", error);
@@ -403,47 +418,47 @@ const dryRun = async (req: DryRunRequest) => {
     currentData: ProfileEditData,
     originalData: ProfileEditData,
     imageChange: ImageChange,
-    allTags: { id: number; name: string }[]
   ): Promise<SaveResult> => {
     setIsSaving(true);
 
     try {
-      const tasks: Promise<void>[] = [];
+      type NamedTask = {key: string; run:Promise<void>};
+      const tasks: NamedTask[] = [];
       // 프로필 이미지
       if (imageChange.action === "UPLOAD") {
-        tasks.push(uploadProfileImage(imageChange.file));
+        tasks.push({ key: "image.upload", run: uploadProfileImage(imageChange.file) });
       } else if (imageChange.action === "DELETE") {
-        tasks.push(deleteProfileImage());
+        tasks.push({ key: "image.delete", run: deleteProfileImage() });
       }
 
       // 자기소개
       if (currentData.user.introduction !== originalData.user.introduction) {
-        tasks.push(saveBio(currentData.user.introduction));
+        tasks.push({ key: "bio", run: saveBio(currentData.user.introduction) });
       }
 
       // 태그
       if (JSON.stringify(currentData.user.userTags) !== JSON.stringify(originalData.user.userTags)) {
-        tasks.push(saveTags(currentData.user.userTags, allTags));
+        tasks.push({ key: "tags", run: saveTags(currentData.user.userTags) });
       }
 
       // 공개 여부
       if (JSON.stringify(currentData.visibility) !== JSON.stringify(originalData.visibility)) {
-        tasks.push(savePrivacy(currentData));
+        tasks.push({ key: "privacy", run: savePrivacy(currentData) });
       }
 
       // 학력
       if (JSON.stringify(currentData.educations) !== JSON.stringify(originalData.educations)) {
-        tasks.push(saveEducations(currentData.educations, originalData.educations));
+        tasks.push({ key: "educations", run: saveEducations(currentData.educations, originalData.educations) });
       }
 
       // 경력
       if (JSON.stringify(currentData.careers) !== JSON.stringify(originalData.careers)) {
-        tasks.push(saveCareers(currentData.careers, originalData.careers));
+        tasks.push({ key: "careers", run: saveCareers(currentData.careers, originalData.careers) });
       }
 
       // 자격증
       if (JSON.stringify(currentData.certificates) !== JSON.stringify(originalData.certificates)) {
-        tasks.push(saveCertificates(currentData.certificates, originalData.certificates));
+        tasks.push({ key: "certificates", run: saveCertificates(currentData.certificates, originalData.certificates) });
       }
 
       // 변경사항이 하나도 없으면 그대로 성공 처리
@@ -451,22 +466,27 @@ const dryRun = async (req: DryRunRequest) => {
         return { success: true };
       }
 
-      const results = await Promise.allSettled(tasks);
+      const results = await Promise.allSettled(tasks.map(t => t.run));
 
       // 실패한 항목 확인
-      const failures = results.filter(r => r.status === "rejected");
+      const failedKeys = results
+        .map((r, idx) => (r.status === "rejected" ? tasks[idx].key : null))
+        .filter((v): v is string => v !== null);
       
-      if (failures.length > 0) {
-        console.error("일부 저장 실패:", failures);
+      if (failedKeys.length > 0) {
+        console.error("일부 저장 실패:", failedKeys);
+        await syncAfterSave("refetch");
         return {
           success: false,
           error: "일부 정보 저장에 실패했습니다.",
         };
       }
 
+      await syncAfterSave("invalidate");
       return { success: true };
     } catch (error) {
       console.error("프로필 저장 중 오류:", error);
+      await syncAfterSave("refetch");
       return {
         success: false,
         error: error instanceof Error ? error.message : "프로필 저장 중 오류가 발생했습니다.",

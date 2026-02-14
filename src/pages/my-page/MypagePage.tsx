@@ -102,6 +102,15 @@ export const MypagePage = () => {
     point: profileData.myPoint,
   };
 
+  const sideBarUser = {
+    uid: profileData.userId.toString(),
+    name: profileData.name,
+    univ: schoolName,
+    major: majorName,
+    gradeNumber: profileData.basics.studentNo.slice(2, 4),
+    point: profileData.myPoint,
+  };
+
   return (
     <>
       <FullLayout
@@ -194,7 +203,7 @@ export const MypagePage = () => {
       <SideBar
         isOpen={isSideBarOpen}
         onClose={() => setIsSideBarOpen(false)}
-        user={user}
+        user={sideBarUser}
       />
     </>
   );
