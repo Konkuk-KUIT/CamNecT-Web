@@ -1,20 +1,21 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import type { AxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
+import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
 import { EmptyLayout } from '../../layouts/EmptyLayout';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../mock/tags';
-import { useImageUpload } from '../../hooks/useImageUpload';
+import { useFileUpload } from '../../hooks/useFileUpload';
+import { useTagList } from '../../hooks/useTagList';
+import { useAuthStore } from '../../store/useAuthStore';
+import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
+import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
 import type { CommunityPostDetail } from '../../types/community';
-import {
-    communityPostData,
-    communityPostSamples,
-    infoPosts,
-    questionPosts,
-} from '../../mock/community';
+import { mapToCommunityPost } from './utils/post';
+import { mapToCommunityPostDetail } from '../../utils/communityMapper';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -24,61 +25,15 @@ export const WritePage = () => {
     const navigate = useNavigate();
     const { postId } = useParams();
     const isEditMode = Boolean(postId);
+    const { filterCategories, filterTags, mapTagNamesToIds, mapTagIdToName, mapTagIdsToNames } = useTagList();
 
-    // 편집 진입 시 기존 글 데이터 매핑
-    const editPost = useMemo<CommunityPostDetail | null>(() => {
-        if (!postId) return null;
-        if (communityPostData.id === postId) return communityPostData;
-
-        const sampleMatch = communityPostSamples.find((post) => post.id === postId);
-        if (sampleMatch) return sampleMatch;
-
-        const infoMatch = infoPosts.find((post) => post.id === postId);
-        if (infoMatch) {
-            return {
-                id: infoMatch.id,
-                boardType: '정보',
-                title: infoMatch.title,
-                likes: infoMatch.likes,
-                comments: infoMatch.comments,
-                saveCount: infoMatch.saveCount,
-                isAdopted: false,
-                createdAt: infoMatch.createdAt,
-                author: infoMatch.author,
-                content: infoMatch.content,
-                categories: infoMatch.categories,
-                postImages: infoMatch.postImageUrl ? [infoMatch.postImageUrl] : undefined,
-            };
-        }
-
-        const questionMatch = questionPosts.find((post) => post.id === postId);
-        if (questionMatch) {
-            return {
-                id: questionMatch.id,
-                boardType: '질문',
-                title: questionMatch.title,
-                likes: questionMatch.likes,
-                comments: questionMatch.answers,
-                saveCount: questionMatch.saveCount,
-                isAdopted: questionMatch.isAdopted,
-                createdAt: questionMatch.createdAt,
-                author: questionMatch.author,
-                content: questionMatch.content,
-                categories: questionMatch.categories,
-            };
-        }
-
-        return null;
-    }, [postId]);
+    const [editPost, setEditPost] = useState<CommunityPostDetail | null>(null);
+    const didInitEditRef = useRef(false);
 
     const initialBoardType = (editPost?.boardType as BoardType | undefined) ?? null;
     const initialTitle = editPost?.title ?? '';
     const initialContent = editPost?.content ?? '';
-    const initialPhotos =
-        editPost?.postImages?.map((url, index) => ({
-            id: `edit-${editPost.id}-${index}`,
-            url,
-        })) ?? [];
+    const initialPhotoUrls = editPost?.postImages ?? [];
 
     // 페이지 공통 상태: 게시판/입력/모달/미리보기
     // 게시판 선택 모달 상태
@@ -93,15 +48,24 @@ export const WritePage = () => {
     const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
     // 완료 확인 모달 상태
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     // 작성 취소 경고 팝업 상태
     const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-    // 사진 미리보기 목록과 object URL 정리용 ref
-    const [photoPreviews, setPhotoPreviews] = useState<{ id: string; url: string }[]>(
-        initialPhotos,
-    );
+    const [errorPopUp, setErrorPopUp] = useState<{ title: string; content: string } | null>(null);
+    type AttachmentItem = {
+        id: string;
+        file: File;
+        previewUrl: string;
+        kind: 'image' | 'pdf';
+    };
+    const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initialPhotoUrls);
+    const [newAttachments, setNewAttachments] = useState<AttachmentItem[]>([]);
     // 숨김 파일 input 제어
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const { prepareImage } = useImageUpload();
+    const { prepareFile, revokeUrl } = useFileUpload({
+        allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+    });
+    const userId = useAuthStore((state) => state.user?.id);
 
     const [selectedTags, setSelectedTags] = useState<string[]>(
         editPost?.categories ?? [],
@@ -141,9 +105,101 @@ export const WritePage = () => {
     const hasDraftContent =
         title.trim().length > 0 ||
         content.trim().length > 0 ||
-        photoPreviews.length > 0 ||
+        existingPhotoUrls.length > 0 ||
+        newAttachments.length > 0 ||
         Boolean(boardType) ||
         selectedTags.length > 0;
+
+    // 이미지 업로드 전 가로/세로 사이즈 측정
+    const getImageSize = (file: File) =>
+        new Promise<{ width: number; height: number }>((resolve) => {
+            const url = URL.createObjectURL(file);
+            const image = new Image();
+            image.onload = () => {
+                resolve({ width: image.width, height: image.height });
+                URL.revokeObjectURL(url);
+            };
+            image.onerror = () => {
+                resolve({ width: 0, height: 0 });
+                URL.revokeObjectURL(url);
+            };
+            image.src = url;
+        });
+
+    // Presign 발급 → S3 PUT → 서버에 넘길 첨부 메타 생성
+    const uploadAttachments = async (
+        attachments: { file: File; kind: 'image' | 'pdf' }[],
+        ownerId: number,
+    ) => {
+        if (attachments.length === 0) return [];
+
+        const images = attachments.filter((item) => item.kind === 'image');
+        const orderedAttachments =
+            images.length > 0
+                ? [images[0], ...attachments.filter((item) => item !== images[0])]
+                : attachments;
+
+        const presignItems = orderedAttachments.map((item) => ({
+            contentType: item.file.type || 'application/octet-stream',
+            size: item.file.size,
+            originalFilename: item.file.name,
+        }));
+
+        let presignResponse;
+        try {
+            presignResponse = await postCommunityUploadPresign({
+                params: { userId: ownerId },
+                body: { items: presignItems },
+            });
+        } catch (error) {
+            const status = (error as AxiosError)?.response?.status;
+            if (status === 429) {
+                const limitError = new Error('UPLOAD_LIMIT_EXCEEDED');
+                limitError.name = 'UploadLimitError';
+                throw limitError;
+            }
+            throw error;
+        }
+
+        const presignedItems: CommunityUploadPresignItemResponse[] =
+            presignResponse.data.items ?? [];
+        if (presignedItems.length !== orderedAttachments.length) {
+            throw new Error('Presign 응답 개수가 업로드 파일 수와 일치하지 않습니다.');
+        }
+
+        const sizes = await Promise.all(
+            orderedAttachments.map(async (item) => {
+                if (item.kind !== 'image') return { width: 0, height: 0 };
+                return getImageSize(item.file);
+            }),
+        );
+
+        await Promise.all(
+            presignedItems.map((presigned, index) => {
+                const attachment = orderedAttachments[index];
+                const headers = {
+                    'Content-Type': attachment.file.type || 'application/octet-stream',
+                    ...(presigned.requiredHeaders ?? {}),
+                };
+                return fetch(presigned.uploadUrl, {
+                    method: 'PUT',
+                    headers,
+                    body: attachment.file,
+                }).then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`S3 업로드 실패: ${response.status}`);
+                    }
+                });
+            }),
+        );
+
+        return presignedItems.map((item, index) => ({
+            fileKey: item.fileKey,
+            width: sizes[index].width,
+            height: sizes[index].height,
+            fileSize: orderedAttachments[index].file.size,
+        }));
+    };
 
     // 모바일 키보드 높이에 맞춰 하단 사진 영역 위치 업데이트
     useEffect(() => {
@@ -170,34 +226,73 @@ export const WritePage = () => {
         };
     }, []);
 
+    useEffect(() => {
+        didInitEditRef.current = false;
+        setEditPost(null);
+    }, [postId]);
+
+    useEffect(() => {
+        if (!isEditMode || !postId) return;
+        const numericUserId = Number(userId);
+        if (!Number.isFinite(numericUserId)) return;
+        getCommunityPostDetail({ postId, params: { userId: numericUserId } })
+            .then((response) => {
+                setEditPost(mapToCommunityPostDetail(response.data, mapTagIdToName));
+            })
+            .catch(() => {
+                setEditPost(mapToCommunityPost(postId));
+            });
+    }, [isEditMode, postId, userId, mapTagIdToName]);
+
+    useEffect(() => {
+        if (!isEditMode || !editPost || didInitEditRef.current) return;
+        const mappedTags = editPost.tagIds
+            ? mapTagIdsToNames(editPost.tagIds)
+            : editPost.categories ?? [];
+        const needsTags = Boolean(editPost.tagIds && editPost.tagIds.length > 0);
+        if (needsTags && mappedTags.length === 0) return;
+        const nextBoardType = editPost.boardType as BoardType;
+        setBoardType(nextBoardType);
+        setDraftBoardType(nextBoardType);
+        setTitle(editPost.title);
+        setContent(editPost.content);
+        setSelectedTags(mappedTags);
+        setExistingPhotoUrls(editPost.postImages ?? []);
+        setNewAttachments([]);
+        didInitEditRef.current = true;
+    }, [isEditMode, editPost, mapTagIdsToNames]);
+
     // 파일 선택 -> object URL 생성 -> 미리보기 상태에 추가
-    const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleAttachmentChange = (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files || files.length === 0) return;
 
-        const nextPreviews = Array.from(files)
-            .map((file, index) => {
-                const result = prepareImage(file);
-                if (!result) return null;
-                return {
-                    id: `${file.name}-${file.lastModified}-${index}`,
-                    url: result.previewUrl,
-                };
+        const nextAttachments = Array.from(files)
+            .map((file) => {
+                const prepared = prepareFile(file);
+                if (!prepared) return null;
+                const kind: AttachmentItem['kind'] =
+                    file.type === 'application/pdf' ? 'pdf' : 'image';
+                return { id: prepared.id, file, previewUrl: prepared.previewUrl, kind };
             })
-            .filter((preview): preview is { id: string; url: string } => preview !== null);
+            .filter(
+                (attachment): attachment is AttachmentItem => attachment !== null,
+            );
 
-        setPhotoPreviews((prev) => [...nextPreviews, ...prev]);
+        setNewAttachments((prev) => [...nextAttachments, ...prev]);
         event.target.value = '';
     };
 
     // 개별 미리보기 삭제 + object URL 해제
-    const handleRemovePhoto = (id: string) => {
-        setPhotoPreviews((prev) => {
-            const target = prev.find((preview) => preview.id === id);
+    const handleRemoveAttachment = (id: string) => {
+        setNewAttachments((prev) => {
+            const target = prev.find((attachment) => attachment.id === id);
             if (target) {
-                URL.revokeObjectURL(target.url);
+                if (target.previewUrl) {
+                    revokeUrl(target.previewUrl);
+                }
             }
-            return prev.filter((preview) => preview.id !== id);
+            return prev.filter((attachment) => attachment.id !== id);
         });
     };
 
@@ -207,14 +302,87 @@ export const WritePage = () => {
     };
 
     // 확인 모달에서 "네" 클릭 시 메인으로 이동
-    const handleConfirm = () => {
-        // TODO: api 전송(게시판 종류, 제목, 필터 배열, 내용, 사진), 글쓰기 완료 팝업 추가
+    // 작성/수정 확정 처리
+    const handleConfirm = async () => {
         // TODO: 수정 모드인 경우 변경된 데이터만 전송
-        if (isEditMode && postId) {
-            navigate(`/community/post/${postId}`);
+        if (!userId) {
+            console.warn('로그인 정보가 없습니다. 다시 로그인해 주세요.');
             return;
         }
-        navigate('/community');
+        if (isSubmitting) return;
+        const numericUserId = Number(userId);
+        if (!Number.isFinite(numericUserId)) {
+            console.warn('로그인 정보가 올바르지 않습니다. 다시 로그인해 주세요.');
+            return;
+        }
+
+        const isQuestionBoard = boardType === '질문';
+        const boardCode = isQuestionBoard ? 'QUESTION' : 'INFO';
+        const tagIds = mapTagNamesToIds(selectedTags);
+
+        setIsSubmitting(true);
+        try {
+            const uploadedAttachments = await uploadAttachments(
+                newAttachments.map((attachment) => ({
+                    file: attachment.file,
+                    kind: attachment.kind,
+                })),
+                numericUserId,
+            );
+            const existingAttachments = (editPost?.attachments ?? [])
+                .slice()
+                .sort((a, b) => a.sortOrder - b.sortOrder)
+                .map((attachment) => ({
+                    fileKey: attachment.fileKey,
+                    width: attachment.width,
+                    height: attachment.height,
+                    fileSize: attachment.fileSize,
+                }));
+            const mergedAttachments = [...existingAttachments, ...uploadedAttachments];
+
+            if (isEditMode && postId) {
+                await updateCommunityPost({
+                    postId,
+                    params: { userId: numericUserId },
+                    body: {
+                        title: title.trim(),
+                        content: content.trim(),
+                        anonymous: false,
+                        tagIds,
+                        ...(mergedAttachments.length > 0
+                            ? { attachments: mergedAttachments }
+                            : {}),
+                    },
+                });
+                navigate(`/community/post/${postId}`);
+                return;
+            }
+
+            const response = await createCommunityPost({
+                body: {
+                    boardCode,
+                    title: title.trim(),
+                    content: content.trim(),
+                    anonymous: false,
+                    tagIds,
+                    attachments: uploadedAttachments,
+                },
+            });
+            const nextPostId = response.data.postId;
+            navigate(`/community/post/${nextPostId}`);
+        } catch (error) {
+            if (error instanceof Error && error.name === 'UploadLimitError') {
+                setErrorPopUp({
+                    title: '작성 오류',
+                    content: '업로드 가능한 파일 개수 제한을 초과했습니다.',
+                });
+                return;
+            }
+            console.error('게시글 업로드/등록에 실패했습니다.', error);
+        } finally {
+            setIsSubmitting(false);
+            setIsConfirmOpen(false);
+        }
     };
 
     const handleCancelClick = () => {
@@ -255,29 +423,35 @@ export const WritePage = () => {
                     </button>
 
                     <div className='flex items-center' style={{ gap: '13px' }}>
-                        <button
-                            type='button'
-                            onClick={openBoardSelector}
-                            className='flex text-r-16'
-                            style={{ color: boardLabelColor }}
-                        >
-                            {boardLabel}
-                            <svg
-                                xmlns='http://www.w3.org/2000/svg'
-                                width='22'
-                                height='22'
-                                viewBox='0 0 22 22'
-                                fill='none'
+                        {!isEditMode ? (
+                            <button
+                                type='button'
+                                onClick={openBoardSelector}
+                                className='flex text-r-16'
+                                style={{ color: boardLabelColor }}
                             >
-                                <path
-                                    d='M17.875 7.5625L11 14.4375L4.125 7.5625'
-                                    stroke='#A1A1A1'
-                                    strokeWidth='1.5'
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                />
-                            </svg>
-                        </button>
+                                {boardLabel}
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    width='22'
+                                    height='22'
+                                    viewBox='0 0 22 22'
+                                    fill='none'
+                                >
+                                    <path
+                                        d='M17.875 7.5625L11 14.4375L4.125 7.5625'
+                                        stroke='#A1A1A1'
+                                        strokeWidth='1.5'
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                    />
+                                </svg>
+                            </button>
+                        ) : (
+                            <span className='text-r-16' style={{ color: boardLabelColor }}>
+                                {boardLabel}
+                            </span>
+                        )}
                         <button
                             type='button'
                             className='text-b-16-hn'
@@ -397,19 +571,19 @@ export const WritePage = () => {
                                 className='text-[16px] font-normal leading-[140%] tracking-[-0.64px]'
                                 style={{ color: 'var(--ColorGray2, #A1A1A1)' }}
                             >
-                                사진추가
+                                파일추가
                             </span>
                         </button>
-                        {/* 사진 미리보기 카드 */}
-                        {photoPreviews.map((preview) => (
+                        {/* 기존 이미지 미리보기 */}
+                        {existingPhotoUrls.map((url, index) => (
                             <div
-                                key={preview.id}
+                                key={`existing-${index}-${url}`}
                                 className='relative flex-shrink-0'
                                 style={{ width: '170px', height: '128px' }}
                             >
                                 <img
-                                    src={preview.url}
-                                    alt='preview'
+                                    src={url}
+                                    alt='existing'
                                     style={{
                                         width: '100%',
                                         height: '100%',
@@ -417,12 +591,43 @@ export const WritePage = () => {
                                         objectFit: 'cover',
                                     }}
                                 />
+                            </div>
+                        ))}
+                        {/* 새 파일 미리보기 */}
+                        {newAttachments.map((attachment) => (
+                            <div
+                                key={attachment.id}
+                                className='relative flex-shrink-0'
+                                style={{ width: '170px', height: '128px' }}
+                            >
+                                {attachment.kind === 'image' ? (
+                                    <img
+                                        src={attachment.previewUrl}
+                                        alt='preview'
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            borderRadius: '12px',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                ) : (
+                                    <div
+                                        className='flex h-full w-full flex-col items-center justify-center rounded-[12px] border border-[#ECECEC] bg-white text-center'
+                                        style={{ gap: '6px', padding: '10px' }}
+                                    >
+                                        <span className='text-b-14-hn text-gray-900'>PDF</span>
+                                        <span className='text-r-12 text-gray-650 line-clamp-2'>
+                                            {attachment.file.name}
+                                        </span>
+                                    </div>
+                                )}
                                 <button
                                     type='button'
-                                    aria-label='사진 삭제'
+                                    aria-label='파일 삭제'
                                     className='absolute'
                                     style={{ top: '10px', right: '10px' }}
-                                    onClick={() => handleRemovePhoto(preview.id)}
+                                    onClick={() => handleRemoveAttachment(attachment.id)}
                                 >
                                     <svg
                                         xmlns='http://www.w3.org/2000/svg'
@@ -448,40 +653,26 @@ export const WritePage = () => {
                             id='community-photos'
                             name='photos'
                             type='file'
-                            accept='image/*'
+                            accept='image/*,application/pdf'
                             multiple
                             className='hidden'
-                            onChange={handlePhotoChange}
+                            onChange={handleAttachmentChange}
                         />
                     </div>
                 </div>
             </div>
 
             {/* 게시판 선택 모달 */}
-            {isBoardOpen && (
-                <div
-                    className='fixed inset-0 z-50 flex items-end justify-center'
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)' }}
-                    onClick={() => closeBoardSelector(true)}
-                >
+            {!isEditMode && (
+                <BottomSheetModal isOpen={isBoardOpen} onClose={() => closeBoardSelector(true)} height='235px'>
                     <div
-                        className='flex w-[clamp(320px,100vw,540px)] flex-col'
+                        className='flex w-full flex-col'
                         style={{
-                            height: '235px',
                             padding: '10px 24px 56px',
-                            borderRadius: '10px 10px 0 0',
                             background: 'var(--Color_Gray_B, #FCFCFC)',
-                            boxShadow: '0 -1px 9.6px 0 rgba(32, 32, 35, 0.10)',
                             gap: '20px',
                         }}
-                        onClick={(event) => event.stopPropagation()}
                     >
-                        <div className='flex justify-center'>
-                            <svg xmlns='http://www.w3.org/2000/svg' width='78' height='5' viewBox='0 0 78 5' fill='none'>
-                                <path d='M2.5 2.5H75.5' stroke='#A1A1A1' strokeWidth='5' strokeLinecap='round' />
-                            </svg>
-                        </div>
-
                         <div className='flex flex-col' style={{ gap: '20px' }}>
                             <span className='text-b-18' style={{ color: 'var(--ColorBlack, #202023)' }}>
                                 게시판 선택
@@ -507,7 +698,7 @@ export const WritePage = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </BottomSheetModal>
             )}
 
             {/* 완료 확인 모달 */}
@@ -528,6 +719,15 @@ export const WritePage = () => {
                 onLeftClick={handleCancelConfirm}
                 onRightClick={handleCancelDismiss}
             />
+            {errorPopUp && (
+                <PopUp
+                    isOpen={true}
+                    type='confirm'
+                    title={errorPopUp.title}
+                    content={errorPopUp.content}
+                    onClick={() => setErrorPopUp(null)}
+                />
+            )}
 
             <TagsFilterModal
                 isOpen={isFilterOpen}
@@ -537,8 +737,8 @@ export const WritePage = () => {
                     setSelectedTags(next);
                     setIsFilterOpen(false);
                 }}
-                categories={TAG_CATEGORIES}
-                allTags={MOCK_ALL_TAGS}
+                categories={filterCategories}
+                allTags={filterTags}
             />
         </EmptyLayout>
     );

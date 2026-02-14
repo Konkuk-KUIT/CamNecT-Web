@@ -1,55 +1,43 @@
-import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import SortSelector from '../../../components/SortSelector';
+import { Link } from 'react-router-dom';
 import Category from '../../../components/Category';
 import FilterHeader from '../../../components/FilterHeader';
 import Icon from '../../../components/Icon';
-import WriteButton from '../components/WriteButton';
-import type { InfoPost } from '../../../types/community';
-import { formatTimeAgo } from '../time';
+import SortSelector from '../../../components/SortSelector';
 import TagsFilterModal from '../../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
-
-type InfoTabProps = {
-  posts: InfoPost[];
-};
+import { useTagList } from '../../../hooks/useTagList';
+import type { InfoPost } from '../../../types/community';
+import WriteButton from '../components/WriteButton';
+import { formatTimeAgo } from '../time';
 
 type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
 
 const sortLabels: Record<SortKey, string> = {
-  recommended: '추천순',
   latest: '최신순',
+  recommended: '추천순',
   likes: '좋아요 많은 순',
   bookmarks: '북마크 많은 순',
 };
 
+type InfoTabProps = {
+  posts: InfoPost[];
+  sortKey: SortKey;
+  onSortChange: (next: SortKey) => void;
+};
+
 // 정보 탭: 필터 + 정렬 + 정보글 리스트
-const InfoTab = ({ posts }: InfoTabProps) => {
+const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>('recommended');
+  const { filterCategories, filterTags } = useTagList();
 
+  // 선택된 태그 기준으로 목록 필터링
   const filteredPosts = useMemo(() => {
     if (selectedTags.length === 0) return posts;
     return posts.filter((post) =>
       selectedTags.every((tag) => post.categories.includes(tag)),
     );
   }, [posts, selectedTags]);
-
-  // 정렬 기준에 따른 목록 재계산
-  const sortedPosts = useMemo(() => {
-    if (sortKey === 'recommended') return filteredPosts;
-    const cloned = [...filteredPosts];
-    if (sortKey === 'latest') {
-      return cloned.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-    if (sortKey === 'likes') {
-      return cloned.sort((a, b) => b.likes - a.likes);
-    }
-    return cloned.sort((a, b) => b.saveCount - a.saveCount);
-  }, [filteredPosts, sortKey]);
 
   return (
     <div
@@ -67,13 +55,13 @@ const InfoTab = ({ posts }: InfoTabProps) => {
             }
           />
         </div>
-        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} />
+        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={onSortChange} />
       </div>
 
       {/* 정보글 리스트 */}
       <div className='flex flex-col' style={{ gap: '10px' }}>
         {/* TODO: 정보글 리스트 API 연결 */}
-        {sortedPosts.map((post) => (
+        {filteredPosts.map((post) => (
           <Link key={post.id} to={`/community/post/${post.id}`} className='block'>
             <article
               className='flex flex-col'
@@ -90,17 +78,34 @@ const InfoTab = ({ posts }: InfoTabProps) => {
               </div>
 
               <div className='flex flex-col' style={{ gap: '7px' }}>
-                <div className='flex flex-col' style={{ gap: '5px' }}>
+                <div className='flex' style={{ gap: '12px' }}>
+                  <div className='flex flex-1 flex-col' style={{ gap: '5px' }}>
                   <div className='flex items-center gap-[6px]'>
                     <span className='text-sb-14 text-gray-900'>{post.author.name}</span>
-                    <span className='text-r-12 text-gray-750'>· {post.author.major} {post.author.studentId}학번</span>
+                    <span className='text-r-12 text-gray-750'>
+                      · {post.author.major}
+                      {post.author.studentId
+                        ? ` ${post.author.studentId}학번`
+                        : ''}
+                    </span>
                   </div>
 
                   <div className='text-sb-16-hn leading-[150%] text-gray-900'>{post.title}</div>
 
-                  <div className='line-clamp-2 text-r-16 text-gray-750'>
+                  <div className='line-clamp-2 whitespace-pre-wrap text-r-16 text-gray-750'>
                     {post.content}
                   </div>
+                  </div>
+
+                  {post.thumbnailUrl && (
+                    <div className='h-[70px] w-[70px] shrink-0 overflow-hidden rounded-[8px] bg-[var(--ColorGray1,#D5D5D5)]'>
+                      <img
+                        src={post.thumbnailUrl}
+                        alt=''
+                        className='h-full w-full object-cover'
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className='flex items-center gap-[10px] text-r-12 text-gray-650'>
@@ -111,6 +116,10 @@ const InfoTab = ({ posts }: InfoTabProps) => {
                   <span className='flex items-center gap-[4px]'>
                     <Icon name='comment' className='h-[12px] w-[12px]' />
                     {post.comments}
+                  </span>
+                  <span className='flex items-center gap-[4px]'>
+                    <Icon name='save' className='h-[12px] w-[12px]' />
+                    {post.saveCount}
                   </span>
                   <span>{formatTimeAgo(post.createdAt)}</span>
                 </div>
@@ -128,8 +137,8 @@ const InfoTab = ({ posts }: InfoTabProps) => {
           setSelectedTags(next);
           setIsFilterOpen(false);
         }}
-        categories={TAG_CATEGORIES}
-        allTags={MOCK_ALL_TAGS}
+        categories={filterCategories}
+        allTags={filterTags}
       />
 
       {/* TODO: 글쓰기 라우터 연결 (버튼 클릭 / 현재는 임시) */}
