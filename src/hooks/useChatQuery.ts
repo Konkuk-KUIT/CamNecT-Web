@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { requestChatRespond, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
+import { requestChatRespond, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList, deleteAllChatRequest, deleteAllTeamRecruit } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../types/coffee-chat/coffeeChatTypes";
@@ -200,6 +200,41 @@ export const useChatRequestRespond = () => {
             // 요청 목록, 채팅 목록 최신화
             queryClient.invalidateQueries({ queryKey: ['chatRequests'] });
             queryClient.invalidateQueries({ queryKey: ['chatRooms'] });
+        }
+    });
+};
+
+// 6. (게시글 별) 팀원 모집 전체 삭제 API [DELETE] (/api/request/all/team-recruit/{recruitmentId})
+export const useDeleteAllTeamRecruitRequest = () => {
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (variables: { recruitmentId: number }) => 
+            deleteAllTeamRecruit({
+                userId: Number(user?.id),
+                ...variables
+            }),
+        onSuccess: () => {
+            // 요청 목록 최신화
+            queryClient.invalidateQueries({ queryKey: ['chatRequests'] });
+        }
+    });
+};
+
+// 7. 커피챗 요청 전체 삭제 API [DELETE] (/api/request/all/coffee-chat)
+export const useDeleteAllChatRequest = () => {
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => 
+            deleteAllChatRequest({
+                userId: Number(user?.id)
+            }),
+        onSuccess: () => {
+            // 요청 목록 최신화
+            queryClient.invalidateQueries({ queryKey: ['chatRequests'] });
         }
     });
 };

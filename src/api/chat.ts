@@ -84,7 +84,7 @@ export const deleteAllTeamRecruit = async (data: DeleteAllTeamRecruitRequest) =>
 }
 
 // 8. 커피챗 요청 전체 삭제 API [DELETE] (/api/request/all/coffee-chat)
-export const deleteAllChat = async (data: DeleteAllChatRequest) => {
+export const deleteAllChatRequest = async (data: DeleteAllChatRequest) => {
     const { userId } = data;
     
     const response = await axiosInstance.delete<DeleteAllChatResponse>("/api/request/all/coffee-chat", {
