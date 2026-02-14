@@ -30,7 +30,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
     const { mutate: endChat } = useChatRoomOut();
 
-    const {messages: socketMessages, sendMessage} = useStompChat(Number(roomId));
+    const {messages: socketMessages, sendMessage, leaveChatRoom} = useStompChat(Number(roomId));
     
     // 검색 관련 상태
     const [isSearching, setIsSearching] = useState(false);
@@ -86,6 +86,20 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
         return () => subscription.unsubscribe();
     }, [roomId, queryClient]);
+
+    // STOMP 채팅방 나가기 처리 (브라우저 종료/새로고침 대응)
+    // SPA 내부 이동 시 퇴장 처리는 useStompChat 훅의 클린업에서 자동으로 수행됩니다.
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            leaveChatRoom();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        }
+    }, [leaveChatRoom]);
 
     // 초기 진입 시 깜빡임 방지를 위한 상태
     const [isReady, setIsReady] = useState(false);
