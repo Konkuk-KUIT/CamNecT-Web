@@ -7,17 +7,15 @@ import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType } from "../typ
 // 1-1. 전체 안 읽은 메시지 개수 조회 전용 쿼리
 export const useUnreadCountQuery = () => {
     const { user, isAuthenticated } = useAuthStore();
-    const { setTotalUnreadCount } = useChatStore();
 
     return useQuery({
-        queryKey: ['chatUnreadCount', user?.id],
+        queryKey: ['chatUnreadCount'],
         queryFn: async () => {
             if (!user?.id) return 0;
             const response = await viewChatRoomList({
                 userId: Number(user?.id)
             });
             const count = response.data.totalUnreadCount;
-            setTotalUnreadCount(count);
             return count;
         },
         enabled: isAuthenticated && !!user?.id,

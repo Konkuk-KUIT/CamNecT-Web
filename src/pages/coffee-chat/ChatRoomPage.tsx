@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -21,6 +22,7 @@ export const ChatRoomPage = () => {
 };
 
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
+    const queryClient = useQueryClient();
     const { user } = useAuthStore();
     const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
     const { mutate: endChat } = useChatRoomOut();
@@ -129,6 +131,13 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             scrollToBottom();
         }
     }, [localMessages.length, isReady]);
+
+    // 3. 채팅방을 나갈 때(언마운트) 전역 안 읽은 개수 다시 가져오도록 설정
+    useEffect(() => {
+        return () => {
+            queryClient.invalidateQueries({ queryKey: ['chatUnreadCount'] });
+        };
+    }, [queryClient]);
 
     // 메시지 전송 함수 
     const handleSendMessage = (text: string) => {

@@ -1,7 +1,7 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { stompClient } from "../api/stompClient";
 import { useAuthStore } from "../store/useAuthStore";
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 // 로그인 / 로그아웃 시 소켓 연결/해제 (커피챗 실시간 수신을 위해)
 export const useSocketInitializer = () => {
@@ -36,7 +36,7 @@ export const useSocketInitializer = () => {
 
                 // BottomNav badge(totalUnreadCount 최신화)
                 queryClient.invalidateQueries({
-                    queryKey: ['chatUnreadCount', user?.id]
+                    queryKey: ['chatUnreadCount']
                 });
             });
 

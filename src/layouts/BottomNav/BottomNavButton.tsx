@@ -1,6 +1,6 @@
 import Icon from "../../components/Icon";
-import { useChatStore } from "../../store/useChatStore";
 import type { BottomNavProps } from "./BottomNav";
+import { useUnreadCountQuery } from "../../hooks/useChatQuery";
 
 interface BottomNavButtonProps extends BottomNavProps {
     isActive: boolean;
@@ -8,7 +8,7 @@ interface BottomNavButtonProps extends BottomNavProps {
 }
 
 export const BottomNavButton = ({ icon, activeIcon, label, isActive, handleNavClick }: BottomNavButtonProps) => {
-    const { totalUnreadCount } = useChatStore();
+    const { data: totalUnreadCount = 0 } = useUnreadCountQuery();
     
     // 커피챗 탭이고 안 읽은 메시지가 있을 때 배지 표시
     const showBadge = label === "커피챗" && totalUnreadCount > 0;
