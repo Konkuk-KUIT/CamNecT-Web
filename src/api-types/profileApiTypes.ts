@@ -1,5 +1,4 @@
-export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | 'EXCHANGE' | 'DROPPED_OUT' | 'TRANSFERRED';
-
+import type { EducationStatus } from "../types/mypage/mypageTypes";
 //마이페이지 조회 타입
 
 export interface PortfolioProject {

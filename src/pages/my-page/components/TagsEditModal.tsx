@@ -5,6 +5,7 @@ import { useModalHistory } from "../../../hooks/useModalHistory";
 import PopUp from "../../../components/Pop-up";
 import { useQuery } from "@tanstack/react-query";
 import { requestTagList } from "../../../api/auth";
+import { useNavigate } from "react-router-dom";
 
 interface TagEditModalProps {
     tags: string[];
@@ -15,6 +16,7 @@ interface TagEditModalProps {
 const ALLOWED_CATEGORY_IDS = new Set([1, 2, 3, 4, 5]);
 
 export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProps) {
+    const navigate = useNavigate();
     const [selectedTags, setSelectedTags] = useState<string[]>(tags);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -131,6 +133,7 @@ export default function TagEditModal({ tags, onClose, onSave }: TagEditModalProp
                 title="오류 발생" 
                 content="태그 목록을 불러오는 중 문제가 발생했습니다" 
                 buttonText="닫기"
+                onClick={() => navigate(-1)}
             />
         );
     }
