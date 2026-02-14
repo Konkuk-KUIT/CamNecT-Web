@@ -1,47 +1,48 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-import { AlumniSearchPage } from "../pages/alumni/AlumniPage";
-import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
-import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
 import { ActivityPage } from "../pages/activity/ActivityPage";
-import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
-import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
 import ActivityPostPage from "../pages/activity/ActivityPostPage";
-import { LoginPage } from "../pages/auth/LoginPage";
-import { SignUpPage } from "../pages/auth/SignUpPage";
-import { HomePage } from "../pages/home/HomePage";
-import { MypageEditPage } from "../pages/my-page/MypageEditPage";
-import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
-import { MypagePage } from "../pages/my-page/MypagePage";
-import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
-import { WritePage } from "../pages/community/WritePage";
-import { AuthGuard } from "./AuthGuard";
-import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
-import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
-import { CommunityPage } from "../pages/community/CommunityPage";
-import  CommunityPostPage  from "../pages/community/CommunityPostPage";
-import { NotificationPage } from "../pages/home/NotificationPage";
-import { Schedule } from "../pages/schedule/Schedule";
-import { ShopPage } from "../pages/shop/ShopPage";
-import { ShopDetailPage } from "../pages/shop/ShopDetailPage";
-import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
-import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
-import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
-import { MyPostsPage } from "../pages/my-page/sidebar/MyPostPage";
-import { MyBookmarksPage } from "../pages/my-page/sidebar/MyBookmarksPage";
-import { MySettingsPage } from "../pages/my-page/sidebar/MySettingsPage";
-import { AccountSettingsPage } from "../pages/my-page/sidebar/AccountSettingsPage";
-import { TermsPage } from "../pages/my-page/sidebar/TermsPage";
-import { EditPasswordPage } from "../pages/my-page/sidebar/EditPasswordPage";
-import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
-import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
-import { ActivityWritePage } from "../pages/activity/WritePage";
 import { ExternalActivityPostPage } from "../pages/activity/ExternalActivityPostPage";
 import { RecruitDetailPage } from "../pages/activity/RecruitDetailPage";
 import { RecruitWritePage } from "../pages/activity/RecruitWritePage";
+import { ActivityWritePage } from "../pages/activity/WritePage";
+import { AdminVerificationDetail } from "../pages/admin/AdminVerificationDetail";
+import { AdminVerificationList } from "../pages/admin/AdminVerificationList";
 import { AdminWritePage } from "../pages/admin/AdminWritePage";
 import { ExternalWritePage } from "../pages/admin/ExternalPostWritePage";
 import { JobWritePage } from "../pages/admin/JobPostWritePage";
+import { AlumniSearchPage } from "../pages/alumni/AlumniPage";
+import { AlumniPortfolioDetailPage } from "../pages/alumni/portfolio/AlumniPortfolioDetailPage";
+import { AlumniPortfolioListPage } from "../pages/alumni/portfolio/AlumniPortfolioListPage";
+import { AlumniProfilePage } from "../pages/alumni/ProfilePage";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { SignUpPage } from "../pages/auth/SignUpPage";
+import { ChatListPage } from "../pages/coffee-chat/ChatListPage";
+import { ChatRequestListPage } from "../pages/coffee-chat/ChatRequestListPage";
+import { ChatRequestRoomPage } from "../pages/coffee-chat/ChatRequestRoomPage";
+import { ChatRoomPage } from "../pages/coffee-chat/ChatRoomPage";
+import { CommunityPage } from "../pages/community/CommunityPage";
+import CommunityPostPage from "../pages/community/CommunityPostPage";
+import { WritePage } from "../pages/community/WritePage";
+import { HomePage } from "../pages/home/HomePage";
+import { NotificationPage } from "../pages/home/NotificationPage";
+import { MypageEditPage } from "../pages/my-page/MypageEditPage";
+import { FollowerPage } from "../pages/my-page/MypageFollowerPage";
+import { MypagePage } from "../pages/my-page/MypagePage";
+import { AccountSettingsPage } from "../pages/my-page/sidebar/AccountSettingsPage";
+import { DeleteAccountPage } from "../pages/my-page/sidebar/DeleteAccountPage";
+import { EditPasswordPage } from "../pages/my-page/sidebar/EditPasswordPage";
+import { MyBookmarksPage } from "../pages/my-page/sidebar/MyBookmarksPage";
+import { MyPostsPage } from "../pages/my-page/sidebar/MyPostPage";
+import { MySettingsPage } from "../pages/my-page/sidebar/MySettingsPage";
+import { TermsPage } from "../pages/my-page/sidebar/TermsPage";
+import { OnboardingPage } from "../pages/onboarding/OnboardingPage";
+import { PortfolioDetailPage } from "../pages/portfolio/PortfolioDetailPage";
+import { PortfolioListPage } from "../pages/portfolio/PortfolioListPage";
+import { Schedule } from "../pages/schedule/Schedule";
+import { ShopDetailPage } from "../pages/shop/ShopDetailPage";
+import { ShopPage } from "../pages/shop/ShopPage";
+import { AuthGuard } from "./AuthGuard";
 
 export const router = createBrowserRouter([
 
@@ -284,6 +285,10 @@ export const router = createBrowserRouter([
                                             {
                                                 path: "password",
                                                 element: <EditPasswordPage/>
+                                            },
+                                            {
+                                                path: "delete-account",
+                                                element: <DeleteAccountPage/>
                                             }
                                         ]
                                     },
