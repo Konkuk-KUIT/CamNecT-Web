@@ -44,8 +44,11 @@ export const useSocketInitializer = () => {
             setUpSubscriptions();
         }
         
-        // 소켓 연결
-        stompClient.activate();
+        // 소켓 연결 (비활성 상태일 때만 활성화)
+        if (!stompClient.active) {
+            console.log("소켓 활성화 명령");
+            stompClient.activate();
+        }
 
         // 이미 socket이 켜져있을때 새로운 구독 실행
         if(stompClient.connected){
@@ -66,6 +69,8 @@ export const useSocketInitializer = () => {
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            // 언마운트 시 매번 비활성화하기보다는 인증 해제 시에만 처리하도록 조정 가능
+            // 여기서는 기존 유지
             if (stompClient.active) {
                 stompClient.deactivate();
             }

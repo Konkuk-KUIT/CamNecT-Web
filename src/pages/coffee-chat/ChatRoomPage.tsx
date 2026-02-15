@@ -35,6 +35,9 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     // 검색 관련 상태
     const [isSearching, setIsSearching] = useState(false);
     const [roomSearchQuery, setRoomSearchQuery] = useState("");
+
+    // 소켓 연결 상태를 추적할 로컬 상태 추가 (지연 초기화로 최신 상태 반영)
+    const [isSocketReady, setIsSocketReady] = useState(() => stompClient.connected);
     
     // 메뉴 관련 상태
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,6 +102,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 }
             });
             console.log("채팅방 구독 성공:", roomId);
+            setIsSocketReady(true);
         }
 
         
@@ -115,6 +119,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 }
                 // 2. 현재 채팅방 구독
                 performSubscribe();
+                setIsSocketReady(true);
             }
         }
 
@@ -128,7 +133,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             // [중요] 페이지를 나갈 때 내가 임시로 바꿨던 onConnect를 원래대로 반드시 돌려놓음 (무한루프 방지)
             stompClient.onConnect = originalOnConnect;
         };
-    }, [roomId, queryClient]);
+    }, [roomId, queryClient, isSocketReady]);
 
     // STOMP 채팅방 나가기 처리 (브라우저 종료/새로고침 대응)
     // SPA 내부 이동 시 퇴장 처리는 useStompChat 훅의 클린업에서 자동으로 수행됩니다.
@@ -201,7 +206,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     // 1. 레이아웃 안정화 및 초기 스크롤
     useLayoutEffect(() => {
-        if (!isLoading && !isReady) {
+        if (!isLoading && !isReady && isSocketReady) {
             if (localMessages.length > 0) {
                 window.scrollTo(0, document.documentElement.scrollHeight);
                 requestAnimationFrame(() => {
@@ -214,14 +219,14 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 });
             }
         }
-    }, [isLoading, localMessages.length, isReady]);
+    }, [isLoading, localMessages.length, isReady, isSocketReady]);
 
     // 2. 메시지가 추가될 때 부드럽게 스크롤
     useEffect(() => {
-        if (isReady && localMessages.length > 0) {
+        if (isReady && localMessages.length > 0 && isSocketReady) {
             scrollToBottom();
         }
-    }, [localMessages.length, isReady]);
+    }, [localMessages.length, isReady, isSocketReady]);
 
     // 3. 채팅방을 나갈 때(언마운트) 전역 안 읽은 개수 다시 가져오도록 설정
     useEffect(() => {
@@ -229,6 +234,17 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             queryClient.invalidateQueries({ queryKey: ['chatUnreadCount'] });
         };
     }, [queryClient]);
+
+    // 소켓이 준비되지 않은 상태에서 렌더링을 시도하면 STOMP 커넥션 에러가 발생할 수 있음
+    if (!isSocketReady) {
+        return (
+            <HeaderLayout headerSlot={<MainHeader title="연결 중..." />}>
+                <div className="flex h-[calc(100vh-100px)] items-center justify-center text-gray-400">
+                    채팅 서버에 연결하고 있습니다...
+                </div>
+            </HeaderLayout>
+        );
+    }
 
     // 메시지 전송 함수 
     const handleSendMessage = (text: string) => {

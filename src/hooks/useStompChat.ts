@@ -1,3 +1,4 @@
+import type { StompSubscription } from "@stomp/stompjs";
 import { useCallback, useEffect, useState } from "react";
 import type { StompChatResponse, StompMessageRequest, StompMessageResponse } from "../api-types/stompApiTypes";
 import { isReadReceipt } from "../api-types/stompApiTypes";
@@ -29,28 +30,45 @@ export const useStompChat = (roomId: number) => {
 
     // 특정 채팅방 구독 (수신) 및 클린업
     useEffect(() => {
-        const subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
-            const data: StompChatResponse = JSON.parse(message.body);
+        let subscription: StompSubscription | null = null;
 
-            // 읽음 처리 수신 시 (READ)
-            if (isReadReceipt(data)) {
-                setMessages((prev) => 
-                    prev.map((msg) => 
-                        msg.messageId <= data.lastReadMessageId 
-                            ? { ...msg, read: true, readAt: data.readAt } 
-                            : msg
-                    )
-                );
-                return;
-            }
+        const performSubscribe = () => {
+            if (subscription) return;
+            subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+                const data: StompChatResponse = JSON.parse(message.body);
 
-            // 일반 메시지 수신 시
-            setMessages((prev) => [...prev, data]);
-        });
+                // 읽음 처리 수신 시 (READ)
+                if (isReadReceipt(data)) {
+                    setMessages((prev) => 
+                        prev.map((msg) => 
+                            msg.messageId <= data.lastReadMessageId 
+                                ? { ...msg, read: true, readAt: data.readAt } 
+                                : msg
+                        )
+                    );
+                    return;
+                }
+
+                // 일반 메시지 수신 시
+                setMessages((prev) => [...prev, data]);
+            });
+        };
+
+        if (stompClient.connected) {
+            performSubscribe();
+        } else {
+            const originalOnConnect = stompClient.onConnect;
+            stompClient.onConnect = (frame) => {
+                if (originalOnConnect && originalOnConnect !== stompClient.onConnect) {
+                    originalOnConnect(frame);
+                }
+                performSubscribe();
+            };
+        }
 
         // 핵심: 채팅방을 나갈 때(언마운트) 구독 해제와 나가기 신호를 한꺼번에 처리
         return () => {
-            subscription.unsubscribe();
+            if (subscription) subscription.unsubscribe();
             leaveChatRoom();
         };
     }, [roomId, leaveChatRoom]);
