@@ -16,13 +16,12 @@ type ActivityListTabProps = {
   tab: string;
 };
 
-type SortKey = 'recommended' | 'latest' | 'likes' | 'bookmarks';
-type SortExternalKey = 'recommended' | 'latest' | 'deadline' |'bookmarks';
+type SortInternalKey = 'recommended' | 'latest' | 'bookmarks';
+type SortExternalKey = 'recommended' | 'latest' | 'deadline' | 'bookmarks' | 'recruits';
 
-const sortLabels: Record<SortKey, string> = {
+const sortInternalLabels: Record<SortInternalKey, string> = {
   recommended: '추천순',
   latest: '최신순',
-  likes: '좋아요 많은 순',
   bookmarks: '북마크 많은 순',
 };
 const sortExternalLabels: Record<SortExternalKey, string> = {
@@ -30,6 +29,7 @@ const sortExternalLabels: Record<SortExternalKey, string> = {
   latest: '최신순',
   deadline: '마감임박순',
   bookmarks: '북마크 많은 순',
+  recruits: '팀원모집 많은 순'
 };
 
 const ActivityListTab = ({
@@ -41,8 +41,8 @@ const ActivityListTab = ({
   const navigate = useNavigate();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>('recommended');
-  const [sortExternalKey, setSortExternalKey] = useState<SortExternalKey>('recommended');
+  const [sortInternalKey, setSortInternalKey] = useState<SortInternalKey>('latest');
+  const [sortExternalKey, setSortExternalKey] = useState<SortExternalKey>('latest');
 
   const isExternalTab = tab === 'external' || tab === 'job';
   const writePath = tab === 'external' ? "/admin/post/external" : "/admin/post/job";
@@ -80,36 +80,34 @@ const ActivityListTab = ({
   const cloned = [...filteredPosts];
 
     if (isExternalTab) {
-		if (sortExternalKey === 'recommended') return cloned;
-		if (sortExternalKey === 'latest') {
-			return cloned.sort(
-				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-			);
-		}
-		if (sortExternalKey === 'deadline') {
-			return cloned.sort((a, b) => {
-				const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
-				const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
-				return aTime - bTime; 
-			});
-		}
+      if (sortExternalKey === 'recommended') return cloned;
+      if (sortExternalKey === 'latest') {
+        return cloned.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+      }
+      if (sortExternalKey === 'deadline') {
+        return cloned.sort((a, b) => {
+          const aTime = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
+          const bTime = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
+          return aTime - bTime; 
+        });
+      }
+      if (sortExternalKey === 'recruits') return cloned; //TODO: api 연결할 때는 제대로 된 정렬로
 
-		return cloned.sort((a, b) => b.saveCount - a.saveCount);
+      return cloned.sort((a, b) => b.saveCount - a.saveCount);
 
-	} else {
-		if (sortKey === 'recommended') return cloned;
-		if (sortKey === 'latest') {
-			return cloned.sort(
-				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-			);
-		}
-		if (sortKey === 'likes') {
-			return cloned.sort((a, b) => b.likes - a.likes);
-		}
+    } else {
+      if (sortInternalKey === 'recommended') return cloned;
+      if (sortInternalKey === 'latest') {
+        return cloned.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+      }
     }
 
   return cloned.sort((a, b) => b.saveCount - a.saveCount);
-}, [filteredPosts, isExternalTab, sortKey, sortExternalKey]);
+}, [filteredPosts, isExternalTab, sortInternalKey, sortExternalKey]);
 
 
   return (
@@ -126,7 +124,7 @@ const ActivityListTab = ({
         </div>
         
         {!isExternalTab ? 
-        <SortSelector sortKey={sortKey} sortLabels={sortLabels} onChange={setSortKey} /> :
+        <SortSelector sortKey={sortInternalKey} sortLabels={sortInternalLabels} onChange={setSortInternalKey} /> :
         <SortSelector sortKey={sortExternalKey} sortLabels={sortExternalLabels} onChange={setSortExternalKey}/>
         }
       </div>

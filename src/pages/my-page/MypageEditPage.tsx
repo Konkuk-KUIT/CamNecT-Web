@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { MOCK_SESSION } from "../../mock/mypages";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
 import PortfolioSection from "./components/PortfolioSection";
 import ImageEditModal from "./components/ImageEditModal";
 import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
+import { useProfileSave } from "./hooks/useProfileSave";
 import TagsEditModal from "./components/TagsEditModal";
 import IntroEditModal from "./components/IntroEditModal";
 import EducationEditModal from "./components/EducationEditModal";
@@ -13,29 +14,83 @@ import CareerEditModal from "./components/CareerEditModal";
 import CertificateEditModal from "./components/CertificateEditModal";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
-import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
 import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
-import { useImageUpload } from "../../hooks/useImageUpload";
+import { useAuthStore } from "../../store/useAuthStore";
+import { requestTagList } from "../../api/auth";
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 export const MypageEditPage = () => {
     const navigate = useNavigate();
-    const userId: string = MOCK_SESSION.meUid;
+    const authUser = useAuthStore(state => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
     const pageRef = useRef<HTMLDivElement>(null);
+
+    type ImageAction = "KEEP"|"UPLOAD"|"DELETE";
+    const imageActionRef = useRef<ImageAction>("KEEP");
     const imageFileRef = useRef<File | null>(null);
 
-    const { data, setData, hasChanges } = useProfileEdit(userId);
+    const { data, setData, resetToServer, hasChanges, originalData, isLoading, isError } = useProfileEdit(userId);
     const { currentModal, openModal, closeModal } = useProfileEditModals();
+    const { saveProfile, isSaving } = useProfileSave();
 
     const [confirm, setConfirm] = useState(false);
     const [leaveOpen, setLeaveOpen] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [imageSizeErrorOpen, setImageSizeErrorOpen] = useState(false);
 
-    const handleSave = () => {
-        if (!hasChanges) return;
-        console.log('Profile saved:', data); //TODO: 추후 삭제
-        setConfirm(true);
+    // 태그 리스트 조회
+    const { data: tagList } = useQuery({
+        queryKey: ["tagList"],
+        queryFn: () => requestTagList(),
+    });
+
+    // 태그 데이터 포맷팅
+    const { tagIdToName } = useMemo(() => {
+        const tags = tagList?.data?.flatMap(cat =>
+            cat.tags.map(tag => ({ id: tag.id, name: tag.name }))
+        ) ?? [];
+        const m = new Map<number, string>();
+        for (const t of tags) m.set(t.id, t.name);
+        return { allTags: tags, tagIdToName: m };
+    }, [tagList]);
+
+    const handleSave = async () => {
+        if (!hasChanges || !data || !userId || !originalData) return;
+
+        let imageChange:
+            | { action: "KEEP" }
+            | { action: "UPLOAD"; file: File }
+            | { action: "DELETE" };
+
+        if (imageActionRef.current === "UPLOAD") {
+            const file = imageFileRef.current;
+            if (!file) {
+            setSaveError("이미지 업로드 파일이 없습니다. 다시 선택해주세요.");
+            return;
+            }
+            imageChange = { action: "UPLOAD", file };
+        } else if (imageActionRef.current === "DELETE") {
+            imageChange = { action: "DELETE" };
+        } else {
+            imageChange = { action: "KEEP" };
+        }
+
+        const result = await saveProfile(data, originalData, imageChange);
+
+        if (result.success) {
+            imageActionRef.current = "KEEP";
+            imageFileRef.current = null;
+            setConfirm(true);
+        } else {
+            setSaveError(result.error || "저장에 실패했습니다.");
+            //저장 실패 시 서버값으로 되돌림
+            imageActionRef.current = "KEEP";
+            imageFileRef.current = null;
+            resetToServer();
+        }
     };
 
     const handleClose = () => { 
@@ -59,34 +114,64 @@ export const MypageEditPage = () => {
         };
     }, [currentModal]);
 
-    const {prepareImage} = useImageUpload();
+    const MAX_BYTES = 20 * 1024 * 1024;
+    const handleSelectImage = (file: File) => {
+        if (file.size > MAX_BYTES) {
+            setImageSizeErrorOpen(true);
+            return; 
+        }
+
+        // 20MB이하의 이미지만 기존 로직 실행
+        handleImageUpload(file);
+    };
 
     const handleImageUpload = (file: File) => {
-        const result = prepareImage(file);
-        if (!result) return;
-        setData((prev) => ({
-            ...prev,
-            user: { ...prev.user, profileImg: result.previewUrl },
-        }));
-        //서버 전송용 원본 파일 보관
-        imageFileRef.current = result.file;
+        const previewUrl = URL.createObjectURL(file);
 
+        setData((prev) => {
+            const base = prev ?? data;
+            if (!base) return prev;
+
+            const prevImg = base.user.profileImg;
+            if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
+
+            return {
+            ...base,
+            user: { ...base.user, profileImg: previewUrl },
+            };
+        });
+
+        imageFileRef.current = file;
+        imageActionRef.current = "UPLOAD";
         closeModal();
-        };
+    };
 
-    if (!data) 
+    // 로딩 중
+    if (isLoading || !data) {
         return (
-        <PopUp
-            type="error"
-            title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
-            titleSecondary='잠시 후 다시 시도해주세요'
-            isOpen={true}
-            rightButtonText='확인'
-        />
-    )
+            <PopUp
+                type="loading"
+                isOpen={true}
+            />
+        );
+    }
+
+    // 에러 또는 데이터 없음
+    if (isError) {
+        return (
+            <PopUp
+                type="error"
+                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
+                titleSecondary='잠시 후 다시 시도해주세요'
+                isOpen={true}
+                rightButtonText='확인'
+                onClick={() => navigate(-1)}
+            />
+        );
+    }
     
 
-    const { user, visibility, educations, careers, certificates, portfolios, showFollowPublic } = data;
+    const { user, visibility, educations, careers, certificates, portfolios } = data;
 
     return (
         <div>
@@ -101,9 +186,9 @@ export const MypageEditPage = () => {
                                     hasChanges ? 'text-primary' : 'text-gray-650'
                                 }`}
                                 onClick={handleSave}
-                                disabled={!hasChanges}
+                                disabled={!hasChanges || isSaving}
                             >
-                                완료
+                                {isSaving ? '저장 중...' : '완료'}
                             </button>
                         }
                     />
@@ -118,7 +203,11 @@ export const MypageEditPage = () => {
                                 <button className="relative h-[56px] w-[56px]"
                                 onClick={() => openModal('image')}>
                                     <img
-                                    src={user.profileImg}
+                                    src={user.profileImg ?? DEFAULT_PROFILE_IMAGE}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                        e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                    }}
                                     alt="프로필"
                                     className="h-[56px] w-[56px] rounded-full"
                                 />
@@ -146,12 +235,12 @@ export const MypageEditPage = () => {
                                         </button>
                                     </div>
                                     <div className="w-full flex flex-wrap gap-[5px] pl-[4px]">
-                                        {user.userTags.map((t) => (
+                                        {user.userTags.map((id: number) => (
                                             <span
-                                                key={t}
+                                                key={id}
                                                 className="flex justify-center items-center rounded-[3px] border border-primary bg-green-50 px-[5px] py-[3px] text-R-12-hn text-primary"
                                             >
-                                                {t}
+                                                {tagIdToName.get(id) ?? `#${id}`}
                                             </span>
                                         ))}
                                     </div>
@@ -165,7 +254,7 @@ export const MypageEditPage = () => {
                                             <Icon name="more2" className="w-[10px] h-[10px] block shrink-0"/>
                                         </button>
                                     </div>
-                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] whitespace-pre-line break-keep [overflow-wrap:anywhere]">
+                                    <div className="w-full flex text-R-14 text-gray-750 leading-[1.5] pl-[4px] line-clamp-3 whitespace-pre-line break-keep [overflow-wrap:anywhere]">
                                         {user.introduction}
                                     </div>
                                 </div>
@@ -174,14 +263,26 @@ export const MypageEditPage = () => {
                             <div className="w-full py-[15px] px-[25px] flex justify-between items-center">
                                 <span className="text-SB-14 text-gray-900">팔로잉/팔로워 수 비공개</span>
                                 <button
-                                    onClick={() => setData({ ...data, showFollowPublic: !showFollowPublic })}
-                                    className={`relative w-[50px] h-[24px] rounded-[21px] transition-colors duration-300 ease-in-out ${
-                                        showFollowPublic ? 'bg-gray-300' : 'bg-primary'
+                                    onClick={() => {
+                                        setData((prev) => {
+                                            const base = prev ?? data;
+                                            if (!base) return prev;
+                                            return {
+                                                ...base,
+                                                visibility: {
+                                                    ...base.visibility,
+                                                    isFollowerVisible: !base.visibility.isFollowerVisible
+                                                }
+                                            };
+                                        }
+                                    )}}
+                                    className={`relative w-[50px] h-[24px] rounded-full transition-colors duration-300 ease-in-out ${
+                                        data.visibility.isFollowerVisible ? 'bg-gray-300' : 'bg-primary'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-[2px] left-[2px] w-[20px] h-[20px] rounded-full bg-white transition-transform duration-300 ease-in-out ${
-                                            showFollowPublic ? "translate-x-0" : "translate-x-[26px]"
+                                            data.visibility.isFollowerVisible ? "translate-x-0" : "translate-x-[26px]"
                                         }`}
                                     />
                                 </button>
@@ -226,18 +327,32 @@ export const MypageEditPage = () => {
             <ImageEditModal
                 isOpen={currentModal === 'image'}
                 onClose={closeModal}
-                onSelect={handleImageUpload}
+                onSelect={handleSelectImage}
                 onDelete={() => {
-                    setData({ ...data, user: { ...user, profileImg: DEFAULT_PROFILE_IMAGE } });
+                    setData((prev) => {
+                        const base = prev ?? data;
+                        if (!base) return prev;
+
+                        const prevImg = base.user.profileImg;
+                        if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
+
+                        return {
+                        ...base,
+                        user: { ...base.user, profileImg: null }, //null->삭제
+                        };
+                    });
+
+                    imageFileRef.current = null;
+                    imageActionRef.current = "DELETE";
                     closeModal();
                 }}
             />
             {currentModal === 'tags' && (
                 <TagsEditModal
-                    tags={user.userTags || []}
+                    tagIds={user.userTags || []}
                     onClose={closeModal}
-                    onSave={(newTags) => { 
-                        setData({ ...data, user: { ...user, userTags: newTags } }); 
+                    onSave={(newTagIds) => { 
+                        setData({ ...data, user: { ...user, userTags: newTagIds } }); 
                         closeModal(); 
                     }}
                 />
@@ -328,6 +443,23 @@ export const MypageEditPage = () => {
                     navigate(-1);
                 }}
             />
+            <PopUp
+                isOpen={!!saveError}
+                type="error"
+                title="일시적 오류로 인해 접근에 실패했습니다."
+                content={saveError || ""}
+                buttonText="확인"
+                onClick={() => setSaveError(null)}
+            />
+            <PopUp
+                isOpen={imageSizeErrorOpen}
+                type="error"
+                title="파일 용량 초과"
+                content="프로필 사진은 최대 20MB까지 업로드할 수 있습니다."
+                buttonText="확인"
+                onClick={() => setImageSizeErrorOpen(false)}
+            />
+
         </div>
     );
-}
+};

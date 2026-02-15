@@ -1,23 +1,61 @@
+import { useState } from "react";
+import { IoMdPhonePortrait } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { type User } from "../../../types/user/userTypes";
+import { logout } from "../../../api/profileApi";
+import PopUp from "../../../components/Pop-up";
+import { usePwaInstall } from "../../../hooks/usePwaInstall";
+import { useAuthStore } from "../../../store/useAuthStore";
+
+type SideBarUser = {
+  uid: string;
+  name: string;
+  univ: string;
+  major: string;
+  gradeNumber: string;
+  point: number | null;
+};
 
 interface SideBarProps {
     isOpen: boolean;
     onClose: () => void;
-    user: User;
+    user: SideBarUser;
 }
 
 export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
     const navigate = useNavigate();
+    const setLogout = useAuthStore((s) => s.setLogout);
+    const userId = useAuthStore((s) => s.user?.id);
+    const { isInstallable, install } = usePwaInstall();
+    
+    const [isInstallPopupOpen, setIsInstallPopupOpen] = useState(false);
 
     const handleNavigation = (path: string) => {
         navigate(path);
         onClose();
     };
 
-    const handleLogout = (userId: string) => {
-        alert(`${userId} 로그아웃 로직 실행`); //TODO: 로그아웃 api 연결
-        navigate("/");
+    const handleInstallClick = async () => {
+        if (isInstallable) {
+            await install();
+        } else {
+            setIsInstallPopupOpen(true);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            const loginUserId = Number(userId);
+            if (!Number.isFinite(loginUserId)) throw new Error("Invalid userId");
+
+            await logout(loginUserId);
+        } catch (e) {
+            // 401이어도 일단 로그아웃 처리
+            console.warn("logout failed:", e);
+        } finally {
+            setLogout();
+            onClose();
+            navigate("/login");
+        }
     }
 
     if (!isOpen) return null;
@@ -120,13 +158,29 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                                         </svg>
                                         <span className="text-r-16-hn text-gray-750">환경 설정</span>
                                     </button>
+                                    <button
+                                        onClick={handleInstallClick}
+                                        className="inline-flex items-center gap-[15px] p-[10px]"
+                                    >
+                                        <IoMdPhonePortrait className="w-[20px] h-[20px] text-gray-750" />
+                                        <span className="text-r-16-hn text-gray-750">앱 설치</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => handleLogout(user.id)} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
+                        <button onClick={() => handleLogout()} className="p-[10px] text-r-16-hn text-red">로그아웃</button>
                     </div>
                 </div>
             </div>
+
+            <PopUp
+                isOpen={isInstallPopupOpen}
+                type="confirm"
+                title="알림"
+                content="이미 설치되어 있거나,\n설치를 지원하지 않는 브라우저입니다.\n(iOS는 Safari '홈 화면에 추가'를 이용해주세요)"
+                buttonText="확인"
+                onClick={() => setIsInstallPopupOpen(false)}
+            />
         </>
     );
 };

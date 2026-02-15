@@ -80,7 +80,7 @@ export const  PortfolioListPage = ({
             const newPortfolio: PortfolioDetail = {
                 ...data,
                 portfolioId: `pf_${ownerId}_${Date.now()}`,
-                id: ownerId,
+                uid: ownerId,
                 updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
             };
             setPortfolios([...portfolios, newPortfolio]);

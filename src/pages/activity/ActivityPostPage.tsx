@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
-import Icon from '../../components/Icon';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
 import PopUp from '../../components/Pop-up';
 import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
@@ -45,12 +44,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
-  const [isLiked, setIsLiked] = useState(selectedPost.isLiked ?? false);
   const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
-
-  const handleLikeToggle = (checked: boolean) => {
-    setIsLiked(checked);
-  };
 
   const handleBookmarkToggle = (checked: boolean) => {
     setIsBookmarked(checked);
@@ -130,22 +124,16 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
                   {selectedPost.title}
                 </div>
                 <div className='flex flex-wrap items-center gap-[10px] text-[12px] text-[var(--ColorGray3,#646464)]'>
-                  <div className='flex items-center gap-[5px]'>
-                    <div className='flex items-center gap-[3px]'>
-                      <Icon name='like' className='h-[14px] w-[14px]' />
-                      <span>{selectedPost.likes}</span>
-                    </div>
-                    <div className='flex items-center gap-[3px]'>
-                      <svg viewBox='0 0 11 12' fill='none' className='w-[11px] h-[12px]'>
-                        <path 
-                          d='M9.22867 0.697692C9.962 0.775908 10.5 1.3558 10.5 2.03286V11.5L5.5 9.20853L0.5 11.5V2.03286C0.5 1.3558 1.03733 0.775908 1.77133 0.697692C4.24879 0.434103 6.75121 0.434103 9.22867 0.697692Z' 
-                          stroke='#646464' 
-                          strokeLinecap='round' 
-                          strokeLinejoin='round'
-                        />
-                      </svg>
-                      <span>{selectedPost.saveCount}</span>
-                    </div>
+                  <div className='flex items-center gap-[3px]'>
+                    <svg viewBox='0 0 11 12' fill='none' className='w-[11px] h-[12px]'>
+                      <path 
+                        d='M9.22867 0.697692C9.962 0.775908 10.5 1.3558 10.5 2.03286V11.5L5.5 9.20853L0.5 11.5V2.03286C0.5 1.3558 1.03733 0.775908 1.77133 0.697692C4.24879 0.434103 6.75121 0.434103 9.22867 0.697692Z' 
+                        stroke='#646464' 
+                        strokeLinecap='round' 
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                    <span>{selectedPost.saveCount}</span>
                   </div>
                   <span className='text-[var(--ColorGray2,#A1A1A1)]'>
                     {formatPostDisplayDate(selectedPost.createdAt)}
@@ -230,10 +218,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
       <BottomReact
         isMine={isPostMine}
         status={status}
-        likeCount={selectedPost.likes}
-        isLiked={isLiked}
         isBookmarked={isBookmarked}
-        onLikeToggle={handleLikeToggle}
         onBookmarkToggle={handleBookmarkToggle}
         onOpenCompletePopup={() => setIsRecruitPopupOpen(true)}
       />

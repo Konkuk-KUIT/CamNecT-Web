@@ -1,26 +1,24 @@
-import { type User } from "../user/userTypes";
-
-export type EducationStatus = "ENROLLED" | "LEAVE" | "EXCHANGED" | "GRADUATED" | "DROPOUT" | "TRANSFERRED";
-// // User 공통 인터페이스 
-// export interface User {
-//   id: string; 
-//   name: string; 
-//   profileImg: string; 
-//   major: string; 
-//   gradeNumber: string; 
-//   userTags: string[]; 
-//   introduction: string; // 자기소개 (최대 75자, 3줄)
-//   point: number; 
-// }
+export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | 'EXCHANGE' | 'DROPPED_OUT' | 'TRANSFERRED';
+// User 공통 인터페이스 
+export interface User {
+  uid: string; 
+  name: string; 
+  profileImg: string | null;
+  univ: string;
+  major: string; 
+  gradeNumber: string; 
+  userTags: number[]; 
+  introduction: string;
+  following: number;
+  follower: number;
+  point: number; 
+}
 
 export type UserPreview = Omit<User, "userTags"|"introduction"|"point"|"univ">;
-export type UserMini = Pick<UserPreview, "id" | "name" | "major" | "gradeNumber">;
 
 export interface UserProfile extends User {
-  following: UserPreview[];
-  follower: UserPreview[];
-
-  isFollowCountPublic: boolean;
+  followingList: UserPreview[];
+  followerList: UserPreview[];
 }
 
 export interface EducationItem {
@@ -49,7 +47,7 @@ export interface CertificateItem {
 }
 
 export interface ProfileVisibility {
-  portfolioVisibility: boolean;
+  isFollowerVisible: boolean;
   educationVisibility: boolean;
   careerVisibility: boolean;
   certificateVisibility: boolean;
@@ -57,7 +55,7 @@ export interface ProfileVisibility {
 
 //프로필 상세(학력/경력/자격증 등)까지 포함
 export interface UserProfileDetail {
-  user: UserProfile;
+  user: User;
   visibility: ProfileVisibility;
   educations: EducationItem[];
   careers: CareerItem[];
@@ -65,10 +63,35 @@ export interface UserProfileDetail {
 }
 
 export const EDUCATION_STATUS_KR: Record<EducationStatus, string> = {
-  ENROLLED: "재학",
-  LEAVE: "휴학",
-  EXCHANGED: "교환",
+  ATTENDING: "재학",
+  LEAVE_OF_ABSENCE: "휴학",
+  EXCHANGE: "교환",
   GRADUATED: "졸업",
-  DROPOUT: "중퇴",
+  DROPPED_OUT: "중퇴",
   TRANSFERRED: "편입"
+};
+
+//작성/북마크한 글(커뮤니티)
+export type CommunityPostItem = {
+    postId: number;
+    boardCode: "INFO" | "QUESTION";
+    title: string;
+    preview: string;
+    createdAt: string;
+    likeCount: number;
+    answerCount: number;
+    commentCount: number;
+    bookmarkCount: number;
+    acceptedBadge?: boolean;
+    tags: string[];
+    thumbnailUrl?: string | null;
+    author: {
+      userId: number;
+      name: string;
+      profileImageUrl: string | null;
+      studentNo: string;
+      majorName: string;
+    };
+    accessType?: "FREE" | "POINT_REQUIRED";
+    accessStatus?: "GRANTED" | "LOCKED";
 };

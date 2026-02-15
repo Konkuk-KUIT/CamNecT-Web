@@ -6,12 +6,14 @@ import { useChatRooms } from '../../hooks/useChatQuery';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { ChatList } from './components/ChatList';
+import type { ChatRoomListItemType } from '../../types/coffee-chat/coffeeChatTypes';
 
 export const ChatListPage = () => {
-  const { data: chatRooms = [], isLoading } = useChatRooms();
-  const [activeId, setActiveId] = useState('COFFEE_CHAT');
+  const [activeId, setActiveId] = useState<ChatRoomListItemType>('COFFEE_CHAT');
+  const { data: chatRooms = [], isLoading } = useChatRooms(activeId);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const unreadCount = 3;
+  const unreadCount = 3; // 팀원 모집 전체 요청...?
 
   const navigate = useNavigate();
 
@@ -42,7 +44,6 @@ export const ChatListPage = () => {
     });
   };
 
-
   const handleChatRoomClick = (roomId: string) => {
     navigate(`/chat/${roomId}`);
   };
@@ -63,7 +64,7 @@ export const ChatListPage = () => {
       <Tabs
         tabs={tabs}
         activeId={activeId}
-        onChange={(id) => setActiveId(id)}
+        onChange={(id) => setActiveId(id as ChatRoomListItemType)}
       >
         {/* 검색영역 */}
         <section className="w-full px-[25px] py-[20px] ">

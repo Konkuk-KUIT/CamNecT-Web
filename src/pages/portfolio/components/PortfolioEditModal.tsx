@@ -415,7 +415,7 @@ export default function PortfolioEditModal({
             const data: PortfolioDetail = {
                 ...(initialData || {}),
                 portfolioId: initialData?.portfolioId || `pf_${userId}_${Date.now()}`,
-                id: initialData?.id || userId,
+                id: initialData?.uid || userId,
                 title,
                 content,
                 startYear,

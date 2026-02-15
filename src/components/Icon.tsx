@@ -53,7 +53,9 @@ type IconName =
   | 'adminActivityRegistration'
   | 'adminActivityRegistrationActive'
 
-  | 'bookmark';
+  | 'bookmark'
+  | 'alarmOff'
+  | 'logOut'; // 채팅방 나가기 버튼 (Red)
 
 type IconProps = {
   name: IconName;
@@ -556,6 +558,26 @@ const iconPaths: Record<IconName, IconDefinition> = {
     content: (
       <path d="M17.593 3.32206C18.693 3.45006 19.5 4.39906 19.5 5.50706V21.0001L12 17.2501L4.5 21.0001V5.50706C4.5 4.39906 5.306 3.45006 6.407 3.32206C10.1232 2.89069 13.8768 2.89069 17.593 3.32206Z" 
       stroke="#A1A1A1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    )
+  },
+  alarmOff: {
+    viewBox: '0 0 24 24',
+    content: (
+      <>
+        <path d="M14.857 17.082C16.8202 16.8614 18.5509 16.4217 20.311 15.772C18.8204 14.1208 17.9967 11.9745 18 9.75V9C18 7.4087 17.3679 5.88258 16.2426 4.75736C15.1174 3.63214 13.5913 3 12 3C10.4087 3 8.88258 3.63214 7.75736 4.75736C6.63215 5.88258 6 7.4087 6 9V9.75C6.00302 11.9746 5.17899 14.121 3.688 15.772C5.421 16.412 7.248 16.857 9.143 17.082M14.857 17.082C12.959 17.3071 11.041 17.3071 9.143 17.082M14.857 17.082C15.0011 17.5319 15.0369 18.0094 14.9616 18.4757C14.8862 18.942 14.7018 19.384 14.4234 19.7656C14.1449 20.1472 13.7803 20.4576 13.3592 20.6716C12.9381 20.8856 12.4724 20.9972 12 20.9972C11.5276 20.9972 11.0619 20.8856 10.6408 20.6716C10.2197 20.4576 9.85508 20.1472 9.57662 19.7656C9.29817 19.384 9.11377 18.942 9.03842 18.4757C8.96307 18.0094 8.9989 17.5319 9.143 17.082" 
+          stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 3L21 21" stroke="black" strokeWidth="1.5" strokeLinecap="round" />
+      </>
+    )
+  },
+  logOut : {
+    viewBox: "0 0 24 24",
+    content: (
+      <>
+      <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="#FF3838" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M16 17L21 12L16 7" stroke="#FF3838" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 12H9" stroke="#FF3838" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </>
     )
   }
 };

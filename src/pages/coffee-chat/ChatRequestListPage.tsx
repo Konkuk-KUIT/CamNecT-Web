@@ -5,22 +5,26 @@ import { Tabs } from "../../components/Tabs";
 import { useChatRequests } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-import type { ChatRoomListItem } from "../../types/coffee-chat/coffeeChatTypes";
+import type { ChatRoomListItem, ChatRoomListItemType } from "../../types/coffee-chat/coffeeChatTypes";
 import { AllRequestDeleteButton } from "./components/AllRequestDeleteButton";
 import { ChatList } from "./components/ChatList";
 import { ChatPostAccordian } from "./components/ChatPostAccordian";
+import { useDeleteAllChatRequest } from "../../hooks/useChatQuery";
 
 export const ChatRequestListPage = () => {
   const navigate = useNavigate();
-  const { data: chatRequestRooms = [], isLoading } = useChatRequests();
 
   const tabs = [
     { id: 'COFFEE_CHAT', label: '커피챗' },
     { id: 'TEAM_RECRUIT', label: '팀원모집' },
   ];
 
-  const [activeId, setActiveId] = useState('COFFEE_CHAT');
+  const [activeId, setActiveId] = useState<ChatRoomListItemType>('COFFEE_CHAT');
   const [openPostTitle, setOpenPostTitle] = useState<string | null>(null); // 1개만 열릴 수 있음
+
+  const { data: chatRequestRooms = [], isLoading } = useChatRequests(activeId);
+  // const { mutate: deleteAllTeamRecruitRequest} = useDeleteAllTeamRecruitRequest();
+  const { mutate: deleteAllChatRequest} = useDeleteAllChatRequest();
 
     // mock데이터 타입별 filtering + 날짜 내림차순 정렬
   const filteredChatRoomList = chatRequestRooms
@@ -53,13 +57,13 @@ export const ChatRequestListPage = () => {
     ? (openPostTitle ? (filteredChatRoomListByPost[openPostTitle]?.length || 0) : 0)
     : filteredChatRoomList.length;
 
-  // todo 삭제 핸들러
+  // todo 팀원 모집 삭제 API 연결
   const handleDeleteAll = () => {
     if (activeId === 'TEAM_RECRUIT') {
       if (!openPostTitle) return;
-      console.log(`${openPostTitle} 그룹의 요청 ${currentDeleteCount}개 삭제`);
+
     } else {
-      console.log('커피챗 요청 전체 삭제');
+      deleteAllChatRequest();
     }
   };
 
@@ -77,7 +81,7 @@ export const ChatRequestListPage = () => {
       <Tabs
         tabs={tabs}
         activeId={activeId}
-        onChange={(id) => setActiveId(id)}
+        onChange={(id) => setActiveId(id as ChatRoomListItemType)}
       >
         <ol>
           {

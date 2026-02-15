@@ -14,28 +14,36 @@ type PortfolioDetailPageProps = {
     ownerId?: string;
     isMine?: boolean;
     portfolioId?: string;
+    initialPortfolio?: PortfolioDetail;
 };
 
 export const PortfolioDetailPage = ({
     ownerId: ownerIdProp,
     isMine: isMineProp,
     portfolioId: portfolioIdProp,
+    initialPortfolio,
 }: PortfolioDetailPageProps) => {
     const meUid = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
     const [searchParams] = useSearchParams();
     const ownerId = ownerIdProp ?? searchParams.get('ownerId') ?? meUid;
     const isMineParam = searchParams.get('isMine');
     const isMine = isMineProp ?? (isMineParam ? isMineParam === 'true' : ownerId === meUid);
-    const userDetail = MOCK_PROFILE_DETAIL_BY_UID[ownerId];
+    const userDetail = ownerId ? MOCK_PROFILE_DETAIL_BY_UID[ownerId] : undefined;
     const user = userDetail?.user;
+    const resolvedUser = user ?? {
+        name: "알 수 없음",
+        profileImg: "",
+        major: "",
+        gradeNumber: "",
+    };
 
     const navigate = useNavigate();
     const { portfolioId: portfolioIdParam } = useParams();
     const portfolioId = portfolioIdProp ?? portfolioIdParam;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(initialPortfolio ?? null);
+    const [isLoading, setIsLoading] = useState(!initialPortfolio);
     const [error, setError] = useState<string | null>(null);
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
@@ -53,6 +61,13 @@ export const PortfolioDetailPage = ({
 
     // Mock 데이터에서 포트폴리오 가져오기
     useEffect(() => {
+        if (initialPortfolio) {
+            setPortfolio(initialPortfolio);
+            setIsLoading(false);
+            setError(null);
+            return;
+        }
+
         const fetchData = async () => {
             setIsLoading(true);
             setError(null);
@@ -85,7 +100,7 @@ export const PortfolioDetailPage = ({
         };
 
         fetchData();
-    }, [portfolioId, ownerId]);
+    }, [portfolioId, ownerId, initialPortfolio]);
 
     const handleEdit = () => {
         setIsMenuOpen(false);
@@ -132,7 +147,7 @@ export const PortfolioDetailPage = ({
     };
 
     // userDetail이 없는 경우 에러 처리
-    if (!userDetail || !user) {
+    if (!userDetail && !initialPortfolio) {
         return (
             <PopUp
                 type="error"
@@ -215,14 +230,23 @@ export const PortfolioDetailPage = ({
                     <div className="border-t border-gray-150">
                         {/* 작성자 정보 */}
                             <div className="px-[25px] py-[20px] flex items-center gap-[15px]">
-                                <img
-                                    src={user.profileImg}
-                                    alt={user.name}
-                                    className="w-[40px] h-[40px] rounded-full object-cover"
-                                />
+                                {resolvedUser.profileImg ? (
+                                    <img
+                                        src={resolvedUser.profileImg}
+                                        alt={resolvedUser.name}
+                                        className="w-[40px] h-[40px] rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div
+                                        className="w-[40px] h-[40px] rounded-full bg-gray-200"
+                                        aria-hidden
+                                    />
+                                )}
                                 <div className = "flex flex-col gap-[6px] flex-1">
-                                    <div className="text-b-18-hn text-gray-900">{user.name}</div>
-                                    <div className="text-r-14-hn text-gray-750">{user.major} {user.gradeNumber}학번</div>
+                                    <div className="text-b-18-hn text-gray-900">{resolvedUser.name}</div>
+                                    <div className="text-r-14-hn text-gray-750">
+                                        {resolvedUser.major} {resolvedUser.gradeNumber ? `${resolvedUser.gradeNumber}학번` : ""}
+                                    </div>
                                 </div>
                             </div>
 

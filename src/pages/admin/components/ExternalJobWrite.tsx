@@ -63,8 +63,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     descriptionBody: editPost?.descriptionBody ?? '',
 
     target: editPost?.target ?? '',
-    employType: editPost?.employType ?? '',
-    payment: editPost?.payment ?? '',
 
     startYear: startY,
     startMonth: startM,
@@ -89,17 +87,12 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
 
     const [title, setTitle] = useState(() => initial.title);
     // external 전용
-    const [target, setTarget] = useState(() => initial.target);
     const [announceYear, setAnnounceYear] = useState(() => initial.announceYear);
     const [announceMonth, setAnnounceMonth] = useState(() => initial.announceMonth);
     const [announceDay, setAnnounceDay] = useState(() => initial.announceDay);
     const [showAnnounceYearDropdown, setShowAnnounceYearDropdown] = useState(false);
     const [showAnnounceMonthDropdown, setShowAnnounceMonthDropdown] = useState(false);
     const [showAnnounceDayDropdown, setShowAnnounceDayDropdown] = useState(false);
-    
-    // job 전용
-    const [employType, setEmployType] = useState(() => initial.employType);
-    const [payment, setPayment] = useState(() => initial.payment);  
     
     // 공통
     const [startYear, setStartYear] = useState(() => initial.startYear);
@@ -110,6 +103,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const [endMonth, setEndMonth] = useState(() => initial.endMonth);
     const [endDay, setEndDay] = useState(() => initial.endDay);
 
+    const [target, setTarget] = useState(() => initial.target);
     const [organizer, setOrganizer] = useState(() => initial.organizer);
     const [applyUrl, setApplyUrl] = useState(() => initial.applyUrl);
     const [descriptionTitle, setDescriptionTitle] = useState(() => initial.descriptionTitle);
@@ -188,6 +182,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     // 초기값 저장
     const initialBase = useMemo(() => ({
         title: initial.title,
+        target: initial.target,
         organizer: initial.organizer,
         applyUrl: initial.applyUrl,
         descriptionTitle: initial.descriptionTitle,
@@ -205,7 +200,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
 
     const initialDataExternal = useMemo(() => ({
         ...initialBase,
-        target: initial.target,
         announceYear: initial.announceYear,
         announceMonth: initial.announceMonth,
         announceDay: initial.announceDay,
@@ -213,8 +207,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
 
     const initialDataJob = useMemo(() => ({
         ...initialBase,
-        employType: initial.employType,
-        payment: initial.payment,
     }), [initialBase, initial]);
 
 
@@ -223,6 +215,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const hasChanges = useMemo(() => {
         const baseChanges =
         title !== initialBase.title ||
+        target !== initialDataExternal.target ||
         organizer !== initialBase.organizer ||
         applyUrl !== initialBase.applyUrl ||
         descriptionTitle !== initialBase.descriptionTitle ||
@@ -239,20 +232,17 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
         if (type === 'external') {
         return (
             baseChanges ||
-            target !== initialDataExternal.target ||
             announceYear !== initialDataExternal.announceYear ||
             announceMonth !== initialDataExternal.announceMonth ||
             announceDay !== initialDataExternal.announceDay
         );
         } else {
         return (
-            baseChanges ||
-            employType !== initialDataJob.employType ||
-            payment !== initialDataJob.payment
+            baseChanges
         );
         }
     }, [title, organizer, applyUrl, descriptionTitle, descriptionBody, startYear, startMonth, startDay, endYear, endMonth, endDay, selectedTags, thumbnailUrl,
-        target, announceYear, announceMonth, announceDay, employType, payment, initialBase, initialDataExternal, initialDataJob, type]);
+        target, announceYear, announceMonth, announceDay, initialBase, initialDataExternal, initialDataJob, type]);
 
     const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
     const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
@@ -295,6 +285,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
         const baseData = {
         id: postId,
         title,
+        target,
         organizer,
         applyUrl,
         descriptionBlocks: {
@@ -312,14 +303,11 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
         if (type === 'external') {
         console.log({
             ...baseData,
-            target,
             announceDate: `${announceYear}-${String(announceMonth).padStart(2, '0')}-${String(announceDay).padStart(2, '0')}`,
         });
         } else {
         console.log({
             ...baseData,
-            employType,
-            payment,
         });
         }
         
@@ -407,8 +395,8 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         <label className='text-sb-16-hn text-gray-900'>{config.field1Label}</label>
                         <input
                         type='text'
-                        value={type === 'external' ? target : employType}
-                        onChange={(e) => type === 'external' ? setTarget(e.target.value) : setEmployType(e.target.value)}
+                        value={target}
+                        onChange={(e) => setTarget(e.target.value)}
                         placeholder={config.field1Placeholder}
                         className='w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none' />
                     </div>
@@ -605,7 +593,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                     </div>
 
                     {/* Field 2 (수상 발표 or 급여) */}
-                    {type === 'external' ? (
+                    {type === 'external' && (
                         <div className='flex flex-col gap-[10px]'>
                             <label className='text-sb-16-hn text-gray-900'>{config.field2Label}</label>
                             <div className='flex gap-[10px] flex-wrap'>
@@ -673,13 +661,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                                 )}
                                 </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className='flex flex-col gap-[10px]'>
-                        <label className='text-sb-16-hn text-gray-900'>{config.field2Label}</label>
-                        <input type='text' value={payment} onChange={(e) => setPayment(e.target.value)}
-                            placeholder='내용 입력'
-                            className='w-full h-[52px] p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none' />
                         </div>
                     )}
 

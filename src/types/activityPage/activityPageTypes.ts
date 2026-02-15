@@ -1,8 +1,12 @@
-import { type Activity } from "../activity/activityTypes";
-import { type TeamPost } from "../team/teamTypes";
-
 export type ActivityPostTab = 'club' | 'study' | 'external' | 'job';
 export type ActivityPostStatus = 'OPEN' | 'CLOSED';
+
+export const categoryToTab: Record<"CLUB" | "STUDY" | "EXTERNAL" | "RECRUITMENT", ActivityPostTab> = {
+    CLUB: "club",
+    STUDY: "study",
+    EXTERNAL: "external",
+    RECRUITMENT: "job",
+};
 
 export type ActivityPostAuthor = {
   id: string;
@@ -19,14 +23,12 @@ export type ActivityPost = {
   title: string;
   content?: string;
   categories: string[];
-  likes: number;
   saveCount: number;
   createdAt: string;
   author: ActivityPostAuthor;
   status?: ActivityPostStatus;
   postImages?: string[];
   thumbnailUrl?: string;
-  isLiked?: boolean;
   isBookmarked?: boolean;
   organizer?: string;
   deadline?: string;
@@ -37,8 +39,6 @@ export type ActivityPost = {
 export type ActivityPostDetail = ActivityPost & {
   // 대외활동/취업정보에만 있는 필드들
   location?: string;
-  employType?:string;
-  payment?:string;
   target?: string;
   applyPeriod?: {
     start: string;
@@ -65,44 +65,44 @@ export type ActivityPostDetail = ActivityPost & {
 // }
 
 //대외활동 데이터
-export interface userInfo {
-    authorProfile:string;
-    authorName:string;
-    authorMajor:string;
-    authorGrade: string;
-}
+// export interface userInfo {
+//     authorProfile:string;
+//     authorName:string;
+//     authorMajor:string;
+//     authorGrade: string;
+// }
 
-export interface ActivityListItem extends Activity{
-    authorId: string;
-    authorInfo?: userInfo;
-    tab: string;
-    content?: string;
-    tags: string[];
-    createdAt: string;
-    isBookmarked: boolean;
-}
+// export interface ActivityListItem extends Activity{
+//     authorId: string;
+//     authorInfo?: userInfo;
+//     tab: string;
+//     content?: string;
+//     tags: string[];
+//     createdAt: string;
+//     isBookmarked: boolean;
+// }
 
-export interface ActivityDetail extends ActivityListItem {
-  images?: string[];
-  target: string; //모집대상
-  applyPeriod: { 
-    start: string; 
-    end: string 
-  };
-  announceDate?: string;
+// export interface ActivityDetail extends ActivityListItem {
+//   images?: string[];
+//   target: string; //모집대상
+//   applyPeriod: { 
+//     start: string; 
+//     end: string 
+//   };
+//   announceDate?: string;
 
-  applyUrl: string; //해당 공모전 홈페이지 url
-  descriptionTitle: string;
-  descriptionBody: string;
-}
+//   applyUrl: string; //해당 공모전 홈페이지 url
+//   descriptionTitle: string;
+//   descriptionBody: string;
+// }
 
 
 
 // // 팀원 모집 인터페이스
-// export interface TeamPost {
-// 	id : string,
-// 	title : string
-// }
+export interface TeamPost {
+	id : string,
+	title : string
+}
 
 export interface TeamRecruitPost extends TeamPost{
     activityId: string; // 어떤 활동에 붙은 팀원공고인지
