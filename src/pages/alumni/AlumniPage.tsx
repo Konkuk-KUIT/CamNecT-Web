@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Category from '../../components/Category';
-import CoffeeChatButton from './components/CoffeeChatButton';
-import Icon from '../../components/Icon';
-import {FullLayout} from '../../layouts/FullLayout';
-import { MainHeader } from '../../layouts/headers/MainHeader';
-import FilterHeader from '../../components/FilterHeader';
-import TagsFilterModal from '../../components/TagsFilterModal';
 import { getAlumniList } from '../../api/alumni';
-import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
-import { useTagList } from '../../hooks/useTagList';
+import Category from '../../components/Category';
+import FilterHeader from '../../components/FilterHeader';
+import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
+import TagsFilterModal from '../../components/TagsFilterModal';
+import { useTagList } from '../../hooks/useTagList';
+import { FullLayout } from '../../layouts/FullLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
+import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
+import CoffeeChatButton from './components/CoffeeChatButton';
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ export const AlumniSearchPage = () => {
           signal: controller.signal,
         });
         if (isActive) {
-          setAlumniItems(mapAlumniApiListToProfiles(response.data));
+          setAlumniItems(mapAlumniApiListToProfiles(response.data.content));
         }
       } catch (error) {
         if (!controller.signal.aborted) {
