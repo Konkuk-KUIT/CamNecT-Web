@@ -222,6 +222,8 @@ export const MyBookmarksPage = () => {
                                 name: '',
                                 major: '',
                                 studentId: '',
+                                profileImageUrl: null,
+                                
                             },
                             content: item.contextPreview,
                             categories: item.tags,
@@ -245,6 +247,7 @@ export const MyBookmarksPage = () => {
                                 name: '',
                                 major: '',
                                 studentId: '',
+                                profileImageUrl: null,
                             },
                             categories: item.tags,
                             saveCount: item.bookmarkCount,
@@ -269,7 +272,7 @@ export const MyBookmarksPage = () => {
                     authorId=""
                     activityName={item.activityTitle}
                     authorName={item.userName}
-                    recruitNow={item.recruitStatus === 'OPEN'}
+                    recruitNow={item.recruitStatus === 'RECRUITING'}
                     title={item.title}
                     bookmarkCount={item.bookmarkCount}
                     createdAt={item.createdAt}

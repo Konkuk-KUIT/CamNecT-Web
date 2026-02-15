@@ -1,4 +1,5 @@
 import type { EducationStatus } from "../types/mypage/mypageTypes";
+import type { RecruitStatus } from "./activityApiTypes";
 
 // ===== 학력 =====
 
@@ -203,7 +204,7 @@ export interface RecruitmentItem {
   recruitId: number;
   activityTitle: string;
   userName: string;
-  recruitStatus: string;
+  recruitStatus: RecruitStatus;
   title: string;
   content: string;
   recruitDeadline: string;  // "YYYY-MM-DD"
