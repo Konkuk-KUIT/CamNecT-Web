@@ -1,32 +1,22 @@
-import ButtonWhite from "../../components/ButtonWhite";
-import Button from "../../components/Button";
-import { useNavigate } from "react-router-dom";
-import { usePwaInstall } from "../../hooks/usePwaInstall";
-import PopUp from "../../components/Pop-up";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "../../components/Button";
+import ButtonWhite from "../../components/ButtonWhite";
+import PopUp from "../../components/Pop-up";
+import { usePwaInstall } from "../../hooks/usePwaInstall";
 
 
 export const SchoolStandByStep = () => {
     const navigate = useNavigate();
-    const { deferredPrompt, clearPrompt } = usePwaInstall();
+    const { isInstallable, install } = usePwaInstall();
 
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     const handleInstallClick = async () => {
-        
-        if (deferredPrompt) {
-            // 브라우저의 설치창 띄우기
-            deferredPrompt.prompt();
-            
-            // 사용자 선택 대기
-            const {outcome} = await deferredPrompt.userChoice;
-            
-            // 설치 선택 시
-            if (outcome === 'accepted') {
-                clearPrompt();
-            } else {
-                setIsPopupOpen(true);
-            }
+        if (isInstallable) {
+            await install();
+        } else {
+            setIsPopupOpen(true);
         }
     }
 
