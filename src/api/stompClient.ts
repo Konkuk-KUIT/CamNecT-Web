@@ -9,4 +9,11 @@ export const stompClient = new Client({
     reconnectDelay: 2000, 
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,
+    onWebSocketError: (event) => {
+        console.error('WebSocket Error:', event);
+    },
+    onStompError: (frame) => {
+        console.error('STOMP Error:', frame.headers['message']);
+        console.log('STOMP Error Details:', frame.body);
+    },
 })

@@ -33,11 +33,11 @@ export const useStompChat = (roomId: number) => {
         let subscription: StompSubscription | null = null;
 
         const performSubscribe = () => {
-            if (subscription) return;
+            if (!stompClient.connected || subscription) return;
+            
             subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
                 const data: StompChatResponse = JSON.parse(message.body);
 
-                // 읽음 처리 수신 시 (READ)
                 if (isReadReceipt(data)) {
                     setMessages((prev) => 
                         prev.map((msg) => 
@@ -49,26 +49,23 @@ export const useStompChat = (roomId: number) => {
                     return;
                 }
 
-                // 일반 메시지 수신 시
                 setMessages((prev) => [...prev, data]);
             });
+        };
+
+        const handleStompConnected = () => {
+            performSubscribe();
         };
 
         if (stompClient.connected) {
             performSubscribe();
         } else {
-            const originalOnConnect = stompClient.onConnect;
-            stompClient.onConnect = (frame) => {
-                if (originalOnConnect && originalOnConnect !== stompClient.onConnect) {
-                    originalOnConnect(frame);
-                }
-                performSubscribe();
-            };
+            window.addEventListener('stomp-connected', handleStompConnected);
         }
 
-        // 핵심: 채팅방을 나갈 때(언마운트) 구독 해제와 나가기 신호를 한꺼번에 처리
         return () => {
             if (subscription) subscription.unsubscribe();
+            window.removeEventListener('stomp-connected', handleStompConnected);
             leaveChatRoom();
         };
     }, [roomId, leaveChatRoom]);
