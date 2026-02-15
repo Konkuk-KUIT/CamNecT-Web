@@ -14,10 +14,15 @@ import {
   createActivity,
   updateActivity,
   getActivityDetail,
-  getActivityThumbnailPresignUrl,
+  //getActivityThumbnailPresignUrl,
   getActivityAttachmentsPresignUrl,
 } from '../../api/activityApi';
 import type { ActivityCategory } from '../../api-types/activityApiTypes';
+import { uploadFileToS3 } from '../../utils/s3Upload';
+import { useFileUpload } from '../../hooks/useFileUpload';
+
+const MAX_SIZE_MB = 10;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png']);
 
 const boardTypes = ['동아리', '스터디'] as const;
 type BoardType = (typeof boardTypes)[number];
@@ -27,21 +32,13 @@ const boardTypeToCategory: Record<BoardType, ActivityCategory> = {
   스터디: 'STUDY',
 };
 
-// S3 Presigned URL로 파일 업로드
-const uploadFileToS3 = async (
-  uploadUrl: string,
-  file: File,
-  requiredHeaders: Record<string, string>,
-): Promise<void> => {
-  await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': file.type,
-      ...requiredHeaders,
-    },
-    body: file,
-  });
-};
+type PhotoPreview = {
+  id: string;
+  url: string;
+  file?: File;
+  isExisting?: boolean;
+  key?: string;
+}
 
 export const ActivityWritePage = () => {
   const navigate = useNavigate();
@@ -52,6 +49,11 @@ export const ActivityWritePage = () => {
   
   const authUser = useAuthStore((state) => state.user);
   const userId = authUser?.id ? parseInt(authUser.id) : null;
+
+  const {prepareFile, revokeUrl} = useFileUpload({
+    maxSizeMB: MAX_SIZE_MB,
+    allowedTypes: ['image/jpeg, image/jpg, image/png'],
+  })
 
   //수정일 경우 기존 데이터 로드
   const { data: editDetailResponse, isLoading: isLoadingEdit } = useQuery({
@@ -78,6 +80,7 @@ export const ActivityWritePage = () => {
       photos: (attachment ?? []).map((a) => ({
         id: `existing-${a.id}`,
         url: a.fileUrl,
+        key: a.fileKey,
         isExisting: true,
       })),
     };
@@ -94,11 +97,10 @@ export const ActivityWritePage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
   const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
-  // 이미지: { id, url(preview), file(원본 File), isExisting(기존 이미지) }
-  const [photoPreviews, setPhotoPreviews] = useState<
-    { id: string; url: string; file?: File; isExisting?: boolean }[]
-  >(() => initialValues?.photos ?? []);
+  const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview[]>(() => initialValues?.photos ?? []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isFileErrorOpen, setIsFileErrorOpen] = useState(false);
+  const [fileErrorMessage, setFileErrorMessage] = useState('');
 
   // 수정 모드 초기값 세팅
   const boardLabel = boardType ?? '게시판';
@@ -135,20 +137,50 @@ export const ActivityWritePage = () => {
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    const nextPreviews = Array.from(files).map((file, index) => ({
-      id: `new-${file.name}-${file.lastModified}-${index}`,
-      url: URL.createObjectURL(file),
-      file,
-      isExisting: false,
-    }));
-    setPhotoPreviews((prev) => [...prev, ...nextPreviews]);
+    const nextPreviews: PhotoPreview[] = [];
+    let errorMsg: string | null = null;
+
+    for (const file of Array.from(files)) {
+      //타입 체크
+      if (!ALLOWED_TYPES.has(file.type)) {
+        errorMsg = '이미지는 jpg / jpeg / png 형식만 업로드 가능합니다.';
+        continue;
+      }
+
+      //용량 체크
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        errorMsg = `이미지가 파일 용량 제한을 초과합니다. (최대 ${MAX_SIZE_MB}MB)`;
+        continue;
+      }
+
+      const prepared = prepareFile(file);
+      if (!prepared) {
+        //prepareFile 내부 조건에 걸린 경우
+        errorMsg = '파일을 업로드할 수 없어요. 형식/용량을 확인해주세요.';
+        continue;
+      }
+
+      nextPreviews.push({
+        id: `new-${prepared.id}`,
+        url: prepared.previewUrl,
+        file: prepared.file,
+        isExisting: false,
+      });
+    }
+    if (nextPreviews.length > 0) {
+      setPhotoPreviews((prev) => [...prev, ...nextPreviews]);
+    }
+    if (errorMsg) {
+      setFileErrorMessage(errorMsg);
+      setIsFileErrorOpen(true);
+    }
     event.target.value = '';
   };
 
   const handleRemovePhoto = (id: string) => {
     setPhotoPreviews((prev) => {
       const target = prev.find((p) => p.id === id);
-      if (target && !target.isExisting) URL.revokeObjectURL(target.url);
+      if (target && !target.isExisting) revokeUrl(target.url);
       return prev.filter((p) => p.id !== id);
     });
   };
@@ -171,71 +203,57 @@ export const ActivityWritePage = () => {
 
   const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
 
-  if (isEditMode && isLoadingEdit) {
-    return (
-      <PopUp
-        type="loading"
-        isOpen={true}
-      />
-    );
-  }
-
   const submitMutation = useMutation({
     mutationFn: async () => {
       if (!boardType || !userId) throw new Error('필수 값 누락');
 
       const category: ActivityCategory = boardTypeToCategory[boardType];
-      const newFiles = photoPreviews.filter((p) => !p.isExisting && p.file);
 
       // selectedTags(name[]) → tagIds(number[]) 변환
       const tagIds = selectedTags
         .map((name) => tagNameToIdMap.get(name))
         .filter((id): id is number => id !== undefined);
 
-      // 1. 썸네일 업로드 (첫 번째 새 이미지를 썸네일로)
-      let thumbnailKey = '';
-      const thumbnailFile = newFiles[0]?.file;
-      if (thumbnailFile) {
-        const presignRes = await getActivityThumbnailPresignUrl(userId, {
-          contentType: thumbnailFile.type,
-          size: thumbnailFile.size,
-          originalFilename: thumbnailFile.name,
-        });
-        await uploadFileToS3(
-          presignRes.data.uploadUrl,
-          thumbnailFile,
-          presignRes.data.requiredHeaders,
-        );
-        thumbnailKey = presignRes.data.fileKey;
-      } else if (isEditMode && editPost?.activity.thumbnailUrl) {
-        // ⚠️ 임시처리: 수정 시 기존 썸네일 key를 URL에서 추출
-        // → BE에서 기존 fileKey를 상세 응답에 포함시켜주면 더 정확한 처리 가능
-        thumbnailKey = editPost.activity.thumbnailUrl.split('/').pop() ?? '';
-      }
+      // 2) 신규 파일
+      const newFilesInOrder: File[] = photoPreviews
+        .filter((p) => !p.isExisting && p.file)
+        .map((p) => p.file!) as File[];
 
-      // 2. 첨부파일 업로드 (썸네일 제외 나머지)
-      const attachmentFiles = newFiles.slice(1).map((p) => p.file!);
-      let attachmentKeys: string[] = [];
-      if (attachmentFiles.length > 0) {
+      // 3) 신규 업로드: attachments presign
+      let uploadedNewKeysInOrder: string[] = [];
+      if (newFilesInOrder.length > 0) {
         const presignRes = await getActivityAttachmentsPresignUrl(userId, {
-          items: attachmentFiles.map((f) => ({
+          items: newFilesInOrder.map((f) => ({
             contentType: f.type,
             size: f.size,
             originalFilename: f.name,
           })),
         });
+
+        // 업로드 실행
         await Promise.all(
           presignRes.data.items.map((item, i) =>
-            uploadFileToS3(item.uploadUrl, attachmentFiles[i], item.requiredHeaders),
+            uploadFileToS3(item.uploadUrl, newFilesInOrder[i], item.requiredHeaders),
           ),
         );
-        attachmentKeys = presignRes.data.items.map((item) => item.fileKey);
+
+        uploadedNewKeysInOrder = presignRes.data.items.map((item) => item.fileKey);
       }
 
-      // 기존 첨부파일 key 유지
-      const existingAttachmentKeys = photoPreviews
-        .filter((p) => p.isExisting)
-        .map((p) => p.url.split('/').pop() ?? '');
+      // 4) 최종 attachmentKey
+      let newKeyCursor = 0;
+      const finalAttachmentKeys: string[] = photoPreviews
+        .map((p) => {
+          if (p.isExisting) return p.key ?? null;
+          // 신규는 업로드된 key를 순서대로 매칭
+          const k = uploadedNewKeysInOrder[newKeyCursor] ?? null;
+          newKeyCursor += 1;
+          return k;
+        })
+        .filter((k): k is string => Boolean(k));
+      const attachmentKey = finalAttachmentKeys.length > 0 ? finalAttachmentKeys : null;
+      //썸네일=첫 번째 이미지
+      const thumbnailKey = finalAttachmentKeys.length > 0 ? finalAttachmentKeys[0] : null;
 
       const payload = {
         category,
@@ -243,7 +261,7 @@ export const ActivityWritePage = () => {
         tagIds,
         content: content.trim(),
         thumbnailKey,
-        attachmentKey: [...existingAttachmentKeys, ...attachmentKeys],
+        attachmentKey,
       };
 
       if (isEditMode && activityId) {
@@ -261,6 +279,15 @@ export const ActivityWritePage = () => {
       }
     },
   });
+
+    if (isEditMode && isLoadingEdit) {
+    return (
+      <PopUp
+        type="loading"
+        isOpen={true}
+      />
+    );
+  }
 
   const openBoardSelector = () => {
     setDraftBoardType(boardType);
@@ -380,7 +407,7 @@ export const ActivityWritePage = () => {
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder='내용을 적어주세요'
-              className='min-h-[160px] w-full flex-1 border-none bg-transparent p-0 text-[16px] font-normal leading-[140%] tracking-[-0.64px] outline-none placeholder:text-gray-650'
+              className='min-h-[160px] w-full flex-1 border-none bg-transparent p-0 text-[16px] font-normal leading-[140%] tracking-[-0.64px] outline-none resize-none placeholder:text-gray-650'
               style={{
                 fontWeight: 400,
                 color: content
@@ -400,41 +427,6 @@ export const ActivityWritePage = () => {
       >
         <div className='flex w-full px-[25px] pb-[25px]'>
           <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
-            {photoPreviews.map((preview) => (
-              <div
-                key={preview.id}
-                className='relative flex-shrink-0'
-                style={{ width: '170px', height: '128px' }}
-              >
-                <img
-                  src={preview.url}
-                  alt='preview'
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '12px',
-                    objectFit: 'cover',
-                  }}
-                />
-                <button
-                  type='button'
-                  aria-label='사진 삭제'
-                  className='absolute'
-                  style={{ top: '10px', right: '10px' }}
-                  onClick={() => handleRemovePhoto(preview.id)}
-                >
-                  <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'>
-                    <path
-                      d='M6 18L18 6M6 6L18 18'
-                      stroke='#646464'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </button>
-              </div>
-            ))}
             <button
               type='button'
               className='flex h-[128px] w-[128px] flex-col items-center justify-center rounded-[12px] flex-shrink-0'
@@ -474,6 +466,41 @@ export const ActivityWritePage = () => {
               className='hidden'
               onChange={handlePhotoChange}
             />
+            {photoPreviews.map((preview) => (
+              <div
+                key={preview.id}
+                className='relative flex-shrink-0'
+                style={{ width: '170px', height: '128px' }}
+              >
+                <img
+                  src={preview.url}
+                  alt='preview'
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '12px',
+                    objectFit: 'cover',
+                  }}
+                />
+                <button
+                  type='button'
+                  aria-label='사진 삭제'
+                  className='absolute'
+                  style={{ top: '10px', right: '10px' }}
+                  onClick={() => handleRemovePhoto(preview.id)}
+                >
+                  <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'>
+                    <path
+                      d='M6 18L18 6M6 6L18 18'
+                      stroke='#646464'
+                      strokeWidth='1.5'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
+                  </svg>
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -542,10 +569,20 @@ export const ActivityWritePage = () => {
       <PopUp
         isOpen={isCancelWarningOpen}
         type='warning'
-        title={'작성된 내용이 있습니다.\n삭제하시겠습니까?'}
-        content='삭제된 내용은 복구 불가능 합니다.'
+        title={'작성을 취소하고 나가시겠습니까?'}
+        content='취소된 내용은 복구할 수 없습니다.'
+        leftButtonText='나가기'
         onLeftClick={() => {setIsCancelWarningOpen(false); navigate(-1);}}
         onRightClick={() => setIsCancelWarningOpen(false)}
+      />
+
+      <PopUp
+        isOpen={isFileErrorOpen}
+        type="error"
+        title="업로드할 수 없는 파일입니다."
+        content={fileErrorMessage}
+        rightButtonText="확인"
+        onClick={() => setIsFileErrorOpen(false)}
       />
 
       <TagsFilterModal
