@@ -14,6 +14,8 @@ import type {
 } from '../../../types/activityPage/activityPageTypes';
 import type { TagCategory } from '../../../components/TagsFilterModal';
 
+const toArray = <T,>(v: T[] | null | undefined): T[] => (Array.isArray(v) ? v : []);
+
 //카테고리 변환
 export const categoryToTab = (category: ActivityCategory): ActivityPostTab => {
   const map: Record<ActivityCategory, ActivityPostTab> = {
@@ -37,14 +39,26 @@ export const tabToCategory = (tab: ActivityPostTab): ActivityCategory => {
 
 //프로필 변환
 
-export const mapProfilePreviewToAuthor = (profile: ProfilePreview) => {
-  return {
-    id: String(profile.userId),
-    name: profile.userName,
-    profileImageUrl: profile.profileImageKey || null,
-    major: profile.majorName,
-    studentId: profile.studentNo,
-  };
+export const mapProfilePreviewToAuthor = (profile: ProfilePreview | null) => {
+  if (profile) {
+    return {
+      id: String(profile.userId),
+      name: profile.userName,
+      profileImageUrl: profile.profileImageKey || null,
+      major: profile.majorName,
+      studentId: profile.studentNo,
+    };
+  } else {
+    return {
+      id: "0",
+      name: "익명",
+      profileImageUrl: null,
+      major: "임시과",
+      studentId: "200000000",
+    };
+  }
+    
+  
 };
 
 //목록 아이템 변환
@@ -81,12 +95,12 @@ export const mapDetailToActivityPost = (detailData: ActivityDetailData): Activit
     tab: categoryToTab(activity.category),
     title: activity.title,
     content: activity.context,
-    categories: tagList,
+    categories: toArray(tagList),
     saveCount: bookmarkCount,
     createdAt: activity.createdAt,
     author: mapProfilePreviewToAuthor(profilePreview),
     status: activity.status,
-    postImages: attachment.map((a) => a.fileUrl),
+    postImages: toArray(attachment).map((a) => a.fileUrl),
     thumbnailUrl: activity.thumbnailUrl ?? null,
     organizer: activity.organizer ?? null,
     deadline: activity.applyEndDate ?? null,

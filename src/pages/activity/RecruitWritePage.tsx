@@ -2,13 +2,12 @@ import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { EditHeader } from '../../layouts/headers/EditHeader';
-import { getTeamRecruitDetail } from '../../mock/teamRecruit';
 import PopUp from '../../components/Pop-up';
 import Card from '../../components/Card';
 import Icon from '../../components/Icon';
 import { useAuthStore } from '../../store/useAuthStore';
-import { createRecruitment, getRecruitmentDetail } from '../../api/activityApi';
-import { useQueryClient } from '@tanstack/react-query';
+import { createRecruitment, getRecruitmentDetail, updateRecruitment } from '../../api/activityApi';
+import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -16,36 +15,45 @@ export const RecruitWritePage = () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { activityId, recruitId } = useParams();
+    const authUser = useAuthStore((state) => state.user)
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
+    const recruitmentId = recruitId ? parseInt(recruitId) : null;
+    const activityIdNum = activityId ? parseInt(activityId) : null;
     const isEditMode = Boolean(recruitId);
+
     const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+
+    //수정 모드: 기존 데이터 로드
+    const { data: editDetailResponse, isLoading: isLoadingEdit } = useQuery({
+        queryKey: ['recruitmentDetail', recruitmentId],
+        queryFn: () => getRecruitmentDetail(userId!, recruitmentId!),
+        enabled: isEditMode && !!userId && !!recruitmentId,
+    });
+
+    const existingRecruit = editDetailResponse?.data?.recruitment;
+
+    const initialValues = useMemo(() => {
+    if (!existingRecruit) return null;
+    const d = new Date(existingRecruit.recruitDeadline);
+    return {
+      title: existingRecruit.title,
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      day: d.getDate(),
+      teamNumber: existingRecruit.recruitCount,
+      description: existingRecruit.content,
+    };
+  }, [existingRecruit]);
+
+
+    const [title, setTitle] = useState(() => initialValues?.title ?? '');
+    const [year, setYear] = useState(() => initialValues?.year ?? currentYear);
+    const [month, setMonth] = useState(() => initialValues?.month ?? 1);
+    const [day, setDay] = useState(() => initialValues?.day ?? 1);
+    const [teamNumber, setTeamNumber] = useState(() => initialValues?.teamNumber ?? 1);
+    const [description, setDescription] = useState(() => initialValues?.description ?? '');
     
-    const existingRecruit = useMemo(
-        () => (recruitId ? getTeamRecruitDetail(recruitId) : null),
-        [recruitId]
-    );
-
-    
-
-    const initial = useMemo(() => {
-        const d = existingRecruit ? new Date(existingRecruit.recruitDeadline) : null;
-
-        return {
-            title: existingRecruit?.title ?? '',
-            year: d?.getFullYear() ?? currentYear,
-            month: d ? d.getMonth() + 1 : 1,
-            day: d?.getDate() ?? 1,
-            teamNumber: existingRecruit?.recruitTeamNumber ?? 1,
-            description: existingRecruit?.description ?? '',
-        };
-    }, [existingRecruit, currentYear]);
-
-
-    const [title, setTitle] = useState(() => initial.title);
-    const [year, setYear] = useState(() => initial.year);
-    const [month, setMonth] = useState(() => initial.month);
-    const [day, setDay] = useState(() => initial.day);
-    const [teamNumber, setTeamNumber] = useState(() => initial.teamNumber);
-    const [description, setDescription] = useState(() => initial.description);
     const [showWarning, setShowWarning] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -54,8 +62,7 @@ export const RecruitWritePage = () => {
     const [showDayDropdown, setShowDayDropdown] = useState(false);
 
     const maxLength = 300;
-    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
-    
+
     // 선택된 연도/월에 따른 일수 계산
     const daysInMonth = useMemo(() => {
         return new Date(year, month, 0).getDate();
@@ -63,37 +70,34 @@ export const RecruitWritePage = () => {
 
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    // 초기값 저장
-    const initialData = useMemo(() => ({
-        title: initial.title,
-        year: initial.year,
-        month: initial.month,
-        day: initial.day,
-        teamNumber: initial.teamNumber,
-        description: initial.description,
-    }), [initial]);
-
-
-    // 변경사항 추적
-    const hasChanges = useMemo(
-        () =>
-        title !== initialData.title ||
-        year !== initialData.year ||
-        month !== initialData.month ||
-        day !== initialData.day ||
-        teamNumber !== initialData.teamNumber ||
-        description !== initialData.description,
-        [title, year, month, day, teamNumber, description, initialData]
-    );
-
     const isFormValid = title.trim() !== '' && description.trim() !== '';
 
-    const handleClose = () => {
-        if (hasChanges) {
-        setShowWarning(true);
-        } else {
-        navigate(-1);
+    //등록/수정
+    const submitMutation = useMutation({
+        mutationFn: async () => {
+        if (!userId || !activityIdNum) throw new Error('필수 값 누락');
+
+        const payload = {
+            activityId: activityIdNum,
+            title: title.trim(),
+            recruitDeadline: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+            recruitCount: teamNumber,
+            content: description.trim(),
+        };
+
+        if (isEditMode && recruitmentId) {
+            return updateRecruitment(userId, recruitmentId, payload);
         }
+        return createRecruitment(userId, payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['recruitmentDetail'] });
+            navigate(-1);
+        },
+    });
+
+    const handleClose = () => {
+        setShowWarning(true);
     };
 
     const handleSubmit = () => {
@@ -109,6 +113,15 @@ export const RecruitWritePage = () => {
         setTeamNumber(prev => (prev > 1 ? prev - 1 : 1));
     };
 
+    if (isEditMode && isLoadingEdit) {
+        return (
+        <PopUp
+            type="loading"
+            isOpen={true}
+        />
+        );
+    }
+
     return (
         <>
             <HeaderLayout
@@ -120,12 +133,12 @@ export const RecruitWritePage = () => {
                             <button
                                 type='button'
                                 onClick={handleSubmit}
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || submitMutation.isPending}
                                 className={`text-b-16-hn transition-colors ${
                                 isFormValid ? 'text-primary' : 'text-gray-650'
                                 }`}
                             >
-                                완료
+                                {submitMutation.isPending ? '저장 중...' : '완료'}
                             </button>
                             }
                     />
@@ -311,8 +324,8 @@ export const RecruitWritePage = () => {
             <PopUp
                 isOpen={showWarning}
                 type='warning'
-                title='변경사항이 있습니다.\n나가시겠습니까?'
-                content='저장하지 않을 시 변경사항이 삭제됩니다.'
+                title={isEditMode ? '수정을 취소하고 나가시겠습니까?' : '작성을 취소하고 나가시겠습니까?'}
+                content={isEditMode ? '저장하지 않을 시 변경사항이 삭제됩니다.' : '취소된 내용은 복구할 수 없습니다.'}
                 leftButtonText='나가기'
                 onLeftClick={() => {
                     setShowWarning(false);
@@ -324,19 +337,12 @@ export const RecruitWritePage = () => {
             <PopUp 
                 isOpen={isConfirmOpen} 
                 type='info' 
-                title={isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?'} 
-                content={isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.'}
+                title={isEditMode ? '모집글을 수정하시겠습니까?' : '모집글을 등록하시겠습니까?'} 
+                content={isEditMode ? '수정된 내용으로 저장됩니다.' : '모집글은 등록 후 삭제할 수 없습니다.'}
                 onLeftClick={() => setIsConfirmOpen(false)} 
                 onRightClick={() => {
-                    // TODO: API 호출하여 팀원 모집 글 생성/수정
-                    console.log({
-                    id: recruitId,
-                    title,
-                    deadline: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-                    teamNumber,
-                    description,
-                    });
-                    navigate(-1);
+                    setIsConfirmOpen(false);
+                    submitMutation.mutate();
                 }} />
         </>
     );

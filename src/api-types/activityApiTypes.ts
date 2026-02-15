@@ -12,7 +12,7 @@ export interface ProfilePreview {
   userName: string;
   majorName: string;
   studentNo: string;
-  profileImageKey: string;
+  profileImageKey: string | null;
 }
 
 //목록 조회
@@ -20,7 +20,7 @@ export interface ActivityListItem {
   activityId: number;
   title: string;
   contextPreview: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   tags: string[];
   bookmarkCount: number;
   organizer: string;
@@ -80,8 +80,8 @@ export interface ActivityCreateRequest {
   title: string;
   tagIds: number[];
   content: string;
-  thumbnailKey: string;
-  attachmentKey: string[];
+  thumbnailKey: string | null;
+  attachmentKey: string[] | null;
 }
 
 export interface ActivityCreateResponse {
@@ -129,7 +129,7 @@ export interface RecruitmentItem {
   activityId: number;
   activityTitle: string;
   userName: string;
-  recruitStatus: string;  // "RECRUITING" | "CLOSED"
+  recruitStatus: RecruitStatus;  // "RECRUITING" | "CLOSED"
   title: string;
   content: string;
   recruitDeadline: string; // "YYYY-MM-DD"
@@ -160,11 +160,11 @@ export interface ActivityDetail {
 
 export interface ActivityDetailData {
   isMine: boolean;
-  profilePreview: ProfilePreview;
+  profilePreview: ProfilePreview | null;
   activity: ActivityDetail;
-  attachment: ActivityAttachment[];
-  tagList: string[];
-  recruitmentList: RecruitmentItem[];
+  attachment: ActivityAttachment[] | null;
+  tagList: string[] | null;
+  recruitmentList: RecruitmentItem[] | null;
   bookmarkCount: number;
   isBookmarked: boolean;
 }
@@ -182,8 +182,8 @@ export interface ActivityUpdateRequest {
   title: string;
   tagIds: number[];
   content: string;
-  thumbnailKey: string;
-  attachmentKey: string[];
+  thumbnailKey: string | null;
+  attachmentKey: string[] | null;
 }
 
 export interface ActivityUpdateResponse {

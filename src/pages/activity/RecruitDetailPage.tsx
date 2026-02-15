@@ -11,8 +11,11 @@ import Icon from '../../components/Icon';
 import TeamApplyModal from './components/TeamApplyModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/useAuthStore';
-import { getRecruitmentDetail, toggleRecruitmentBookmark, applyRecruitment } from '../../api/activityApi';
+import { getRecruitmentDetail, toggleRecruitmentBookmark, applyRecruitment, closeRecruitment } from '../../api/activityApi';
 import axios from 'axios';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post';
 
@@ -66,22 +69,39 @@ export const RecruitDetailPage = () => {
     const bookmarkMutation = useMutation({
         mutationFn: () => toggleRecruitmentBookmark(userId!, recruitmentId!),
         onMutate: () => {
-        setIsBookmarked((prev) => !prev);
+            setIsBookmarked((prev) => !prev);
         },
         onError: () => {
-        setIsBookmarked((prev) => !prev);
+            setIsBookmarked((prev) => !prev);
         },
         onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['recruitmentDetail', recruitmentId] });
+            queryClient.invalidateQueries({ queryKey: ['recruitmentDetail', recruitmentId] });
         },
     });
+
+    //모집 중지
+    const closeMutation = useMutation({
+        mutationFn: () => closeRecruitment(userId!, recruitmentId!),
+        onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['recruitmentDetail', recruitmentId] });
+    },
+  });
 
     //팀원 신청
     const applyMutation = useMutation({
         mutationFn: (content: string) =>
         applyRecruitment(userId!, recruitmentId!, { content }),
         onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['recruitmentDetail', recruitmentId] });
+            queryClient.invalidateQueries({ queryKey: ['recruitmentDetail', recruitmentId] });
+        },
+        onError: (error: unknown) => {
+            // 400 에러: 이미 지원한 경우
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status?: number } };
+                if (axiosError.response?.status === 400) {
+                setIsDuplicateApplyPopup(true);
+                }
+            }
         },
     });
 
@@ -106,7 +126,7 @@ export const RecruitDetailPage = () => {
         );
     }
 
-    const { recruitment, isMine, major_kor, grade } = recruitDetail;
+    const { recruitment, isMine  } = recruitDetail;
     const isRecruitNow = recruitment.recruitStatus === 'RECRUITING';
 
     const optionItems: OptionItem[] = isMine
@@ -142,10 +162,7 @@ export const RecruitDetailPage = () => {
     };
 
     const statusLabel = isRecruitNow ? '모집 중' : '모집 완료';
-
-    // ⚠️ 임시처리: 대외활동 공고 정보가 없음
-    // → BE에 activityName 추가 요청 또는 별도 API 호출
-    const activityName = '대외활동 공고 제목'; // TODO: API 응답에 포함 필요
+    const activityName = recruitDetail.activityTitle;
 
     return (
         <HeaderLayout
@@ -192,17 +209,21 @@ export const RecruitDetailPage = () => {
                         <div className='flex items-center gap-[10px]'>
                             <div className='h-[32px] w-[32px] rounded-full overflow-hidden'>
                                 <img 
-                                    src={''}
-                                    alt={`${''} 프로필`}
+                                    src={recruitDetail.profilePreview.profileImageKey ?? DEFAULT_PROFILE_IMAGE}
+                                    alt={`${recruitDetail.profilePreview.userName} 프로필`}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                        e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                    }}
                                     className='h-full w-full object-cover'
                                 />
                             </div>
                             <div className='flex flex-col gap-[3px]'>
                                 <div className='text-b-14-hn text-gray-900'>
-                                    {'-'}
+                                    {recruitDetail.profilePreview.userName}
                                 </div>
                                 <div className='text-r-12-hn text-gray-750'>
-                                    {major_kor} {grade}학번
+                                    {recruitDetail.profilePreview.majorName} {recruitDetail.profilePreview.studentNo.slice(2,4)}학번
                                 </div>
                             </div>
                         </div>
@@ -236,10 +257,10 @@ export const RecruitDetailPage = () => {
                         </div>
                         <div className='flex text-gray-750'>
                             <span className='min-w-[100px] text-sb-16-hn'>
-                            모집 인원
+                                모집 인원
                             </span>
                             <span className='text-r-16-hn'>
-                            {recruitment.recruitCount}인
+                                {recruitment.recruitCount}인
                             </span>
                         </div>
                     </div>
@@ -294,7 +315,7 @@ export const RecruitDetailPage = () => {
       </div>
 
         <BottomSheetModal isOpen={isOptionOpen} onClose={() => setIsOptionOpen(false)} height='auto'>
-            <div className='flex min-h-[200px] flex-col px-[clamp(16px,6vw,25px)] pt-[30px]'>
+            <div className='flex min-h-[100px] flex-col px-[clamp(16px,6vw,25px)] pt-[30px]'>
                 <div className='flex flex-col divide-y divide-gray-150'>
                     {optionItems.map((item) => (
                         <button
@@ -320,7 +341,8 @@ export const RecruitDetailPage = () => {
             content={'모집 완료 후에는 다시 모집 중 상태로\n변경할 수 없습니다.'}
             onLeftClick={() => setIsStopRecruitPopupOpen(false)}
             onRightClick={() => {
-                setIsStopRecruitPopupOpen(false); //todo: 모집 완료 API 추가
+                setIsStopRecruitPopupOpen(false);
+                closeMutation.mutate();
             }}
         />
 
