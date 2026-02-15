@@ -52,7 +52,20 @@ export const useSocketInitializer = () => {
             setUpSubscriptions();
         }
 
+        // 앱이 백그라운드에서 돌아왔을 때(visibilitychange) 소켓 재연결
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                if (!stompClient.active && isAuthenticated) {
+                    console.log("앱 복귀 감지: 소켓 재활성화 시도");
+                    stompClient.activate();
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             if (stompClient.active) {
                 stompClient.deactivate();
             }
