@@ -30,9 +30,9 @@ const BottomReact = ({
               type='button'
               onClick={onOpenCompletePopup}
               disabled={isClosed}
-              className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[#FFEFEF] text-red disabled:cursor-not-allowed disabled:opacity-60'
+              className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] disabled:cursor-not-allowed ${isClosed ? 'bg-gray-650 text-white' : 'bg-[#FFEFEF] text-red'}`}
             >
-              모집 완료하기
+              {isClosed ? '모집 완료됨' : '모집 완료하기'}
             </button>
           ) : (
             <div className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorSub2,#F2FCF8)] text-[var(--ColorMain,#00C56C)]'>
