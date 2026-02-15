@@ -30,7 +30,7 @@ export const useUnreadCountQuery = () => {
             const count = response.data.totalUnreadCount;
             return count;
         },
-        enabled: isAuthenticated && !!user?.id,
+        enabled: isAuthenticated && !!user?.id && user?.nextStep === 'HOME',
         staleTime: 1000 * 60, // 1분간 신선도 유지
     });
 };
