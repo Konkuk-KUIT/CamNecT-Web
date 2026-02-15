@@ -24,9 +24,9 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
     console.log('💤 [백그라운드] FCM 메시지 도착:', payload);
     
-    // 알림 제목과 본문은 주로 payload.notification에서 가져옴
-    const title = payload.notification?.title || "CamNecT";
-    const body = payload.notification?.body || "새로운 알림이 도착했습니다.";
+    // 백엔드에서 data 필드에 title, body를 담아 보내준다
+    const title = payload.data?.title || payload.notification?.title || "CamNecT";
+    const body = payload.data?.body || payload.notification?.body || "새로운 알림이 도착했습니다.";
     
     const notificationOptions = {
         body: body,
