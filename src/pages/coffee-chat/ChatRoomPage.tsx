@@ -68,26 +68,20 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     // todo (복습) 실시간 읽음 처리 (Read Receipt) 감시 및 캐시 동기화
     useEffect(() => {
-        // 1. 백그라운드일때 OS가 아예 socket을 종료시켰을수도 
+        // 1. 백그라운드일때 OS가 아예 socket을 종료시켰을수도 있으니 체크
         if (!stompClient.active) {
             stompClient.activate();
         }
 
         let subscription: StompSubscription | null = null;
-        const originalOnConnect = stompClient.onConnect; // 이전 소켓 연결 버전 대입 (rooms 전역구독)
 
         const performSubscribe = () => {
-            // 이미 구독 중이면 중복 방지
-            if (subscription) {
-                console.log("이미 구독중인 세션 존재");
-                return;
-            }
+            if (!stompClient.connected || subscription) return;
 
             subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
                 const data: StompChatResponse = JSON.parse(message.body);
 
                 if (isReadReceipt(data)) {
-                    // TanStack Query 캐시에 저장된 과거 메시지들을 실시간으로 '읽음' 상태로 업데이트
                     queryClient.setQueryData(['chatRoom', roomId], (oldData: ChatRoomDetailData | undefined) => {
                         if (!oldData) return oldData;
                         return {
@@ -105,35 +99,27 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             setIsSocketReady(true);
         }
 
-        
+        // 연결 상태 소식 듣기
+        const handleStompConnected = () => {
+            console.log("ChatRoomPage: 연결 소식 접수!");
+            performSubscribe();
+        };
+
         if (stompClient.connected) {
             performSubscribe();
         } else {
-            console.log("소켓 연결 대기 중, 연결 후 구독 예약");
-
-            // [수정] 겹겹이 쌓이는 것을 방지하기 위해 함수 정의를 명확히 함
-            stompClient.onConnect = (frame) => {
-                // 1. 기존의 전역 구독 로직 실행
-                if (originalOnConnect && originalOnConnect !== stompClient.onConnect) {
-                    originalOnConnect(frame);
-                }
-                // 2. 현재 채팅방 구독
-                performSubscribe();
-                setIsSocketReady(true);
-            }
+            // 전역 이벤트 리스너 등록
+            window.addEventListener('stomp-connected', handleStompConnected);
         }
 
         return () => {
-            // [중요] 구독 해제 전 반드시 존재 여부 체크
             if (subscription) {
                 subscription.unsubscribe();
                 subscription = null;
             }
-
-            // [중요] 페이지를 나갈 때 내가 임시로 바꿨던 onConnect를 원래대로 반드시 돌려놓음 (무한루프 방지)
-            stompClient.onConnect = originalOnConnect;
+            window.removeEventListener('stomp-connected', handleStompConnected);
         };
-    }, [roomId, queryClient, isSocketReady]);
+    }, [roomId, queryClient]);
 
     // STOMP 채팅방 나가기 처리 (브라우저 종료/새로고침 대응)
     // SPA 내부 이동 시 퇴장 처리는 useStompChat 훅의 클린업에서 자동으로 수행됩니다.

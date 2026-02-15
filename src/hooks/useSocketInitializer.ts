@@ -24,24 +24,29 @@ export const useSocketInitializer = () => {
         };
 
         const setUpSubscriptions = () => {
+             if (!stompClient.connected) return;
+             
             // 전역 채팅 목록 destination
             stompClient.subscribe(`/sub/user/${user?.id}/rooms`, () => {
                 queryClient.invalidateQueries({ 
                     queryKey: ['chatRooms'], 
-                    exact: false, // 'chatRooms'로 시작하는 모든 키를 포함
-                    refetchType: 'all' // 전부 리프레시
+                    exact: false, 
+                    refetchType: 'all' 
                 });
 
-                // BottomNav badge(totalUnreadCount 최신화)
                 queryClient.invalidateQueries({
                     queryKey: ['chatUnreadCount']
                 });
             });
-
         }
-        // 연결 성공 후
-        stompClient.onConnect = () => {
+
+        // 연결 성공 후 실행될 단 하나의 마스터 핸들러
+        stompClient.onConnect = (frame) => {
+            console.log("STOMP 연결 성공! 전역 구독 및 이벤트 발송");
             setUpSubscriptions();
+            
+            // 다른 컴포넌트들에게 "연결 완료"를 알림
+            window.dispatchEvent(new CustomEvent('stomp-connected', { detail: frame }));
         }
         
         // 소켓 연결 (비활성 상태일 때만 활성화)
