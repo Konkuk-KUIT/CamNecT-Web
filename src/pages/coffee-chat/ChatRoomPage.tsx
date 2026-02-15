@@ -1,3 +1,4 @@
+import type { StompSubscription } from "@stomp/stompjs";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -16,7 +17,6 @@ import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
 import { TypingArea } from "./components/TypingArea";
-import type { StompSubscription } from "@stomp/stompjs";
 
 export const ChatRoomPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -74,7 +74,6 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         const originalOnConnect = stompClient.onConnect; // 이전 소켓 연결 버전 대입 (rooms 전역구독)
 
         const performSubscribe = () => {
-
             // 이미 구독 중이면 중복 방지
             if (subscription) {
                 console.log("이미 구독중인 세션 존재");
@@ -99,31 +98,34 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                     });
                 }
             });
+            console.log("채팅방 구독 성공:", roomId);
         }
-        
-        if(stompClient.connected){
-            performSubscribe();
-        }
-        
-        // STOMP 연결 안되어있다면
-        else {
-            console.log("소켓 연결 대기 중, 연결 후 구독");
 
-            // socket이 서버와 연결되면
+        
+        if (stompClient.connected) {
+            performSubscribe();
+        } else {
+            console.log("소켓 연결 대기 중, 연결 후 구독 예약");
+
+            // [수정] 겹겹이 쌓이는 것을 방지하기 위해 함수 정의를 명확히 함
             stompClient.onConnect = (frame) => {
-                // 1. 기존의 전역 구독 로직 복구 (rooms 구독)
-                if (originalOnConnect) originalOnConnect(frame);
+                // 1. 기존의 전역 구독 로직 실행
+                if (originalOnConnect && originalOnConnect !== stompClient.onConnect) {
+                    originalOnConnect(frame);
+                }
                 // 2. 현재 채팅방 구독
                 performSubscribe();
             }
         }
 
         return () => {
+            // [중요] 구독 해제 전 반드시 존재 여부 체크
             if (subscription) {
                 subscription.unsubscribe();
+                subscription = null;
             }
 
-            // 예약된 로직이 있다면 복구하여 메모리 누수 방지
+            // [중요] 페이지를 나갈 때 내가 임시로 바꿨던 onConnect를 원래대로 반드시 돌려놓음 (무한루프 방지)
             stompClient.onConnect = originalOnConnect;
         };
     }, [roomId, queryClient]);
