@@ -1,21 +1,22 @@
-import { useMemo, useState } from 'react';
+
+import { useMemo, useState, useEffect } from 'react';
 import {FullLayout} from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-
 import Card from '../../components/Card';
 import PopUp from '../../components/Pop-up';
-import PointBox from './components/PointBox';
-import CommunityBox from './components/CommunityBox';
-import RecommendBox from './components/RecommendBox';
+import { useFcmToken } from '../../hooks/useFcmNotification';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useNotificationStore } from '../../store/useNotificationStore';
 import CoffeeChatBox from './components/CoffeeChatBox';
+import CommunityBox from './components/CommunityBox';
 import ContestBox from './components/ContestBox';
-import { coffeeChatRequests, contests, recommendList, homeGreetingUser } from './homeData';
+import PointBox from './components/PointBox';
+import RecommendBox from './components/RecommendBox';
+import { coffeeChatRequests, contests, homeGreetingUser, recommendList } from './homeData';
 import { requestHome } from '../../api/home';
 import { requestNotificationUnreadCount } from '../../api/notifications';
-import { useNotificationStore } from '../../store/useNotificationStore';
-import { useAuthStore } from '../../store/useAuthStore';
 import { mapHomeResponseToViewModel } from './homeMapper';
 
 type PopUpConfig = {
@@ -71,6 +72,47 @@ export const HomePage = () => {
     const hasUnreadNotificationsFromStore = useNotificationStore((state) =>
         state.items.some((notice) => !notice.isRead),
     );
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const { handleRequestPermission } = useFcmToken();
+    const [isNotificationPopupOpen, setIsNotificationPopupOpen] = useState(false);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        // 세션 내에 이미 등록을 시도했는지 확인
+        const isRegisteredInSession = sessionStorage.getItem('FCM_REGISTERED_IN_SESSION');
+
+        // 1. 이미 알림 권한이 허용된 상태라면 (이번 세션 최초 1회만 등록/최신화)
+        if (Notification.permission === 'granted' && !isRegisteredInSession) {
+            handleRequestPermission();
+            sessionStorage.setItem('FCM_REGISTERED_IN_SESSION', 'true');
+            return;
+        }
+
+        // 2. 권한이 아직 '기본' 상태이고 안내 팝업을 본 적 없다면 우리 서비스 팝업 띄우기
+        const hasSeenPopup = localStorage.getItem('HAS_SEEN_FCM_PROMPT');
+        if (Notification.permission === 'default' && !hasSeenPopup) {
+            // cascading 방지
+            const timer = setTimeout(() => {
+                setIsNotificationPopupOpen(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isAuthenticated, handleRequestPermission]);
+
+    const handleClosePopup = () => {
+        setIsNotificationPopupOpen(false);
+
+        // 이번 브라우저에서는 다시 질문 X
+        localStorage.setItem('HAS_SEEN_FCM_PROMPT', 'true');
+    }
+
+    const handleConfirmNotification = async () => {
+        setIsNotificationPopupOpen(false);
+        // 이번 브라우저에서는 다시 질문 X
+        localStorage.setItem('HAS_SEEN_FCM_PROMPT', 'true');
+        await handleRequestPermission();
+    };
     const storedUserName = useAuthStore((state) => state.user?.name);
     const storedUserId = useAuthStore((state) => state.user?.id);
     const userIdParam = resolveUserIdParam(storedUserId);
@@ -199,6 +241,18 @@ export const HomePage = () => {
                     />
                 </section>
             </div>
+
+            {/* FCM 알림 권한 요청 팝업 (Soft Prompt) */}
+            <PopUp
+                isOpen={isNotificationPopupOpen}
+                type="info"
+                title="실시간 채팅 알림"
+                content="새로운 메시지 알림을 받으시겠어요?\n언제든 설정에서 변경할 수 있습니다."
+                leftButtonText="나중에"
+                rightButtonText="알림 켜기"
+                onLeftClick={handleClosePopup}
+                onRightClick={handleConfirmNotification}
+            />
             {popUpConfig && (
                 <PopUp
                     isOpen={!!popUpConfig}

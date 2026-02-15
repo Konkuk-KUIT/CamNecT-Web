@@ -1,5 +1,5 @@
 import { useState } from "react";
-import BottomSheetModal from "../../../components/BottomSheetModal/BottomSheetModal";
+// import BottomSheetModal from "../../../components/BottomSheetModal/BottomSheetModal";
 import Icon from "../../../components/Icon";
 
 interface TypingAreaProps {
@@ -8,7 +8,7 @@ interface TypingAreaProps {
 
 export const TypingArea = ({ onSend }: TypingAreaProps) => {
     const [inputValue, setInputValue] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSend = () => {
         if (inputValue.trim()) {
@@ -21,14 +21,14 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
         <>
             <div className="flex justify-center fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-[25px] pt-[6px] pb-[calc(40px+env(safe-area-inset-bottom))] z-50">
                 <div className="flex items-center gap-[10px] w-full">
-                    {/* 추가 버튼 */}
-                    <button 
+                    {/* 추가 버튼 -> MVP 제외*/}
+                    {/* <button 
                         type="button" 
                         onClick={() => setIsModalOpen(true)}
                         className="shrink-0 w-[36px] h-[36px] rounded-full bg-gray-150 flex items-center justify-center active:bg-gray-200 transition-colors"
                     >
                         <Icon name="plus" />
-                    </button>
+                    </button> */}
                     
                     {/* 입력창 영역 */}
                     <div className="relative flex-1">
@@ -51,7 +51,7 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
                 </div>
             </div>
 
-            <BottomSheetModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            {/* <BottomSheetModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <div className="flex flex-col px-[40px] pt-[10px] pb-[calc(30px+env(safe-area-inset-bottom))]">
                     <button 
                         className="flex items-center gap-[15px] py-[20px] w-full border-b border-gray-150 active:opacity-50 transition-opacity" 
@@ -68,7 +68,7 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
                         <span className="text-m-16 text-gray-750">파일</span>
                     </button>
                 </div>
-            </BottomSheetModal>
+            </BottomSheetModal> */}
         </>
     )
 }

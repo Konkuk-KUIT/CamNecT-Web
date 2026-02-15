@@ -22,6 +22,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
     const [showMountPopUp, setShowMountPopUp] = useState(true);
     const [showErrorPopUp, setShowErrorPopUp] = useState(false);
+    const [showSizeErrorPopUp, setShowSizeErrorPopUp] = useState(false);
     const [docType, setDocType] = useState<SchoolDocType>('ENROLLMENT_CERTIFICATE');
     const [isSubmitting, setIsSubmitting] = useState(false); // 전체 제출 상태 관리
 
@@ -57,6 +58,12 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            // 10MB 용량 제한 체크 (10 * 1024 * 1024 bytes)
+            if (file.size > 10 * 1024 * 1024) {
+                setShowSizeErrorPopUp(true);
+                event.target.value = ""; // input 초기화
+                return;
+            }
             setVerificationFile(file);
         }
     };
@@ -248,6 +255,17 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     content="인증 파일 제출 중 오류가 발생했습니다\n다시 시도해 주세요"
                     buttonText="확인"
                     onClick={() => setShowErrorPopUp(false)}
+                />
+            )}
+
+            {showSizeErrorPopUp && (
+                <PopUp
+                    isOpen={showSizeErrorPopUp}
+                    type="error"
+                    title="파일 용량 초과"
+                    content="파일 크기는 10MB를 초과할 수 없습니다."
+                    buttonText="확인"
+                    onClick={() => setShowSizeErrorPopUp(false)}
                 />
             )}
 

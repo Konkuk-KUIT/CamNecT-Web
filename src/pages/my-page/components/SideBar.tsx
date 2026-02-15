@@ -1,5 +1,9 @@
+import { useState } from "react";
+import { IoMdPhonePortrait } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../api/profileApi";
+import PopUp from "../../../components/Pop-up";
+import { usePwaInstall } from "../../../hooks/usePwaInstall";
 import { useAuthStore } from "../../../store/useAuthStore";
 
 type SideBarUser = {
@@ -21,10 +25,21 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
     const navigate = useNavigate();
     const setLogout = useAuthStore((s) => s.setLogout);
     const userId = useAuthStore((s) => s.user?.id);
+    const { isInstallable, install } = usePwaInstall();
+    
+    const [isInstallPopupOpen, setIsInstallPopupOpen] = useState(false);
 
     const handleNavigation = (path: string) => {
         navigate(path);
         onClose();
+    };
+
+    const handleInstallClick = async () => {
+        if (isInstallable) {
+            await install();
+        } else {
+            setIsInstallPopupOpen(true);
+        }
     };
 
     const handleLogout = async () => {
@@ -143,6 +158,13 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                                         </svg>
                                         <span className="text-r-16-hn text-gray-750">환경 설정</span>
                                     </button>
+                                    <button
+                                        onClick={handleInstallClick}
+                                        className="inline-flex items-center gap-[15px] p-[10px]"
+                                    >
+                                        <IoMdPhonePortrait className="w-[20px] h-[20px] text-gray-750" />
+                                        <span className="text-r-16-hn text-gray-750">앱 설치</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -150,6 +172,15 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
                     </div>
                 </div>
             </div>
+
+            <PopUp
+                isOpen={isInstallPopupOpen}
+                type="confirm"
+                title="알림"
+                content="이미 설치되어 있거나,\n설치를 지원하지 않는 브라우저입니다.\n(iOS는 Safari '홈 화면에 추가'를 이용해주세요)"
+                buttonText="확인"
+                onClick={() => setIsInstallPopupOpen(false)}
+            />
         </>
     );
 };
