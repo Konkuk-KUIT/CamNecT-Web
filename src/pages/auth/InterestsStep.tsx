@@ -99,7 +99,8 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
         <div className="absolute inset-0 bg-white px-[25px] flex flex-col overflow-hidden">
             {/* 1. 헤더 영역 (고정) */}
             <h1 className="flex-none relative z-10 pt-[86px] text-[24px] font-bold leading-[140%] tracking-[-0.6px] text-gray-900">
-                관심분야를 알려주세요!
+                관심분야를 알려주세요!  <span className="text-m-14 text-gray-750 font-normal ml-[4px]">(최대 5개)</span>
+
             </h1>
 
             {/* 2. 태그 선택 영역 (나머지 공간 모두 차지) */}
