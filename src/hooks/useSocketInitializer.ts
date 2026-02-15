@@ -10,8 +10,8 @@ export const useSocketInitializer = () => {
 
     // 로그인 상태 바뀔 때만 수행
     useEffect(() => {
-        // 로그아웃 체크
-        if (!isAuthenticated || !user?.id) {
+        // 로그아웃 체크 또는 가입 완료 전(HOME이 아닌 경우) 연결 방지
+        if (!isAuthenticated || !user?.id || user?.nextStep !== 'HOME') {
             if (stompClient.active) {
                 stompClient.deactivate();
             }
@@ -57,6 +57,6 @@ export const useSocketInitializer = () => {
                 stompClient.deactivate();
             }
         }
-    }, [isAuthenticated, user?.id, accessToken, queryClient])
+    }, [isAuthenticated, user?.id, user?.nextStep, accessToken, queryClient])
     
 }

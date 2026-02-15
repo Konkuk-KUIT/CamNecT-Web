@@ -103,7 +103,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
 
     // 인증서 제출 함수 
     const handleVerificationSubmit = async () => {
-        if (!verificationFile || !userId) {
+        if (!verificationFile || userId === null || userId === undefined) {
             console.error("제출 실패: 파일 또는 유저 ID가 없습니다.", { verificationFile, userId });
             return;
         }
