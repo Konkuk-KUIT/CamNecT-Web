@@ -16,8 +16,8 @@ import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
 import { TypingArea } from "./components/TypingArea";
+import type { StompSubscription } from "@stomp/stompjs";
 
-// todo 읽었을때 읽은 시각으로 보여줘야 함 (읽음 표시와 함께)
 export const ChatRoomPage = () => {
     const { id } = useParams<{ id: string }>();
     
@@ -65,26 +65,67 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     // todo (복습) 실시간 읽음 처리 (Read Receipt) 감시 및 캐시 동기화
     useEffect(() => {
-        const subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
-            const data: StompChatResponse = JSON.parse(message.body);
+        // 1. 백그라운드일때 OS가 아예 socket을 종료시켰을수도 
+        if (!stompClient.active) {
+            stompClient.activate();
+        }
 
-            if (isReadReceipt(data)) {
-                // TanStack Query 캐시에 저장된 과거 메시지들을 실시간으로 '읽음' 상태로 업데이트
-                queryClient.setQueryData(['chatRoom', roomId], (oldData: ChatRoomDetailData | undefined) => {
-                    if (!oldData) return oldData;
-                    return {
-                        ...oldData,
-                        messages: oldData.messages.map((msg: ChatMessage) => 
-                            Number(msg.id) <= data.lastReadMessageId 
-                                ? { ...msg, isRead: true, readAt: data.readAt } 
-                                : msg
-                        )
-                    };
-                });
+        let subscription: StompSubscription | null = null;
+        const originalOnConnect = stompClient.onConnect; // 이전 소켓 연결 버전 대입 (rooms 전역구독)
+
+        const performSubscribe = () => {
+
+            // 이미 구독 중이면 중복 방지
+            if (subscription) {
+                console.log("이미 구독중인 세션 존재");
+                return;
             }
-        });
 
-        return () => subscription.unsubscribe();
+            subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+                const data: StompChatResponse = JSON.parse(message.body);
+
+                if (isReadReceipt(data)) {
+                    // TanStack Query 캐시에 저장된 과거 메시지들을 실시간으로 '읽음' 상태로 업데이트
+                    queryClient.setQueryData(['chatRoom', roomId], (oldData: ChatRoomDetailData | undefined) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            messages: oldData.messages.map((msg: ChatMessage) => 
+                                Number(msg.id) <= data.lastReadMessageId 
+                                    ? { ...msg, isRead: true, readAt: data.readAt } 
+                                    : msg
+                            )
+                        };
+                    });
+                }
+            });
+        }
+        
+        if(stompClient.connected){
+            performSubscribe();
+        }
+        
+        // STOMP 연결 안되어있다면
+        else {
+            console.log("소켓 연결 대기 중, 연결 후 구독");
+
+            // socket이 서버와 연결되면
+            stompClient.onConnect = (frame) => {
+                // 1. 기존의 전역 구독 로직 복구 (rooms 구독)
+                if (originalOnConnect) originalOnConnect(frame);
+                // 2. 현재 채팅방 구독
+                performSubscribe();
+            }
+        }
+
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+
+            // 예약된 로직이 있다면 복구하여 메모리 누수 방지
+            stompClient.onConnect = originalOnConnect;
+        };
     }, [roomId, queryClient]);
 
     // STOMP 채팅방 나가기 처리 (브라우저 종료/새로고침 대응)
