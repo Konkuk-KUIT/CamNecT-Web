@@ -1,12 +1,14 @@
 
-import { useMemo, useState, useEffect } from 'react';
-import {FullLayout} from '../../layouts/FullLayout';
-import { HomeHeader } from '../../layouts/headers/HomeHeader';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { requestHome } from '../../api/home';
+import { requestNotificationUnreadCount } from '../../api/notifications';
 import Card from '../../components/Card';
 import PopUp from '../../components/Pop-up';
 import { useFcmToken } from '../../hooks/useFcmNotification';
+import { FullLayout } from '../../layouts/FullLayout';
+import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import CoffeeChatBox from './components/CoffeeChatBox';
@@ -15,8 +17,6 @@ import ContestBox from './components/ContestBox';
 import PointBox from './components/PointBox';
 import RecommendBox from './components/RecommendBox';
 import { coffeeChatRequests, contests, homeGreetingUser, recommendList } from './homeData';
-import { requestHome } from '../../api/home';
-import { requestNotificationUnreadCount } from '../../api/notifications';
 import { mapHomeResponseToViewModel } from './homeMapper';
 
 type PopUpConfig = {
@@ -78,6 +78,9 @@ export const HomePage = () => {
 
     useEffect(() => {
         if (!isAuthenticated) return;
+
+        // 브라우저가 Notification API를 지원하는지 확인
+        if (!("Notification" in window)) return;
 
         // 세션 내에 이미 등록을 시도했는지 확인
         const isRegisteredInSession = sessionStorage.getItem('FCM_REGISTERED_IN_SESSION');
