@@ -217,6 +217,12 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                     }}
                 />
             )}
+
+            <PopUp 
+                isOpen={emailRequestMutation.isPending} 
+                type="loading" 
+                title="인증번호를 전송하고 있습니다..." 
+            />
         </form> 
     )
 }
