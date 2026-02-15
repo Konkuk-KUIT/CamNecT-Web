@@ -10,6 +10,12 @@ export const useFcmToken = () => {
 
     // useCallback : handleRequestPermission 함수가 변경되지 않도록 메모이제이션 (HomePage에서 의존성으로 사용중)
     const handleRequestPermission = useCallback(async () => {
+        // 브라우저가 Notification API를 지원하는지 확인
+        if (!("Notification" in window)) {
+            console.warn("이 브라우저는 알림 기능을 지원하지 않습니다.");
+            return;
+        }
+
         // 이미 권한이 거부된 상태라면 다시 묻지 않음
         if (Notification.permission === "denied") return;
 
