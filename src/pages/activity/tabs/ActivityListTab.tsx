@@ -200,12 +200,7 @@ const ActivityListTab = ({
       </div>
 
       <div className='flex flex-col'>
-        {isLoading ? (
-          <PopUp
-            type="loading"
-            isOpen={true}
-          />
-        ) : filteredPosts.length === 0 ? (
+        {!isLoading && filteredPosts.length === 0 ? (
           <div className='flex justify-center py-[40px]'>
             <p className='text-r-14-hn text-gray-650'>게시글이 없습니다.</p>
           </div>
