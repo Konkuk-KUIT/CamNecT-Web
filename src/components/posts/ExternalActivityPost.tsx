@@ -65,7 +65,13 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
             </div>
             {dDay !== null && (
               <div className='flex justify-center items-center px-[12px] py-[6px] rounded-[20px] bg-primary text-b-14-hn text-white'>
-                {dDay > 0 ? `D-${dDay}` : dDay === 0 ? "D-Day" : "마감"}
+                {post.status === 'CLOSED'
+                  ? '마감'
+                  : dDay > 0
+                    ? `D-${dDay}`
+                    : dDay === 0
+                      ? 'D-Day'
+                      : '마감'}
               </div>
             )}
           </div>
@@ -74,7 +80,7 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
         {thumbnailUrl && (
           <div className='relative'>
             <img
-              src={thumbnailUrl}
+              src={thumbnailUrl ?? REPLACE_IMAGE}
               alt={post.title}
               className='w-[94px] h-[134px] object-cover flex-shrink-0'
               onError={(e) => {
