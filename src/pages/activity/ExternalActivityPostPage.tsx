@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Category from '../../components/Category';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
@@ -7,14 +7,16 @@ import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal
 import Icon from '../../components/Icon';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
-import { mapToActivityPost } from '../../mock/activityCommunity';
-import { getTeamRecruitsByActivityId } from '../../mock/teamRecruit';
 import { formatOnlyDate } from '../../utils/formatDate';
 import { RecruitPost } from '../../components/posts/RecruitPost';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivityDetail, deleteActivity, toggleActivityBookmark } from '../../api/activityApi';
+import { getActivityDetail, closeAdminActivity, toggleActivityBookmark } from '../../api/activityApi';
 import { mapDetailToActivityPost, mapRecruitmentItemToTeamRecruitPost } from './utils/activityMapper';
+import { type ActivityDetailResponse } from '../../api-types/activityApiTypes';
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'close-post';
 
@@ -35,9 +37,9 @@ export const ExternalActivityPostPage = () => {
     const activityId = postId ? parseInt(postId) : null;
 
     const [activeTab, setActiveTab] = useState<TabType>('detail');
-    const [isBookmarked, setIsBookmarked] = useState(false);
     const [isOptionOpen, setIsOptionOpen] = useState(false);
     const [isClosePopupOpen, setIsClosePopupOpen] = useState(false);
+    const [isCloseAgainPopupOpen, setIsCloseAgainPopupOpen] = useState(false);
     const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
   //상세 조회
@@ -45,46 +47,58 @@ export const ExternalActivityPostPage = () => {
     data: detailResponse,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<ActivityDetailResponse>({
     queryKey: ['activityDetail', activityId],
     queryFn: () => getActivityDetail(userId!, activityId!),
     enabled: !!userId && !!activityId,
   });
-
-  //초기 북마크 상태
-  useEffect(() => {
-    if (detailResponse?.data) {
-      setIsBookmarked(detailResponse.data.isBookmarked);
-    }
-  }, [detailResponse?.data]);
 
   const selectedPost = useMemo(() => {
     if (!detailResponse?.data) return null;
     return mapDetailToActivityPost(detailResponse.data);
   }, [detailResponse]);
 
-  //북마크 토글
-  const bookmarkMutation = useMutation({
-    mutationFn: () => toggleActivityBookmark(userId!, activityId!),
-    onMutate: () => {
-      // 낙관적 업데이트
-      setIsBookmarked((prev) => !prev);
-    },
-    onError: () => {
-      // 실패 시 롤백
-      setIsBookmarked((prev) => !prev);
-    },
+  //팀원 모집 중지
+  const closeMutation = useMutation({
+    mutationFn: () => closeAdminActivity(activityId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
     },
   });
 
-  //삭제
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteActivity(userId!, activityId!),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activityList'] });
-      navigate(-1);
+  const bookmarkMutation = useMutation({
+    mutationFn: () => toggleActivityBookmark(userId!, activityId!),
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['activityDetail', activityId] });
+
+      const prev = queryClient.getQueryData<typeof detailResponse>([
+        'activityDetail',
+        activityId,
+      ]);
+
+      if (prev?.data) {
+        queryClient.setQueryData(['activityDetail', activityId], {
+          ...prev,
+          data: {
+            ...prev.data,
+            isBookmarked: !prev.data.isBookmarked,
+          },
+        });
+      }
+
+      return { prev };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) {
+        queryClient.setQueryData(['activityDetail', activityId], ctx.prev);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
     },
   });
 
@@ -95,6 +109,8 @@ export const ExternalActivityPostPage = () => {
   }, [detailResponse]);
 
   const isMine = detailResponse?.data?.isMine ?? false;
+
+  const canCloseRecruit = isMine && selectedPost?.status === 'OPEN';
 
   const optionItems: OptionItem[] = isMine
     ? [
@@ -127,11 +143,13 @@ export const ExternalActivityPostPage = () => {
       if (selectedPost?.tab === 'external') navigate(`/admin/post/external/${activityId}`);
       else navigate(`/admin/post/job/${activityId}`);
     }
-    if (item.id === 'close-post') setIsClosePopupOpen(true);
+    if (item.id === 'close-post') {
+      if (canCloseRecruit) setIsClosePopupOpen(true);
+      else setIsCloseAgainPopupOpen(true);
+    };
     setIsOptionOpen(false);
   };
 
-  // ===== 로딩 / 에러 처리 =====
   if (isLoading) {
     return (
       <PopUp
@@ -141,7 +159,7 @@ export const ExternalActivityPostPage = () => {
     );
   }
 
-  if (isError || !selectedPost) {
+  if (isError || !selectedPost || !detailResponse?.data) {
     return (
       <PopUp
         type="error"
@@ -160,9 +178,9 @@ export const ExternalActivityPostPage = () => {
       {selectedPost.descriptionBody && (
         <div className='flex flex-col gap-[20px]'>
           {selectedPost.descriptionTitle && (
-            <span className='text-b-16-hn text-gray-900'>{selectedPost.descriptionTitle}</span>
+            <span className='text-b-16-hn text-gray-900 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>{selectedPost.descriptionTitle}</span>
           )}
-          <p className='text-r-14 text-gray-900 whitespace-pre-line'>
+          <p className='text-r-14 text-gray-900 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>
             {selectedPost.descriptionBody}
           </p>
         </div>
@@ -191,8 +209,17 @@ export const ExternalActivityPostPage = () => {
     </div>
   );
 
-  // 팀원 모집 탭의 카운트: API recruitmentList 사용
+  //팀원 모집 탭의 카운트: API recruitmentList 사용
   const recruitCount = detailResponse?.data?.recruitmentList?.length ?? teamRecruits.length;
+
+  //화면에 표시할 북마크 상태는 캐시 값 그대로 사용
+  const isBookmarkedView = detailResponse.data.isBookmarked;
+
+  //연타/중복 요청 막기
+  const handleToggleBookmark = () => {
+    if (bookmarkMutation.isPending) return;
+    bookmarkMutation.mutate();
+  };
 
     return (
         <HeaderLayout
@@ -212,8 +239,8 @@ export const ExternalActivityPostPage = () => {
                         <SaveToggle 
                         width={24} 
                         height={24} 
-                        isActive={isBookmarked} 
-                        onToggle={() => bookmarkMutation.mutate()}
+                        isActive={isBookmarkedView} 
+                        onToggle={() => handleToggleBookmark()}
                         />
                         <button type='button' onClick={() => setIsOptionOpen(true)} aria-label='게시글 옵션 열기'>
                             <Icon name='option'/>
@@ -225,15 +252,17 @@ export const ExternalActivityPostPage = () => {
         <div className='flex w-full justify-center bg-white'>
             <div className='flex w-full max-w-[720px] flex-col'>
                 {/* 썸네일 이미지 */}
-                {thumbnailUrl && (
                     <div className='w-full relative'>
                         <img
-                            src={thumbnailUrl}
+                            src={thumbnailUrl ?? REPLACE_IMAGE}
                             alt={selectedPost.title}
+                            onError={(e) => {
+                                e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                e.currentTarget.src = REPLACE_IMAGE;
+                            }}
                             className='w-full h-full object-cover rounded-none'
                         />
                     </div>
-                )}
 
                 {/* 헤더 정보 */}
                 <section className='flex flex-col gap-[20px] px-[25px] py-[30px]'>
@@ -334,7 +363,7 @@ export const ExternalActivityPostPage = () => {
                         : 'border-transparent text-gray-650 text-r-16-hn'
                     }`}
                     >
-                    팀원 모집 ({teamRecruits.length})
+                    팀원 모집 ({recruitCount})
                     </button>
                 </div>
 
@@ -356,7 +385,7 @@ export const ExternalActivityPostPage = () => {
                 >
                     <BottomSheetIcon name={item.icon} />
                     <span className='text-[16px] font-medium text-[var(--ColorGray3,#646464)]'>
-                    {item.label}
+                      {item.label}
                     </span>
                 </button>
                 ))}
@@ -366,11 +395,22 @@ export const ExternalActivityPostPage = () => {
 
         <PopUp
             isOpen={isClosePopupOpen}
-            type='warning'
-            title='정말 모집 마감하시겠습니까?'
-            content='다시 모집 중 상태로 되돌리지 못합니다.'
+            type='info'
+            title='모집을 중지하시겠습니까?'
+            content='중지 후에는 다시 모집 중 상태로 변경할 수 없습니다.'
             onLeftClick={() => setIsClosePopupOpen(false)}
-            onRightClick={() => setIsClosePopupOpen(false)}
+            onRightClick={() => {
+              setIsClosePopupOpen(false);
+              closeMutation.mutate();
+            }}
+        />
+
+        <PopUp
+            isOpen={isCloseAgainPopupOpen}
+            type='confirm'
+            title='모집 마감 완료'
+            content='이미 팀원 모집이 중지되어 있습니다.'
+            onClick={() => setIsCloseAgainPopupOpen(false)}
         />
 
         <PopUp

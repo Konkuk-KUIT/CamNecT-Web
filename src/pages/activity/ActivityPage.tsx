@@ -19,10 +19,7 @@ const tabItems: TabItem[] = [
 export const ActivityPage = () => {
   const [activeTab, setActiveTab] = useState<ActivityPostTab>('club');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(''); 
   const [searchQuery, setSearchQuery] = useState('');
-
-  const applySearch = () => setSearchQuery(inputValue.trim());
 
   const renderTab = () => {
     if (activeTab === 'club')
@@ -44,7 +41,6 @@ export const ActivityPage = () => {
                 <button
                   type='button'
                   onClick={() => {
-                    setInputValue('');
                     setSearchQuery('');
                     setIsSearchOpen(false);
                   }}
@@ -53,19 +49,13 @@ export const ActivityPage = () => {
                   <Icon name='search' className='h-[28px] w-[28px]' />
                 </button>
                 <input
-                  type='search'
+                  type='text'
                   enterKeyHint='search'
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') applySearch();
-                  }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder='제목 검색'
                   className='flex-1 bg-transparent text-r-16 text-[var(--ColorBlack,#202023)] placeholder:text-[var(--ColorGray2,#A1A1A1)] focus:outline-none'
                 />
-                <button type='button' onClick={applySearch} aria-label='검색 실행'>
-                  <Icon name='search' className='h-[24px] w-[24px]' />
-                </button>
               </div>
             </div>
           </div>

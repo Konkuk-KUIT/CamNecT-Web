@@ -11,8 +11,11 @@ import type { ActivityPostStatus } from '../../types/activityPage/activityPageTy
 import { formatPostDisplayDate } from './utils/post';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivityDetail, deleteActivity, toggleActivityBookmark } from '../../api/activityApi';
+import { getActivityDetail, deleteActivity, toggleActivityBookmark, closeActivity } from '../../api/activityApi';
 import { mapDetailToActivityPost } from './utils/activityMapper';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
 
@@ -57,6 +60,7 @@ const ActivityPostPage = () => {
   }
 
   const selectedPost = mapDetailToActivityPost(detailResponse.data);
+
   return (
     <ActivityPostContent 
       key={selectedPost.id} 
@@ -94,8 +98,8 @@ const ActivityPostContent = ({
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isCloseRecruitPopupOpen, setIsCloseRecruitPopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
-  const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   
   //북마크 토글
@@ -105,7 +109,7 @@ const ActivityPostContent = ({
       setIsBookmarked((prev) => !prev);
     },
     onError: () => {
-      setIsBookmarked((prev) => !prev);
+      setIsBookmarked((prev) => !prev); //낙관적 업데이트
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
@@ -121,12 +125,15 @@ const ActivityPostContent = ({
     },
   });
 
-  // ⚠️ 임시처리: 모집 완료 처리 API 없음
-  // → 모집 상태 변경 API가 있다면 연동 필요. 현재는 클라이언트 상태만 변경
-  const handleRecruitComplete = () => {
-    setStatus('CLOSED');
-    setIsRecruitPopupOpen(false);
-  };
+  //모집 중지
+  const closeMutation = useMutation({
+    mutationFn: () => closeActivity(userId, activityId),
+    onSuccess: () => {
+      setStatus('CLOSED');
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+    },
+  });
 
   const optionItems: OptionItem[] = isMine
     ? [
@@ -212,35 +219,35 @@ const ActivityPostContent = ({
 
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
               <div className='flex items-center gap-[10px]'>
-                {selectedPost.author.profileImageUrl ? (
                   <img
-                    src={selectedPost.author.profileImageUrl}
+                    src={selectedPost.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
                     alt={`${selectedPost.author.name} 프로필`}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null; //이미지 깨짐 방지
+                      e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                    }}
                     className='h-[32px] w-[32px] rounded-full object-cover'
                   />
-                ) : (
-                  <div className='h-[32px] w-[32px] rounded-full bg-[#ECECEC]' aria-hidden='true' />
-                )}
                 <div className='flex flex-col gap-[4px]'>
                   <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
                     {selectedPost.author.name}
                   </div>
                   <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major} {selectedPost.author.studentId}학번
+                    {selectedPost.author.major} {selectedPost.author.studentId.slice(2,4)}학번
                   </div>
                 </div>
               </div>
-              <button
+              {!isMine && (<button
                 type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
                 onClick={() => navigate(`/alumni/profile/${selectedPost.author.id}`)}
               >
                 커피챗 보내기
-              </button>
+              </button>)}
             </div>
 
             <div className='flex flex-col gap-[20px]'>
-              <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+              <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>
                 {selectedPost.content}
               </div>
               {selectedPost.postImages && selectedPost.postImages.length > 0 && (
@@ -288,7 +295,7 @@ const ActivityPostContent = ({
         status={status}
         isBookmarked={isBookmarked}
         onBookmarkToggle={() => bookmarkMutation.mutate()}
-        onOpenCompletePopup={() => setIsRecruitPopupOpen(true)}
+        onOpenCompletePopup={() => setIsCloseRecruitPopupOpen(true)}
       />
 
       <BottomSheetModal isOpen={isOptionOpen} onClose={() => setIsOptionOpen(false)} height='auto'>
@@ -312,15 +319,12 @@ const ActivityPostContent = ({
       </BottomSheetModal>
 
       <PopUp
-        isOpen={isRecruitPopupOpen}
+        isOpen={isCloseRecruitPopupOpen}
         type='info'
         title='모집을 완료하시겠습니까?'
-        content={'모집 완료 후에는 다시 모집 중 상태로\n변경할 수 없습니다.'}
-        onLeftClick={() => setIsRecruitPopupOpen(false)}
-        onRightClick={() => {
-          setStatus('CLOSED');
-          setIsRecruitPopupOpen(false);
-        }}
+        content={'모집 완료 후에는 다시 모집 중 상태로 변경할 수 없습니다.'}
+        onLeftClick={() => setIsCloseRecruitPopupOpen(false)}
+        onRightClick={() => {setIsCloseRecruitPopupOpen(false); closeMutation.mutate();}}
       />
 
       <PopUp
