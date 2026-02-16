@@ -796,7 +796,7 @@ export default function PortfolioEditModal({
                                         >
                                         <ModalIcon name="photo" className="w-[24px] h-[24px] text-gray-400" />
                                         <span className="text-r-12-hn text-gray-500">
-                                            대표 이미지를 추가해 주세요<br/>(png, webp, pdf ...)
+                                            대표 이미지를 추가해 주세요<br/>(png, webp, jpeg ...)
                                         </span>
                                         </button>
                                     )}
