@@ -54,14 +54,14 @@ export default function ImageEditModal({ isOpen, onClose, onSelect, onDelete }: 
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/png, image/jpg, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, 'album')}
                 />
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/png, image/jpg, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg"
                     capture="environment"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, 'camera')}

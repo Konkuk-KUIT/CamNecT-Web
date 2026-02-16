@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Icon from '../../../components/Icon';
 import PopUp from '../../../components/Pop-up';
 import Card from '../../../components/Card';
@@ -7,13 +8,30 @@ import { HeaderLayout } from '../../../layouts/HeaderLayout';
 import { EditHeader } from '../../../layouts/headers/EditHeader';
 import FilterHeader from '../../../components/FilterHeader';
 import TagsFilterModal from '../../../components/TagsFilterModal';
-import { MOCK_ALL_TAGS, TAG_CATEGORIES } from '../../../mock/tags';
-import { useImageUpload } from '../../../hooks/useImageUpload';
-import { mapToActivityPost } from '../../../mock/activityCommunity';
+import { getTags } from '../../../api/activityApi';
+import { mapApiTagCategoryToUiTagCategory } from '../../activity/utils/activityMapper';
+import { useAuthStore } from '../../../store/useAuthStore';
+import {
+  createAdminActivity,
+  updateAdminActivity,
+  getActivityDetail,
+  getActivityThumbnailPresignUrl,
+} from '../../../api/activityApi';
+import type { ActivityCategory, ActivityAdminCreateRequest, ActivityAdminUpdateRequest } from '../../../api-types/activityApiTypes';
+import { uploadFileToS3 } from '../../../utils/s3Upload';
+import { useFileUpload } from '../../../hooks/useFileUpload';
+import replaceImg from "../../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
+
+const MAX_SIZE_MB = 10;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const daysInMonth = (year: number, month: number) => new Date(year, month, 0).getDate();
 const clampDay = (day: number, year: number, month: number) => Math.min(day, daysInMonth(year, month));
+const toDateStr = (y: number, m: number, d: number) =>
+  `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
 
 type PostType = 'external' | 'job';
@@ -22,104 +40,113 @@ interface ExternalJobWritePageProps {
     type: PostType;
 }
 
+const typeToCategory: Record<PostType, ActivityCategory> = {
+  external: 'EXTERNAL',
+  job: 'RECRUITMENT',
+};
+
 export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const navigate = useNavigate();
     const { postId } = useParams();
+    const queryClient = useQueryClient();
+    const { prepareFile, revokeUrl } = useFileUpload({
+        maxSizeMB: 10,
+        allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+    });
     const isEditMode = Boolean(postId);
+    const activityId = postId ? parseInt(postId) : null;
 
-    // TODO: postId로 기존 데이터 가져오기
-    const editPost = useMemo(() => {
-        if (!postId) return null;
-        return mapToActivityPost(postId);
-    }, [postId]);
+    const authUser = useAuthStore((state) => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
 
-    const initial = useMemo(() => {
-  const currentYear = new Date().getFullYear();
+    //기존 데이터 로드
+    const { data: editDetailResponse, isLoading: isLoadingEdit, isError: isErrorEdit} = useQuery({
+        queryKey: ['activityDetail', activityId],
+        queryFn: () => getActivityDetail(userId!, activityId!),
+        enabled: isEditMode && !!userId && !!activityId,
+    });
 
-  const startDate = editPost?.applyPeriod?.start ? new Date(editPost.applyPeriod.start) : null;
-  const endDate = editPost?.applyPeriod?.end ? new Date(editPost.applyPeriod.end) : null;
-  const announceDate = editPost?.announceDate ? new Date(editPost.announceDate) : null;
+    const editPost = editDetailResponse?.data;
+    const currentYear = new Date().getFullYear();
 
-  const startY = startDate?.getFullYear() ?? currentYear;
-  const startM = startDate ? startDate.getMonth() + 1 : 1;
-  const startD = startDate?.getDate() ?? 1;
+    //초기값
+    const initialValues = useMemo(() => {
+        if (!editPost) return null;
+        const { activity, tagIds } = editPost;
 
-  const endY = endDate?.getFullYear() ?? currentYear;
-  const endM = endDate ? endDate.getMonth() + 1 : 12;
-  const endD = endDate?.getDate() ?? 31;
+        const startDate = activity.applyStartDate ? new Date(activity.applyStartDate) : null;
+        const endDate = activity.applyEndDate ? new Date(activity.applyEndDate) : null;
+        const announceDate = type === 'external' && activity.resultAnnounceDate
+        ? new Date(activity.resultAnnounceDate) : null;
 
-  const announceY = announceDate?.getFullYear() ?? currentYear;
-  const announceM = announceDate ? announceDate.getMonth() + 1 : 1;
-  const announceD = announceDate?.getDate() ?? 1;
+        return {
+            title: activity.title,
+            tags: tagIds,
+            organizer: activity.organizer ?? '',
+            target: activity.targetDescription ?? '',
+            applyUrl: activity.officialUrl ?? '',
+            contextTitle: activity.contextTitle ?? '',
+            context: activity.context ?? '',
+            thumbnailUrl: activity.thumbnailUrl ?? null,
+            thumbnailKey: activity.thumbnailUrl ? activity.thumbnailUrl.split('/').pop() ?? null : null,
+            startYear: startDate?.getFullYear() ?? currentYear,
+            startMonth: startDate ? startDate.getMonth() + 1 : 1,
+            startDay: startDate?.getDate() ?? 1,
+            endYear: endDate?.getFullYear() ?? currentYear,
+            endMonth: endDate ? endDate.getMonth() + 1 : 12,
+            endDay: endDate?.getDate() ?? 31,
+            announceYear: announceDate?.getFullYear() ?? currentYear,
+            announceMonth: announceDate ? announceDate.getMonth() + 1 : 1,
+            announceDay: announceDate?.getDate() ?? 1,
+        };
+    }, [editPost, type, currentYear]);
 
-  return {
-    currentYear,
+    //태그 목록 조회
+    const { data: tagData } = useQuery({
+        queryKey: ['tags', 'DEFAULT'],
+        queryFn: () => getTags('DEFAULT'),
+        staleTime: 1000 * 60 * 10,
+    });
 
-    title: editPost?.title ?? '',
-    selectedTags: editPost?.categories ?? [],
-    organizer: editPost?.organizer ?? '',
-    applyUrl: editPost?.applyUrl ?? '',
-    descriptionTitle: editPost?.descriptionTitle ?? '',
-    descriptionBody: editPost?.descriptionBody ?? '',
+    const tagNameToIdMap = useMemo(() => {
+        const map = new Map<string, number>();
+        tagData?.data.forEach((cat) => {
+        cat.tags.forEach((tag) => map.set(tag.name, tag.id));
+        });
+        return map;
+    }, [tagData]);
 
-    target: editPost?.target ?? '',
+    const tagIdToNameMap = useMemo(() => {
+        const map = new Map<number, string>();
+        tagData?.data.forEach((cat) => {
+        cat.tags.forEach((tag) => map.set(tag.id, tag.name));
+        });
+        return map;
+    }, [tagData]);
 
-    startYear: startY,
-    startMonth: startM,
-    startDay: clampDay(startD, startY, startM),
+    const tagCategories = useMemo(() => tagData?.data.map(mapApiTagCategoryToUiTagCategory) ?? [], [tagData]);
 
-    endYear: endY,
-    endMonth: endM,
-    endDay: clampDay(endD, endY, endM),
+    const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
 
-    announceYear: announceY,
-    announceMonth: announceM,
-    announceDay: clampDay(announceD, announceY, announceM),
+    //날짜 초기값
+    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
-    thumbnailUrl: editPost?.thumbnailUrl
-      ? { id: 'existing-thumbnail', url: editPost.thumbnailUrl }
-      : null,
-  };
-}, [editPost]);
+    //공통
+    const [title, setTitle] = useState(() => initialValues?.title ?? '');
+    const [selectedTags, setSelectedTags] = useState<number[]>(() => initialValues?.tags ?? []);
+    const [organizer, setOrganizer] = useState(() => initialValues?.organizer ?? '');
+    const [target, setTarget] = useState(() => initialValues?.target ?? '');
+    const [applyUrl, setApplyUrl] = useState(() => initialValues?.applyUrl ?? '');
+    const [contextTitle, setContextTitle] = useState(() => initialValues?.contextTitle ?? '');
+    const [context, setContext] = useState(() => initialValues?.context ?? '');
 
-
-    const currentYear = initial.currentYear;
-
-    const [title, setTitle] = useState(() => initial.title);
-    // external 전용
-    const [announceYear, setAnnounceYear] = useState(() => initial.announceYear);
-    const [announceMonth, setAnnounceMonth] = useState(() => initial.announceMonth);
-    const [announceDay, setAnnounceDay] = useState(() => initial.announceDay);
-    const [showAnnounceYearDropdown, setShowAnnounceYearDropdown] = useState(false);
-    const [showAnnounceMonthDropdown, setShowAnnounceMonthDropdown] = useState(false);
-    const [showAnnounceDayDropdown, setShowAnnounceDayDropdown] = useState(false);
+    const [startYear, setStartYear] = useState(() => initialValues?.startYear ?? currentYear);
+    const [startMonth, setStartMonth] = useState(() => initialValues?.startMonth ?? 1);
+    const [startDay, setStartDay] = useState(() => initialValues?.startDay ?? 1);
     
-    // 공통
-    const [startYear, setStartYear] = useState(() => initial.startYear);
-    const [startMonth, setStartMonth] = useState(() => initial.startMonth);
-    const [startDay, setStartDay] = useState(() => initial.startDay);
-
-    const [endYear, setEndYear] = useState(() => initial.endYear);
-    const [endMonth, setEndMonth] = useState(() => initial.endMonth);
-    const [endDay, setEndDay] = useState(() => initial.endDay);
-
-    const [target, setTarget] = useState(() => initial.target);
-    const [organizer, setOrganizer] = useState(() => initial.organizer);
-    const [applyUrl, setApplyUrl] = useState(() => initial.applyUrl);
-    const [descriptionTitle, setDescriptionTitle] = useState(() => initial.descriptionTitle);
-    const [descriptionBody, setDescriptionBody] = useState(() => initial.descriptionBody);
-
-    const [thumbnailUrl, setThumbnailUrl] = useState<{ id: string; url: string } | null>(
-        () => initial.thumbnailUrl
-    );
-
-    const [selectedTags, setSelectedTags] = useState<string[]>(
-        () => initial.selectedTags
-    );
-
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [endYear, setEndYear] = useState(() => initialValues?.endYear ?? currentYear);
+    const [endMonth, setEndMonth] = useState(() => initialValues?.endMonth ?? 12);
+    const [endDay, setEndDay] = useState(() => initialValues?.endDay ?? 31);
 
     const [showStartYearDropdown, setShowStartYearDropdown] = useState(false);
     const [showStartMonthDropdown, setShowStartMonthDropdown] = useState(false);
@@ -127,14 +154,33 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const [showEndYearDropdown, setShowEndYearDropdown] = useState(false);
     const [showEndMonthDropdown, setShowEndMonthDropdown] = useState(false);
     const [showEndDayDropdown, setShowEndDayDropdown] = useState(false);
+    
+    //external
+    const [announceYear, setAnnounceYear] = useState(() => initialValues?.announceYear ?? currentYear);
+    const [announceMonth, setAnnounceMonth] = useState(() => initialValues?.announceMonth ?? 1);
+    const [announceDay, setAnnounceDay] = useState(() => initialValues?.announceDay ?? 1);
+    const [showAnnounceYearDropdown, setShowAnnounceYearDropdown] = useState(false);
+    const [showAnnounceMonthDropdown, setShowAnnounceMonthDropdown] = useState(false);
+    const [showAnnounceDayDropdown, setShowAnnounceDayDropdown] = useState(false);
+    
+    //썸네일 
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+    const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string | null>(() => initialValues?.thumbnailUrl ?? null);
+    const [isThumbnailRemoved, setIsThumbnailRemoved] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const { prepareImage } = useImageUpload();
 
-    const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
+    const [isFileErrorOpen, setIsFileErrorOpen] = useState(false);
+    const [fileErrorMessage, setFileErrorMessage] = useState('');
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    const startDaysInMonth = useMemo(() => new Date(startYear, startMonth, 0).getDate(), [startYear, startMonth]);
-    const startDays = Array.from({ length: startDaysInMonth }, (_, i) => i + 1);
+    const startDays = useMemo(
+        () => Array.from({ length: daysInMonth(startYear, startMonth) }, (_, i) => i + 1),
+        [startYear, startMonth],
+    );
 
     const endDayOptions = useMemo(() => {
         const max = new Date(endYear, endMonth, 0).getDate();
@@ -150,131 +196,161 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
         return Array.from({ length: max - min + 1 }, (_, i) => min + i);
     }, [announceYear, announceMonth, startYear, startMonth, startDay]);
 
-    // 타입별 설정
-    const config = useMemo(() => {
-        if (type === 'external') {
-        return {
-            title: '대외활동',
-            field1Label: '모집 대상',
-            field1Placeholder: '내용 입력',
-            field2Label: '수상 발표',
-            imageLabel: '대표 이미지',
-            contentLabel: '공모전 개요',
-            contentPlaceholder: '공모전 개요 입력',
-            detailLabel: '공모전 상세 정보',
-            detailPlaceholder: '공모전 상세 입력',
-        };
-        } else {
-        return {
-            title: '취업정보',
-            field1Label: '채용 형태',
-            field1Placeholder: '내용 입력',
-            field2Label: '급여',
-            imageLabel: '대표 이미지',
-            contentLabel: '취업 정보 개요',
-            contentPlaceholder: '취업 정보 개요 입력',
-            detailLabel: '취업 정보 상세',
-            detailPlaceholder: '취업 정보 상세 입력',
-        };
-        }
-    }, [type]);
 
-    // 초기값 저장
-    const initialBase = useMemo(() => ({
-        title: initial.title,
-        target: initial.target,
-        organizer: initial.organizer,
-        applyUrl: initial.applyUrl,
-        descriptionTitle: initial.descriptionTitle,
-        descriptionBody: initial.descriptionBody,
-        startYear: initial.startYear,
-        startMonth: initial.startMonth,
-        startDay: initial.startDay,
-        endYear: initial.endYear,
-        endMonth: initial.endMonth,
-        endDay: initial.endDay,
-        selectedTags: initial.selectedTags,
-        thumbnailUrl: initial.thumbnailUrl?.url ?? null,
-    }), [initial]);
-
-
-    const initialDataExternal = useMemo(() => ({
-        ...initialBase,
-        announceYear: initial.announceYear,
-        announceMonth: initial.announceMonth,
-        announceDay: initial.announceDay,
-    }), [initialBase, initial]);
-
-    const initialDataJob = useMemo(() => ({
-        ...initialBase,
-    }), [initialBase, initial]);
-
-
-
-    // 변경사항 추적
-    const hasChanges = useMemo(() => {
-        const baseChanges =
-        title !== initialBase.title ||
-        target !== initialDataExternal.target ||
-        organizer !== initialBase.organizer ||
-        applyUrl !== initialBase.applyUrl ||
-        descriptionTitle !== initialBase.descriptionTitle ||
-        descriptionBody !== initialBase.descriptionBody ||
-        startYear !== initialBase.startYear ||
-        startMonth !== initialBase.startMonth ||
-        startDay !== initialBase.startDay ||
-        endYear !== initialBase.endYear ||
-        endMonth !== initialBase.endMonth ||
-        endDay !== initialBase.endDay ||
-        JSON.stringify(selectedTags) !== JSON.stringify(initialBase.selectedTags) ||
-        (thumbnailUrl?.url ?? null) !== (initialBase.thumbnailUrl ?? null)
-
-        if (type === 'external') {
-        return (
-            baseChanges ||
-            announceYear !== initialDataExternal.announceYear ||
-            announceMonth !== initialDataExternal.announceMonth ||
-            announceDay !== initialDataExternal.announceDay
-        );
-        } else {
-        return (
-            baseChanges
-        );
-        }
-    }, [title, organizer, applyUrl, descriptionTitle, descriptionBody, startYear, startMonth, startDay, endYear, endMonth, endDay, selectedTags, thumbnailUrl,
-        target, announceYear, announceMonth, announceDay, initialBase, initialDataExternal, initialDataJob, type]);
-
-    const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
-    const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
-
-    const isSubmitEnabled = title.trim().length > 0 && selectedTags.length > 0;
-
-    const handleThumbnailChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
+    const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
         if (!files || files.length === 0) return;
-
+        
         const file = files[0];
-        const result = prepareImage(file);
-        if (!result) return;
 
-        if (thumbnailUrl) {
-        URL.revokeObjectURL(thumbnailUrl.url);
+        // 타입 체크
+        if (!ALLOWED_TYPES.has(file.type)) {
+            setFileErrorMessage('이미지는 webp / jpeg / png 형식만 업로드 가능합니다.');
+            setIsFileErrorOpen(true);
+            e.target.value = '';
+            return;
         }
 
-        setThumbnailUrl({
-        id: `${file.name}-${file.lastModified}`,
-        url: result.previewUrl,
-        });
+        // 용량 체크
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            setFileErrorMessage(`이미지가 파일 용량 제한을 초과합니다. (최대 ${MAX_SIZE_MB}MB)`);
+            setIsFileErrorOpen(true);
+            e.target.value = '';
+            return;
+        }
 
-        event.target.value = '';
+        const prepared = prepareFile(file);
+            if (!prepared) {
+            setFileErrorMessage('파일을 업로드할 수 없어요. 형식/용량을 확인해주세요.');
+            setIsFileErrorOpen(true);
+            e.target.value = '';
+            return;
+        }
+
+        // 기존 미리보기 정리
+        if (thumbnailPreview) {
+            revokeUrl(thumbnailPreview);
+        }
+
+        setThumbnailFile(prepared.file);
+        setThumbnailPreview(prepared.previewUrl);
+        setExistingThumbnailUrl(null);
+        setIsThumbnailRemoved(false);
+        e.target.value = '';
     };
 
     const handleRemoveThumbnail = () => {
-        if (thumbnailUrl) {
-        URL.revokeObjectURL(thumbnailUrl.url);
-        setThumbnailUrl(null);
+        if (thumbnailPreview) {
+            revokeUrl(thumbnailPreview);
         }
+        setThumbnailFile(null);
+        setThumbnailPreview(null);
+        setExistingThumbnailUrl(null);
+        setIsThumbnailRemoved(true);
     };
+
+    const displayThumbnail = thumbnailPreview ?? existingThumbnailUrl;
+
+    // 타입별 설정
+    const config = useMemo(() => {
+        if (type === 'external') {
+            return {
+                title: '대외활동',
+                field1Label: '모집 대상',
+                field1Placeholder: '내용 입력',
+                field2Label: '수상 발표',
+                imageLabel: '대표 이미지',
+                contentLabel: '공모전 개요',
+                contentPlaceholder: '공모전 개요 입력',
+                detailLabel: '공모전 상세 정보',
+                detailPlaceholder: '공모전 상세 입력',
+            };
+        } else {
+            return {
+                title: '취업정보',
+                field1Label: '채용 형태',
+                field1Placeholder: '내용 입력',
+                field2Label: '급여',
+                imageLabel: '대표 이미지',
+                contentLabel: '취업 정보 개요',
+                contentPlaceholder: '취업 정보 개요 입력',
+                detailLabel: '취업 정보 상세',
+                detailPlaceholder: '취업 정보 상세 입력',
+            };
+        }
+    }, [type]);
+
+    const isSubmitEnabled = 
+        title.trim().length > 0 &&
+        selectedTags.length > 0 &&
+        organizer.trim().length > 0 &&
+        target.trim().length > 0 &&
+        applyUrl.trim().length > 0 &&
+        contextTitle.trim().length > 0 &&
+        context.trim().length > 0 &&
+        (thumbnailFile !== null || existingThumbnailUrl !== null) &&
+        (type === 'job' || (announceYear > 0 && announceMonth > 0 && announceDay > 0));
+
+    const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
+    const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에는 삭제할 수 없습니다.';
+
+    const submitMutation = useMutation({
+        mutationFn: async () => {
+            if (!userId) throw new Error('로그인이 필요합니다.');
+
+            const category: ActivityCategory = typeToCategory[type];
+
+            // 썸네일 업로드
+            let thumbnailKey: string | null = null;
+            if (thumbnailFile) {
+                const presignRes = await getActivityThumbnailPresignUrl(userId, {
+                    contentType: thumbnailFile.type,
+                    size: thumbnailFile.size,
+                    originalFilename: thumbnailFile.name,
+                });
+                await uploadFileToS3(
+                    presignRes.data.uploadUrl,
+                    thumbnailFile,
+                    presignRes.data.requiredHeaders,
+                );
+                thumbnailKey = presignRes.data.fileKey;
+            } else if (isThumbnailRemoved) {
+                thumbnailKey = "";
+            }
+
+            const payload: ActivityAdminCreateRequest = {
+                category,
+                title: title.trim(),
+                tagIds: selectedTags,
+                organizer: organizer.trim(),
+                targetDescription: target.trim(),
+                applyStartDate: toDateStr(startYear, startMonth, startDay),
+                applyEndDate: toDateStr(endYear, endMonth, endDay),
+                resultAnnounceDate: type === 'external' 
+                    ? toDateStr(announceYear, announceMonth, announceDay)
+                    : null,
+                officialUrl: applyUrl.trim(),
+                thumbnailKey,
+                contextTitle: contextTitle.trim(),
+                content: context.trim(),
+            };
+
+            if (isEditMode && activityId) {
+                const updatePayload: ActivityAdminUpdateRequest = {
+                    ...payload,
+                };
+                return updateAdminActivity(userId, activityId, updatePayload);
+            }
+            return createAdminActivity(userId, payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['activityList'] });
+            if (isEditMode && activityId) {
+                queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+            }
+            navigate(-1);
+        },
+    });
 
     const handleSubmit = () => {
         if (!isSubmitEnabled) return;
@@ -282,54 +358,38 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     };
 
     const handleConfirm = () => {
-        const baseData = {
-        id: postId,
-        title,
-        target,
-        organizer,
-        applyUrl,
-        descriptionBlocks: {
-            title: descriptionTitle,
-            body: descriptionBody,
-        },
-        applyPeriod: {
-            start: `${startYear}-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
-            end: `${endYear}-${String(endMonth).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`,
-        },
-        categories: selectedTags,
-        thumbnailUrl: thumbnailUrl?.url,
-        };
-
-        if (type === 'external') {
-        console.log({
-            ...baseData,
-            announceDate: `${announceYear}-${String(announceMonth).padStart(2, '0')}-${String(announceDay).padStart(2, '0')}`,
-        });
-        } else {
-        console.log({
-            ...baseData,
-        });
-        }
-        
-        navigate(-1);
+        setIsConfirmOpen(false);
+        submitMutation.mutate();
     };
 
     const handleCancelClick = () => {
-        if (hasChanges) {
-        setIsCancelWarningOpen(true);
-        return;
+        if (!isEditMode && !isSubmitEnabled) {
+            navigate(-1);
+            return;
         }
-        navigate(-1);
+        setIsCancelWarningOpen(true);
     };
 
-    const handleCancelConfirm = () => {
-        setIsCancelWarningOpen(false);
-        navigate(-1);
-    };
+    if (isEditMode && isLoadingEdit) {
+        return (
+        <PopUp
+            type="loading"
+            isOpen={true}
+        />
+        );
+    }
 
-    const handleCancelDismiss = () => {
-        setIsCancelWarningOpen(false);
-    };
+    if (isErrorEdit) {
+    return (
+      <PopUp
+        type="error"
+        title="정보를 불러올 수 없습니다."
+        isOpen={true}
+        rightButtonText="확인"
+        onClick={() => navigate(-1)}
+      />
+    );
+  }
 
     return (
         <HeaderLayout
@@ -341,12 +401,12 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         <button
                             type='button'
                             className={`text-b-16-hn transition-colors ${
-                                    isSubmitEnabled ? 'text-primary' : 'text-gray-650'
+                                    isSubmitEnabled && !submitMutation.isPending ? 'text-primary' : 'text-gray-650'
                                     }`}
                             onClick={handleSubmit}
-                            disabled={!isSubmitEnabled}
+                            disabled={!isSubmitEnabled || submitMutation.isPending}
                             >
-                        완료
+                        {submitMutation.isPending ? '저장 중...' : '완료'}
                         </button>
                     }
                 />
@@ -373,9 +433,13 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         {/* 태그 입력 */}
                         <div className='w-full flex flex-col px-[10px] py-[6px] border-t border-b border-gray-650'>
                             <FilterHeader
-                                activeFilters={selectedTags}
+                                activeFilters={selectedTags.map(id => tagIdToNameMap.get(id) ?? '').filter(Boolean)}
                                 onOpenFilter={() => setIsFilterOpen(true)}
-                                onRemoveFilter={(tag) => setSelectedTags((prev) => prev.filter((item) => item !== tag))} />
+                                onRemoveFilter={(tagName) => {
+                                    const tagId = tagNameToIdMap.get(tagName);
+                                    if (tagId) setSelectedTags((prev) => prev.filter((id) => id !== tagId));
+                                }} 
+                            />
                         </div>
                     </div>
 
@@ -592,7 +656,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         </div>
                     </div>
 
-                    {/* Field 2 (수상 발표 or 급여) */}
+                    {/*수상 발표*/}
                     {type === 'external' && (
                         <div className='flex flex-col gap-[10px]'>
                             <label className='text-sb-16-hn text-gray-900'>{config.field2Label}</label>
@@ -679,12 +743,21 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                     <div className='flex flex-col gap-[10px]'>
                         <label className='text-sb-16-hn text-gray-900'>{config.imageLabel}</label>
                         
-                        {thumbnailUrl ? (
+                        {displayThumbnail  ? (
                         <div className='relative w-full h-[200px]'>
-                            <img src={thumbnailUrl.url} alt='썸네일' className='w-full h-full rounded-[12px] object-cover' />
+                            <img 
+                                src={displayThumbnail ?? REPLACE_IMAGE} 
+                                alt='썸네일' 
+                                className='w-full h-full rounded-[12px] object-cover' 
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                    e.currentTarget.src = REPLACE_IMAGE;
+                                }}
+                            />
                             <button type='button' aria-label='사진 삭제'
-                            className='absolute top-[10px] right-[10px] w-[32px] h-[32px] bg-black/50 rounded-full flex items-center justify-center'
-                            onClick={handleRemoveThumbnail}>
+                                className='absolute top-[10px] right-[10px] w-[32px] h-[32px] bg-black/50 rounded-full flex items-center justify-center'
+                                onClick={handleRemoveThumbnail}
+                            >
                             <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'>
                                 <path d='M6 18L18 6M6 6L18 18' stroke='white' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
                             </svg>
@@ -694,11 +767,11 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         <button type='button' className='w-full p-[15px] flex items-center justify-center rounded-[5px] bg-gray-150 gap-[10px]'
                             onClick={() => fileInputRef.current?.click()}>
                             <Icon name='album'/>
-                            <span className='text-r-16 text-gray-650'>대표이미지 추가(png, jpg, jpeg)</span>
+                            <span className='text-r-16 text-gray-650 whitespace-pre-line'>{'대표이미지 추가\n(png, webp, jpeg)'}</span>
                         </button>
                         )}
                         
-                        <input ref={fileInputRef} type='file' accept='image/png, image/jpg, image/jpeg'
+                        <input ref={fileInputRef} type='file' accept='image/png, image/webp, image/jpeg'
                         className='hidden' onChange={handleThumbnailChange} />
                     </div>
 
@@ -706,7 +779,9 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                     <div className='flex flex-col gap-[10px]'>
                         <label className='text-sb-16-hn text-gray-900'>{config.contentLabel}</label>
                         <Card width='100%' height={100} className='px-[15px] py-[15px]'>
-                        <textarea value={descriptionTitle} onChange={(e) => setDescriptionTitle(e.target.value)}
+                        <textarea 
+                            value={contextTitle} 
+                            onChange={(e) => setContextTitle(e.target.value)}
                             placeholder={config.contentPlaceholder}
                             className='h-full w-full resize-none bg-transparent outline-none text-r-16-hn text-gray-750 placeholder:text-gray-650' />
                         </Card>
@@ -716,7 +791,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                     <div className='flex flex-col gap-[10px]'>
                         <label className='text-sb-16-hn text-gray-900'>{config.detailLabel}</label>
                         <Card width='100%' height={200} className='px-[15px] py-[15px]'>
-                        <textarea value={descriptionBody} onChange={(e) => setDescriptionBody(e.target.value)}
+                        <textarea value={context} onChange={(e) => setContext(e.target.value)}
                             placeholder={config.detailPlaceholder}
                             className='h-full w-full resize-none bg-transparent outline-none text-r-16-hn text-gray-750 placeholder:text-gray-650' />
                         </Card>
@@ -724,16 +799,47 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                 </section>
             </div>
 
-            <PopUp isOpen={isConfirmOpen} type='info' title={confirmTitle} content={confirmContent}
-                onLeftClick={() => setIsConfirmOpen(false)} onRightClick={handleConfirm} />
+        <PopUp
+            isOpen={isConfirmOpen}
+            type='info'
+            title={confirmTitle}
+            content={confirmContent}
+            onLeftClick={() => setIsConfirmOpen(false)}
+            onRightClick={handleConfirm}
+        />
+        <PopUp
+            isOpen={isCancelWarningOpen}
+            type='warning'
+            title='변경사항이 있습니다.\n나가시겠습니까?'
+            content='저장하지 않을 시 변경사항이 삭제됩니다.'
+            leftButtonText='나가기'
+            onLeftClick={() => { setIsCancelWarningOpen(false); navigate(-1); }}
+            onRightClick={() => setIsCancelWarningOpen(false)}
+        />
 
-            <PopUp isOpen={isCancelWarningOpen} type='warning'
-                title='변경사항이 있습니다.\n나가시겠습니까?' content='저장하지 않을 시 변경사항이 삭제됩니다.'
-                leftButtonText='나가기' onLeftClick={handleCancelConfirm} onRightClick={handleCancelDismiss} />
+        <PopUp
+            isOpen={isFileErrorOpen}
+            type="error"
+            title="업로드할 수 없는 파일입니다."
+            content={fileErrorMessage}
+            rightButtonText="확인"
+            onClick={() => setIsFileErrorOpen(false)}
+        />
 
-            <TagsFilterModal isOpen={isFilterOpen} tags={selectedTags} onClose={() => setIsFilterOpen(false)}
-                onSave={(next) => { setSelectedTags(next); setIsFilterOpen(false); }}
-                categories={TAG_CATEGORIES} allTags={MOCK_ALL_TAGS} />
+        <TagsFilterModal
+            isOpen={isFilterOpen}
+            tags={selectedTags.map(id => tagIdToNameMap.get(id) ?? '').filter(Boolean)}
+            onClose={() => setIsFilterOpen(false)}
+            onSave={(tagNames) => {
+                const tagIds = tagNames
+                    .map(name => tagNameToIdMap.get(name))
+                    .filter((id): id is number => id !== undefined);
+                setSelectedTags(tagIds);
+                setIsFilterOpen(false);
+            }}
+            categories={tagCategories}
+            allTags={allTags}
+        />
         </HeaderLayout>
     );
 };

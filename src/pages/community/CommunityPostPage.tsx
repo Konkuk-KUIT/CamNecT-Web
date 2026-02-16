@@ -666,6 +666,7 @@ const CommunityPostPage = () => {
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
               <button
                 type='button'
+                disabled={isPostMine}
                 className='flex items-center gap-[10px] text-left'
                 onClick={() =>
                   navigate(`/alumni/profile/${selectedPost.author.id}`, {
@@ -701,7 +702,7 @@ const CommunityPostPage = () => {
                   </div>
                 </div>
               </button>
-              <button
+              {!isPostMine && (<button
                 type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
                 onClick={() =>
@@ -718,7 +719,7 @@ const CommunityPostPage = () => {
                 }
               >
                 커피챗 보내기
-              </button>
+              </button>)}
             </div>
 
             <div className='flex flex-col gap-[20px]'>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
@@ -7,13 +7,15 @@ import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import BottomReact from './components/BottomReact';
-import {
-  activityLoggedInUser,
-  getActivityPostStatusLabel,
-  mapToActivityPost,
-} from '../../mock/activityCommunity';
 import type { ActivityPostStatus } from '../../types/activityPage/activityPageTypes';
 import { formatPostDisplayDate } from './utils/post';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getTags, getActivityDetail, deleteActivity, toggleActivityBookmark, closeActivity } from '../../api/activityApi';
+import { mapDetailToActivityPost } from './utils/activityMapper';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type OptionId = 'copy-url' | 'report-post' | 'edit-post' | 'delete-post';
 
@@ -25,35 +27,129 @@ type OptionItem = {
 
 const ActivityPostPage = () => {
   const { postId } = useParams();
-  const selectedPost = useMemo(() => mapToActivityPost(postId), [postId]);
+  const navigate = useNavigate();
+  const authUser = useAuthStore((state) => state.user);
+  const userId = authUser?.id ? parseInt(authUser.id) : null;
+  const activityId = postId ? parseInt(postId) : null;
 
-  return <ActivityPostContent key={selectedPost.id} selectedPost={selectedPost} />;
+  const { data: detailResponse, isLoading, isError } = useQuery({
+    queryKey: ['activityDetail', activityId],
+    queryFn: () => getActivityDetail(userId!, activityId!),
+    enabled: !!userId && !!activityId,
+  });
+
+  const { data: tagData } = useQuery({
+    queryKey: ['tags', 'DEFAULT'],
+    queryFn: () => getTags('DEFAULT'),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const tagIdToNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    tagData?.data.forEach(cat =>
+      cat.tags.forEach(tag => map.set(tag.id, tag.name))
+    );
+    return map;
+  }, [tagData]);
+
+  if (isLoading) {
+    return (
+      <PopUp
+        type="loading"
+        isOpen={true}
+      />
+    );
+  }
+
+  if (isError || !detailResponse?.data) {
+    return (
+      <PopUp
+        type="error"
+        title="게시글을 찾을 수 없습니다."
+        isOpen={true}
+        rightButtonText="확인"
+        onClick={() => navigate(-1)}
+      />
+    );
+  }
+
+  const selectedPost = mapDetailToActivityPost(detailResponse.data, tagIdToNameMap);
+
+  return (
+    <ActivityPostContent 
+      key={selectedPost.id} 
+      selectedPost={selectedPost}
+      isMine={detailResponse.data.isMine}
+      activityId={activityId!}
+      userId={userId!}
+      initialIsBookmarked={detailResponse.data.isBookmarked}
+      initialStatus={detailResponse.data.activity.status}
+    />
+  );
 };
 
 type ActivityPostContentProps = {
-  selectedPost: ReturnType<typeof mapToActivityPost>;
+  selectedPost: ReturnType<typeof mapDetailToActivityPost>;
+  isMine: boolean;
+  activityId: number;
+  userId: number;
+  initialIsBookmarked: boolean;
+  initialStatus: 'OPEN' | 'CLOSED';
 };
 
-const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
+const ActivityPostContent = ({ 
+  selectedPost,
+  isMine,
+  activityId,
+  userId,
+  initialIsBookmarked,
+  initialStatus,
+ }: ActivityPostContentProps) => {
   const navigate = useNavigate();
-  const currentUser = activityLoggedInUser;
+  const queryClient = useQueryClient();
 
-  const [status, setStatus] = useState<ActivityPostStatus>(selectedPost.status ?? 'OPEN');
+  const [status, setStatus] = useState<ActivityPostStatus>(initialStatus);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isCloseRecruitPopupOpen, setIsCloseRecruitPopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
-  const [isRecruitPopupOpen, setIsRecruitPopupOpen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(selectedPost.isBookmarked ?? false);
+  const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
+  
+  //북마크 토글
+  const bookmarkMutation = useMutation({
+    mutationFn: () => toggleActivityBookmark(userId, activityId),
+    onMutate: () => {
+      setIsBookmarked((prev) => !prev);
+    },
+    onError: () => {
+      setIsBookmarked((prev) => !prev); //낙관적 업데이트
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+    },
+  });
 
-  const handleBookmarkToggle = (checked: boolean) => {
-    setIsBookmarked(checked);
-  };
+  //삭제 -> 동아리/스터디에서만 사용됨
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteActivity(userId, activityId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+      navigate(-1);
+    },
+  });
 
-  const isPostMine = selectedPost.author.id === currentUser.id;
-  const statusLabel = getActivityPostStatusLabel(status);
+  //모집 중지
+  const closeMutation = useMutation({
+    mutationFn: () => closeActivity(userId, activityId),
+    onSuccess: () => {
+      setStatus('CLOSED');
+      queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
+      queryClient.invalidateQueries({ queryKey: ['activityList'] });
+    },
+  });
 
-  const optionItems: OptionItem[] = isPostMine
+  const optionItems: OptionItem[] = isMine
     ? [
         { id: 'edit-post', icon: 'edit', label: '게시글 수정' },
         { id: 'delete-post', icon: 'delete', label: '게시글 삭제' },
@@ -65,7 +161,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
 
   const handleOptionClick = async (item: OptionItem) => {
     if (item.id === 'copy-url') {
-      const postUrl = `${window.location.origin}/activity/post/${selectedPost.id}`;
+      const postUrl = `${window.location.origin}/activity/post/${activityId}`;
       try {
         await navigator.clipboard.writeText(postUrl);
       } catch {
@@ -79,27 +175,21 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         document.body.removeChild(textarea);
       }
     }
-
-    if (item.id === 'report-post') {
-      setIsReportPopupOpen(true);
-    }
-
-    if (item.id === 'edit-post') {
-      navigate(`/activity/edit/${selectedPost.id}`);
-    }
-
-    if (item.id === 'delete-post') {
-      setIsDeletePopupOpen(true);
-    }
-
+    if (item.id === 'report-post') setIsReportPopupOpen(true);
+    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`);
+    if (item.id === 'delete-post') setIsDeletePopupOpen(true);
     setIsOptionOpen(false);
   };
+
+  const statusLabel = status === 'CLOSED' ? '모집 완료' : '모집 중';
+
 
   return (
     <HeaderLayout
       headerSlot={
         <MainHeader
           title='대외활동'
+          leftAction={{onClick: () => navigate('/activity')}}
           rightActions={[
             { icon: 'option', onClick: () => setIsOptionOpen(true), ariaLabel: '게시글 옵션 열기' },
           ]}
@@ -143,39 +233,68 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
             </div>
 
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
-              <div className='flex items-center gap-[10px]'>
-                {selectedPost.author.profileImageUrl ? (
-                  <img
-                    src={selectedPost.author.profileImageUrl}
-                    alt={`${selectedPost.author.name} 프로필`}
-                    className='h-[32px] w-[32px] rounded-full object-cover'
-                  />
-                ) : (
-                  <div className='h-[32px] w-[32px] rounded-full bg-[#ECECEC]' aria-hidden='true' />
-                )}
-                <div className='flex flex-col gap-[4px]'>
-                  <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
-                    {selectedPost.author.name}
-                  </div>
-                  <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major} {selectedPost.author.studentId}학번
-                  </div>
-                </div>
-              </div>
               <button
                 type='button'
+                disabled={isMine}
+                className='flex items-center text-left'
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
+              >
+                <div className='flex items-center gap-[10px]'>
+                  <img
+                    src={selectedPost.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
+                    alt={`${selectedPost.author.name} 프로필`}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null; //이미지 깨짐 방지
+                      e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                    }}
+                    className='h-[32px] w-[32px] rounded-full object-cover'
+                  />
+                  <div className='flex flex-col gap-[4px]'>
+                    <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
+                      {selectedPost.author.name}
+                    </div>
+                    <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
+                      {selectedPost.author.major} {selectedPost.author.studentId.slice(2,4)}학번
+                    </div>
+                  </div>
+                </div>
+              </button>
+              {!isMine && (<button
+                type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
-                onClick={() => navigate(`/alumni/profile/${selectedPost.author.id}`)}
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}?coffeeChat=1`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
               >
                 커피챗 보내기
-              </button>
+              </button>)}
             </div>
 
             <div className='flex flex-col gap-[20px]'>
-              <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)]'>
+              <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>
                 {selectedPost.content}
               </div>
-              {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
+              {selectedPost.postImages && selectedPost.postImages.length > 0 && (
                 <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
                   <div className='flex w-max gap-[5px] pr-[20px]'>
                     {selectedPost.postImages.map((imageUrl: string, index: number) => {
@@ -203,7 +322,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
                     })}
                   </div>
                 </div>
-              ) : null}
+              )}
               <div className='flex flex-wrap gap-[5px]'>
                 {selectedPost.categories.map((category: string) => (
                   <Category key={category} label={category} />
@@ -216,11 +335,11 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
       </div>
 
       <BottomReact
-        isMine={isPostMine}
+        isMine={isMine}
         status={status}
         isBookmarked={isBookmarked}
-        onBookmarkToggle={handleBookmarkToggle}
-        onOpenCompletePopup={() => setIsRecruitPopupOpen(true)}
+        onBookmarkToggle={() => bookmarkMutation.mutate()}
+        onOpenCompletePopup={() => setIsCloseRecruitPopupOpen(true)}
       />
 
       <BottomSheetModal isOpen={isOptionOpen} onClose={() => setIsOptionOpen(false)} height='auto'>
@@ -244,15 +363,12 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
       </BottomSheetModal>
 
       <PopUp
-        isOpen={isRecruitPopupOpen}
+        isOpen={isCloseRecruitPopupOpen}
         type='info'
         title='모집을 완료하시겠습니까?'
-        content={'모집 완료 후에는 다시 모집 중 상태로\n변경할 수 없습니다.'}
-        onLeftClick={() => setIsRecruitPopupOpen(false)}
-        onRightClick={() => {
-          setStatus('CLOSED');
-          setIsRecruitPopupOpen(false);
-        }}
+        content={'모집 완료 후에는 다시 모집 중 상태로 변경할 수 없습니다.'}
+        onLeftClick={() => setIsCloseRecruitPopupOpen(false)}
+        onRightClick={() => {setIsCloseRecruitPopupOpen(false); closeMutation.mutate();}}
       />
 
       <PopUp
@@ -260,7 +376,7 @@ const ActivityPostContent = ({ selectedPost }: ActivityPostContentProps) => {
         type='warning'
         title='정말 삭제하시겠습니까?'
         content='삭제된 내용은 복구 불가능합니다.'
-        onLeftClick={() => setIsDeletePopupOpen(false)}
+        onLeftClick={() => {setIsDeletePopupOpen(false); deleteMutation.mutate();}}
         onRightClick={() => setIsDeletePopupOpen(false)}
       />
 
