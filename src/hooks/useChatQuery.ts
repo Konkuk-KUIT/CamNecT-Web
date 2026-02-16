@@ -42,7 +42,7 @@ export const useChatRooms = (type: ChatRoomListItemType) => {
     const { user } = useAuthStore(); // 1. 유저 정보 가져오기 
     const { setTotalUnreadCount } = useChatStore();
 
-    return useQuery<ChatRoomListItem[]>({
+    return useQuery({
         queryKey: ['chatRooms', user?.id, type], // 데이터 고유이름 (캐싱용)
         queryFn: async () => {
 
@@ -55,21 +55,24 @@ export const useChatRooms = (type: ChatRoomListItemType) => {
             setTotalUnreadCount(response.data.totalUnreadCount);
 
             // 4. API 응답 데이터를 UI에서 사용하는 형식으로 변환 (Mapper)
-            return response.data.chatRoomList.map((room): ChatRoomListItem => ({
-                roomId: String(room.roomId),
-                type: type,
-                partner: {
-                    id: String(room.opponentId), 
-                    name: room.opponentName,
-                    major: room.opponentMajor,
-                    studentId: room.opponentStudentYear,
-                    profileImg: room.opponentProfileImgUrl,
-                },
-                lastMessage: room.lastMessage,
-                lastMessageDate: room.lastMessageTime,
-                unreadCount: room.unreadCount,
-                isClosed: room.closed,
-            }));
+            return {
+                chatRooms: response.data.chatRoomList.map((room): ChatRoomListItem => ({
+                    roomId: String(room.roomId),
+                    type: type,
+                    partner: {
+                        id: String(room.opponentId), 
+                        name: room.opponentName,
+                        major: room.opponentMajor,
+                        studentId: room.opponentStudentYear,
+                        profileImg: room.opponentProfileImgUrl,
+                    },
+                    lastMessage: room.lastMessage,
+                    lastMessageDate: room.lastMessageTime,
+                    unreadCount: room.unreadCount,
+                    isClosed: room.closed,
+                })),
+                requestExists: response.data.requestExists
+            };
         },
         enabled: !!user?.id // 유저 ID가 있을 때만 실행
     });

@@ -24,6 +24,7 @@ export interface ChatRoomListResponse {
     data: {
         chatRoomList: ChatRoomInfo[];
         totalUnreadCount: number;
+        requestExists: boolean;
     };
 }
 
