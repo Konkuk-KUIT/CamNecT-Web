@@ -209,8 +209,8 @@ export const RecruitDetailPage = () => {
                         <div className='flex items-center gap-[10px]'>
                             <div className='h-[32px] w-[32px] rounded-full overflow-hidden'>
                                 <img 
-                                    src={recruitDetail.profilePreview.profileImageKey ?? DEFAULT_PROFILE_IMAGE}
-                                    alt={`${recruitDetail.profilePreview.userName} 프로필`}
+                                    src={recruitDetail.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
+                                    alt={`${recruitDetail.author.name} 프로필`}
                                     onError={(e) => {
                                         e.currentTarget.onerror = null; //이미지 깨짐 방지
                                         e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
@@ -220,10 +220,10 @@ export const RecruitDetailPage = () => {
                             </div>
                             <div className='flex flex-col gap-[3px]'>
                                 <div className='text-b-14-hn text-gray-900'>
-                                    {recruitDetail.profilePreview.userName}
+                                    {recruitDetail.author.name}
                                 </div>
                                 <div className='text-r-12-hn text-gray-750'>
-                                    {recruitDetail.profilePreview.majorName} {recruitDetail.profilePreview.studentNo.slice(2,4)}학번
+                                    {recruitDetail.author.majorName} {recruitDetail.author.studentNo.slice(2,4)}학번
                                 </div>
                             </div>
                         </div>

@@ -61,10 +61,10 @@ const buildPost = (
   location: overrides.location,
   target: overrides.target,
   applyPeriod: overrides.applyPeriod ?? null,
-  announceDate: overrides.announceDate,
+  announceDate: overrides.announceDate ?? null,
   applyUrl: overrides.applyUrl,
-  descriptionTitle: overrides.descriptionTitle,
-  descriptionBody: overrides.descriptionBody,
+  contextTitle: overrides.contextTitle,
+  context: overrides.context,
 });
 
 const baseActivityPosts: ActivityPostDetail[] = [
@@ -165,8 +165,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-01T00:00:00.000Z',
     applyUrl: 'https://example.com/contest/data-2025',
     thumbnailUrl: sampleThumbnail2,
-    descriptionTitle: '공모 주제',
-    descriptionBody: '공공데이터를 활용한 혁신적인 서비스 아이디어',
+    contextTitle: '공모 주제',
+    context: '공공데이터를 활용한 혁신적인 서비스 아이디어',
   }),
   buildPost({
     id: 'external-2',
@@ -184,8 +184,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     },
     applyUrl: 'https://example.com/supporters/2025',
     thumbnailUrl: sampleThumbnail3,
-    descriptionTitle: '설명',
-    descriptionBody: '설명',
+    contextTitle: '설명',
+    context: '설명',
   }),
   buildPost({
     id: 'external-3',
@@ -205,8 +205,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     announceDate: '2026-04-15T00:00:00.000Z',
     applyUrl: 'https://example.com/design-challenge',
     thumbnailUrl: sampleThumbnail1,
-    descriptionTitle: '설명',
-    descriptionBody: '설명',
+    contextTitle: '설명',
+    context: '설명',
   }),
   buildPost({
     id: 'job-1',
@@ -225,8 +225,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: true,
     thumbnailUrl: sampleThumbnail2,
-    descriptionTitle: '기계사업본부 신입/경력사원 모집',
-    descriptionBody: '설명',
+    contextTitle: '기계사업본부 신입/경력사원 모집',
+    context: '설명',
   }),
   buildPost({
     id: 'job-2',
@@ -245,8 +245,8 @@ const baseActivityPosts: ActivityPostDetail[] = [
     applyUrl: 'https://example.com/contest/data-2025',
     isBookmarked: false,
     thumbnailUrl: sampleThumbnail1,
-    descriptionTitle: 'Customer Engineer - 반도체 장비 엔지니어 채용(학사)',
-    descriptionBody: '설명',
+    contextTitle: 'Customer Engineer - 반도체 장비 엔지니어 채용(학사)',
+    context: '설명',
   }),
 ];
 
