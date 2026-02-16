@@ -72,13 +72,11 @@ export const createActivity = async (
 
 // 대외활동/취업정보 등록 (관리자) [POST] (/api/activity/admin)
 export const createAdminActivity = async (
-  userId: number,
   data: ActivityAdminCreateRequest,
 ): Promise<ActivityAdminCreateResponse> => {
   const response = await axiosInstance.post<ActivityAdminCreateResponse>(
     '/api/activity/admin',
     data,
-    { params: { userId } },
   );
   return response.data;
 };
