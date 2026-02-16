@@ -2,7 +2,7 @@ import type { GifticonHomeRequest, GifticonHomeResponse, GifticonProductRequest,
 import { axiosInstance } from "./axiosInstance";
 
 // 기프티콘 샵 홈 조회 [GET] (/api/gifticons/home)
-export const getGifticonHome = async (params: GifticonHomeRequest): Promise<GifticonHomeResponse> => {
+export const viewGifticonList = async (params: GifticonHomeRequest): Promise<GifticonHomeResponse> => {
     
     const response = await axiosInstance.get<GifticonHomeResponse>(
         "/api/gifticons/home",
@@ -11,8 +11,8 @@ export const getGifticonHome = async (params: GifticonHomeRequest): Promise<Gift
     return response.data;
 };
 
-// 상품 상세 조회 [GET] (/api/gifticons/productsq/{productId})
-export const getGifticonProduct = async (params: GifticonProductRequest): Promise<GifticonProductResponse> => {
+// 상품 상세 조회 [GET] (/api/gifticons/products/{productId})
+export const viewGifticonProduct = async (params: GifticonProductRequest): Promise<GifticonProductResponse> => {
     const { productId } = params;
     
     const response = await axiosInstance.get<GifticonProductResponse>(`/api/gifticons/products/${productId}`);
