@@ -81,18 +81,27 @@ const ActivityListTab = ({
     return map;
   }, [tagData]);
 
-  // TagsFilterModal에 넘길 데이터 (API 응답 → UI 타입 변환)
+  //TagsFilterModal에 넘길 데이터
   const tagCategories = useMemo(() => {
     if (!tagData?.data) return [];
     
     const categories = tagData.data.map(mapApiTagCategoryToUiTagCategory);
     
-    // showRecruitStatus가 true이면 "모집 상태" 카테고리를 맨 위로
+    //showRecruitStatus가 true이면 모집 상태 카테고리를 맨 위로
     if (showRecruitStatus) {
-      const recruitStatusIndex = categories.findIndex(cat => cat.id === "8");
+      const recruitStatusIndex = tagData.data.findIndex(cat => cat.categoryId === 8);
       if (recruitStatusIndex > 0) {
-        const recruitStatusCategory = categories.splice(recruitStatusIndex, 1)[0];
-        categories.unshift(recruitStatusCategory);
+        const reordered = [...tagData.data];
+        const recruitStatusCategory = reordered.splice(recruitStatusIndex, 1)[0];
+        
+        //모집 태그 순서 변경
+        const modifiedRecruitStatus = {
+          ...recruitStatusCategory,
+          tags: [...recruitStatusCategory.tags].reverse(),
+        };
+        
+        reordered.unshift(modifiedRecruitStatus);
+        return reordered.map(mapApiTagCategoryToUiTagCategory);
       }
     }
     

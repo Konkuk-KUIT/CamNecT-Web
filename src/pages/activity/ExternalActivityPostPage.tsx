@@ -70,7 +70,7 @@ export const ExternalActivityPostPage = () => {
   const selectedPost = useMemo(() => {
     if (!detailResponse?.data) return null;
     return mapDetailToActivityPost(detailResponse.data, tagIdToNameMap);
-  }, [detailResponse]);
+  }, [detailResponse, tagIdToNameMap]);
 
   //팀원 모집 중지
   const closeMutation = useMutation({

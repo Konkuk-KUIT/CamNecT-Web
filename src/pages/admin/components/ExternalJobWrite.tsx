@@ -67,6 +67,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     });
 
     const editPost = editDetailResponse?.data;
+    const currentYear = new Date().getFullYear();
 
     //초기값
     const initialValues = useMemo(() => {
@@ -98,7 +99,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
             announceMonth: announceDate ? announceDate.getMonth() + 1 : 1,
             announceDay: announceDate?.getDate() ?? 1,
         };
-    }, [editPost, type]);
+    }, [editPost, type, currentYear]);
 
     //태그 목록 조회
     const { data: tagData } = useQuery({
@@ -128,7 +129,6 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
 
     //날짜 초기값
-    const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
     //공통
