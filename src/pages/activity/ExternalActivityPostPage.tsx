@@ -266,7 +266,7 @@ export const ExternalActivityPostPage = () => {
         <div className='flex w-full justify-center bg-white'>
             <div className='flex w-full max-w-[720px] flex-col'>
                 {/* 썸네일 이미지 */}
-                    <div className='w-full relative'>
+                    <div className='w-full relative min-h-[200px] max-h-[500px]'>
                         <img
                             src={thumbnailUrl ?? REPLACE_IMAGE}
                             alt={selectedPost.title}
@@ -343,16 +343,24 @@ export const ExternalActivityPostPage = () => {
                     </div>
 
                     {/* 공식 홈페이지 버튼 */}
-                    {selectedPost.applyUrl && (
-                    <a
-                        href={selectedPost.applyUrl}
+                    {selectedPost.applyUrl && (() => {
+                    //URL에 프로토콜이 없으면 https:// 추가
+                    const url = selectedPost.applyUrl;
+                    const finalUrl = url.startsWith('http://') || url.startsWith('https://') 
+                      ? url 
+                      : `https://${url}`;
+                    
+                    return (
+                      <a
+                        href={finalUrl}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='px-[40px] py-[15px] text-center flex items-center justify-center w-full rounded-full bg-primary text-white text-b-16-hn'
-                    >
+                      >
                         공식 홈페이지에서 신청하기
-                    </a>
-                    )}
+                      </a>
+                    );
+                  })()}
                 </section>
 
                 {/* 탭 */}
