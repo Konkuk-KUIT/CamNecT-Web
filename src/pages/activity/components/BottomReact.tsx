@@ -24,7 +24,7 @@ const BottomReact = ({
         className='mx-auto flex w-full max-w-[720px] items-center gap-[clamp(8px,2.2vw,10px)] px-[clamp(16px,6vw,25px)] py-[6px] box-border'
         style={{ paddingBottom: 'calc(15px + env(safe-area-inset-bottom))' }}
       >
-        <div className='flex flex-1 items-center'>
+        <div className='flex flex-1 items-center mt-[5px]'>
           {isMine ? (
             <button
               type='button'
@@ -35,7 +35,7 @@ const BottomReact = ({
               {isClosed ? '모집 완료됨' : '모집 완료하기'}
             </button>
           ) : (
-            <div className='text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] bg-[var(--ColorSub2,#F2FCF8)] text-[var(--ColorMain,#00C56C)]'>
+            <div className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] ${isClosed ? 'bg-gray-650 text-white' : 'bg-green-50 text-primary'}`}>
               {isClosed ? '모집 완료' : '모집 중'}
             </div>
           )}
