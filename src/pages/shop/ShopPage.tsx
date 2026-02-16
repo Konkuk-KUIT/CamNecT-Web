@@ -5,7 +5,7 @@ import { useToast } from '../../hooks/useToast';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { usePointStore } from '../../store/usePointStore';
-import { shopItems } from './data';
+import { useGifticonListQuery } from '../../hooks/useGifticonQuery';
 
 const formatPoint = (value: number) => value.toLocaleString('ko-KR');
 
@@ -13,6 +13,10 @@ export const ShopPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isOpen: isToastOpen, isFading: isToastFading, openToast } = useToast();
+
+  const { data: gifticonList} = useGifticonListQuery();
+  const shopItems = gifticonList?.shopItems ?? [];
+
   // 전역 포인트 표시
   const point = usePointStore((state) => state.point);
 

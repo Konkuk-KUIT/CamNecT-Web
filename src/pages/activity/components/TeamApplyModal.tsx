@@ -50,12 +50,10 @@ const TeamApplyModal = ({ isOpen, onClose, activityName, onSubmit }: TeamApplyMo
   const handleSubmit = async () => {
     if (!isSubmitEnabled) return;
     try {
-      const result = await onSubmit?.({ message });
-      if (result === false) return;
+      await onSubmit?.({ message });
+    } finally {
       setMessage(''); // 초기화
       onClose();
-    } catch {
-      // keep modal open on error
     }
   };
 

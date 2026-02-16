@@ -198,7 +198,7 @@ const TagsFilterModalContent = ({
             </div>
           </section>
 
-          {selectedTags.length < maxSelected && (
+          {selectedTags.length < maxSelected ? (
             <section className='min-h-0 flex-1 overflow-y-auto pb-[40px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
               <div className='flex w-full flex-col'>
                 {filteredExtraCategories.map((category) => (
@@ -251,6 +251,10 @@ const TagsFilterModalContent = ({
                 ))}
               </div>
             </section>
+          ) : (
+            <div className='flex flex-1 flex-col items-center justify-center gap-[10px] pb-[40px]'>
+              <p className='text-r-16 text-gray-650'>최대 {maxSelected}개까지만 선택 가능합니다.</p>
+            </div>
           )}
         </section>
     </div>

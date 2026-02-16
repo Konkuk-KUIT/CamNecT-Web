@@ -1,13 +1,11 @@
 import ActivityListTab from './ActivityListTab';
-import type { ActivityPost } from '../../../types/activityPage/activityPageTypes';
 
 type StudyTabProps = {
-  posts: ActivityPost[];
+  searchQuery?: string;
 };
 
-const StudyTab = ({ posts }: StudyTabProps) => {
-  return <ActivityListTab posts={posts} showRecruitStatus tab="study"/>;
+const StudyTab = ({ searchQuery }: StudyTabProps) => {
+  return <ActivityListTab showRecruitStatus tab='study' searchQuery={searchQuery} />;
 };
 
 export default StudyTab;
- 

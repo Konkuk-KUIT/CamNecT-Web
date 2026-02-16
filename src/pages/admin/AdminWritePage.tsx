@@ -1,11 +1,10 @@
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Icon from '../../components/Icon';
 import { Tabs, type TabItem } from '../../components/Tabs';
-import { getActivityPosts } from '../../mock/activityCommunity';
 import ExternalTab from '../activity/tabs/ExternalTab';
 import JobTab from '../activity/tabs/JobTab';
-import type { ActivityPost, ActivityPostTab } from '../../types/activityPage/activityPageTypes';
+import type { ActivityPostTab } from '../../types/activityPage/activityPageTypes';
 import { AdminFullLayout } from '../../layouts/AdminFullLayout';
 
 const tabItems: TabItem[] = [
@@ -13,54 +12,14 @@ const tabItems: TabItem[] = [
   { id: 'job', label: '취업정보' },
 ];
 
-const filterByQuery = (posts: ActivityPost[], query: string) => {
-  if (!query) return posts;
-  return posts.filter((post) => {
-    const title = post.title.toLowerCase();
-    const content = post.content ? post.content.toLowerCase() : '';
-    const categories = post.categories.some((category) =>
-      category.toLowerCase().includes(query),
-    );
-    return title.includes(query) || content.includes(query) || categories;
-  });
-};
-
 export const AdminWritePage = () => {
   const [activeTab, setActiveTab] = useState<ActivityPostTab>('external')
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-
-  const [posts] = useState<ActivityPost[]>(() => getActivityPosts());
-
-  const postsByTab = useMemo(() => {
-    return posts.reduce<Record<ActivityPostTab, ActivityPost[]>>(
-      (acc, post) => {
-        acc[post.tab].push(post);
-        return acc;
-      },
-      {
-        club: [],
-        study: [],
-        external: [],
-        job: [],
-      },
-    );
-  }, [posts]);
-
-  const filteredExternalPosts = useMemo(
-    () => filterByQuery(postsByTab.external, normalizedQuery),
-    [postsByTab.external, normalizedQuery],
-  );
-  const filteredJobPosts = useMemo(
-    () => filterByQuery(postsByTab.job, normalizedQuery),
-    [postsByTab.job, normalizedQuery],
-  );
-
   const renderTab = () => {
-    if (activeTab === 'external') return <ExternalTab posts={filteredExternalPosts} isAdmin={true}/>;
-    return <JobTab posts={filteredJobPosts} isAdmin={true}/>;
+    if (activeTab === 'external') return <ExternalTab searchQuery={searchQuery} isAdmin={true}/>;
+    return <JobTab searchQuery={searchQuery} isAdmin={true}/>;
   };
 
   return (
@@ -82,6 +41,7 @@ export const AdminWritePage = () => {
                 </button>
                 <input
                   type='text'
+                  enterKeyHint='search'
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder='제목, 내용, 태그, 검색'

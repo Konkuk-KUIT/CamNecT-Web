@@ -5,15 +5,16 @@ import { Tabs } from '../../components/Tabs';
 import { useChatRooms } from '../../hooks/useChatQuery';
 import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { ChatList } from './components/ChatList';
 import type { ChatRoomListItemType } from '../../types/coffee-chat/coffeeChatTypes';
+import { ChatList } from './components/ChatList';
 
 export const ChatListPage = () => {
   const [activeId, setActiveId] = useState<ChatRoomListItemType>('COFFEE_CHAT');
-  const { data: chatRooms = [], isLoading } = useChatRooms(activeId);
+  const { data, isLoading } = useChatRooms(activeId);
+  const chatRooms = data?.chatRooms ?? [];
+  const requestExists = data?.requestExists ?? false;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const unreadCount = 3; // 팀원 모집 전체 요청...?
 
   const navigate = useNavigate();
 
@@ -57,7 +58,7 @@ export const ChatListPage = () => {
           rightActions={[
             { icon: 'coffeeChat', onClick: () => navigate('/chat/requests') }
           ]}
-          showBadge={unreadCount > 0}
+          showBadge={requestExists}
         />
       }
     >
@@ -100,12 +101,14 @@ export const ChatListPage = () => {
             <ChatList 
               key={chatRoom.roomId} 
               chatRoom={chatRoom} 
+              isClosed={chatRoom.isClosed}
               searchQuery={searchQuery} 
               onClick={() => handleChatRoomClick(chatRoom.roomId)}
             />
           )) : filteredChatRoomList.map((chatRoom) => (
             <ChatList 
               key={chatRoom.roomId} 
+              isClosed={chatRoom.isClosed}
               chatRoom={chatRoom} 
               onClick={() => handleChatRoomClick(chatRoom.roomId)}
             />
