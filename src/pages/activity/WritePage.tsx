@@ -14,7 +14,7 @@ import {
   createActivity,
   updateActivity,
   getActivityDetail,
-  //getActivityThumbnailPresignUrl,
+  getActivityThumbnailPresignUrl,
   getActivityAttachmentsPresignUrl,
 } from '../../api/activityApi';
 import type { ActivityCategory } from '../../api-types/activityApiTypes';
@@ -37,7 +37,7 @@ type PhotoPreview = {
   url: string;
   file?: File;
   isExisting?: boolean;
-  key?: string;
+  fileKey?: string;
 }
 
 export const ActivityWritePage = () => {
@@ -52,7 +52,7 @@ export const ActivityWritePage = () => {
 
   const {prepareFile, revokeUrl} = useFileUpload({
     maxSizeMB: MAX_SIZE_MB,
-    allowedTypes: ['image/jpeg, image/webp, image/png'],
+    allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
   })
 
   //수정일 경우 기존 데이터 로드
@@ -80,7 +80,7 @@ export const ActivityWritePage = () => {
       photos: (attachment ?? []).map((a) => ({
         id: `existing-${a.id}`,
         url: a.fileUrl,
-        key: a.fileKey,
+        fileKey: a.fileKey,
         isExisting: true,
       })),
     };
@@ -143,7 +143,7 @@ export const ActivityWritePage = () => {
     for (const file of Array.from(files)) {
       //타입 체크
       if (!ALLOWED_TYPES.has(file.type)) {
-        errorMsg = '이미지는 jpg / jpeg / png 형식만 업로드 가능합니다.';
+        errorMsg = '이미지는 webp / jpeg / png 형식만 업로드 가능합니다.';
         continue;
       }
 
@@ -216,19 +216,35 @@ export const ActivityWritePage = () => {
       if (!boardType || !userId) throw new Error('필수 값 누락');
 
       const category: ActivityCategory = boardTypeToCategory[boardType];
-
       const tagIds = selectedTags;
 
-      // 2) 신규 파일
-      const newFilesInOrder: File[] = photoPreviews
+      //새로운 파일 추출
+      const newFiles: File[] = photoPreviews
         .filter((p) => !p.isExisting && p.file)
-        .map((p) => p.file!) as File[];
+        .map((p) => p.file!);
 
-      // 3) 신규 업로드: attachments presign
-      let uploadedNewKeysInOrder: string[] = [];
-      if (newFilesInOrder.length > 0) {
-        const presignRes = await getActivityAttachmentsPresignUrl(userId, {
-          items: newFilesInOrder.map((f) => ({
+      //새로운 파일 업로드
+      let uploadedNewKeys: string[] = [];
+      let thumbnailKeyFromUpload: string | null = null;
+      
+      if (newFiles.length > 0) {
+        //첫 번째 이미지를 thumbnail presign으로 업로드
+        const firstFile = newFiles[0];
+        const thumbnailPresignRes = await getActivityThumbnailPresignUrl(userId, {
+          contentType: firstFile.type,
+          size: firstFile.size,
+          originalFilename: firstFile.name,
+        });
+        await uploadFileToS3(
+          thumbnailPresignRes.data.uploadUrl,
+          firstFile,
+          thumbnailPresignRes.data.requiredHeaders,
+        );
+        thumbnailKeyFromUpload = thumbnailPresignRes.data.fileKey;
+
+        //모든 이미지를 attachments presign으로 업로드
+        const attachmentsPresignRes = await getActivityAttachmentsPresignUrl(userId, {
+          items: newFiles.map((f) => ({
             contentType: f.type,
             size: f.size,
             originalFilename: f.name,
@@ -237,28 +253,61 @@ export const ActivityWritePage = () => {
 
         // 업로드 실행
         await Promise.all(
-          presignRes.data.items.map((item, i) =>
-            uploadFileToS3(item.uploadUrl, newFilesInOrder[i], item.requiredHeaders),
+          attachmentsPresignRes.data.items.map((item, i) =>
+            uploadFileToS3(item.uploadUrl, newFiles[i], item.requiredHeaders),
           ),
         );
 
-        uploadedNewKeysInOrder = presignRes.data.items.map((item) => item.fileKey);
+        uploadedNewKeys = attachmentsPresignRes.data.items.map((item) => item.fileKey);
       }
 
-      // 4) 최종 attachmentKey
+      //최종 attachmentKey
       let newKeyCursor = 0;
       const finalAttachmentKeys: string[] = photoPreviews
         .map((p) => {
-          if (p.isExisting) return p.key ?? null;
-          // 신규는 업로드된 key를 순서대로 매칭
-          const k = uploadedNewKeysInOrder[newKeyCursor] ?? null;
-          newKeyCursor += 1;
-          return k;
+          if (p.isExisting && p.fileKey) return p.fileKey;
+          if (!p.isExisting) {
+            const key = uploadedNewKeys[newKeyCursor];
+            newKeyCursor += 1;
+            return key;
+          }
+          return null;
         })
         .filter((k): k is string => Boolean(k));
-      const attachmentKey = finalAttachmentKeys.length > 0 ? finalAttachmentKeys : null;
-      //썸네일=첫 번째 이미지
-      const thumbnailKey = finalAttachmentKeys.length > 0 ? finalAttachmentKeys[0] : null;
+
+      //thumbnailKey와 attachmentKey 결정
+      let thumbnailKey: string | null = null;
+      let attachmentKey: string[] | null = null;
+
+      if (isEditMode) {
+        const originalPhotoCount = initialValues?.photos.length ?? 0;
+        const currentPhotoCount = photoPreviews.length;
+
+        if (currentPhotoCount === 0 && originalPhotoCount > 0) {
+          //전체 삭제
+          thumbnailKey = '';
+          attachmentKey = [];
+        } else if (currentPhotoCount > 0) {
+          //변경 있을 때
+          const firstPhotoIsNew = !photoPreviews[0].isExisting;
+          const firstPhotoDeleted = originalPhotoCount > 0 && photoPreviews[0].id !== initialValues?.photos[0].id;
+          
+          if (firstPhotoIsNew || firstPhotoDeleted) {
+            //첫 번째 사진이 변경됨: 서버가 attachment[0]을 썸네일로 사용
+            thumbnailKey = '';
+          }
+          //첫 번째 사진 유지: thumbnailKey = null
+
+          attachmentKey = finalAttachmentKeys;
+        }
+        //변경 없음: 둘 다 null
+      } else {
+        //생성
+        if (thumbnailKeyFromUpload && finalAttachmentKeys.length > 0) {
+          thumbnailKey = thumbnailKeyFromUpload;
+          attachmentKey = finalAttachmentKeys;
+        }
+      }
 
       const payload = {
         category,
