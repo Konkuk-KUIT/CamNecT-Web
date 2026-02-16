@@ -154,10 +154,32 @@ const ActivityListTab = ({
 
   const allPosts = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) =>
+    let posts = data.pages.flatMap((page) =>
       page.data.content.map((item) => mapListItemToActivityPost(item, category)),
     );
-  }, [data, category]);
+
+    if (isExternalTab && sortExternalKey === 'deadline') {
+      const now = new Date();
+      const activePosts = posts.filter(post => {
+        // CLOSED 상태는 아래로
+        if (post.status === 'CLOSED') return false;
+        // 마감일 없으면 아래로
+        if (!post.deadline) return false;
+        // 마감 지났으면 아래로
+        const deadline = new Date(post.deadline);
+        return deadline >= now;
+      });
+      const expiredPosts = posts.filter(post => {
+        if (post.status === 'CLOSED') return true;
+        if (!post.deadline) return true;
+        const deadline = new Date(post.deadline);
+        return deadline < now;
+      });
+      posts = [...activePosts, ...expiredPosts];
+    }
+    
+    return posts;
+  }, [data, category, isExternalTab, sortExternalKey]);
 
   // 모집 상태 태그는 서버 파라미터가 없으므로 클라이언트 필터로 처리
   const filteredPosts = useMemo(() => {
