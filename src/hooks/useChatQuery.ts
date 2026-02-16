@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteAllChatRequest, deleteAllTeamRecruit, requestChatRespond, requestChatRoomOut, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
+import { deleteAllChatRequest, deleteAllTeamRecruit, requestChatRespond, requestChatRoomClose, requestChatRoomExit, viewChatRequestDetail, viewChatRequestList, viewChatRoomDetail, viewChatRoomList } from "../api/chat";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import type { ChatMessage, ChatRoomListItem, ChatRoomListItemType, ChatUser } from "../types/coffee-chat/coffeeChatTypes";
@@ -14,6 +14,8 @@ export interface ChatRoomDetailData {
         content: string;
     };
     messages: ChatMessage[];
+    closed: boolean;
+    opponentExited: boolean;
 }
 
 // 1-1. 전체 안 읽은 메시지 개수 조회 전용 쿼리
@@ -66,6 +68,7 @@ export const useChatRooms = (type: ChatRoomListItemType) => {
                 lastMessage: room.lastMessage,
                 lastMessageDate: room.lastMessageTime,
                 unreadCount: room.unreadCount,
+                isClosed: room.closed,
             }));
         },
         enabled: !!user?.id // 유저 ID가 있을 때만 실행
@@ -114,7 +117,9 @@ export const useChatRoom = (roomId: string) => {
                     createdAt: message.sendDate,
                     isRead: message.read,
                     readAt: message.readAt
-                }))
+                })),
+                closed: data.closed,
+                opponentExited: data.opponentExited,
             };
         },
         enabled: !!roomId && !!user?.id
@@ -249,14 +254,14 @@ export const useDeleteAllChatRequest = () => {
     });
 };
 
-// 8. 개별 채팅방 대화종료 API [PATCH] (/api/chat/room/{roomId}/out)
-export const useChatRoomOut = () => {
+// 8. 채팅방 대화종료 API [PATCH] (/api/chat/room/{roomId}/close)
+export const useChatRoomClose = () => {
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (variables: { roomId: number }) => 
-            requestChatRoomOut({
+            requestChatRoomClose({
                 userId: Number(user?.id),
                 ...variables
             }),
@@ -267,3 +272,20 @@ export const useChatRoomOut = () => {
     });
 };
     
+// 9. 채팅방 나가기 API [PATCH] (/api/chat/room/{roomId}/exit)
+export const useChatRoomExit = () => {
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (variables: { roomId: number }) => 
+            requestChatRoomExit({
+                userId: Number(user?.id),
+                ...variables
+            }),
+        onSuccess: () => {
+            // 채팅 목록 최신화
+            queryClient.invalidateQueries({ queryKey: ['chatRooms'] });
+        }
+    });
+};

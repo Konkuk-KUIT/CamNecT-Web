@@ -14,6 +14,8 @@ export interface ChatRoomInfo {
     lastMessage: string;
     lastMessageTime: string;
     unreadCount: number;
+    closed: boolean;
+    opponentExited: boolean;
 }
 
 export interface ChatRoomListResponse {
@@ -64,16 +66,30 @@ export interface ChatRoomDetailResponse {
         activityId: number;
         recruitmentId: number;
         chatList: ChatMessageInfo[];
+        closed: boolean;
+        opponentExited: boolean;
     };
 }
 
-// 개별 채팅방 나가기 DTO (/api/chat/room/{roomId}/out)
-export interface ChatRoomOutRequest {
+// 채팅 종료 DTO (/api/chat/room/{roomId}/close)
+export interface ChatRoomCloseRequest {
     roomId: number;
     userId: number;
 }
 
-export interface ChatRoomOutResponse {
+export interface ChatRoomCloseResponse {
+    status: number;
+    message: string;
+    data: string;
+}
+
+// 개별 채팅방 나가기 DTO (/api/chat/room/{roomId}/exit)
+export interface ChatRoomExitRequest {
+    roomId: number;
+    userId: number;
+}
+
+export interface ChatRoomExitResponse {
     status: number;
     message: string;
     data: string;

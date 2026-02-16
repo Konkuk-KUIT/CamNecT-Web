@@ -56,6 +56,7 @@ export interface ChatRoomListItem {
   
   unreadCount: number; // 0이면 뱃지 숨김, 1이상이면 초록색 원에 숫자 표시
   requestPostTitle?: string; // 팀원 모집 게시글 제목
+  isClosed?: boolean; // 대화 종료 여부
 }
 
 // 5. 커피챗 요청 수락/거절용 (Request)

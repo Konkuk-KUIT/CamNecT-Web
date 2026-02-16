@@ -100,12 +100,14 @@ export const ChatListPage = () => {
             <ChatList 
               key={chatRoom.roomId} 
               chatRoom={chatRoom} 
+              isClosed={chatRoom.isClosed}
               searchQuery={searchQuery} 
               onClick={() => handleChatRoomClick(chatRoom.roomId)}
             />
           )) : filteredChatRoomList.map((chatRoom) => (
             <ChatList 
               key={chatRoom.roomId} 
+              isClosed={chatRoom.isClosed}
               chatRoom={chatRoom} 
               onClick={() => handleChatRoomClick(chatRoom.roomId)}
             />
