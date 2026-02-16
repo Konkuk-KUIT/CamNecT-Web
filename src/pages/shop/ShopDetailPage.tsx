@@ -1,41 +1,43 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PopUp from '../../components/Pop-up';
+import { useGifticonProductQuery, useGifticonPurchaseMutation } from '../../hooks/useGifticonQuery';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { useAuthStore } from '../../store/useAuthStore';
 import { usePointStore } from '../../store/usePointStore';
 import { BottomBuy } from './components/BottomBuy';
 import { PurchaseBottomSheet } from './components/PurchaseBottomSheet';
-import { shopItems } from './data';
 
 const formatPoint = (value: number) => value.toLocaleString('ko-KR');
 
 export const ShopDetailPage = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
+
+  const { user } = useAuthStore();
+  const { data: gifticonProduct } = useGifticonProductQuery(productId);
+  const { mutate: purchaseProduct } = useGifticonPurchaseMutation();
+  const product = gifticonProduct;
+
+  // 전역 포인트 및 핸드폰 번호 (ShopPage 진입 시 gifticonList API에서 동기화됨)
+  const point = usePointStore((state) => state.point);
+  const phoneNum = usePointStore((state) => state.phoneNum);
+  const getPoint = usePointStore((state) => state.getPoint);
+  
   // 구매 수량 및 구매 플로우 상태
   const [quantity, setQuantity] = useState(1);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [popUpConfig, setPopUpConfig] = useState<{ title: string; content: string } | null>(null);
+  
   const [confirmPopUpConfig, setConfirmPopUpConfig] = useState<{
     title: string;
     content: string;
     rightButtonText: string;
   } | null>(null);
-  // 전역 포인트 (구매 즉시 반영)
-  const point = usePointStore((state) => state.point);
-  const getPoint = usePointStore((state) => state.getPoint);
-  const deductPoint = usePointStore((state) => state.deductPoint);
-  // URL 파라미터로 상품 찾기
-  const product = useMemo(() => {
-    const id = Number(productId);
-    if (!Number.isFinite(id)) {
-      return null;
-    }
-    return shopItems.find((item) => item.id === id) ?? null;
-  }, [productId]);
 
+  // 상품이 없을 때 
   if (!product) {
     return (
       <HeaderLayout headerSlot={<MainHeader title='기프티콘 샵' />}>
@@ -70,9 +72,13 @@ export const ShopDetailPage = () => {
     });
   };
 
+  // 상품 구매 함수
   const handleConfirmPurchase = () => {
+    if (!user || !product) return;
+
     const totalRequiredPoint = product.point * quantity;
     const currentPoint = getPoint();
+
     // 포인트가 부족하면 구매 진행 중단 (최신 포인트 기준)
     if (currentPoint < totalRequiredPoint) {
       setConfirmPopUpConfig(null);
@@ -82,11 +88,32 @@ export const ShopDetailPage = () => {
       });
       return;
     }
-    deductPoint(totalRequiredPoint);
-    setConfirmPopUpConfig(null);
-    setIsSheetOpen(false);
-    setIsPurchasing(false);
-    navigate('/shop', { state: { purchaseSuccess: true } });
+
+    // 서버로 구매 요청 전송
+    purchaseProduct({
+      productId: product.id,
+      quantity: quantity,
+      spendPoints: totalRequiredPoint,
+      clientRequestId: crypto.randomUUID(),
+      recipientName: user.name || "사용자",
+      recipientPhone: phoneNum, // 전역 스토어에서 가져온 핸드폰 번호
+      giftMessage: null,
+    }, {
+      onSuccess: () => {
+        setConfirmPopUpConfig(null);
+        setIsSheetOpen(false);
+        setIsPurchasing(false);
+        // 성공 시 ShopPage로 이동 (useGifticonPurchaseMutation 내부에서 포인트 차감 및 쿼리 무효화 처리됨)
+        navigate('/shop', { state: { purchaseSuccess: true } });
+      },
+      onError: () => {
+        setConfirmPopUpConfig(null);
+        setPopUpConfig({
+          title: '구매에 실패했어요',
+          content: '잠시 후 다시 시도해 주세요.',
+        });
+      }
+    });
   };
 
   const handleDecrease = () => {

@@ -11,6 +11,7 @@ import { FullLayout } from '../../layouts/FullLayout';
 import { HomeHeader } from '../../layouts/headers/HomeHeader';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
+import { usePointStore } from '../../store/usePointStore';
 import CoffeeChatBox from './components/CoffeeChatBox';
 import CommunityBox from './components/CommunityBox';
 import ContestBox from './components/ContestBox';
@@ -145,7 +146,18 @@ export const HomePage = () => {
         staleTime: 30 * 1000,
     });
 
+    const point = usePointStore((state) => state.point);
+    const setPoint = usePointStore((state) => state.setPoint);
+
     const homeViewModel = mapHomeResponseToViewModel(homeResponse, fallbackViewModel);
+    
+    // API에서 가져온 포인트를 전역 스토어에 동기화
+    useEffect(() => {
+        if (homeResponse?.data?.point?.balance !== undefined) {
+            setPoint(homeResponse.data.point.balance);
+        }
+    }, [homeResponse?.data?.point?.balance, setPoint]);
+
     const visibleRecommands = homeViewModel.recommendList.slice(0, 2);
     const userName = homeViewModel.userName;
     const unreadCount = unreadCountResponse?.data?.unreadCount;
@@ -184,7 +196,7 @@ export const HomePage = () => {
                     <div className="flex w-full flex-col gap-[15px]">
                         {/*<CheckScheduleBox />*/}
                         <div className="flex w-full justify-between gap-[20px]">
-                            <PointBox points={homeViewModel.pointBalance} />
+                            <PointBox points={point} />
                             <CommunityBox />
                         </div>
                     </div>
@@ -256,6 +268,7 @@ export const HomePage = () => {
                 onLeftClick={handleClosePopup}
                 onRightClick={handleConfirmNotification}
             />
+            
             {popUpConfig && (
                 <PopUp
                     isOpen={!!popUpConfig}
