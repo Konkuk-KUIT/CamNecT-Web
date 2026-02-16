@@ -37,6 +37,11 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
                             type="text" 
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                    handleSend();
+                                }
+                            }}
                             className="w-full h-[44px] bg-gray-100 border border-gray-150 rounded-[30px] pl-[18px] pr-[48px] text-r-16 outline-none placeholder:text-gray-400" 
                         />
                         {/* 전송 버튼 */}

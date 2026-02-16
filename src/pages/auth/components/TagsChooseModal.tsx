@@ -102,7 +102,7 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                             </section>
 
                             {/*태그 리스트*/}
-                            {selectedTags.length < 5 && (
+                            {selectedTags.length < 5 ? (
                                 <section className="flex-1 min-h-0 overflow-y-auto pb-[40px]">
                                         <div className="w-full flex flex-col">
                                             {filteredCategories.map(category => (
@@ -120,7 +120,7 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                                                                         : 'text-r-14-hn bg-white text-gray-650 border-gray-650'
                                                                 }`}
                                                             >
-                                                                {tag.name}
+                                                                 {tag.name}
                                                             </button>
                                                         ))}
                                                     </div>
@@ -128,6 +128,10 @@ export default function TagsChooseModal({ selectedTags, categories, allTags, onT
                                             ))}
                                         </div>
                                 </section>
+                            ) : (
+                                <div className="flex flex-1 flex-col items-center justify-center gap-[10px] pb-[40px]">
+                                    <p className="text-r-16 text-gray-650">최대 5개까지만 선택 가능합니다.</p>
+                                </div>
                             )}
                         </section>
                     </div>

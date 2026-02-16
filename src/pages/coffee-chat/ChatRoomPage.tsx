@@ -2,13 +2,13 @@ import type { StompSubscription } from "@stomp/stompjs";
 import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { StompChatResponse } from "../../api-types/stompApiTypes";
 import { isReadReceipt } from "../../api-types/stompApiTypes";
 import { stompClient } from "../../api/stompClient";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
-import { useChatRoom, useChatRoomOut, type ChatRoomDetailData } from "../../hooks/useChatQuery";
+import { useChatRoom, useChatRoomClose, useChatRoomExit, type ChatRoomDetailData } from "../../hooks/useChatQuery";
 import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
@@ -25,10 +25,12 @@ export const ChatRoomPage = () => {
 };
 
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { user } = useAuthStore();
     const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
-    const { mutate: endChat } = useChatRoomOut();
+    const { mutate: endChat } = useChatRoomClose();
+    const { mutate: exitChat } = useChatRoomExit();
 
     const {messages: socketMessages, sendMessage, leaveChatRoom} = useStompChat(Number(roomId));
     
@@ -41,8 +43,18 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     
     // 메뉴 관련 상태
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isEndPopUpOpen, setIsEndPopUpOpen] = useState(false);
-    const [isTerminated, setIsTerminated] = useState(false);
+    const [confirmPopUpConfig, setConfirmPopUpConfig] = useState<{
+        title: string;
+        content: string;
+        leftButtonText: string;
+        onConfirm: () => void;
+    } | null>(null);
+    const [localIsTerminated, setLocalIsTerminated] = useState(false);
+    
+    // 종료 여부 (서버 데이터 우선, 없을 시 로컬 상태 사용)
+    const isTerminated = chatRoomData?.closed || localIsTerminated;
+    const opponentExited = chatRoomData?.opponentExited;
+
     const menuRef = useRef<HTMLDivElement>(null);
 
     // 메뉴 바깥 클릭/터치 시 닫기
@@ -237,18 +249,40 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         sendMessage(text);
     }
 
-    // 채팅 종료 함수
+    // 채팅 종료 함수 
     const handleEndChat = () => {
         setIsMenuOpen(false);
-        setIsEndPopUpOpen(true);
+
+        setConfirmPopUpConfig({
+            title: "채팅을 종료하시겠습니까?",
+            content: "더이상 대화가 불가능하며,\n이후 채팅방 나가기를 통해 목록에서 제거됩니다.",
+            leftButtonText: "종료하기",
+            onConfirm: () => {
+                endChat({ roomId: Number(roomId) }, {
+                    onSuccess: () => {
+                        setLocalIsTerminated(true);
+                        queryClient.invalidateQueries({ queryKey: ['chatRoom', roomId] });
+                        setConfirmPopUpConfig(null);
+                    }
+                });
+            }
+        });
     }
 
-    const handleEndChatConfirm = () => {
-        setIsEndPopUpOpen(false);
-        endChat({ roomId: Number(roomId) }, {
-            onSuccess: () => {
-                // 채팅 종료 UI 표시
-                setIsTerminated(true);
+    // 채팅방 나가기 함수 (목록에서 삭제)
+    const handleExitChat = () => {
+        setIsMenuOpen(false);
+        setConfirmPopUpConfig({
+            title: "채팅방을 나가시겠습니까?",
+            content: "방을 나가면 채팅목록에서 사라지며\n다시 복구할 수 없습니다.",
+            leftButtonText: "나가기",
+            onConfirm: () => {
+                exitChat({ roomId: Number(roomId) }, {
+                    onSuccess: () => {
+                        navigate('/chat', { replace: true });
+                        setConfirmPopUpConfig(null);
+                    }
+                });
             }
         });
     }
@@ -271,13 +305,23 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                 ref={menuRef}
                                 className="absolute right-[25px] top-[calc(100%+10px)] z-[60] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
                             >
-                                <button 
-                                    onClick={handleEndChat}
-                                    className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
-                                >
-                                    <Icon name="logOut" className="w-[24px] h-[24px]" />
-                                    <span className="text-r-16 text-[#FF3838] tracking-[-0.64px]">채팅 종료하기</span>
-                                </button>
+                                {isTerminated ? (
+                                    <button 
+                                        onClick={handleExitChat}
+                                        className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
+                                    >
+                                        <Icon name="logOut" className="w-[24px] h-[24px]" />
+                                        <span className="text-r-16 text-[#FF3838] tracking-[-0.64px]">채팅 나가기</span>
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={handleEndChat}
+                                        className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
+                                    >
+                                        <Icon name="logOut" className="w-[24px] h-[24px]" />
+                                        <span className="text-r-16 text-[#FF3838] tracking-[-0.64px]">채팅 종료하기</span>
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -433,6 +477,16 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                             <div className="flex-1 h-[1px] bg-gray-150"></div>
                         </div>
                     )}
+                    {/* 상대방이 나갔을 때 표시 */}
+                    {opponentExited && (
+                        <div className="flex items-center gap-[15px] my-[20px]">
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                            <div className="text-r-12 text-gray-650 tracking-[-0.24px] shrink-0">
+                                상대방이 채팅방을 나갔습니다
+                            </div>
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
             </div>
@@ -442,15 +496,17 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             
             <PopUp isOpen={isLoading} type="loading" />
             
-            <PopUp 
-                isOpen={isEndPopUpOpen}
-                type="warning"
-                title="채팅을 종료하시겠습니까?"
-                content="채팅을 종료하면 다시 복구할 수 없습니다."
-                leftButtonText="종료하기"
-                onLeftClick={handleEndChatConfirm}
-                onRightClick={() => setIsEndPopUpOpen(false)}
-            />
+            {confirmPopUpConfig && (
+                <PopUp 
+                    isOpen={!!confirmPopUpConfig}
+                    type="warning"
+                    title={confirmPopUpConfig.title}
+                    content={confirmPopUpConfig.content}
+                    leftButtonText={confirmPopUpConfig.leftButtonText}
+                    onLeftClick={confirmPopUpConfig.onConfirm}
+                    onRightClick={() => setConfirmPopUpConfig(null)}
+                />
+            )}
 
             {!isLoading && !roomInfo && (
                 <div className="fixed inset-0 flex justify-center items-center bg-white z-[60] text-gray-400">
