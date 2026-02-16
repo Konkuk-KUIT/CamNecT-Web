@@ -3,19 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { MainHeader } from "../../../layouts/headers/MainHeader";
 import { Tabs, type TabItem } from "../../../components/Tabs";
-import { MOCK_SESSION } from "../../../mock/mypages";
 import { CommunityPost } from "../../../components/posts/CommunityPost";
 import InternalActivityPost from "../../../components/posts/InternalActivityPost";
 import ExternalActivityPost from "../../../components/posts/ExternalActivityPost";
 import { RecruitPost } from "../../../components/posts/RecruitPost";
 import SortSelector from "../../../components/SortSelector";
-import type { InfoPost, QuestionPost } from "../../../types/community";
-import { infoPosts, questionPosts } from "../../../mock/community";
-import { getActivityPosts } from "../../../mock/activityCommunity";
-import { teamRecruitPosts } from "../../../mock/teamRecruit";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { categoryToTab } from "../../../types/activityPage/activityPageTypes";
+import { getMyPostsCommunity, getMyPostsExternal, getMyPostsRecruitment } from "../../../api/userInfoApi";
+import type { CommunityPostItem, ActivityItem, RecruitmentItem, PostItem, PostSortType } from "../../../api-types/userInfoApiTypes";
 
 type TabType = 'community' | 'activity' | 'recruit';
-type SortType = 'latest' | 'oldest';
+type SortType = 'recommended' | 'latest';
 
 const TAB_ITEMS: TabItem[] = [
     { id: 'community', label: '커뮤니티' },
@@ -24,60 +24,252 @@ const TAB_ITEMS: TabItem[] = [
 ];
 
 const SORT_LABELS: Record<SortType, string> = {
+    recommended: "추천순",
     latest: '최신순',
-    oldest: '오래된순'
 };
+
+const SORT_MAP: Record<SortType, PostSortType> = {
+    recommended: 'RECOMMENDED',
+    latest: 'LATEST',
+};
+
+// Type guards
+const isCommunityPost = (item: PostItem): item is CommunityPostItem => {
+    return 'postId' in item;
+};
+
+const isActivityPost = (item: PostItem): item is ActivityItem => {
+    return 'activityId' in item;
+};
+
+const isRecruitmentPost = (item: PostItem): item is RecruitmentItem => {
+    return 'recruitId' in item;
+};
+
+const fallbackAuthor: NonNullable<CommunityPostItem["author"]> = {
+    userId: 0,
+    name: "익명",
+    profileImageUrl: null,
+    studentNo: "",
+    majorName: "",
+};
+
 
 export const MyPostsPage = () => {
     const navigate = useNavigate();
-    const userId = MOCK_SESSION.meUid;
+    const authUser = useAuthStore(state => state.user);
+    const userId = authUser?.id ? parseInt(authUser.id) : null;
 
     const [activeTab, setActiveTab] = useState<TabType>('community');
     const [sortOrder, setSortOrder] = useState<SortType>('latest');
 
     const listRef = useRef<HTMLDivElement | null>(null);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         // 탭 바뀔 때마다 스크롤 맨 위로
-        listRef.current?.scrollTo({ top: 0, behavior: "auto" }); // 필요하면 "smooth"
+        listRef.current?.scrollTo({ top: 0, behavior: "auto" });
     }, [activeTab]);
 
-    //ISO 형식 날짜 정렬 함수
-    const sortPosts = <T extends { createdAt: string }>(posts: T[]): T[] => {
-        return [...posts].sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            
-            if (sortOrder === 'latest') {
-                return dateB - dateA; // 최신순 (내림차순)
-            } else {
-                return dateA - dateB; // 오래된순 (오름차순)
-            }
-        });
+    const sort = SORT_MAP[sortOrder];
+
+    // 커뮤니티 작성글
+    const {
+        data: communityData,
+        fetchNextPage: fetchNextCommunity,
+        hasNextPage: hasNextCommunity,
+        isFetchingNextPage: isFetchingCommunity,
+    } = useInfiniteQuery({
+        queryKey: ["myPosts", "community", userId, sort],
+        queryFn: ({ pageParam }) => getMyPostsCommunity({
+            userId: userId!,
+            sort,
+            cursorId: pageParam?.cursorId,
+            cursorValue: pageParam?.cursorValue,
+        }),
+        initialPageParam: undefined as { cursorId: number; cursorValue: number } | undefined,
+        getNextPageParam: (lastPage) =>
+            lastPage.data.hasNext
+                ? { cursorId: lastPage.data.nextCursorId, cursorValue: lastPage.data.nextCursorValue }
+                : undefined,
+        enabled: !!userId && activeTab === 'community',
+    });
+
+    // 대외활동 작성글
+    const {
+        data: externalData,
+        fetchNextPage: fetchNextExternal,
+        hasNextPage: hasNextExternal,
+        isFetchingNextPage: isFetchingExternal,
+    } = useInfiniteQuery({
+        queryKey: ["myPosts", "external", userId, sort],
+        queryFn: ({ pageParam }) => getMyPostsExternal({
+            userId: userId!,
+            sort,
+            cursorId: pageParam?.cursorId,
+            cursorValue: pageParam?.cursorValue,
+        }),
+        initialPageParam: undefined as { cursorId: number; cursorValue: number } | undefined,
+        getNextPageParam: (lastPage) =>
+            lastPage.data.hasNext
+                ? { cursorId: lastPage.data.nextCursorId, cursorValue: lastPage.data.nextCursorValue }
+                : undefined,
+        enabled: !!userId && activeTab === 'activity',
+    });
+
+    // 팀원모집 작성글
+    const {
+        data: recruitData,
+        fetchNextPage: fetchNextRecruit,
+        hasNextPage: hasNextRecruit,
+        isFetchingNextPage: isFetchingRecruit,
+    } = useInfiniteQuery({
+        queryKey: ["myPosts", "recruitment", userId, sort],
+        queryFn: ({ pageParam }) => getMyPostsRecruitment({
+            userId: userId!,
+            sort,
+            cursorId: pageParam?.cursorId,
+            cursorValue: pageParam?.cursorValue,
+        }),
+        initialPageParam: undefined as { cursorId: number; cursorValue: number } | undefined,
+        getNextPageParam: (lastPage) =>
+            lastPage.data.hasNext
+                ? { cursorId: lastPage.data.nextCursorId, cursorValue: lastPage.data.nextCursorValue }
+                : undefined,
+        enabled: !!userId && activeTab === 'recruit',
+    });
+
+    // 무한스크롤 감지
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    if (activeTab === 'community' && hasNextCommunity && !isFetchingCommunity) {
+                        fetchNextCommunity();
+                    } else if (activeTab === 'activity' && hasNextExternal && !isFetchingExternal) {
+                        fetchNextExternal();
+                    } else if (activeTab === 'recruit' && hasNextRecruit && !isFetchingRecruit) {
+                        fetchNextRecruit();
+                    }
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        if (bottomRef.current) observer.observe(bottomRef.current);
+        return () => observer.disconnect();
+    }, [activeTab, hasNextCommunity, hasNextExternal, hasNextRecruit, isFetchingCommunity, isFetchingExternal, isFetchingRecruit, fetchNextCommunity, fetchNextExternal, fetchNextRecruit]);
+
+    // 각 탭 아이템 flatten
+    const communityItems = communityData?.pages.flatMap(p => p.data.items) ?? [];
+    const externalItems = externalData?.pages.flatMap(p => p.data.items) ?? [];
+    const recruitItems = recruitData?.pages.flatMap(p => p.data.items) ?? [];
+
+    const getPostCount = () => {
+        if (activeTab === 'community') return communityItems.length;
+        if (activeTab === 'activity') return externalItems.length;
+        return recruitItems.length;
     };
 
-    const MOCK_COMMUNITY_POSTS: (InfoPost | QuestionPost)[] = [...infoPosts, ...questionPosts];
-    const allActivityPosts = getActivityPosts();
-
-    // 탭별 필터링된 게시물
-    const filteredCommunityPosts = sortPosts(
-        MOCK_COMMUNITY_POSTS.filter(post => post.author.id === "user-park-wonbin-20") //TODO: api 연동 이후 userId로 변경
-    );
-    
-    // 내가 작성한 활동 게시물만 필터링
-    const filteredActivityPosts = sortPosts(
-        allActivityPosts.filter(post => post.author.id === userId)
-    );
-    
-    const filteredRecruitPosts = sortPosts(
-        teamRecruitPosts.filter((post) => post.authorId === userId)
-    );
-
-    // 현재 탭에 따른 게시물 개수
-    const getPostCount = () => {
-        if (activeTab === 'community') return filteredCommunityPosts.length;
-        if (activeTab === 'activity') return filteredActivityPosts.length;
-        return filteredRecruitPosts.length;
+    // 아이템 렌더링
+    const renderItem = (item: PostItem, index: number) => {
+        if (isCommunityPost(item)) {
+            return (
+                <CommunityPost
+                    key={`community-${item.postId}-${index}`}
+                    post={{
+                        postId: item.postId,
+                        boardCode:item.boardCode,
+                        tags:item.tags,
+                        author: item.author ?? fallbackAuthor,
+                        title: item.title,
+                        createdAt:item.createdAt,
+                        preview:item.preview,
+                        likeCount: item.likeCount,
+                        answerCount: item.answerCount,
+                        commentCount: item.commentCount,
+                        bookmarkCount: item.bookmarkCount,
+                        thumbnailUrl:item.thumbnailUrl,
+                        acceptedBadge: item.acceptedBadge,
+                        accessType: item.accessType,
+                        accessStatus: item.accessStatus,
+                    }}
+                />
+            );
+        }
+        
+        if (isActivityPost(item)) {
+            const isInternal = item.category === 'CLUB' || item.category === 'STUDY';
+            
+            if (isInternal) {
+                return (
+                    <InternalActivityPost
+                        key={`activity-${item.activityId}-${index}`}
+                        post={{
+                            id: String(item.activityId),
+                            tab: categoryToTab[item.category],
+                            title: item.title,
+                            author: {
+                                id: '',
+                                name: '',
+                                major: '',
+                                studentId: '',
+                            },
+                            content: item.contextPreview,
+                            categories: item.tags,
+                            saveCount: item.bookmarkCount,
+                            createdAt: item.createdAt,
+                            status: item.status,
+                            thumbnailUrl: item.thumbnailUrl,
+                        }}
+                        showRecruitStatus={true}
+                    />
+                );
+            } else {
+                return (
+                    <ExternalActivityPost
+                        key={`activity-${item.activityId}-${index}`}
+                        post={{
+                            id: String(item.activityId),
+                            title: item.title,
+                            author: {
+                                id: '',
+                                name: '',
+                                major: '',
+                                studentId: '',
+                            },
+                            categories: item.tags,
+                            saveCount: item.bookmarkCount,
+                            organizer: item.organizer,
+                            deadline: item.applyEndDate,
+                            thumbnailUrl: item.thumbnailUrl,
+                            tab: categoryToTab[item.category],
+                            descriptionTitle: item.contextPreview,
+                            createdAt: item.createdAt
+                        }}
+                    />
+                );
+            }
+        }
+        
+        if (isRecruitmentPost(item)) {
+            return (
+                <RecruitPost
+                    key={`recruit-${item.recruitId}-${index}`}
+                    id={String(item.recruitId)}
+                    activityId=""
+                    authorId=""
+                    activityName={item.activityTitle}
+                    authorName={item.userName}
+                    recruitNow={item.recruitStatus === 'OPEN'}
+                    title={item.title}
+                    bookmarkCount={item.bookmarkCount}
+                    createdAt={item.createdAt}
+                />
+            );
+        }
+        
+        return null;
     };
 
     return (
@@ -85,12 +277,11 @@ export const MyPostsPage = () => {
             headerSlot={
                 <MainHeader
                     title="작성한 글"
-                    leftAction={{onClick: () => navigate(-1)}}
+                    leftAction={{ onClick: () => navigate(-1) }}
                 />
             }
         >
             <div className="w-full bg-white h-full flex flex-col min-h-0">
-                {/* Tabs */}
                 <Tabs
                     tabs={TAB_ITEMS}
                     activeId={activeTab}
@@ -109,7 +300,6 @@ export const MyPostsPage = () => {
                         />
                     </div>
 
-                    {/* Posts List */}
                     <div className="flex flex-col">
                         {getPostCount() === 0 ? (
                             <div className="flex items-center justify-center py-[80px]">
@@ -117,43 +307,22 @@ export const MyPostsPage = () => {
                             </div>
                         ) : (
                             <div className="flex flex-col">
-                                {/* Community Posts */}
-                                {activeTab === 'community' && filteredCommunityPosts.map((post) => (
-                                    <CommunityPost
-                                        key={post.id}
-                                        {...post}
-                                    />
-                                ))}
-
-                                {/* Activity Posts (Internal + External) */}
-                                {activeTab === 'activity' && (
-                                    filteredActivityPosts.map((post) => {
-                                        const isExternal = post.tab === 'external' || post.tab === 'job';
-                                        
-                                        if (isExternal) {
-                                            return <ExternalActivityPost key={post.id} post={post} />;
-                                        }
-                                        
-                                        return (
-                                            <InternalActivityPost 
-                                                key={post.id} 
-                                                post={post}
-                                                showRecruitStatus={post.tab === 'club' || post.tab === 'study'}
-                                            />
-                                        );
-                                    })
-                                )}
-
-                                {/* Recruit Posts */}
-                                {activeTab === 'recruit' && filteredRecruitPosts.map((post) => (
-                                    <RecruitPost
-                                        key={post.id}
-                                        {...post}
-                                    />
-                                ))}
+                                {activeTab === 'community' && communityItems.map((item, idx) => renderItem(item, idx))}
+                                {activeTab === 'activity' && externalItems.map((item, idx) => renderItem(item, idx))}
+                                {activeTab === 'recruit' && recruitItems.map((item, idx) => renderItem(item, idx))}
                             </div>
                         )}
                     </div>
+
+                    {/* 무한스크롤 트리거 */}
+                    <div ref={bottomRef} className="h-[1px]" />
+
+                    {/* 로딩 인디케이터 */}
+                    {(isFetchingCommunity || isFetchingExternal || isFetchingRecruit) && (
+                        <div className="flex justify-center py-[20px]">
+                            <span className="text-r-14-hn text-gray-650">불러오는 중...</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </HeaderLayout>

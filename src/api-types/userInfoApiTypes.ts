@@ -142,3 +142,93 @@ export interface CertificateDeleteResponse {
   message: string;
   data: string;
 }
+
+
+export interface PostListParams {
+  userId: number;
+  sort?: 'RECOMMENDED' | 'LATEST';
+  cursorId?: number;
+  cursorValue?: number;
+  size?: number;
+}
+
+export type PostSortType = 'RECOMMENDED' | 'LATEST';
+
+export type PostTab = 'COMMUNITY' | 'EXTERNAL' | 'RECRUITMENT';
+
+// ===== 아이템 타입 (contentType으로 구분) =====
+
+// Community 게시글
+export interface CommunityPostItem {
+  postId: number;
+  boardCode: "INFO" | "QUESTION";
+  title: string;
+  preview: string;
+  createdAt: string;
+  likeCount: number;
+  answerCount: number;
+  commentCount: number;
+  bookmarkCount: number;
+  acceptedBadge?: boolean;
+  tags: string[];
+  author: {
+    userId: number;
+    name: string;
+    profileImageUrl: string | null;
+    studentNo: string;
+    majorName: string;
+  };
+  thumbnailUrl?: string | null;
+  accessType?: "FREE" | "POINT_REQUIRED";
+  accessStatus?: "GRANTED" | "LOCKED";
+}
+
+// 대외활동
+export interface ActivityItem {
+  activityId: number;
+  title: string;
+  contextPreview: string;
+  thumbnailUrl: string;
+  tags: string[];
+  bookmarkCount: number;
+  organizer: string;
+  applyEndDate: string;  // "YYYY-MM-DD"
+  status: 'OPEN' | 'CLOSED';
+  createdAt: string;
+  category: 'CLUB' | 'STUDY' | 'EXTERNAL' | 'RECRUITMENT';
+}
+
+// 팀원모집
+export interface RecruitmentItem {
+  recruitId: number;
+  activityTitle: string;
+  userName: string;
+  recruitStatus: string;
+  title: string;
+  content: string;
+  recruitDeadline: string;  // "YYYY-MM-DD"
+  recruitCount: number;
+  bookmarkCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Union 타입
+export type PostItem = CommunityPostItem | ActivityItem | RecruitmentItem;
+
+// ===== 응답 타입 =====
+
+export interface PostListData {
+  tab: PostTab;
+  sort: PostSortType;
+  items: PostItem[];
+  hasNext: boolean;
+  nextCursorId: number;
+  nextCursorValue: number;
+}
+
+export interface PostListResponse {
+  status: number;
+  message: string;
+  data: PostListData;
+}

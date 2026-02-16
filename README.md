@@ -121,11 +121,11 @@ CamNecT는
 
 **Data & State**
 
-- TanStack Query
-- Axios (instance 기반)
-- react-hook-form
-- zod
-- Zustand
+- TanStack Query (Server State)
+- Axios (HTTP/REST)
+- @stomp/stompjs & sockjs-client (WebSocket/STOMP)
+- react-hook-form & zod (Form Validation)
+- Zustand (Global State Management)
 
 **Tooling**
 

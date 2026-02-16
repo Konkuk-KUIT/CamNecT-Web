@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 import { requestEmailCode, verifyEmailCode } from '../../api/auth';
@@ -52,7 +52,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     type EmailFormData = z.infer<typeof emailSchema>;
 
     // RHF로 폼 제어
-    const {register, handleSubmit, watch, formState : {errors}} = useForm<EmailFormData>({
+    const { register, handleSubmit, control, formState : { errors } } = useForm<EmailFormData>({
         resolver: zodResolver(emailSchema),
         mode: "onChange",
         defaultValues: {
@@ -62,8 +62,8 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     });
 
     // SingleInput에 입력되는 값들 실시간 감지
-    const emailValue = watch("email");
-    const codeValue = watch("verificationCode");
+    const emailValue = useWatch({ control, name: "email" });
+    const codeValue = useWatch({ control, name: "verificationCode" });
 
     // 이메일 인증번호 요청
     const emailRequestMutation = useMutation({
@@ -217,6 +217,12 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
                     }}
                 />
             )}
+
+            <PopUp 
+                isOpen={emailRequestMutation.isPending} 
+                type="loading" 
+                title="인증번호를 전송하고 있습니다..." 
+            />
         </form> 
     )
 }

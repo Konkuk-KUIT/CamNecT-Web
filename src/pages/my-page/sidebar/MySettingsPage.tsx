@@ -98,7 +98,7 @@ export const MySettingsPage = () => {
                 {/* Profile Section */}
                 <div className="flex flex-col gap-[20px] px-[25px] py-[30px] border-b border-gray-150">
                     <div className="flex gap-[25px]">
-                        <div className="min-w-[55px] h-[55px] rounded-full overflow-hidden">
+                        <div className="min-w-[55px] w-[55px] h-[55px] rounded-full overflow-hidden">
                             <img 
                                 src={userSetting.profileImageUrl ?? defaultProfileImg}
                                 onError={(e) => {

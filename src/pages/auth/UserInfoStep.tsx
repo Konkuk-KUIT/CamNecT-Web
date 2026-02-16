@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useShallow } from 'zustand/react/shallow';
 import { checkIdDuplicate } from '../../api/auth';
@@ -39,7 +39,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     
     // 비밀번호 정규화 
     // 문자열로 사용할 경우 (예: new RegExp 사용 시)
-    const passwordPattern = "^(?=.*\\d)[A-Za-z0-9!@#$%^&*()_+={}[\\]|\\\\:;\"'<>,.?/~`-]{8,16}$";
+    const passwordPattern = /^(?=.*\d)(?=.*[a-z])[A-Za-z0-9!@#$%^&*()_+={}[\]|\\:;"'<>,.?/~`-]{8,16}$/;
 
     // zod : input 데이터 규칙 검사기 
     // .refine() : 추가적인 검증 로직 (비밀번호 확인 검사)
@@ -51,12 +51,15 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
         phoneNum: z
             .string() 
             .regex(/^01[0-9]\d{8}$/, "전화번호 형식이 올바르지 않습니다"),
-        username: z.string().min(1, "아이디를 입력해 주세요"),
+        username: z
+            .string()
+            .min(1, "아이디를 입력해 주세요")
+            .regex(/^[a-z0-9]+$/, "아이디는 영문 소문자와 숫자만 입력 가능합니다"),
         password: z
             .string()
             .regex(
-                new RegExp(passwordPattern),
-                "비밀번호는 8~16자, 숫자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다"
+                passwordPattern,
+                "비밀번호는 8~16자, 숫자 1개 이상, 소문자 1개 이상, 공백 없이 영문/숫자/특수문자만 사용 가능합니다"
             ),
         confirmPassword: z.string(),
     })
@@ -70,7 +73,7 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
 
     // React Hook Form : 여러개의 input 값 관리 (유효성 검사, 에러처리, submit처리)
     // isValid : 입력된 데이터들 유효확인
-    const { register, handleSubmit, watch,
+    const { register, handleSubmit, control,
         setError, clearErrors, formState: { errors, isValid } } = useForm({
         resolver: zodResolver(userInfoSchema), // 검증은 zod로
         mode: "onChange", // 입력될 때 마다 검사
@@ -83,8 +86,10 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     }
     });
 
-    // SingleInput에 입력되는 아이디 값 실시간 감지
-    const userNameValue = watch("username");
+    // SingleInput에 입력되는 값들 실시간 감지
+    const userNameValue = useWatch({ control, name: "username" });
+    const passwordValue = useWatch({ control, name: "password" });
+    const confirmPasswordValue = useWatch({ control, name: "confirmPassword" });
 
     const idCheckMutation = useMutation({
         mutationFn: checkIdDuplicate,
@@ -127,9 +132,6 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
     };
 
     //
-    useEffect(() => {
-        setIsUserNameChecked(false);
-    }, [userNameValue])
 
 
     // handleSubmit : 모든 input값을 zod로 검증한 후 onSubmit 실행
@@ -150,7 +152,9 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             className="flex-1"
                             label='아이디' 
                             placeholder='아이디를 입력해 주세요' 
-                            {...register("username")} 
+                            {...register("username", {
+                                onChange: () => setIsUserNameChecked(false),
+                            })} 
                             error={errors.username?.message}
                             successMessage={isUserNameChecked ? "사용 가능한 아이디입니다" : ""}
                         />
@@ -179,6 +183,15 @@ export const UserInfoStep = ({ onNext }: UserInfoStepProps) => {
                             helperText="비밀번호를 한번 더 입력해 주세요"
                             {...register("confirmPassword")}
                             error={errors.confirmPassword?.message}
+                            successMessage={
+                                passwordValue && 
+                                confirmPasswordValue && 
+                                passwordValue === confirmPasswordValue && 
+                                !errors.confirmPassword &&
+                                !errors.password
+                                    ? "비밀번호 설정이 완료되었습니다." 
+                                    : ""
+                            }
                         /> 
                     </div>
 

@@ -35,7 +35,7 @@ export const MypagePage = () => {
   const profileData = profileResponse?.data;
 
   // 학교 정보 조회
-  const { data: institutionResponse } = useQuery({
+  const { data: institutionResponse, isLoading: isInstitutionLoading, isError: isInstitutionError } = useQuery({
     queryKey: ["institution", profileData?.basics.institutionId],
     queryFn: () => getInstitution({
       institutionId: profileData!.basics.institutionId,
@@ -44,7 +44,7 @@ export const MypagePage = () => {
   });
 
   // 전공 정보 조회 (프로필 데이터가 로드된 후에만)
-  const { data: majorResponse } = useQuery({
+  const { data: majorResponse, isLoading: isMajorLoading, isError: isMajorError } = useQuery({
     queryKey: ["major", profileData?.basics.institutionId, profileData?.basics.majorId],
     queryFn: () => getMajor({
       institutionId: profileData!.basics.institutionId,
@@ -54,7 +54,7 @@ export const MypagePage = () => {
   });
 
   // 로딩 중
-  if (isProfileLoading) {
+  if (isProfileLoading || isInstitutionLoading || isMajorLoading) {
     return (
       <PopUp
         type="loading"
@@ -64,7 +64,7 @@ export const MypagePage = () => {
   }
 
   // 에러 발생
-  if (isProfileError || !profileData) {
+  if (isProfileError || !profileData || isInstitutionError || isMajorError) {
     return (
       <PopUp
         type="error"
@@ -99,6 +99,15 @@ export const MypagePage = () => {
     following: profileData.following,
     follower: profileData.follower,
     introduction: profileData.basics.bio || "",
+    point: profileData.myPoint,
+  };
+
+  const sideBarUser = {
+    uid: profileData.userId.toString(),
+    name: profileData.name,
+    univ: schoolName,
+    major: majorName,
+    gradeNumber: profileData.basics.studentNo.slice(2, 4),
     point: profileData.myPoint,
   };
 
@@ -194,7 +203,7 @@ export const MypagePage = () => {
       <SideBar
         isOpen={isSideBarOpen}
         onClose={() => setIsSideBarOpen(false)}
-        user={user}
+        user={sideBarUser}
       />
     </>
   );

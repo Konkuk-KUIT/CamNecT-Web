@@ -2,6 +2,7 @@ import type {
     AdminVerificationDownloadUrlRequest, AdminVerificationDownloadUrlResponse,
     AdminVerificationListRequest, AdminVerificationListResponse,
     AdminVerificationProcessRequest, AdminVerificationProcessResponse,
+    DeleteAccountRequest, DeleteAccountResponse,
     EmailRequest,
     EmailResponse, EmailVerificationRequest, EmailVerificationResponse,
     IdDuplicateCheckRequest, IdDuplicateCheckResponse, LoginRequest, LoginResponse,
@@ -112,6 +113,17 @@ export const requestVerificationComplete = async (data: VerificationCompleteRequ
     
     const response = await axiosInstance.get<VerificationCompleteResponse>("/api/auth/verification-complete", {
         params: data // query parameter
+    });
+    return response.data;
+}
+
+// 14. 회원 탈퇴 API [Delete] (/api/auth/me)
+export const deleteAccount = async (data: DeleteAccountRequest) => {
+    const { userId, ...body } = data;
+    
+    const response = await axiosInstance.delete<DeleteAccountResponse>("/api/auth/me", {
+        params: { userId },
+        data: body
     });
     return response.data;
 }

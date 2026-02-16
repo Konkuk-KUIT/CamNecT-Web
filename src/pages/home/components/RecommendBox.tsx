@@ -28,6 +28,7 @@ function RecommendBox({
     onRequestChat,
 }: RecommendBoxProps) {
     const navigate = useNavigate();
+    const shortStudentId = studentId?.slice(2, 4) ?? '';
 
     return (
         //TODO: 동문추천 page 라우터 연결
@@ -68,7 +69,7 @@ function RecommendBox({
                                 {name}
                             </div>
                             <div className="text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]">
-                                {major} {studentId}학번
+                                {major} {shortStudentId}학번
                             </div>
                         </div>
                     </div>

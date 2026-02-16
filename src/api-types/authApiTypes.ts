@@ -241,3 +241,11 @@ export interface VerificationCompleteResponse {
   institutionName: string;
   majorName: string;
 }
+
+// 회원 탈퇴 DTO (/api/auth/me)
+export interface DeleteAccountRequest {
+  userId: number;
+  password: string;
+}
+
+export type DeleteAccountResponse = boolean;

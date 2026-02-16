@@ -2,15 +2,21 @@ export type NotificationType =
   | 'coffeeChatRequest'
   | 'pointUse'
   | 'pointEarn'
-  | 'schedule'
   | 'reply'
-  | 'comment';
+  | 'comment'
+  | 'commentAccepted';
 
 export type NotificationBase = {
   id: string;
   type: NotificationType;
   dateLabel: string;
   isRead: boolean;
+  message?: string;
+  link?: string;
+  actorUserId?: number;
+  postId?: number;
+  commentId?: number;
+  requestId?: number;
 };
 
 export type CoffeeChatRequestNotification = NotificationBase & {
@@ -24,8 +30,8 @@ export type PointNotification = NotificationBase & {
   points: number;
 };
 
-export type ScheduleNotification = NotificationBase & {
-  type: 'schedule';
+export type CommentAcceptedNotification = NotificationBase & {
+  type: 'commentAccepted';
 };
 
 export type ReplyNotification = NotificationBase & {
@@ -43,9 +49,9 @@ export type CommentNotification = NotificationBase & {
 export type NotificationItem =
   | CoffeeChatRequestNotification
   | PointNotification
-  | ScheduleNotification
   | ReplyNotification
-  | CommentNotification;
+  | CommentNotification
+  | CommentAcceptedNotification;
 
 type NotificationIconAsset = {
   type: 'pointUse' | 'pointEarn' | 'default';
@@ -112,7 +118,7 @@ export const notificationList: NotificationItem[] = [
   },
   {
     id: 'notice-4',
-    type: 'schedule',
+    type: 'commentAccepted',
     dateLabel: '3일 전',
     isRead: true,
   },

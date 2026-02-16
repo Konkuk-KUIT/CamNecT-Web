@@ -1,6 +1,5 @@
-export type EducationStatus = 'ATTENDING' | 'LEAVE_OF_ABSENCE' | 'GRADUATED' | 'EXCHANGE' | 'DROPPED_OUT' | 'TRANSFERRED';
-
-// ===== 마이페이지 조회 타입 =====
+import type { EducationStatus } from "../types/mypage/mypageTypes";
+//마이페이지 조회 타입
 
 export interface PortfolioProject {
   portfolioId: number;
@@ -47,6 +46,9 @@ export interface ProfileBasics {
   bio: string | null;
   openToCoffeeChat: boolean;
   isFollowerVisible: boolean;
+  isEducationVisible: boolean;
+  isExperienceVisible: boolean;
+  isCertificateVisible: boolean;
   profileImageUrl: string | null;
   studentNo: string;
   institutionId: number;
@@ -140,7 +142,7 @@ export interface FollowUser {
   name: string;
   majorName: string;
   studentNo: string;
-  profileImageUrl: string;
+  profileImageUrl: string | null;
 }
 
 export interface FollowListData {
@@ -158,7 +160,7 @@ export interface FollowListResponse {
 export interface SettingInfoData {
   userId: number;
   name: string;
-  profileImageUrl: string;
+  profileImageUrl: string | null;
   phoneNum: string;
   email: string;
 }
@@ -167,4 +169,9 @@ export interface SettingInfoResponse {
   status: number;
   message: string;
   data: SettingInfoData;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }

@@ -1,11 +1,18 @@
+import type { StompSubscription } from "@stomp/stompjs";
+import { useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import type { StompChatResponse } from "../../api-types/stompApiTypes";
+import { isReadReceipt } from "../../api-types/stompApiTypes";
+import { stompClient } from "../../api/stompClient";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
-import { useChatMessages, useChatRoom } from "../../hooks/useChatQuery";
+import { useChatRoom, useChatRoomOut, type ChatRoomDetailData } from "../../hooks/useChatQuery";
+import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
+import { useAuthStore } from "../../store/useAuthStore";
 import type { ChatMessage } from "../../types/coffee-chat/coffeeChatTypes";
 import { formatFullDateWithDay, formatTime } from "../../utils/formatDate";
 import { ChatRoomInfo } from "./components/ChatRoomInfo";
@@ -18,24 +25,149 @@ export const ChatRoomPage = () => {
 };
 
 const ChatRoomContent = ({ roomId }: { roomId: string }) => {
-    const { data: roomInfo, isLoading: isRoomLoading } = useChatRoom(roomId);
-    // 서버에서 가져온 채팅 데이터
-    const { data: remoteMessages = [], isLoading: isMessagesLoading } = useChatMessages(roomId);
-    // 내가 보낸 임시 메시지
-    const [sentMessages, setSentMessages] = useState<ChatMessage[]>([]);
+    const queryClient = useQueryClient();
+    const { user } = useAuthStore();
+    const { data: chatRoomData, isLoading: isRoomLoading } = useChatRoom(roomId);
+    const { mutate: endChat } = useChatRoomOut();
+
+    const {messages: socketMessages, sendMessage, leaveChatRoom} = useStompChat(Number(roomId));
     
     // 검색 관련 상태
     const [isSearching, setIsSearching] = useState(false);
     const [roomSearchQuery, setRoomSearchQuery] = useState("");
+
+    // 소켓 연결 상태를 추적할 로컬 상태 추가 (지연 초기화로 최신 상태 반영)
+    const [isSocketReady, setIsSocketReady] = useState(() => stompClient.connected);
     
+    // 메뉴 관련 상태
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isEndPopUpOpen, setIsEndPopUpOpen] = useState(false);
+    const [isTerminated, setIsTerminated] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // 메뉴 바깥 클릭/터치 시 닫기
+    useEffect(() => {
+        const handleOutsideAction = (event: MouseEvent | TouchEvent) => {
+            const target = event.target as Node;
+            const isOptionButton = (target as HTMLElement).closest('[aria-label="option"]');
+            
+            if (menuRef.current && !menuRef.current.contains(target) && !isOptionButton) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        if (isMenuOpen) {
+            document.addEventListener("mousedown", handleOutsideAction);
+            document.addEventListener("touchstart", handleOutsideAction);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideAction);
+            document.removeEventListener("touchstart", handleOutsideAction);
+        };
+    }, [isMenuOpen]);
+
+    // todo (복습) 실시간 읽음 처리 (Read Receipt) 감시 및 캐시 동기화
+    useEffect(() => {
+        // 1. 백그라운드일때 OS가 아예 socket을 종료시켰을수도 있으니 체크
+        if (!stompClient.active) {
+            stompClient.activate();
+        }
+
+        let subscription: StompSubscription | null = null;
+
+        const performSubscribe = () => {
+            if (!stompClient.connected || subscription) return;
+
+            subscription = stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+                const data: StompChatResponse = JSON.parse(message.body);
+
+                if (isReadReceipt(data)) {
+                    queryClient.setQueryData(['chatRoom', roomId], (oldData: ChatRoomDetailData | undefined) => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            messages: oldData.messages.map((msg: ChatMessage) => 
+                                Number(msg.id) <= data.lastReadMessageId 
+                                    ? { ...msg, isRead: true, readAt: data.readAt } 
+                                    : msg
+                            )
+                        };
+                    });
+                }
+            });
+            console.log("채팅방 구독 성공:", roomId);
+            setIsSocketReady(true);
+        }
+
+        // 연결 상태 소식 듣기
+        const handleStompConnected = () => {
+            console.log("ChatRoomPage: 연결 소식 접수!");
+            performSubscribe();
+        };
+
+        if (stompClient.connected) {
+            performSubscribe();
+        } else {
+            // 전역 이벤트 리스너 등록
+            window.addEventListener('stomp-connected', handleStompConnected);
+        }
+
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+                subscription = null;
+            }
+            window.removeEventListener('stomp-connected', handleStompConnected);
+        };
+    }, [roomId, queryClient]);
+
+    // STOMP 채팅방 나가기 처리 (브라우저 종료/새로고침 대응)
+    // SPA 내부 이동 시 퇴장 처리는 useStompChat 훅의 클린업에서 자동으로 수행됩니다.
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            leaveChatRoom();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        }
+    }, [leaveChatRoom]);
+
     // 초기 진입 시 깜빡임 방지를 위한 상태
     const [isReady, setIsReady] = useState(false);
 
-    const isLoading = isRoomLoading || isMessagesLoading;
+    const isLoading = isRoomLoading;
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // API 데이터와 내가 보낸 임시 메시지를 합침
-    const allMessages = useMemo(() => [...remoteMessages, ...sentMessages], [remoteMessages, sentMessages]);
+    const roomInfo = chatRoomData?.partner;
+    const requestInfo = chatRoomData?.requestInfo;
+
+    // API로 받은 기존 채팅 내역 데이터들
+    const remoteMessages = useMemo(() => {
+        return chatRoomData?.messages || [];
+    }, [chatRoomData?.messages]);
+
+    const myId = String(user?.id);
+
+    // 실시간 메시지를 도메인 타입으로 변환
+    const mappedSocketMessages = useMemo(() => {
+        return socketMessages.map((msg):ChatMessage => ({
+            id: String(msg.messageId),
+            roomId: String(msg.roomId),
+            senderId: String(msg.senderId),
+            content: msg.message,
+            createdAt: msg.sendDate,
+            isRead: msg.read,
+            readAt: msg.readAt
+        }))
+    }, [socketMessages]);
+
+    // API 데이터와 소켓 메시지를 합치기
+    const allMessages = useMemo(() => {
+        return [...remoteMessages, ...mappedSocketMessages];
+    }, [remoteMessages, mappedSocketMessages]);
 
     // 검색어 필터링 적용
     const localMessages = useMemo(() => {
@@ -45,65 +177,110 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
         );
     }, [allMessages, isSearching, roomSearchQuery]);
 
+    // todo 내가 보낸 제일 마지막 메시지 인덱스 (읽음 표시용)
+    const lastMyMessageIndex = useMemo(() => {
+        for (let i = localMessages.length - 1; i >= 0; i--) {
+            if (String(localMessages[i].senderId) === myId) return i;
+        }
+        return -1;
+    }, [localMessages, myId]);
+
     // 가장 아래로 스크롤하는 함수 (전체 문서 기준)
     const scrollToBottom = () => {
         window.scrollTo(0, document.documentElement.scrollHeight);
     };
 
     // 1. 레이아웃 안정화 및 초기 스크롤
-    // useLayoutEffect : 화면 렌더링 직전 실행
     useLayoutEffect(() => {
-        if (!isLoading && !isReady) {
+        if (!isLoading && !isReady && isSocketReady) {
             if (localMessages.length > 0) {
-                // 화면 그린 후 이동
                 window.scrollTo(0, document.documentElement.scrollHeight);
-                
-                // 이동 직후 즉시 공개 (애니메이션 프레임을 기다려 더 정확하게 처리)
                 requestAnimationFrame(() => {
                     window.scrollTo(0, document.documentElement.scrollHeight);
-                    setIsReady(true); // 메시지들 visible 
+                    setIsReady(true);
                 });
             } else {
-                // 메시지가 없을 때는 스크롤 없이 즉시 표시
                 requestAnimationFrame(() => {
                     setIsReady(true);
                 });
             }
         }
-    }, [isLoading, localMessages.length, isReady]);
+    }, [isLoading, localMessages.length, isReady, isSocketReady]);
 
     // 2. 메시지가 추가될 때 부드럽게 스크롤
     useEffect(() => {
-        if (isReady && localMessages.length > 0) {
+        if (isReady && localMessages.length > 0 && isSocketReady) {
             scrollToBottom();
         }
-    }, [localMessages.length, isReady]);
+    }, [localMessages.length, isReady, isSocketReady]);
 
-    // 메시지 전송 함수
-    const handleSendMessage = (text: string) => {
-        const newMessage: ChatMessage = {
-            id: Date.now().toString(),
-            roomId: roomId,
-            senderId: 'me',
-            type: "TEXT",
-            content: text,
-            createdAt: new Date().toISOString(),
-            isRead: false,
+    // 3. 채팅방을 나갈 때(언마운트) 전역 안 읽은 개수 다시 가져오도록 설정
+    useEffect(() => {
+        return () => {
+            queryClient.invalidateQueries({ queryKey: ['chatUnreadCount'] });
         };
-        setSentMessages((prev) => [...prev, newMessage]);
+    }, [queryClient]);
+
+    // 소켓이 준비되지 않은 상태에서 렌더링을 시도하면 STOMP 커넥션 에러가 발생할 수 있음
+    if (!isSocketReady) {
+        return (
+            <HeaderLayout headerSlot={<MainHeader title="연결 중..." />}>
+                <div className="flex h-[calc(100vh-100px)] items-center justify-center text-gray-400">
+                    채팅 서버에 연결하고 있습니다...
+                </div>
+            </HeaderLayout>
+        );
+    }
+
+    // 메시지 전송 함수 
+    const handleSendMessage = (text: string) => {
+        sendMessage(text);
+    }
+
+    // 채팅 종료 함수
+    const handleEndChat = () => {
+        setIsMenuOpen(false);
+        setIsEndPopUpOpen(true);
+    }
+
+    const handleEndChatConfirm = () => {
+        setIsEndPopUpOpen(false);
+        endChat({ roomId: Number(roomId) }, {
+            onSuccess: () => {
+                // 채팅 종료 UI 표시
+                setIsTerminated(true);
+            }
+        });
     }
 
     return (
         <HeaderLayout
             headerSlot={
                 !isSearching ? (
-                    <MainHeader
-                        title={roomInfo?.partner.name}
-                        rightActions={[
-                            { icon: 'search', onClick: () => setIsSearching(true) },
-                            { icon: 'mypageOption', onClick: () => console.log('menu clicked') }
-                        ]}
-                    />
+                    <div className="fixed left-0 right-0 top-0 z-50 bg-white">
+                        <MainHeader
+                            title={roomInfo?.name}
+                            rightActions={[
+                                { icon: 'search', onClick: () => setIsSearching(true) },
+                                { icon: 'option', onClick: () => setIsMenuOpen(!isMenuOpen) }
+                            ]}
+                        />
+                        {/* 더보기 메뉴 드롭다운 */}
+                        {isMenuOpen && (
+                            <div 
+                                ref={menuRef}
+                                className="absolute right-[25px] top-[calc(100%+10px)] z-[60] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
+                            >
+                                <button 
+                                    onClick={handleEndChat}
+                                    className="w-full flex items-center gap-[15px] hover:bg-gray-50 transition-colors"
+                                >
+                                    <Icon name="logOut" className="w-[24px] h-[24px]" />
+                                    <span className="text-r-16 text-[#FF3838] tracking-[-0.64px]">채팅 종료하기</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <header 
                         className="fixed left-0 right-0 top-0 z-50 flex items-center bg-white px-[25px] py-[10px]"
@@ -139,15 +316,19 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 )
             }
         >
-            {/* invisible : 공간은 차지 하지만 보이지 않음*/}
-            <div className={`flex flex-col pt-[74px] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
+            <div className={`flex flex-col pt-[calc(74px+env(safe-area-inset-top,0px))] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
                 {/* 상단 정보 영역 */}
-                {roomInfo && <ChatRoomInfo chatRoom={roomInfo} />}
+                {roomInfo && requestInfo && (
+                    <ChatRoomInfo 
+                        partner={roomInfo} 
+                        requestInfo={requestInfo} 
+                    />
+                )}
                 
                 {/* 메시지 리스트 영역 */}
                 <div className="flex flex-col mt-[40px] px-[25px]">
                     {localMessages.map((msg, index) => {
-                        const isMe = msg.senderId === 'me';
+                        const isMe = String(msg.senderId) === myId;
                         
                         // 날짜 구분선 표시 여부 확인
                         const showDateDivider = index === 0 || !dayjs(msg.createdAt).isSame(dayjs(localMessages[index - 1].createdAt), 'day');
@@ -185,16 +366,16 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                         {!isMe && (
                                             <div className="w-[32px] mr-[4px] flex-shrink-0 self-start">
                                                 {!isSameAsPrev && (
-                                                    roomInfo?.partner.profileImg ? (
+                                                    roomInfo?.profileImg ? (
                                                         <img 
-                                                            src={roomInfo?.partner.profileImg} 
-                                                            alt={`${roomInfo?.partner.name} 프로필`} 
+                                                            src={roomInfo.profileImg} 
+                                                            alt={`${roomInfo.name} 프로필`} 
                                                             className="w-[32px] h-[32px] rounded-full object-cover shrink-0" 
                                                         />
                                                     ) : (
                                                         <div className="w-[32px] h-[32px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
                                                             <span className="text-[12px] font-bold text-gray-600">
-                                                                {roomInfo?.partner.name.charAt(0)}
+                                                                {roomInfo?.name.charAt(0)}
                                                             </span>
                                                         </div>
                                                     )
@@ -204,7 +385,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
                                         <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} pt-[3px] gap-[7px]`}>
                                             {!isMe && !isSameAsPrev && (
-                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo?.partner.name}</span>
+                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] ml-[2px] ">{roomInfo?.name}</span>
                                             )}
                                             <div className={`px-[13px] py-[7px] text-r-16 tracking-[-0.64px] ${bubbleRounding} ${
                                                 isMe ? 'bg-primary text-white' : 'bg-gray-150 text-gray-750'
@@ -213,25 +394,64 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                             </div>
                                         </div>
 
-                                        {/* 시간 표시: 묶음의 마지막 메시지일 때만 노출 */}
-                                        {!isSameAsNext && (
-                                            <span className="text-r-12 text-gray-750 tracking-[-0.24px] shrink-0 mb-[2px]">
-                                                {formatTime(msg.createdAt)}
-                                            </span>
-                                        )}
+                                        {/* todo 시간 및 읽음 상태 표시 영역 */}
+                                        <div className={`flex flex-col justify-end gap-[2px] mb-[2px] ${isMe ? 'items-end' : 'items-start'}`}>
+                                            {/* 1. 내 메시지이고 안 읽었을 때 & "내가 보낸 전체 메시지 중 마지막"일 때만 '1' 표시 */}
+                                            {isMe && !msg.isRead && index === lastMyMessageIndex && (
+                                                <span className="text-[11px] text-primary font-bold leading-none mb-[1px]">1</span>
+                                            )}
+
+                                            {/* 2. 내 메시지이고 읽었을 때 & "내가 보낸 전체 메시지 중 마지막"일 때만 '읽음' 표시 */}
+                                            {isMe && msg.isRead && index === lastMyMessageIndex && (
+                                                <span className="text-[11px] text-gray-400 font-medium leading-none mb-[1px]">읽음</span>
+                                            )}
+                                            
+                                            {/* 3. 시간 표시: 묶음의 마지막 메시지일 때만 노출 
+                                                상대가 읽었으면 읽은 시간(readAt), 안 읽었으면 보낸 시간(createdAt) 표시
+                                            */}
+                                            {!isSameAsNext && (
+                                                <span className="text-r-12 text-gray-750 tracking-[-0.24px] shrink-0">
+                                                    {msg.isRead && msg.readAt 
+                                                        ? formatTime(msg.readAt) 
+                                                        : formatTime(msg.createdAt)
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </React.Fragment>
                         );
                     })}
+                    {/* 채팅 종료 구분선 */}
+                    {isTerminated && (
+                        <div className="flex items-center gap-[15px] my-[20px]">
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                            <div className="text-r-12 text-gray-650 tracking-[-0.24px] shrink-0">
+                                채팅이 종료되었습니다
+                            </div>
+                            <div className="flex-1 h-[1px] bg-gray-150"></div>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
             </div>
 
             {/* 고정된 입력창 */}
-            <TypingArea onSend={handleSendMessage} />
+            {!isTerminated && <TypingArea onSend={handleSendMessage} />}
             
             <PopUp isOpen={isLoading} type="loading" />
+            
+            <PopUp 
+                isOpen={isEndPopUpOpen}
+                type="warning"
+                title="채팅을 종료하시겠습니까?"
+                content="채팅을 종료하면 다시 복구할 수 없습니다."
+                leftButtonText="종료하기"
+                onLeftClick={handleEndChatConfirm}
+                onRightClick={() => setIsEndPopUpOpen(false)}
+            />
+
             {!isLoading && !roomInfo && (
                 <div className="fixed inset-0 flex justify-center items-center bg-white z-[60] text-gray-400">
                     채팅방 정보를 찾을 수 없습니다.

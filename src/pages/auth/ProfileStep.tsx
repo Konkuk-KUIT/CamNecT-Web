@@ -156,12 +156,15 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
               <span className="sr-only">프로필 사진 업로드</span>
             </label>
 
-            <div className="absolute bottom-0 right-0 w-[32px] h-[32px] bg-[#646464] rounded-full border-2 border-white flex items-center justify-center z-10">
+            <label 
+              htmlFor="profileImage"
+              className="absolute bottom-0 right-0 w-[32px] h-[32px] bg-[#646464] rounded-full border-2 border-white flex items-center justify-center z-10 cursor-pointer"
+            >
               <Icon
                 name="camera"
                 className="w-[20px] h-[20px] text-white"
               />
-            </div>
+            </label>
 
             <input
               type="file"

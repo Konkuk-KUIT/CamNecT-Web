@@ -46,13 +46,13 @@ export const useFileUpload = (options: UseFileUploadOptions = {}) => {
     });
 
     if (!isAllowed) {
-      alert("허용되지 않는 파일 형식입니다.");
+      console.warn("허용되지 않는 파일 형식입니다.");
       return null;
     }
 
     // 2. 용량 검사
     if (file.size > maxSizeMB * 1024 * 1024) {
-      alert(`파일 용량이 너무 큽니다. (최대 ${maxSizeMB}MB)`);
+      console.warn(`파일 용량이 너무 큽니다. (최대 ${maxSizeMB}MB)`);
       return null;
     }
 
