@@ -233,7 +233,24 @@ const ActivityPostContent = ({
             </div>
 
             <div className='flex justify-between gap-[12px] border-b border-[#ECECEC] pb-[15px] sm:flex-row sm:items-center '>
-              <div className='flex items-center gap-[10px]'>
+              <button
+                type='button'
+                disabled={isMine}
+                className='flex items-center text-left'
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
+              >
+                <div className='flex items-center gap-[10px]'>
                   <img
                     src={selectedPost.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
                     alt={`${selectedPost.author.name} 프로필`}
@@ -243,19 +260,31 @@ const ActivityPostContent = ({
                     }}
                     className='h-[32px] w-[32px] rounded-full object-cover'
                   />
-                <div className='flex flex-col gap-[4px]'>
-                  <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
-                    {selectedPost.author.name}
-                  </div>
-                  <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
-                    {selectedPost.author.major} {selectedPost.author.studentId.slice(2,4)}학번
+                  <div className='flex flex-col gap-[4px]'>
+                    <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
+                      {selectedPost.author.name}
+                    </div>
+                    <div className='text-[12px] text-[var(--ColorGray3,#646464)]'>
+                      {selectedPost.author.major} {selectedPost.author.studentId.slice(2,4)}학번
+                    </div>
                   </div>
                 </div>
-              </div>
+              </button>
               {!isMine && (<button
                 type='button'
                 className='inline-flex items-center justify-center rounded-[10px] border border-[var(--ColorMain,#00C56C)] px-[10px] py-[6px] text-[12px] font-normal text-[var(--ColorMain,#00C56C)]'
-                onClick={() => navigate(`/alumni/profile/${selectedPost.author.id}`)}
+                onClick={() =>
+                  navigate(`/alumni/profile/${selectedPost.author.id}?coffeeChat=1`, {
+                    state: {
+                      author: {
+                        name: selectedPost.author.name,
+                        major: selectedPost.author.major,
+                        studentId: selectedPost.author.studentId,
+                        profileImageUrl: selectedPost.author.profileImageUrl,
+                      },
+                    },
+                  })
+                }
               >
                 커피챗 보내기
               </button>)}

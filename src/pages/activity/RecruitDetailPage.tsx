@@ -206,33 +206,62 @@ export const RecruitDetailPage = () => {
 
                     {/* 작성자 정보 */}
                     <div className='flex justify-between gap-[10px] border-b border-gray-150 pb-[15px]'>
-                        <div className='flex items-center gap-[10px]'>
-                            <div className='h-[32px] w-[32px] rounded-full overflow-hidden'>
-                                <img 
-                                    src={recruitDetail.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
-                                    alt={`${recruitDetail.author.name} 프로필`}
-                                    onError={(e) => {
-                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
-                                        e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
-                                    }}
-                                    className='h-full w-full object-cover'
-                                />
-                            </div>
-                            <div className='flex flex-col gap-[3px]'>
-                                <div className='text-b-14-hn text-gray-900'>
-                                    {recruitDetail.author.name}
-                                </div>
-                                <div className='text-r-12-hn text-gray-750'>
-                                    {recruitDetail.author.majorName} {recruitDetail.author.studentNo.slice(2,4)}학번
-                                </div>
-                            </div>
-                        </div>
                         <button
+                            type='button'
+                            disabled={isMine}
+                            className='flex items-center text-left'
+                            onClick={() =>
+                                navigate(`/alumni/profile/${recruitment.userId}`, {
+                                    state: {
+                                        author: {
+                                                name: recruitDetail.author.name,
+                                                major: recruitDetail.author.majorName,
+                                                studentId: recruitDetail.author.studentNo,
+                                                profileImageUrl: recruitDetail.author.profileImageUrl,
+                                        },
+                                    },
+                                })
+                            }
+                        >
+                            <div className='flex items-center gap-[10px]'>
+                                <div className='h-[32px] w-[32px] rounded-full overflow-hidden'>
+                                    <img 
+                                        src={recruitDetail.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
+                                        alt={`${recruitDetail.author.name} 프로필`}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                            e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                        }}
+                                        className='h-full w-full object-cover'
+                                    />
+                                </div>
+                                <div className='flex flex-col gap-[3px]'>
+                                    <div className='text-b-14-hn text-gray-900'>
+                                        {recruitDetail.author.name}
+                                    </div>
+                                    <div className='text-r-12-hn text-gray-750'>
+                                        {recruitDetail.author.majorName} {recruitDetail.author.studentNo.slice(2,4)}학번
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                        {!isMine && (<button
                             className='inline-flex items-center justify-center rounded-[10px] border border-primary p-[10px] text-m-12-hn text-primary break-keep'
-                            onClick={() => {navigate(`/alumni/profile/${recruitment.userId}`)}}
+                            onClick={() =>
+                                navigate(`/alumni/profile/${recruitment.userId}?coffeeChat=1`, {
+                                    state: {
+                                        author: {
+                                            name: recruitDetail.author.name,
+                                            major: recruitDetail.author.majorName,
+                                            studentId: recruitDetail.author.studentNo,
+                                            profileImageUrl: recruitDetail.author.profileImageUrl,
+                                        },
+                                    },
+                                })
+                            }
                         >
                             커피챗 보내기
-                        </button>
+                        </button>)}
                     </div>
 
                     <div className='flex flex-col gap-[12px] py-[10px]'>

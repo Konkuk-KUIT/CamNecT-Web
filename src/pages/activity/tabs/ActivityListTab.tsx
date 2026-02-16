@@ -82,10 +82,22 @@ const ActivityListTab = ({
   }, [tagData]);
 
   // TagsFilterModal에 넘길 데이터 (API 응답 → UI 타입 변환)
-  const tagCategories = useMemo(
-    () => tagData?.data.map(mapApiTagCategoryToUiTagCategory) ?? [],
-    [tagData],
-  );
+  const tagCategories = useMemo(() => {
+    if (!tagData?.data) return [];
+    
+    const categories = tagData.data.map(mapApiTagCategoryToUiTagCategory);
+    
+    // showRecruitStatus가 true이면 "모집 상태" 카테고리를 맨 위로
+    if (showRecruitStatus) {
+      const recruitStatusIndex = categories.findIndex(cat => cat.id === "8");
+      if (recruitStatusIndex > 0) {
+        const recruitStatusCategory = categories.splice(recruitStatusIndex, 1)[0];
+        categories.unshift(recruitStatusCategory);
+      }
+    }
+    
+    return categories;
+  }, [tagData, showRecruitStatus]);
 
   const allTags = useMemo(
     () => tagCategories.flatMap((c) => c.tags),
@@ -97,7 +109,7 @@ const ActivityListTab = ({
   const tagIds = useMemo(
     () =>
       selectedTags
-        .filter((name) => !statusTagNames.includes(name)) // 모집 상태는 API 파라미터 아님
+        .filter((name) => !statusTagNames.includes(name))
         .map((name) => tagNameToIdMap.get(name))
         .filter((id): id is number => id !== undefined),
     [selectedTags, tagNameToIdMap],
