@@ -38,7 +38,32 @@ export type AlumniApiItem = {
 export type AlumniApiResponse = {
   status: number;
   message: string;
-  data: AlumniApiItem[];
+  data: {
+    content: AlumniApiItem[];
+    pageable: {
+      pageNumber: number;
+      pageSize: number;
+      sort: {
+        sorted: boolean;
+        empty: boolean;
+        unsorted: boolean;
+      };
+      offset: number;
+      paged: boolean;
+      unpaged: boolean;
+    };
+    size: number;
+    number: number;
+    sort: {
+      sorted: boolean;
+      empty: boolean;
+      unsorted: boolean;
+    };
+    numberOfElements: number;
+    first: boolean;
+    last: boolean;
+    empty: boolean;
+  };
 };
 
 export type AlumniProfileBasics = {

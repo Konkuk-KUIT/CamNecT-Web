@@ -14,7 +14,7 @@ export const FullLayout = ({ headerSlot, children }: FullLayoutProps) => {
       {headerSlot ?? null}
       
       {/* 컨텐츠 하단이 BottomNav에 가려지지 않도록 패딩 추가 */}
-      <main className="w-full" style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}>
+      <main className="w-full" style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}>
         {children ?? <Outlet />}
       </main>
       

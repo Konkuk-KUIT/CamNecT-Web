@@ -61,7 +61,6 @@ export const AdminVerificationDetail = () => {
     const verifyMutation = useMutation({
         mutationFn: requestAdminVerificationProcess,
         onSuccess: () => {
-
             // 인증서 목록 refetch (queryKey 무효화 -> 캐시 삭제 -> 서버에서 다시 가져옴)
             queryClient.invalidateQueries({ queryKey: ['verificationList'] });
             navigate("/admin/school-verification");
@@ -281,6 +280,13 @@ export const AdminVerificationDetail = () => {
                 content="요청값 검증에 실패했거나\n현재 처리할 수 없는 상태입니다" 
                 buttonText="확인"
                 onClick={() => setShowProcessError(false)}
+            />
+
+            {/* 심사 처리 로딩 팝업 */}
+            <PopUp 
+                isOpen={verifyMutation.isPending} 
+                type="loading" 
+                title="심사 결과를 전송하고 있습니다..." 
             />
         </div>
     );

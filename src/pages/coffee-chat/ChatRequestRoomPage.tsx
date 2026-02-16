@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PopUp from "../../components/Pop-up";
-import { useChatRequestRoom } from "../../hooks/useChatQuery";
+import { useChatRequestRespond, useChatRequestRoom } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import { ChatRequestButton } from "./components/ChatRequestButton";
@@ -24,15 +24,31 @@ export const ChatRequestRoomPage = () => {
         setIsDeletePopUpOpen(true);
     }
 
-    // todo API 연동 
+    const { mutate: respondRequest } = useChatRequestRespond();
     const handleAcceptChatRequestConfirm = () => {
-        setIsAcceptPopUpOpen(false);
-        navigate(`/chat/${id}`);
+        if (!id) return;
+        respondRequest(
+            { requestId: Number(id), isAccepted: true },
+            {
+                onSuccess: () => {
+                    setIsAcceptPopUpOpen(false);
+                    navigate(`/chat/requests`, { replace: true });
+                }
+            }
+        );
     }
 
     const handleDeleteChatRequestConfirm = () => {
-        setIsDeletePopUpOpen(false);
-        navigate(`/chat/requests`);
+        if (!id) return;
+        respondRequest(
+            { requestId: Number(id), isAccepted: false },
+            {
+                onSuccess: () => {
+                    setIsDeletePopUpOpen(false);
+                    navigate(`/chat/requests`, { replace: true });
+                }
+            }
+        );
     }
 
     if (isLoading) return <PopUp isOpen={true} type="loading" />;
@@ -48,7 +64,7 @@ export const ChatRequestRoomPage = () => {
         >
             {/* 75px : ChatRequestButton 높이, 20px : ChatRoomInfo 하단 여백, env(safe-area-inset-bottom) : 하단 안전영역 */}
             <div className="flex flex-col min-h-[calc(100dvh-60px)] justify-end pb-[calc(75px+20px+env(safe-area-inset-bottom))]">
-                <ChatRoomInfo chatRoom={requestInfo} />
+                <ChatRoomInfo partner={requestInfo.partner} requestInfo={requestInfo.requestInfo} />
             </div>
             <ChatRequestButton 
                 onAccept={handleAcceptChatRequest}

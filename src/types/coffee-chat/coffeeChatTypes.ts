@@ -27,14 +27,11 @@ export interface PostAttachment {
 }
 
 // 3. 채팅 메시지 
-export type ChatMessageType = "TEXT" | "IMAGE" | "FILE" | "LINK" | "POST" | "SYSTEM";
 
 export interface ChatMessage {
   id: string;
   roomId: string;
   senderId: string;    // 이 ID가 내 ID와 같으면 오른쪽(초록말풍선), 다르면 왼쪽(회색) 배치
-  type: ChatMessageType;
-  
   content: string;     // 텍스트 메시지 내용 (파일/이미지일 경우 "사진을 보냈습니다" 같은 대체 텍스트 or empty) 
   
   // 타입에 따른 추가 데이터 (Optional)
@@ -44,13 +41,14 @@ export interface ChatMessage {
   
   createdAt: string;   
   isRead: boolean;     
+  readAt: string | null;
 }
 
 export type ChatRoomListItemType = "COFFEE_CHAT" | "TEAM_RECRUIT";
 // 4. 채팅 목록 아이템 (ChatRoomListItem)
 export interface ChatRoomListItem {
   roomId: string;
-  type: ChatRoomListItemType;
+  type?: ChatRoomListItemType;
   partner: ChatUser;   // 상대방 정보 객체 
   
   lastMessage: string; // 내가 보낸 메시지 일 수도
