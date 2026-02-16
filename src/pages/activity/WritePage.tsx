@@ -22,7 +22,7 @@ import { uploadFileToS3 } from '../../utils/s3Upload';
 import { useFileUpload } from '../../hooks/useFileUpload';
 
 const MAX_SIZE_MB = 10;
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 
 const boardTypes = ['동아리', '스터디'] as const;
 type BoardType = (typeof boardTypes)[number];
@@ -52,7 +52,7 @@ export const ActivityWritePage = () => {
 
   const {prepareFile, revokeUrl} = useFileUpload({
     maxSizeMB: MAX_SIZE_MB,
-    allowedTypes: ['image/jpeg, image/jpg, image/png'],
+    allowedTypes: ['image/jpeg, image/webp, image/png'],
   })
 
   //수정일 경우 기존 데이터 로드
@@ -467,7 +467,7 @@ export const ActivityWritePage = () => {
               id='activity-photos'
               name='photos'
               type='file'
-              accept="image/png, image/jpg, image/jpeg"
+              accept="image/png, image/webp, image/jpeg"
               multiple
               className='hidden'
               onChange={handlePhotoChange}

@@ -25,7 +25,7 @@ import replaceImg from "../../../assets/image/replaceImg.png"
 const REPLACE_IMAGE = replaceImg;
 
 const MAX_SIZE_MB = 10;
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const daysInMonth = (year: number, month: number) => new Date(year, month, 0).getDate();
@@ -51,7 +51,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const queryClient = useQueryClient();
     const { prepareFile, revokeUrl } = useFileUpload({
         maxSizeMB: 10,
-        allowedTypes: ['image/png', 'image/jpeg', 'image/jpg'],
+        allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
     });
     const isEditMode = Boolean(postId);
     const activityId = postId ? parseInt(postId) : null;
@@ -771,7 +771,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         </button>
                         )}
                         
-                        <input ref={fileInputRef} type='file' accept='image/png, image/jpg, image/jpeg'
+                        <input ref={fileInputRef} type='file' accept='image/png, image/webp, image/jpeg'
                         className='hidden' onChange={handleThumbnailChange} />
                     </div>
 
