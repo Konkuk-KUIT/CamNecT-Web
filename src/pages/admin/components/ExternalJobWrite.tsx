@@ -205,7 +205,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
 
         // 타입 체크
         if (!ALLOWED_TYPES.has(file.type)) {
-            setFileErrorMessage('이미지는 jpg / jpeg / png 형식만 업로드 가능합니다.');
+            setFileErrorMessage('이미지는 webp / jpeg / png 형식만 업로드 가능합니다.');
             setIsFileErrorOpen(true);
             e.target.value = '';
             return;
@@ -767,7 +767,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                         <button type='button' className='w-full p-[15px] flex items-center justify-center rounded-[5px] bg-gray-150 gap-[10px]'
                             onClick={() => fileInputRef.current?.click()}>
                             <Icon name='album'/>
-                            <span className='text-r-16 text-gray-650 whitespace-pre-line'>{'대표이미지 추가\n(png, jpg, jpeg)'}</span>
+                            <span className='text-r-16 text-gray-650 whitespace-pre-line'>{'대표이미지 추가\n(png, webp, jpeg)'}</span>
                         </button>
                         )}
                         
