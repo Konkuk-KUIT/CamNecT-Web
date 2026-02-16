@@ -43,8 +43,8 @@ export const mapProfilePreviewToAuthor = (profile: ProfilePreview | null) => {
   if (profile) {
     return {
       id: String(profile.userId),
-      name: profile.userName,
-      profileImageUrl: profile.profileImageKey || null,
+      name: profile.name,
+      profileImageUrl: profile.profileImageUrl || null,
       major: profile.majorName,
       studentId: profile.studentNo,
     };
@@ -57,8 +57,6 @@ export const mapProfilePreviewToAuthor = (profile: ProfilePreview | null) => {
       studentId: "200000000",
     };
   }
-    
-  
 };
 
 //목록 아이템 변환
@@ -87,24 +85,27 @@ export const mapListItemToActivityPost = (item: ActivityListItem, category: Acti
 };
 
 //상세 데이터 변환
-export const mapDetailToActivityPost = (detailData: ActivityDetailData): ActivityPostDetail => {
-  const { activity, attachment, tagList, isBookmarked, bookmarkCount, profilePreview } = detailData;
+export const mapDetailToActivityPost = (
+  detailData: ActivityDetailData,
+  tagIdToNameMap: Map<number, string>
+): ActivityPostDetail => {
+  const { activity, attachment, tagIds, isBookmarked, bookmarkCount, author } = detailData;
 
   return {
     id: String(activity.activityId),
     tab: categoryToTab(activity.category),
     title: activity.title,
     content: activity.context,
-    categories: toArray(tagList),
+    categories: (tagIds ?? []).map(id => tagIdToNameMap.get(id) ?? '').filter(Boolean),
     saveCount: bookmarkCount,
     createdAt: activity.createdAt,
-    author: mapProfilePreviewToAuthor(profilePreview),
+    author: mapProfilePreviewToAuthor(author),
     status: activity.status,
     postImages: toArray(attachment).map((a) => a.fileUrl),
     thumbnailUrl: activity.thumbnailUrl ?? null,
     organizer: activity.organizer ?? null,
     deadline: activity.applyEndDate ?? null,
-    descriptionTitle: activity.contextTitle ?? null,
+    contextTitle: activity.contextTitle ?? null,
     // ActivityPostDetail 전용 필드
     isMine: detailData.isMine,
     isBookmarked: isBookmarked,
@@ -115,7 +116,7 @@ export const mapDetailToActivityPost = (detailData: ActivityDetailData): Activit
       : null,
     announceDate: activity.resultAnnounceDate ?? null,
     applyUrl: activity.officialUrl ?? null,
-    descriptionBody: activity.context,
+    context: activity.context,
   };
 };
 

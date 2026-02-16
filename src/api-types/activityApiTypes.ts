@@ -9,10 +9,10 @@ export type RecruitStatus = 'RECRUITING' | 'CLOSED';
 //작성자 정보
 export interface ProfilePreview {
   userId: number;
-  userName: string;
+  name: string;
   majorName: string;
   studentNo: string;
-  profileImageKey: string | null;
+  profileImageUrl: string | null;
 }
 
 //목록 조회
@@ -95,16 +95,16 @@ export interface ActivityCreateResponse {
 export interface ActivityAdminCreateRequest {
   category: ActivityCategory;
   title: string;
+  tagIds: number[];
   organizer: string;
   targetDescription: string;
   applyStartDate: string; // "YYYY-MM-DD"
   applyEndDate: string;
-  resultAnnounceDate: string;
+  resultAnnounceDate: string | null;
   officialUrl: string;
-  thumbnailKey: string;
+  thumbnailKey: string | null;
   contextTitle: string;
   content: string;
-  // TODO: tagIds 필드 추가 필요
 }
 
 export interface ActivityAdminCreateResponse {
@@ -150,7 +150,7 @@ export interface ActivityDetail {
   thumbnailUrl: string;
   applyStartDate: string;  // "YYYY-MM-DD"
   applyEndDate: string;    // "YYYY-MM-DD"
-  resultAnnounceDate: string; // "YYYY-MM-DD"
+  resultAnnounceDate: string | null; // "YYYY-MM-DD"
   officialUrl: string;
   status: ActivityStatus;
   createdAt: string;
@@ -160,10 +160,10 @@ export interface ActivityDetail {
 
 export interface ActivityDetailData {
   isMine: boolean;
-  profilePreview: ProfilePreview | null;
+  author: ProfilePreview | null;
   activity: ActivityDetail;
   attachment: ActivityAttachment[] | null;
-  tagList: string[] | null;
+  tagIds: number[];
   recruitmentList: RecruitmentItem[] | null;
   bookmarkCount: number;
   isBookmarked: boolean;
@@ -200,12 +200,12 @@ export interface ActivityAdminUpdateRequest {
   targetDescription: string;
   applyStartDate: string;
   applyEndDate: string;
-  resultAnnounceDate: string;
+  resultAnnounceDate: string | null;
   officialUrl: string;
-  thumbnailKey: string;
+  thumbnailKey: string | null;
   contextTitle: string;
   content: string;
-  // TODO: tagIds 필드 추가 필요
+  tagIds: number[];
 }
 
 export interface ActivityAdminUpdateResponse {
@@ -320,7 +320,7 @@ export interface RecruitmentUpdateResponse {
 }
 
 export interface RecruitmentDetailData {
-  profilePreview: ProfilePreview;
+  author: ProfilePreview;
   recruitment: RecruitmentItem;
   activityTitle: string;
   isMine: boolean;

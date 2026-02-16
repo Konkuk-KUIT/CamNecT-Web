@@ -31,7 +31,7 @@ export type ActivityPost = {
   thumbnailUrl?: string;
   organizer?: string;
   deadline?: string;
-  descriptionTitle?: string;
+  contextTitle?: string;
 };
 
 // 대외활동 상세 정보 포함 타입
@@ -45,9 +45,9 @@ export type ActivityPostDetail = ActivityPost & {
     start: string;
     end: string;
   } | null;
-  announceDate?: string;
+  announceDate: string | null;
   applyUrl?: string;
-  descriptionBody?: string;
+  context?: string;
 };
 
 
