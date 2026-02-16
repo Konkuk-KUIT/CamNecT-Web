@@ -423,7 +423,7 @@ export const ExternalActivityPostPage = () => {
             isOpen={isCloseAgainPopupOpen}
             type='confirm'
             title='모집 마감 완료'
-            content='이미 팀원 모집이 중지되어 있습니다.'
+            content='이미 모집이 중지되어 있습니다.'
             onClick={() => setIsCloseAgainPopupOpen(false)}
         />
 
