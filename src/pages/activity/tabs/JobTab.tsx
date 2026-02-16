@@ -1,13 +1,12 @@
 import ActivityListTab from './ActivityListTab';
-import type { ActivityPost } from '../../../types/activityPage/activityPageTypes';
 
 type JobTabProps = {
-  posts: ActivityPost[];
-  isAdmin?:boolean;
+  isAdmin?: boolean;
+  searchQuery?: string;
 };
 
-const JobTab = ({ posts, isAdmin }: JobTabProps) => {
-  return <ActivityListTab posts={posts} isAdmin={isAdmin} tab="job"/>;
+const JobTab = ({ isAdmin, searchQuery }: JobTabProps) => {
+  return <ActivityListTab isAdmin={isAdmin} tab='job' searchQuery={searchQuery} />;
 };
 
 export default JobTab;

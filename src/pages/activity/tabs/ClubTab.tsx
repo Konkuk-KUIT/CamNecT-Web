@@ -1,12 +1,11 @@
 import ActivityListTab from './ActivityListTab';
-import type { ActivityPost } from '../../../types/activityPage/activityPageTypes';
 
 type ClubTabProps = {
-  posts: ActivityPost[];
+  searchQuery?: string;
 };
 
-const ClubTab = ({ posts }: ClubTabProps) => {
-  return <ActivityListTab posts={posts} showRecruitStatus tab="club"/>;
+const ClubTab = ({ searchQuery }: ClubTabProps) => {
+  return <ActivityListTab showRecruitStatus tab='club' searchQuery={searchQuery} />;
 };
 
 export default ClubTab;

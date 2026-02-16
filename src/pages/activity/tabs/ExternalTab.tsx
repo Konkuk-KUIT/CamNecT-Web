@@ -1,13 +1,12 @@
 import ActivityListTab from './ActivityListTab';
-import type { ActivityPost } from '../../../types/activityPage/activityPageTypes';
 
 type ExternalTabProps = {
-  posts: ActivityPost[];
-  isAdmin?:boolean;
+  isAdmin?: boolean;
+  searchQuery?: string;
 };
 
-const ExternalTab = ({ posts, isAdmin }: ExternalTabProps) => {
-  return <ActivityListTab posts={posts} isAdmin={isAdmin} tab="external"/>;
+const ExternalTab = ({ isAdmin, searchQuery }: ExternalTabProps) => {
+  return <ActivityListTab isAdmin={isAdmin} tab='external' searchQuery={searchQuery} />;
 };
 
 export default ExternalTab;
