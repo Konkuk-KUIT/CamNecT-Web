@@ -796,7 +796,7 @@ export default function PortfolioEditModal({
                                         >
                                         <ModalIcon name="photo" className="w-[24px] h-[24px] text-gray-400" />
                                         <span className="text-r-12-hn text-gray-500">
-                                            대표 이미지를 추가해 주세요<br/>(png, jpg, pdf ...)
+                                            대표 이미지를 추가해 주세요<br/>(png, webp, jpeg ...)
                                         </span>
                                         </button>
                                     )}
@@ -913,14 +913,14 @@ export default function PortfolioEditModal({
                 <input
                     ref={thumbnailInputRef}
                     type="file"
-                    accept="image/png, image/jpg, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg"
                     onChange={handleThumbnailUpload}
                     className="hidden"
                 />
                 <input
                     ref={imageInputRef}
                     type="file"
-                    accept="image/png, image/jpg, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg"
                     multiple
                     onChange={handleImageUpload}
                     className="hidden"
@@ -928,7 +928,7 @@ export default function PortfolioEditModal({
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/png, image/jpg, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg"
                     capture="environment"
                     onChange={handleCameraUpload}
                     className="hidden"

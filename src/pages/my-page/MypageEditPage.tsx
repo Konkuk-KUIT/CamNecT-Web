@@ -19,8 +19,12 @@ import PopUp from "../../components/Pop-up";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { requestTagList } from "../../api/auth";
+import { useFileUpload } from "../../hooks/useFileUpload";
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
+
+const MAX_SIZE_MB = 20;
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 export const MypageEditPage = () => {
     const navigate = useNavigate();
@@ -39,7 +43,12 @@ export const MypageEditPage = () => {
     const [confirm, setConfirm] = useState(false);
     const [leaveOpen, setLeaveOpen] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
-    const [imageSizeErrorOpen, setImageSizeErrorOpen] = useState(false);
+    const [imageErrorMessage, setImageErrorMessage] = useState('');
+
+    const { prepareFile, revokeUrl } = useFileUpload({
+        maxSizeMB: MAX_SIZE_MB,
+        allowedTypes: ALLOWED_IMAGE_TYPES,
+    });
 
     // 태그 리스트 조회
     const { data: tagList } = useQuery({
@@ -114,34 +123,40 @@ export const MypageEditPage = () => {
         };
     }, [currentModal]);
 
-    const MAX_BYTES = 20 * 1024 * 1024;
     const handleSelectImage = (file: File) => {
-        if (file.size > MAX_BYTES) {
-            setImageSizeErrorOpen(true);
-            return; 
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setImageErrorMessage('이미지는 webp / jpeg / png 형식만 업로드 가능합니다.');
+            return;
         }
 
-        // 20MB이하의 이미지만 기존 로직 실행
-        handleImageUpload(file);
-    };
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            setImageErrorMessage(`이미지가 파일 용량 제한을 초과합니다. (최대 ${MAX_SIZE_MB}MB)`);
+            return;
+        }
 
-    const handleImageUpload = (file: File) => {
-        const previewUrl = URL.createObjectURL(file);
+        const prepared = prepareFile(file);
+        if (!prepared) {
+            setImageErrorMessage('파일을 업로드할 수 없어요. 형식/용량을 확인해주세요.');
+            return;
+        }
 
         setData((prev) => {
             const base = prev ?? data;
             if (!base) return prev;
 
             const prevImg = base.user.profileImg;
-            if (prevImg && prevImg.startsWith("blob:")) URL.revokeObjectURL(prevImg);
+            if (prevImg && prevImg.startsWith("blob:")) {
+                revokeUrl(prevImg);
+            }
 
             return {
-            ...base,
-            user: { ...base.user, profileImg: previewUrl },
+                ...base,
+                user: { ...base.user, profileImg: prepared.previewUrl },
             };
         });
 
-        imageFileRef.current = file;
+        // 20MB이하의 이미지만 로직 실행
+        imageFileRef.current = prepared.file;
         imageActionRef.current = "UPLOAD";
         closeModal();
     };
@@ -452,12 +467,12 @@ export const MypageEditPage = () => {
                 onClick={() => setSaveError(null)}
             />
             <PopUp
-                isOpen={imageSizeErrorOpen}
+                isOpen={!!imageErrorMessage}
                 type="error"
-                title="파일 용량 초과"
-                content="프로필 사진은 최대 20MB까지 업로드할 수 있습니다."
+                title="업로드할 수 없는 파일입니다."
+                content={imageErrorMessage}
                 buttonText="확인"
-                onClick={() => setImageSizeErrorOpen(false)}
+                onClick={() => setImageErrorMessage('')}
             />
 
         </div>
