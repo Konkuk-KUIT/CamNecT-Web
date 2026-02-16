@@ -30,12 +30,12 @@ const BottomReact = ({
               type='button'
               onClick={onOpenCompletePopup}
               disabled={isClosed}
-              className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] disabled:cursor-not-allowed ${isClosed ? 'bg-gray-650 text-white' : 'bg-[#FFEFEF] text-red'}`}
+              className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] disabled:cursor-not-allowed ${isClosed ? 'bg-gray-300 text-white' : 'bg-[#FFEFEF] text-red'}`}
             >
               {isClosed ? '모집 완료됨' : '모집 완료하기'}
             </button>
           ) : (
-            <div className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] ${isClosed ? 'bg-gray-650 text-white' : 'bg-green-50 text-primary'}`}>
+            <div className={`text-b-16-hn flex h-[44px] w-full items-center justify-center rounded-[10px] ${isClosed ? 'bg-gray-300 text-white' : 'bg-green-50 text-primary'}`}>
               {isClosed ? '모집 완료' : '모집 중'}
             </div>
           )}

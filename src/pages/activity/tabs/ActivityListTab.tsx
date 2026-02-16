@@ -18,13 +18,13 @@ type SortInternalKey = 'recommended' | 'latest' | 'bookmarks';
 type SortExternalKey = 'recommended' | 'latest' | 'deadline' | 'bookmarks' | 'recruits';
 
 const sortInternalLabels: Record<SortInternalKey, string> = {
-  recommended: '추천순',
   latest: '최신순',
+  recommended: '추천순',
   bookmarks: '북마크 많은 순',
 };
 const sortExternalLabels: Record<SortExternalKey, string> = {
-  recommended: '추천순',
   latest: '최신순',
+  recommended: '추천순',
   deadline: '마감임박순',
   bookmarks: '북마크 많은 순',
   recruits: '팀원모집 많은 순',
