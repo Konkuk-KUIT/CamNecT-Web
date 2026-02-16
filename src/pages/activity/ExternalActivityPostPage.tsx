@@ -11,7 +11,7 @@ import { formatOnlyDate } from '../../utils/formatDate';
 import { RecruitPost } from '../../components/posts/RecruitPost';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivityDetail, closeAdminActivity, toggleActivityBookmark } from '../../api/activityApi';
+import { getTags, getActivityDetail, closeAdminActivity, toggleActivityBookmark } from '../../api/activityApi';
 import { mapDetailToActivityPost, mapRecruitmentItemToTeamRecruitPost } from './utils/activityMapper';
 import { type ActivityDetailResponse } from '../../api-types/activityApiTypes';
 import replaceImg from "../../assets/image/replaceImg.png"
@@ -53,9 +53,23 @@ export const ExternalActivityPostPage = () => {
     enabled: !!userId && !!activityId,
   });
 
+  const { data: tagData } = useQuery({
+      queryKey: ['tags', 'DEFAULT'],
+      queryFn: () => getTags('DEFAULT'),
+      staleTime: 1000 * 60 * 10,
+    });
+
+  const tagIdToNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    tagData?.data.forEach(cat =>
+      cat.tags.forEach(tag => map.set(tag.id, tag.name))
+    );
+    return map;
+  }, [tagData]);
+
   const selectedPost = useMemo(() => {
     if (!detailResponse?.data) return null;
-    return mapDetailToActivityPost(detailResponse.data);
+    return mapDetailToActivityPost(detailResponse.data, tagIdToNameMap);
   }, [detailResponse]);
 
   //팀원 모집 중지
@@ -124,7 +138,7 @@ export const ExternalActivityPostPage = () => {
 
   const handleOptionClick = async (item: OptionItem) => {
     if (item.id === 'copy-url') {
-      const postUrl = `${window.location.origin}/activity/post/${activityId}`;
+      const postUrl = `${window.location.origin}/activity/external/${activityId}`;
       try {
         await navigator.clipboard.writeText(postUrl);
       } catch {
@@ -175,13 +189,13 @@ export const ExternalActivityPostPage = () => {
 
   const renderDetailTab = () => (
     <div className='flex flex-col px-[25px] py-[30px]'>
-      {selectedPost.descriptionBody && (
+      {selectedPost.context && (
         <div className='flex flex-col gap-[20px]'>
-          {selectedPost.descriptionTitle && (
-            <span className='text-b-16-hn text-gray-900 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>{selectedPost.descriptionTitle}</span>
+          {selectedPost.contextTitle && (
+            <span className='text-b-16-hn text-gray-900 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>{selectedPost.contextTitle}</span>
           )}
           <p className='text-r-14 text-gray-900 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]'>
-            {selectedPost.descriptionBody}
+            {selectedPost.context}
           </p>
         </div>
       )}

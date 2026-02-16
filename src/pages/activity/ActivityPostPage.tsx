@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Category from '../../components/Category';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
@@ -11,7 +11,7 @@ import type { ActivityPostStatus } from '../../types/activityPage/activityPageTy
 import { formatPostDisplayDate } from './utils/post';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivityDetail, deleteActivity, toggleActivityBookmark, closeActivity } from '../../api/activityApi';
+import { getTags, getActivityDetail, deleteActivity, toggleActivityBookmark, closeActivity } from '../../api/activityApi';
 import { mapDetailToActivityPost } from './utils/activityMapper';
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
 
@@ -38,6 +38,20 @@ const ActivityPostPage = () => {
     enabled: !!userId && !!activityId,
   });
 
+  const { data: tagData } = useQuery({
+    queryKey: ['tags', 'DEFAULT'],
+    queryFn: () => getTags('DEFAULT'),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const tagIdToNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    tagData?.data.forEach(cat =>
+      cat.tags.forEach(tag => map.set(tag.id, tag.name))
+    );
+    return map;
+  }, [tagData]);
+
   if (isLoading) {
     return (
       <PopUp
@@ -59,7 +73,7 @@ const ActivityPostPage = () => {
     );
   }
 
-  const selectedPost = mapDetailToActivityPost(detailResponse.data);
+  const selectedPost = mapDetailToActivityPost(detailResponse.data, tagIdToNameMap);
 
   return (
     <ActivityPostContent 
@@ -175,6 +189,7 @@ const ActivityPostContent = ({
       headerSlot={
         <MainHeader
           title='대외활동'
+          leftAction={{onClick: () => navigate('/activity')}}
           rightActions={[
             { icon: 'option', onClick: () => setIsOptionOpen(true), ariaLabel: '게시글 옵션 열기' },
           ]}

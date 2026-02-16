@@ -67,7 +67,7 @@ export const ActivityWritePage = () => {
   //수정 모드 초기값 계산
   const initialValues = useMemo(() => {
     if (!editPost) return null;
-    const { activity, attachment, tagList } = editPost;
+    const { activity, attachment, tagIds } = editPost;
     const categoryToBoardType: Partial<Record<ActivityCategory, BoardType>> = {
       CLUB: '동아리',
       STUDY: '스터디',
@@ -76,7 +76,7 @@ export const ActivityWritePage = () => {
       boardType: categoryToBoardType[activity.category] ?? null,
       title: activity.title,
       content: activity.context,
-      tags: tagList,
+      tags: tagIds,
       photos: (attachment ?? []).map((a) => ({
         id: `existing-${a.id}`,
         url: a.fileUrl,
@@ -92,7 +92,7 @@ export const ActivityWritePage = () => {
   const [draftBoardType, setDraftBoardType] = useState<BoardType | null>(null);
   const [title, setTitle] = useState(() => initialValues?.title ?? '');
   const [content, setContent] = useState(() => initialValues?.content ?? '');
-  const [selectedTags, setSelectedTags] = useState<string[]>(() => initialValues?.tags ?? []);
+  const [selectedTags, setSelectedTags] = useState<number[]>(() => initialValues?.tags ?? []);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
@@ -105,7 +105,7 @@ export const ActivityWritePage = () => {
   // 수정 모드 초기값 세팅
   const boardLabel = boardType ?? '게시판';
   const boardLabelColor = boardType ? 'var(--ColorMain, #00C56C)' : 'var(--ColorGray2, #A1A1A1)';
-  const confirmTitle = isEditMode ? `${boardType ?? '게시글'}을 수정하시겠습니까?` : '게시글을 등록하시겠습니까?';
+  const confirmTitle = isEditMode ? '게시글을 수정하시겠습니까?' : '게시글을 등록하시겠습니까?';
   const confirmContent = isEditMode ? '수정된 내용으로 저장됩니다.' : '등록 후에도 수정/삭제가 가능합니다.';
   const isSubmitEnabled =
     Boolean(boardType) && title.trim().length > 0 && content.trim().length > 0 && selectedTags.length > 0;
@@ -199,6 +199,14 @@ export const ActivityWritePage = () => {
     return map;
   }, [tagData]);
 
+  const tagIdToNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    tagData?.data.forEach((cat) => {
+      cat.tags.forEach((tag) => map.set(tag.id, tag.name));
+    });
+    return map;
+  }, [tagData]);
+
   const tagCategories = useMemo(() => tagData?.data.map(mapApiTagCategoryToUiTagCategory) ?? [], [tagData]);
 
   const allTags = useMemo(() => tagCategories.flatMap((c) => c.tags), [tagCategories]);
@@ -209,10 +217,7 @@ export const ActivityWritePage = () => {
 
       const category: ActivityCategory = boardTypeToCategory[boardType];
 
-      // selectedTags(name[]) → tagIds(number[]) 변환
-      const tagIds = selectedTags
-        .map((name) => tagNameToIdMap.get(name))
-        .filter((id): id is number => id !== undefined);
+      const tagIds = selectedTags;
 
       // 2) 신규 파일
       const newFilesInOrder: File[] = photoPreviews
@@ -273,7 +278,7 @@ export const ActivityWritePage = () => {
       queryClient.invalidateQueries({ queryKey: ['activityList'] });
       if (isEditMode && activityId) {
         queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
-        navigate(`/activity/post/${activityId}`);
+        navigate(`/activity/internal/${activityId}`);
       } else {
         navigate('/activity');
       }
@@ -392,11 +397,12 @@ export const ActivityWritePage = () => {
             }}
           >
             <FilterHeader
-              activeFilters={selectedTags}
+              activeFilters={selectedTags.map(id => tagIdToNameMap.get(id) ?? '').filter(Boolean)}
               onOpenFilter={() => setIsFilterOpen(true)}
-              onRemoveFilter={(tag) =>
-                setSelectedTags((prev) => prev.filter((item) => item !== tag))
-              }
+              onRemoveFilter={(tagName) => {
+                const tagId = tagNameToIdMap.get(tagName);
+                if (tagId) setSelectedTags((prev) => prev.filter((id) => id !== tagId));
+              }}
             />
           </div>
 
@@ -587,10 +593,13 @@ export const ActivityWritePage = () => {
 
       <TagsFilterModal
         isOpen={isFilterOpen}
-        tags={selectedTags}
+        tags={selectedTags.map(id => tagIdToNameMap.get(id) ?? '').filter(Boolean)}
         onClose={() => setIsFilterOpen(false)}
-        onSave={(next) => {
-          setSelectedTags(next);
+        onSave={(tagNames) => {
+          const tagIds = tagNames
+            .map(name => tagNameToIdMap.get(name))
+            .filter((id): id is number => id !== undefined);
+          setSelectedTags(tagIds);
           setIsFilterOpen(false);
         }}
         categories={tagCategories}
