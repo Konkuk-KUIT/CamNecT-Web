@@ -246,7 +246,7 @@ export const MyPostsPage = () => {
                             deadline: item.applyEndDate,
                             thumbnailUrl: item.thumbnailUrl,
                             tab: categoryToTab[item.category],
-                            descriptionTitle: item.contextPreview,
+                            contextTitle: item.contextPreview,
                             createdAt: item.createdAt
                         }}
                     />
