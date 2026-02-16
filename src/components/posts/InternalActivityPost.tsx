@@ -74,7 +74,7 @@ const InternalActivityPost = ({
           </div>
         </div>
 
-        {thumbnailUrl && (
+        {thumbnailUrl && thumbnailUrl !== "기본이미지" && (
           <img
             src={thumbnailUrl}
             alt={post.title}

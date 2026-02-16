@@ -55,7 +55,7 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
           <div className='flex flex-col gap-[30px] items-start'>
             <div className='flex flex-col gap-[5px] text-r-14-hn text-gray-750'>
               {isJobPost ? (
-                <span className='text-r-14 min-h-[42px] line-clamp-2'>{post.descriptionTitle}</span>
+                <span className='text-r-14 min-h-[42px] line-clamp-2'>{post.content}</span>
               ) : (
                 <>
                   {post.organizer && <span>{post.organizer}</span>}
@@ -77,7 +77,7 @@ const ExternalActivityPost = ({ post }: ExternalActivityPostProps) => {
           </div>
         </div>
 
-        {thumbnailUrl && (
+        {thumbnailUrl && thumbnailUrl !== "기본이미지" && (
           <div className='relative'>
             <img
               src={thumbnailUrl ?? REPLACE_IMAGE}
