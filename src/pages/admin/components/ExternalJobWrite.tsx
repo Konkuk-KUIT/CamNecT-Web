@@ -339,9 +339,9 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
                 const updatePayload: ActivityAdminUpdateRequest = {
                     ...payload,
                 };
-                return updateAdminActivity(activityId, updatePayload);
+                return updateAdminActivity(userId, activityId, updatePayload);
             }
-            return createAdminActivity(payload);
+            return createAdminActivity(userId, payload);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['activityList'] });

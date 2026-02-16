@@ -72,11 +72,13 @@ export const createActivity = async (
 
 // 대외활동/취업정보 등록 (관리자) [POST] (/api/activity/admin)
 export const createAdminActivity = async (
+  adminId: number,
   data: ActivityAdminCreateRequest,
 ): Promise<ActivityAdminCreateResponse> => {
   const response = await axiosInstance.post<ActivityAdminCreateResponse>(
     '/api/activity/admin',
     data,
+    { params: { adminId } },
   );
   return response.data;
 };
@@ -109,12 +111,14 @@ export const updateActivity = async (
 
 // 대외활동/취업정보 수정 (관리자) [PATCH] (/api/activity/admin/{activityId})
 export const updateAdminActivity = async (
+  adminId: number,
   activityId: number,
   data: ActivityAdminUpdateRequest,
 ): Promise<ActivityAdminUpdateResponse> => {
   const response = await axiosInstance.patch<ActivityAdminUpdateResponse>(
     `/api/activity/admin/${activityId}`,
     data,
+    { params: { adminId } },
   );
   return response.data;
 };
