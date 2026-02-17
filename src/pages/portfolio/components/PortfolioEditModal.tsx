@@ -929,8 +929,8 @@ console.log('portfolioId:', portfolioId);
                                     {/* PDF 파일 리스트 */}
                                     {pdfFiles.length > 0 && (
                                         <div className="flex flex-col gap-[8px]">
-                                            {pdfFiles.map((pdf) => {
-                                                const fileName = pdf.file?.name || pdf.fileKey?.split('/').pop() || '파일';
+                                            {pdfFiles.map((pdf, idx) => {
+                                                const fileName = pdf.file?.name || `첨부파일${idx+1}.pdf`;
                                                 return (
                                                     <div key={pdf.id} className="flex items-center gap-[10px] px-[15px] py-[12px] bg-gray-100 rounded-[10px]">
                                                         <ModalIcon name="file" className="w-[20px] h-[20px] text-gray-750" />
