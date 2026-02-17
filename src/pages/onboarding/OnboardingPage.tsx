@@ -5,6 +5,7 @@ import graphic2 from '../../assets/image/onboarding2.png';
 import graphic3 from '../../assets/image/onboarding3.png';
 import Button from '../../components/Button';
 import ButtonWhite from '../../components/ButtonWhite';
+import { useAuthStore } from '../../store/useAuthStore';
 import { FirstSplashPage } from './FirstSplashPage';
 
 
@@ -28,9 +29,17 @@ const ONBOARDING_DATA = [
 
 export const OnboardingPage = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   const [showSplash, setShowSplash] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // 로그인된 유저라면 온보딩을 건너뛰고 홈으로 이동
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
