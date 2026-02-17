@@ -71,7 +71,7 @@ export const SideBar = ({ isOpen, onClose, user }: SideBarProps) => {
 
             {/* Sidebar */}
             <div className="fixed top-0 left-0 h-full w-5/6 bg-white z-120 shadow-lg">
-                <div className="h-full flex flex-col px-[25px] pt-[68px] pb-[20px]">
+                <div className="h-full flex flex-col px-[25px] pt-[68px]" style={{ paddingBottom: 'calc(30px + env(safe-area-inset-bottom, 0px))' }}>
                     {/* Header Section */}
                     <div className="flex flex-col gap-[20px] pb-[15px] border-b-[2px] border-gray-150">
                         <div className="flex flex-col gap-[3px]">

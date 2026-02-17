@@ -3,6 +3,7 @@ import Button from "../../components/Button";
 import Icon from "../../components/Icon";
 import CheckBoxToggle from "../../components/Toggle/CheckBoxToggle";
 import { useSignupStore } from "../../store/useSignupStore";
+import { TermsModal } from "../../components/TermsModal";
 
 interface TermsStepProps {
     onNext: () => void;
@@ -12,12 +13,30 @@ interface TermsStepProps {
 export const TermsStep = ({ onNext }: TermsStepProps) => {
     const { agreements, setAgreements } = useSignupStore();
     const [localAgreements, setLocalAgreements] = useState(agreements);
+        const [modalState, setModalState] = useState<{
+        isOpen: boolean;
+        type: 'service' | 'privacy' | null;
+    }>({
+        isOpen: false,
+        type: null
+    });
+    
     const allChecked = localAgreements.serviceTerms && localAgreements.privacyTerms;
 
     const terms = [
         { id: 'serviceTerms', label: '서비스 이용 약관', required: true },
         { id: 'privacyTerms', label: '개인정보 수집 및 이용 동의', required: true }
     ];
+
+    // 이용약관 모달 열기
+    const handleModalOpen = (type: 'service' | 'privacy') => {
+        setModalState({ isOpen: true, type });
+    };
+
+    // 이용약관 모달 닫기
+    const handleModalClose = () => {
+        setModalState({ isOpen: false, type: null });
+    };
 
     // 전체 동의 핸들러
     const handleAllAgree = () => {
@@ -77,7 +96,7 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
                                     <span className="text-m-16 text-gray-900" style={{ letterSpacing: '-0.4px' }}>[필수]</span>
                                     <span className="text-r-14 text-gray-750" style={{ letterSpacing: '-0.56px' }}>{terms[0].label}</span>
                                 </div>
-                                <Icon name="more"></Icon>
+                                <Icon name="more" onClick={() => handleModalOpen('service')}></Icon>
                             </div>
                         </button>
                     </li>
@@ -93,7 +112,7 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
                                     <span className="text-m-16 text-gray-900" style={{ letterSpacing: '-0.4px' }}>[필수]</span>
                                     <span className="text-r-14 text-gray-750" style={{ letterSpacing: '-0.56px' }}>{terms[1].label}</span>
                                 </div>
-                                <Icon name="more"></Icon>
+                                <Icon name="more" onClick={() => handleModalOpen('privacy')}></Icon>
                             </div>
                         </button>
                     </li>
@@ -111,6 +130,14 @@ export const TermsStep = ({ onNext }: TermsStepProps) => {
                     disabled={!allChecked}
                 />
             </div>
+
+            {modalState.type && (
+                <TermsModal
+                    isOpen={modalState.isOpen}
+                    onClose={handleModalClose}
+                    type={modalState.type}
+                />
+            )}
         </div>
     )
 }

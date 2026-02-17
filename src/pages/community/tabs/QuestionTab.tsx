@@ -167,7 +167,6 @@ const QuestionTab = ({ posts, sortKey, onSortChange }: QuestionTabProps) => {
         ]}
       />
 
-      {/* TODO: 글쓰기 라우터 연결 (버튼 클릭) */}
       <WriteButton />
     </div>
   );

@@ -61,6 +61,7 @@ type IconProps = {
   name: IconName;
   className?: string;
   style?: CSSProperties;
+  onClick?: () => void;
 };
 
 type IconDefinition = {
@@ -582,7 +583,7 @@ const iconPaths: Record<IconName, IconDefinition> = {
   }
 };
 
-const Icon = ({ name, className = '', style }: IconProps) => {
+const Icon = ({ name, className = '', style, onClick }: IconProps) => {
   const icon = iconPaths[name];
 
   if (!icon) {
@@ -592,8 +593,16 @@ const Icon = ({ name, className = '', style }: IconProps) => {
   return (
     <svg
       viewBox={icon.viewBox}
-      className={`w-6 h-6 text-[var(--ColorGray3,#646464)] cursor-pointer ${className}`}
+      className={`w-6 h-6 text-[var(--ColorGray3,#646464)] ${
+        onClick ? 'cursor-pointer active:scale-95 active:brightness-95 transition' : ''
+      } ${className}`}
       style={style}
+      onClick={(e) => {
+        if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
+      }}
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >
