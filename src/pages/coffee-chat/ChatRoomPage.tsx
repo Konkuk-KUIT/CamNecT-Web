@@ -8,6 +8,7 @@ import { isReadReceipt } from "../../api-types/stompApiTypes";
 import { stompClient } from "../../api/stompClient";
 import Icon from "../../components/Icon";
 import PopUp from "../../components/Pop-up";
+import Toggle from "../../components/Toggle/Toggle";
 import { useChatRoom, useChatRoomClose, useChatRoomExit, type ChatRoomDetailData } from "../../hooks/useChatQuery";
 import { useStompChat } from "../../hooks/useStompChat";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
@@ -43,6 +44,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
     
     // 메뉴 관련 상태
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isRecruitExpanded, setIsRecruitExpanded] = useState(false);
     const [confirmPopUpConfig, setConfirmPopUpConfig] = useState<{
         title: string;
         content: string;
@@ -155,6 +157,7 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
 
     const roomInfo = chatRoomData?.partner;
     const requestInfo = chatRoomData?.requestInfo;
+    const isTeamRecruit = requestInfo?.type === 'TEAM_RECRUIT';
 
     // API로 받은 기존 채팅 내역 데이터들
     const remoteMessages = useMemo(() => {
@@ -299,11 +302,57 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                 { icon: 'option', onClick: () => setIsMenuOpen(!isMenuOpen) }
                             ]}
                         />
+
+                        {/* 모집 공고 정보 바 (TEAM_RECRUIT 유형일 때만) */}
+                        {isTeamRecruit && requestInfo.recruitmentTitle && (
+                            <>
+                                <div className="h-[10px] bg-white" />
+                                <div className="px-[25px] pb-[10px] w-full bg-white">
+                                    <div 
+                                        className={`mx-auto flex max-w-[380px] flex-col rounded-[5px] px-[15px] py-[10px] transition-all duration-300 bg-gray-100 border border-gray-150 ${isRecruitExpanded ? 'gap-[10px]' : 'h-[40px] justify-center'}`} 
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-[10px]">
+                                                <span className="text-m-14 tracking-[-0.56px] text-gray-650 whitespace-nowrap">
+                                                    모집 공고
+                                                </span>
+                                                <span 
+                                                    onClick={() => requestInfo.activityId && navigate(`/activity/recruit/${requestInfo.recruitmentId}`)}
+                                                    className="text-m-14 tracking-[-0.56px] text-primary underline cursor-pointer"
+                                                >
+                                                    {requestInfo.recruitmentTitle}
+                                                </span>
+                                            </div>
+                                            <Toggle 
+                                                toggled={isRecruitExpanded} 
+                                                onToggle={setIsRecruitExpanded} 
+                                                width={20} 
+                                                height={20} 
+                                                strokeColor="#A1A1A1"
+                                            />
+                                        </div>
+                                        
+                                        {isRecruitExpanded && (
+                                            <div className="flex items-start gap-[10px]">
+                                                <span className="text-m-14 tracking-[-0.56px] text-gray-650 whitespace-nowrap">
+                                                    요청 내용
+                                                </span>
+                                                <span className="text-m-14 tracking-[-0.56px] text-gray-750">
+                                                    {requestInfo.content}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                            
+                        )}
+
                         {/* 더보기 메뉴 드롭다운 */}
                         {isMenuOpen && (
                             <div 
                                 ref={menuRef}
-                                className="absolute right-[25px] top-[calc(100%+10px)] z-[60] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
+                                className="absolute right-[25px] top-[55px] z-[99] min-w-[160px] bg-white rounded-[10px] shadow-[0_4px_20px_0_rgba(0,0,0,0.1)] border border-gray-150 overflow-hidden flex flex-col items-start p-[15px_20px_15px_15px] gap-[10px]"
                             >
                                 {isTerminated ? (
                                     <button 
@@ -360,7 +409,12 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                 )
             }
         >
-            <div className={`flex flex-col pt-[calc(74px+env(safe-area-inset-top,0px))] pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}>
+            <div 
+                className={`flex flex-col pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}
+                style={{
+                    paddingTop: `calc(${isTeamRecruit ? (isRecruitExpanded ? '200px' : '134px') : '74px'} + env(safe-area-inset-top, 0px))`
+                }}
+            >
                 {/* 상단 정보 영역 */}
                 {roomInfo && requestInfo && (
                     <ChatRoomInfo 

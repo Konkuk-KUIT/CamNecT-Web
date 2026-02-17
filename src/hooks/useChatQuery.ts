@@ -12,6 +12,9 @@ export interface ChatRoomDetailData {
         type: string;
         tags: string[];
         content: string;
+        recruitmentTitle?: string;
+        recruitmentId?: number;
+        activityId?: number;
     };
     messages: ChatMessage[];
     closed: boolean;
@@ -110,6 +113,9 @@ export const useChatRoom = (roomId: string) => {
                     type: data.requestType,
                     tags: data.requestTags || [], 
                     content: data.requestContent,
+                    recruitmentTitle: data.recruitmentTitle,
+                    recruitmentId: data.recruitmentId,
+                    activityId: data.activityId,
                 },
                 // 채팅 메시지 리스트
                 messages: data.chatList.map((message): ChatMessage => ({
