@@ -13,6 +13,7 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { getPortfolioDetail, presignThumbnail, presignAssets, createPortfolio, updatePortfolio } from '../../../api/portfolioApi';
 import type { PortfolioAsset } from '../../../api-types/portfolioApiTypes';
 import replaceImg from "../../../assets/image/replaceImg.png"
+import { getFileName } from '../../../utils/getFileName';
 
 const REPLACE_IMAGE = replaceImg;
 
@@ -639,6 +640,7 @@ console.log('portfolioId:', portfolioId);
                                     <input
                                         type="text"
                                         value={title}
+                                        maxLength={50}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="프로젝트 이름을 입력해 주세요"
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary"
@@ -829,6 +831,7 @@ console.log('portfolioId:', portfolioId);
                                     <input
                                         type="text"
                                         value={role}
+                                        maxLength={100}
                                         onChange={(e) => setRole(e.target.value)}
                                         placeholder="프로젝트에서 맡은 역할을 입력해 주세요"
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary"
@@ -843,6 +846,7 @@ console.log('portfolioId:', portfolioId);
                                     <input
                                         type="text"
                                         value={skills}
+                                        maxLength={50}
                                         onChange={(e) => setSkills(e.target.value)}
                                         placeholder="프로젝트에서 사용한 기술을 입력해 주세요"
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-16-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary"
@@ -929,8 +933,8 @@ console.log('portfolioId:', portfolioId);
                                     {/* PDF 파일 리스트 */}
                                     {pdfFiles.length > 0 && (
                                         <div className="flex flex-col gap-[8px]">
-                                            {pdfFiles.map((pdf, idx) => {
-                                                const fileName = pdf.file?.name || `첨부파일${idx+1}.pdf`;
+                                            {pdfFiles.map((pdf) => {
+                                                const fileName = pdf.file?.name || getFileName(pdf.url) || '첨부파일';
                                                 return (
                                                     <div key={pdf.id} className="flex items-center gap-[10px] px-[15px] py-[12px] bg-gray-100 rounded-[10px]">
                                                         <ModalIcon name="file" className="w-[20px] h-[20px] text-gray-750" />
@@ -969,15 +973,15 @@ console.log('portfolioId:', portfolioId);
                                     <textarea
                                         value={problemSolution}
                                         onChange={(e) => {
-                                                if (e.target.value.length <= 100) {
+                                                if (e.target.value.length <= 200) {
                                                     setProblemSolution(e.target.value);
                                                 }
                                             }}
                                         placeholder="문제와 해결방법을 간단히 작성해 주세요 (100자 이내)"
-                                        maxLength={100}
+                                        maxLength={200}
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-14-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary resize-none min-h-[120px]"
                                     />
-                                    <span className="text-right text-r-12-hn text-gray-650">{problemLength}/100</span>
+                                    <span className="text-right text-r-12-hn text-gray-650">{problemLength}/200</span>
                                 </div>
                             </div>
                         </div>
