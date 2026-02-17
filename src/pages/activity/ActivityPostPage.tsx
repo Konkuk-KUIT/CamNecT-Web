@@ -53,7 +53,7 @@ const ActivityPostPage = () => {
     return map;
   }, [tagData]);
 
-  if (isLoading) {
+  if (isLoading || !tagData) {
     return (
       <PopUp
         type="loading"
@@ -178,7 +178,7 @@ const ActivityPostContent = ({
       }
     }
     if (item.id === 'report-post') setIsReportPopupOpen(true);
-    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`);
+    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`, {replace:true});
     if (item.id === 'delete-post') setIsDeletePopupOpen(true);
     setIsOptionOpen(false);
   };
@@ -191,7 +191,7 @@ const ActivityPostContent = ({
       headerSlot={
         <MainHeader
           title='대외활동'
-          leftAction={{onClick: () => navigate('/activity')}}
+          leftAction={{onClick: () => navigate(-1)}}
           rightActions={[
             { icon: 'option', onClick: () => setIsOptionOpen(true), ariaLabel: '게시글 옵션 열기' },
           ]}
