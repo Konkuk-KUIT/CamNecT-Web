@@ -101,6 +101,8 @@ export const ActivityWritePage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isFileErrorOpen, setIsFileErrorOpen] = useState(false);
   const [fileErrorMessage, setFileErrorMessage] = useState('');
+  const [isValidationPopupOpen, setIsValidationPopupOpen] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
 
   // 수정 모드 초기값 세팅
   const boardLabel = boardType ?? '게시판';
@@ -366,7 +368,22 @@ export const ActivityWritePage = () => {
     setIsBoardOpen(false);
   };
 
-  const handleSubmit = () => setIsConfirmOpen(true);
+  const handleSubmit = () => {
+    if (!isSubmitEnabled) {
+      if (!boardType) {
+        setValidationMessage('게시판을 선택해주세요.');
+      } else if (selectedTags.length === 0) {
+        setValidationMessage('태그를 1개 이상 선택해주세요.');
+      } else if (title.trim().length === 0) {
+        setValidationMessage('제목을 입력해주세요.');
+      } else if (content.trim().length === 0) {
+        setValidationMessage('내용을 입력해주세요.');
+      }
+      setIsValidationPopupOpen(true);
+      return;
+    }
+    setIsConfirmOpen(true);
+  };
   const handleConfirm = () => {
     setIsConfirmOpen(false);
     submitMutation.mutate();
@@ -422,7 +439,6 @@ export const ActivityWritePage = () => {
                   : 'var(--ColorGray2, #A1A1A1)',
               }}
               onClick={handleSubmit}
-              disabled={!isSubmitEnabled}
             >
               {submitMutation.isPending ? '저장 중..' : '완료'}
             </button>
@@ -651,6 +667,15 @@ export const ActivityWritePage = () => {
         content={fileErrorMessage}
         rightButtonText="확인"
         onClick={() => setIsFileErrorOpen(false)}
+      />
+
+      <PopUp
+        isOpen={isValidationPopupOpen}
+        type="confirm"
+        title="추가 작성 필요"
+        content={validationMessage}
+        rightButtonText="확인"
+        onClick={() => setIsValidationPopupOpen(false)}
       />
 
       <TagsFilterModal
