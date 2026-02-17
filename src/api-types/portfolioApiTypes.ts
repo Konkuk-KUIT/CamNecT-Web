@@ -57,7 +57,7 @@ export interface PortfolioDetailData {
   portfolioId: number;
   userId: number;
   title: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   startDate: string;    // "YYYY-MM-DD"
   endDate: string;      // "YYYY-MM-DD"
   description: string;

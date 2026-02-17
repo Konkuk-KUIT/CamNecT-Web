@@ -9,6 +9,7 @@ import { getPortfolioList, togglePortfolioPublic } from '../../api/portfolioApi'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PortfolioPreview } from '../../api-types/portfolioApiTypes';
 import replaceImg from "../../assets/image/replaceImg.png"
+import { formatDotDate } from '../../utils/formatDate';
 
 const REPLACE_IMAGE = replaceImg;
 
@@ -177,7 +178,7 @@ export const PortfolioListPage = ({
                                 {/* 제목 및 날짜 */}
                                 <div className="w-full p-[15px] flex flex-col gap-[3px] justify-center items-start">
                                     <div className="text-left w-full text-m-16 text-gray-900 truncate">{portfolio.title}</div>
-                                    <div className="text-R-12-hn text-gray-650">{portfolio.updatedAt}</div>
+                                    <div className="text-R-12-hn text-gray-650">{formatDotDate(portfolio.updatedAt)}</div>
                                 </div>
                             </button>
                             ))}

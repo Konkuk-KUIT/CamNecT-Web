@@ -7,6 +7,7 @@ import { getAlumniPortfolioList } from '../../../api/alumni';
 import { useAuthStore } from '../../../store/useAuthStore';
 import FavoriteBadge from '../components/FavoriteBadge';
 import { useQuery } from '@tanstack/react-query';
+import { formatDotDate } from '../../../utils/formatDate';
 
 type AlumniPortfolioItem = {
   portfolioId: number;
@@ -78,7 +79,7 @@ export const AlumniPortfolioListPage = () => {
     return (
       <PopUp
         type="error"
-        title="일시적 오류로 인해\n포트폴리오 목록을 불러올 수 없습니다."
+        title="일시적 오류로 인해\n포트폴리오 목록을 불러올 수 없습니다"
         titleSecondary="잠시 후 다시 시도해주세요"
         isOpen={true}
         rightButtonText="확인"
@@ -129,7 +130,7 @@ export const AlumniPortfolioListPage = () => {
                   <div className="text-left w-full text-m-16 text-gray-900 truncate">
                     {portfolio.title}
                   </div>
-                  <div className="text-R-12-hn text-gray-650">{portfolio.updatedAt}</div>
+                  <div className="text-R-12-hn text-gray-650">{formatDotDate(portfolio.updatedAt)}</div>
                 </div>
               </button>
             ))}

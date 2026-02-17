@@ -491,13 +491,6 @@ export default function PortfolioEditModal({
                 attachmentKeys,
             };
 
-            console.log('=== Portfolio Save Request ===');  // 👈 여기!
-console.log('Mode:', isEditMode ? 'UPDATE' : 'CREATE');
-console.log('Payload:', JSON.stringify(payload, null, 2));
-console.log('meUserId:', meUserId);
-console.log('userId:', userId);
-console.log('portfolioId:', portfolioId);
-
             if (isEditMode) {
                 await updatePortfolio(meUserId!, userId, portfolioId!, payload);
             } else {
@@ -977,7 +970,7 @@ console.log('portfolioId:', portfolioId);
                                                     setProblemSolution(e.target.value);
                                                 }
                                             }}
-                                        placeholder="문제와 해결방법을 간단히 작성해 주세요 (100자 이내)"
+                                        placeholder="문제와 해결방법을 간단히 작성해 주세요 (200자 이내)"
                                         maxLength={200}
                                         className="w-full p-[15px] border border-gray-150 rounded-[5px] text-r-14-hn text-gray-750 placeholder:text-gray-650 focus:outline-none focus:border-primary resize-none min-h-[120px]"
                                     />
