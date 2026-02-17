@@ -14,6 +14,7 @@ type AlumniPortfolioItem = {
   thumbnailUrl: string;
   isPublic: boolean;
   isFavorite: boolean;
+  updatedAt: string;
 };
 
 export const AlumniPortfolioListPage = () => {
@@ -128,6 +129,7 @@ export const AlumniPortfolioListPage = () => {
                   <div className="text-left w-full text-m-16 text-gray-900 truncate">
                     {portfolio.title}
                   </div>
+                  <div className="text-R-12-hn text-gray-650">{portfolio.updatedAt}</div>
                 </div>
               </button>
             ))}
