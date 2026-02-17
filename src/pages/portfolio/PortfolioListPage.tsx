@@ -8,6 +8,9 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { getPortfolioList, togglePortfolioPublic } from '../../api/portfolioApi';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PortfolioPreview } from '../../api-types/portfolioApiTypes';
+import replaceImg from "../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 type PortfolioListPageProps = {
     ownerId?: string | number;
@@ -42,7 +45,7 @@ export const PortfolioListPage = ({
         enabled: !!meUserId,
     });
 
-    // API 데이터 → 로컬 상태 동기화
+    //로컬 상태 동기화
     useEffect(() => {
         if (data?.data.data) {
             setLocalPortfolios(data.data.data);
@@ -64,7 +67,7 @@ export const PortfolioListPage = ({
 
         // 변경이 필요한 항목만 API 호출
         const toToggle = localPortfolios.filter(p => p.isPublic !== nextPublic);
-        await Promise.all(toToggle.map(p => togglePortfolioPublic(meUserId!, p.portfolioId)));
+        await Promise.all(toToggle.map(p => togglePortfolioPublic(meUserId!, portfolioUserId, p.portfolioId)));
     };
 
     const handlePortfolioClick = (portfolioId: number) => {
@@ -89,11 +92,11 @@ export const PortfolioListPage = ({
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
+                title='일시적 오류로 인해\n데이터를 불러올 수 없습니다.'
                 titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
-                onClick={() => window.location.reload()}
+                onClick={() =>navigate(-1)}
             />
         );
     }
@@ -139,10 +142,14 @@ export const PortfolioListPage = ({
                             >
                                 {/* 썸네일 */}
                                 <div className="h-[128px] relative w-full bg-gray-200">
-                                    {portfolio.thumbnailUrl ? (
+                                    {portfolio.thumbnailUrl && portfolio.thumbnailUrl !== "기본이미지" ? (
                                         <img
-                                            src={portfolio.thumbnailUrl}
+                                            src={portfolio.thumbnailUrl ?? REPLACE_IMAGE}
                                             alt={portfolio.title}
+                                            onError={(e) => {
+                                                e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                                e.currentTarget.src = REPLACE_IMAGE;
+                                            }}
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
@@ -151,20 +158,20 @@ export const PortfolioListPage = ({
                                 
                                     {/* 중요 표시 */}
                                     {portfolio.isFavorite && (
-                                    <svg viewBox="0 0 24 24" className="absolute top-[10px] right-[10px] z-10 h-[20px] w-[20px] fill-primary drop-shadow-[0_0_6px_rgba(0,0,0,0.35)]">
-                                        <path
-                                        fillRule="evenodd"
-                                        clipRule="evenodd"
-                                        d="M10.788 3.20997C11.236 2.13297 12.764 2.13297 13.212 3.20997L15.294 8.21597L20.698 8.64997C21.862 8.74297 22.334 10.195 21.447 10.955L17.33 14.482L18.587 19.755C18.858 20.891 17.623 21.788 16.627 21.18L12 18.354L7.373 21.18C6.377 21.788 5.142 20.89 5.413 19.755L6.67 14.482L2.553 10.955C1.666 10.195 2.138 8.74297 3.302 8.64997L8.706 8.21597L10.788 3.20997Z"
-                                        />
-                                    </svg>
+                                        <svg viewBox="0 0 24 24" className="absolute top-[10px] right-[10px] z-10 h-[20px] w-[20px] fill-primary drop-shadow-[0_0_6px_rgba(0,0,0,0.35)]">
+                                            <path
+                                            fillRule="evenodd"
+                                            clipRule="evenodd"
+                                            d="M10.788 3.20997C11.236 2.13297 12.764 2.13297 13.212 3.20997L15.294 8.21597L20.698 8.64997C21.862 8.74297 22.334 10.195 21.447 10.955L17.33 14.482L18.587 19.755C18.858 20.891 17.623 21.788 16.627 21.18L12 18.354L7.373 21.18C6.377 21.788 5.142 20.89 5.413 19.755L6.67 14.482L2.553 10.955C1.666 10.195 2.138 8.74297 3.302 8.64997L8.706 8.21597L10.788 3.20997Z"
+                                            />
+                                        </svg>
                                     )}
                                 </div>
 
                                 {/* 제목 및 날짜 */}
                                 <div className="w-full p-[15px] flex flex-col gap-[3px] justify-center items-start">
                                     <div className="text-left w-full text-m-16 text-gray-900 truncate">{portfolio.title}</div>
-                                    <div className="text-R-12-hn text-gray-650">{portfolio.title}</div> {/*TODO: updatedAt으로 수정 필요*/}
+                                    <div className="text-R-12-hn text-gray-650">{portfolio.updatedAt}</div>
                                 </div>
                             </button>
                             ))}
@@ -191,7 +198,7 @@ export const PortfolioListPage = ({
                 <PortfolioEditModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    userId={String(portfolioUserId)}
+                    userId={portfolioUserId}
                     onSave={handleSavePortfolio}
                 />
             )}
