@@ -62,7 +62,10 @@ export default function PortfolioEditModal({
     });
 
     const portfolioData = detailData?.data.data.portfolio;
-    const assetsData = detailData?.data.data.portfolioAssets || [];
+    const assetsData = useMemo(
+        () => detailData?.data.data.portfolioAssets ?? [],
+        [detailData]
+    );
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -504,19 +507,6 @@ console.log('portfolioId:', portfolioId);
             onClose();
         } catch (error) {
             console.error('저장 실패:', error);
-            
-            // 에러 세부 정보 로깅
-            if (error instanceof Error) {
-                console.error('Error message:', error.message);
-                console.error('Error stack:', error.stack);
-            }
-            
-            // Axios 에러인 경우
-            if ((error as any)?.response) {
-                console.error('API Error Response:', (error as any).response.data);
-                console.error('API Error Status:', (error as any).response.status);
-            }
-            
             setError('포트폴리오 저장에 실패했습니다. 다시 시도해주세요.');
         } finally {
             setIsSaving(false);

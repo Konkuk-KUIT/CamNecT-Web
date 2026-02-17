@@ -45,8 +45,16 @@ export const PortfolioDetailPage = ({
         (typeof portfolioIdProp === 'number' ? portfolioIdProp : (portfolioIdProp ? parseInt(portfolioIdProp) : null)) ??
         (portfolioIdParam ? parseInt(portfolioIdParam) : null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(() => 
+        new URLSearchParams(window.location.search).get('edit') === 'true'
+    );
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).get('edit') === 'true') {
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ['portfolioDetail', portfolioUserId, portfolioId],
@@ -87,19 +95,6 @@ export const PortfolioDetailPage = ({
         const [year, month] = dateStr.split('-').map(Number);
         return { year, month };
     };
-
-    //URL에서 edit 파라미터 확인
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const shouldEdit = urlParams.get('edit') === 'true';
-        
-        if (shouldEdit && portfolio && isMineAPI) {
-            setIsModalOpen(true);
-            // URL에서 edit 파라미터 제거
-            window.history.replaceState({}, '', window.location.pathname);
-        }
-    }, [portfolio, isMineAPI]);
-
 
     const handleTogglePublic = async () => {
         if (!portfolio || !meUserId) return;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PortfolioEditModal from './components/PortfolioEditModal';
 import PopUp from '../../components/Pop-up';
@@ -46,28 +46,33 @@ export const PortfolioListPage = ({
     });
 
     //로컬 상태 동기화
-    useEffect(() => {
-        if (data?.data.data) {
-            setLocalPortfolios(data.data.data);
-        }
-    }, [data]);
+    const portfoliosAPI = useMemo(() => data?.data.data ?? [], [data]);
+
+    const  [hasLocalChanges, setHasLocalChanges] = useState(false);
+    const displayPortfolios = hasLocalChanges ? localPortfolios : portfoliosAPI;
+
+    // 로컬 변경 헬퍼
+    const applyLocalChange = (updater: (prev: PortfolioPreview[]) => PortfolioPreview[]) => {
+        setLocalPortfolios(updater(portfoliosAPI));
+        setHasLocalChanges(true);
+    };
 
     const visiblePortfolios = useMemo(() => {
-        if (isMine) return localPortfolios;
-        return localPortfolios.filter(p => p.isPublic);
-    }, [isMine, localPortfolios]);
+        if (isMine) return displayPortfolios;
+        return displayPortfolios.filter(p => p.isPublic);
+    }, [isMine, displayPortfolios]);
 
-    const allPrivate = localPortfolios.length > 0 && localPortfolios.every(p => p.isPublic === false);
+    const allPrivate = displayPortfolios.length > 0 && displayPortfolios.every(p => p.isPublic === false);
 
     const handleToggleAllPrivate = async () => {
         const nextAllPrivate = !allPrivate;
         const targetIsPublic = !nextAllPrivate;
 
         // 로컬 상태 즉시 업데이트
-        setLocalPortfolios(prev => prev.map(p => ({ ...p, isPublic: targetIsPublic })));
+        applyLocalChange(prev => prev.map(p => ({ ...p, isPublic: targetIsPublic })));
 
         // 변경이 필요한 항목만 API 호출
-        const toToggle = localPortfolios.filter(p => p.isPublic !== targetIsPublic);
+        const toToggle = displayPortfolios.filter(p => p.isPublic !== targetIsPublic);
         await Promise.all(toToggle.map(p => togglePortfolioPublic(meUserId!, portfolioUserId, p.portfolioId)));
     };
 
