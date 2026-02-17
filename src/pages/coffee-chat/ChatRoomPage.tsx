@@ -410,9 +410,10 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
             }
         >
             <div 
-                className={`flex flex-col pb-[100px] ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}
+                className={`flex flex-col ${!isReady ? 'invisible' : 'visible'} ${allMessages.length === 0 ? 'min-h-[calc(100dvh-100px)] justify-end' : ''}`}
                 style={{
-                    paddingTop: `calc(${isTeamRecruit ? (isRecruitExpanded ? '200px' : '134px') : '74px'} + env(safe-area-inset-top, 0px))`
+                    paddingTop: `calc(${isTeamRecruit ? (isRecruitExpanded ? '200px' : '134px') : '74px'} + env(safe-area-inset-top, 0px))`,
+                    paddingBottom: '65px'
                 }}
             >
                 {/* 상단 정보 영역 */}

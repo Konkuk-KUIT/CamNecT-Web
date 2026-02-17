@@ -571,7 +571,7 @@ export default function PortfolioEditModal({
                             <div className="absolute inset-0 z-50">
                                 <PopUp
                                     type="error"
-                                    title='업로드할 수 없는 파일입니다'
+                                    title='업로드할 수 없는 파일'
                                     content={error}
                                     isOpen={true}
                                     rightButtonText='확인'
@@ -583,8 +583,8 @@ export default function PortfolioEditModal({
                         {isErrorDetail && (
                             <PopUp
                                 type="error"
-                                title='포트폴리오를 불러올 수 없습니다'
-                                content='일시적인 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.'
+                                title="일시적 오류"
+                                content="잠시 후 다시 시도해주세요."
                                 isOpen={true}
                                 rightButtonText='닫기'
                                 onClick={onClose}

@@ -1,15 +1,34 @@
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import PopUp from './components/Pop-up';
 import { ScrollToTop } from './components/ScrollToTop';
 import { useUnreadCountQuery } from './hooks/useChatQuery';
 import { useSocketInitializer } from './hooks/useSocketInitializer';
+import { useAuthStore } from './store/useAuthStore';
 import { useCommunityErrorPopupStore } from './store/useCommunityErrorPopupStore';
 import './styles/global.css';
 
 function App() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 앱이 켜질 때 로컬스토리지에 저장된 로그인 정보를 불러옵니다.
+  useEffect(() => {
+    const check = () => {
+      if (useAuthStore.persist.hasHydrated()) {
+        setIsLoaded(true);
+      } else {
+        useAuthStore.persist.onFinishHydration(() => setIsLoaded(true));
+      }
+    };
+    check();
+  }, []);
+
   useSocketInitializer(); 
-  useUnreadCountQuery(); // 전역 안 읽은 개수 동기화
+  useUnreadCountQuery();
   const { popUpConfig, clearPopUpConfig } = useCommunityErrorPopupStore();
+
+  // 로그인 정보를 다 불러오기 전까지는 아무것도 보여주지 않습니다 (로그아웃 튕김 방지)
+  if (!isLoaded) return null;
 
   return (
     // 전역 레이아웃 적용 (반응형)

@@ -51,7 +51,15 @@ const Divider = () => {
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setLogin = useAuthStore((state) => state.setLogin);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { handleRedirect } = useAuthRedirect(); // 리다이렉트 훅 추가
+
+  // 이미 로그인된 상태라면 홈으로 이동
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const [showPassword, setShowPassword] = useState(false);
   const [id, setId] = useState("");
