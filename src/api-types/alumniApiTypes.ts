@@ -144,6 +144,7 @@ export type AlumniPortfolioListItem = {
   thumbnailUrl: string;
   isPublic: boolean;
   isFavorite: boolean;
+  updatedAt: string;
 };
 
 export type AlumniPortfolioListPayload = {

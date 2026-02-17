@@ -141,7 +141,6 @@ const InfoTab = ({ posts, sortKey, onSortChange }: InfoTabProps) => {
         allTags={filterTags}
       />
 
-      {/* TODO: 글쓰기 라우터 연결 (버튼 클릭 / 현재는 임시) */}
       <WriteButton />
     </div>
   );

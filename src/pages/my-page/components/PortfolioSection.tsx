@@ -2,6 +2,9 @@ import { type Portfolio } from "../../../types/portfolio/portfolioTypes";
 import Icon from "../../../components/Icon";
 import BaseSection from "./BaseSection";
 import { useNavigate } from "react-router-dom";
+import replaceImg from "../../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
 
 export default function PortfolioSection({
     portfolios,
@@ -55,10 +58,14 @@ export default function PortfolioSection({
                             <img
                             src={thumbnail}
                             alt={p.title}
+                            onError={(e) => {
+                                e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                e.currentTarget.src = REPLACE_IMAGE;
+                            }}
                             className="h-full w-full object-cover"
                             />
                         ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                            <div className="flex h-full w-full items-center justify-center text-r-12-hn text-gray-750">
                             No Image
                             </div>
                         )}

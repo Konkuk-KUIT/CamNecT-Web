@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PopUp from "../../components/Pop-up";
 import { Tabs } from "../../components/Tabs";
-import { useChatRequests } from "../../hooks/useChatQuery";
+import { useChatRequests, useDeleteAllChatRequest, useDeleteAllTeamRecruitRequest } from "../../hooks/useChatQuery";
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
 import type { ChatRoomListItem, ChatRoomListItemType } from "../../types/coffee-chat/coffeeChatTypes";
 import { AllRequestDeleteButton } from "./components/AllRequestDeleteButton";
 import { ChatList } from "./components/ChatList";
 import { ChatPostAccordian } from "./components/ChatPostAccordian";
-import { useDeleteAllChatRequest } from "../../hooks/useChatQuery";
 
 export const ChatRequestListPage = () => {
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ export const ChatRequestListPage = () => {
   const [openPostTitle, setOpenPostTitle] = useState<string | null>(null); // 1개만 열릴 수 있음
 
   const { data: chatRequestRooms = [], isLoading } = useChatRequests(activeId);
-  // const { mutate: deleteAllTeamRecruitRequest} = useDeleteAllTeamRecruitRequest();
+  const { mutate: deleteAllTeamRecruitRequest} = useDeleteAllTeamRecruitRequest();
   const { mutate: deleteAllChatRequest} = useDeleteAllChatRequest();
 
     // mock데이터 타입별 filtering + 날짜 내림차순 정렬
@@ -57,11 +56,15 @@ export const ChatRequestListPage = () => {
     ? (openPostTitle ? (filteredChatRoomListByPost[openPostTitle]?.length || 0) : 0)
     : filteredChatRoomList.length;
 
-  // todo 팀원 모집 삭제 API 연결
   const handleDeleteAll = () => {
     if (activeId === 'TEAM_RECRUIT') {
       if (!openPostTitle) return;
 
+      // recruitmentId가 같으므로 첫번째 방의 recruitmentId로 삭제
+      const firstRoom = filteredChatRoomListByPost[openPostTitle]?.[0];
+      if (firstRoom?.recruitmentId) {
+        deleteAllTeamRecruitRequest({ recruitmentId: firstRoom.recruitmentId });
+      }
     } else {
       deleteAllChatRequest();
     }

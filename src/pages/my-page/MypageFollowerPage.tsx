@@ -8,10 +8,17 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { getFollowers, getFollowings } from "../../api/profileApi";
 import type { FollowUser } from "../../api-types/profileApiTypes";
 import { useQuery } from "@tanstack/react-query";
+import { Tabs } from "../../components/Tabs";
+import type { TabItem } from "../../components/Tabs";
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type TabType = "follower" | "following";
+
+const TABS: TabItem[] = [
+    { id: "follower", label: "팔로워" },
+    { id: "following", label: "팔로잉" },
+];
 
 export const FollowerPage = () => {
     const navigate = useNavigate();
@@ -51,7 +58,7 @@ export const FollowerPage = () => {
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
+                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다'
                 titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
@@ -64,21 +71,12 @@ export const FollowerPage = () => {
     const followings = followingsResponse?.data.users ?? [];
 
     // 검색 필터링
-    const getFilteredList = (): FollowUser[] => {
-        const list = activeTab === "follower" ? followers : followings;
-        if (!searchQuery) return list;
-
-        return list.filter(person =>
+    const filteredList: FollowUser[] = (activeTab === "follower" ? followers : followings)
+        .filter(person =>
+            !searchQuery ||
             person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             person.majorName.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    };
-
-    const filteredList = getFilteredList();
-
-    const handleCoffeeChat = (personId: number) => {
-        navigate(`/alumni/profile/${personId}`);
-    };
 
     return (
         <HeaderLayout
@@ -90,36 +88,12 @@ export const FollowerPage = () => {
         >
             <div className="w-full h-full bg-white flex flex-col">
                 {/* 탭 */}
-                <div className="w-full px-[21px] border-b border-gray-650">
-                    <div className="flex items-center justify-around">
-                        <button
-                            onClick={() => setActiveTab("follower")}
-                            className={`flex justify-center items-center flex-1 pt-[10px] pb-[16px] relative flex text-sb-16-hn ${
-                                activeTab === "follower" 
-                                    ? "text-gray-900" 
-                                    : "text-gray-650"
-                            }`}
-                        >
-                            팔로워
-                            {activeTab === "follower" && (
-                                <div className="w-[60px] absolute bottom-0 h-0 border-[2px] border-primary rounded-full" />
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("following")}
-                            className={`flex justify-center items-center flex-1 pt-[10px] pb-[16px] relative flex text-sb-16-hn ${
-                                activeTab === "following" 
-                                    ? "text-gray-900" 
-                                    : "text-gray-650"
-                            }`}
-                        >
-                            팔로잉
-                            {activeTab === "following" && (
-                                <div className="w-[60px] absolute bottom-0 h-0 border-[2px] border-primary rounded-full" />
-                            )}
-                        </button>
-                    </div>
-                </div>
+                <Tabs
+                    tabs={TABS}
+                    activeId={activeTab}
+                    onChange={(id) => setActiveTab(id as TabType)}
+                    className="px-[21px]"
+                />
 
                 {/* 검색창 */}
                 <div className="w-full px-[25px] pt-[20px] pb-[10px]">
@@ -161,12 +135,23 @@ export const FollowerPage = () => {
                                     key={user.userId} 
                                     className="w-full flex items-center justify-between gap-[15px] py-[15px] px-[25px] border-b border-gray-150"
                                 >
-                                    <div className="flex items-center gap-[15px]">
+                                    <button 
+                                        className="flex items-center gap-[15px]"
+                                        onClick={() =>
+                                            navigate(`/alumni/profile/${user.userId}`, {
+                                                state: {
+                                                    author: {
+                                                        name: user.name,
+                                                        major: user.majorName,
+                                                        studentId: user.studentNo,
+                                                        profileImageUrl: user.profileImageUrl,
+                                                    },
+                                                },
+                                            })
+                                        }
+                                    >
                                         {/* 프로필 이미지 */}
-                                        <button
-                                            onClick={() => navigate(`/alumni/profile/${user.userId}`)}
-                                            className="flex-shrink-0"
-                                        >
+                                        <div className="flex-shrink-0">
                                             <img
                                                 src={user.profileImageUrl ?? defaultProfileImg}
                                                 onError={(e) => {
@@ -176,22 +161,31 @@ export const FollowerPage = () => {
                                                 alt={user.name}
                                                 className="w-[48px] h-[48px] rounded-full object-cover"
                                             />
-                                        </button>
+                                        </div>
 
                                         {/* 유저 정보 */}
-                                        <button
-                                            onClick={() => navigate(`/alumni/profile/${user.userId}`)}
-                                            className="flex-1 flex flex-col gap-[3px] items-start"
-                                        >
+                                        <div className="flex-1 flex flex-col gap-[3px] items-start">
                                             <span className="text-b-18-hn text-gray-900">{user.name}</span>
                                             <span className="text-r-14-hn text-gray-650 break-keep text-left">
                                                 {user.majorName} {user.studentNo.slice(2,4)}학번
                                             </span>
-                                        </button>
-                                    </div>
+                                        </div>
+                                    </button>
+
                                     {/* 커피챗 버튼 */}
                                     <button
-                                        onClick={() => handleCoffeeChat(user.userId)}
+                                        onClick={() =>
+                                        navigate(`/alumni/profile/${user.userId}?coffeeChat=1`, {
+                                            state: {
+                                                    author: {
+                                                        name: user.name,
+                                                        major: user.majorName,
+                                                        studentId: user.studentNo,
+                                                        profileImageUrl: user.profileImageUrl,
+                                                    },
+                                                },
+                                            })
+                                        }
                                         className="min-w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
                                     >
                                         커피챗 보내기

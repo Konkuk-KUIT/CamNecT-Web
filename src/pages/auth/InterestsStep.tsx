@@ -137,7 +137,7 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
                     isOpen={showErrorPopUp}
                     type="error"
                     title="저장 실패"
-                    content="정보 저장 중 오류가 발생했습니다\n다시 시도해 주세요"
+                    content="정보 저장 중 오류가 발생했습니다\n다시 시도해 주세요."
                     buttonText="확인"
                     onClick={() => setShowErrorPopUp(false)}
                 />
@@ -155,7 +155,7 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
                 isOpen={isError && !isFetchErrorDismissed} 
                 type="error" 
                 title="오류 발생" 
-                content="태그 목록을 불러오는 중 문제가 발생했습니다" 
+                content="태그 목록을 불러오는 중 문제가 발생했습니다." 
                 buttonText="닫기"
                 onClick={() => setIsFetchErrorDismissed(true)}
             />

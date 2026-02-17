@@ -267,7 +267,7 @@ export const AdminVerificationDetail = () => {
                 isOpen={isError && !isErrorDismissed} 
                 type="error" 
                 title="오류 발생" 
-                content="데이터를 불러오는 중 문제가 발생했습니다" 
+                content="데이터를 불러오는 중 문제가 발생했습니다." 
                 buttonText="닫기"
                 onClick={() => setIsErrorDismissed(true)}
             />
@@ -277,7 +277,7 @@ export const AdminVerificationDetail = () => {
                 isOpen={showProcessError} 
                 type="error" 
                 title="처리 불가" 
-                content="요청값 검증에 실패했거나\n현재 처리할 수 없는 상태입니다" 
+                content="요청값 검증에 실패했거나\n현재 처리할 수 없는 상태입니다." 
                 buttonText="확인"
                 onClick={() => setShowProcessError(false)}
             />

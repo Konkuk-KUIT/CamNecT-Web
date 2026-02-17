@@ -229,7 +229,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     isOpen={showPopUp}
                     type="info"
                     title="인증 파일을 제출하시겠습니까?"
-                    content="파일 제출은 다시 할 수 없습니다"
+                    content="파일 제출은 다시 할 수 없습니다."
                     leftButtonText="취소"
                     rightButtonText="제출"
                     onLeftClick={handlePopUpClose}
@@ -252,7 +252,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     isOpen={showErrorPopUp}
                     type="error"
                     title="제출 실패"
-                    content="인증 파일 제출 중 오류가 발생했습니다\n다시 시도해 주세요"
+                    content="인증 파일 제출 중 오류가 발생했습니다\n다시 시도해 주세요."
                     buttonText="확인"
                     onClick={() => setShowErrorPopUp(false)}
                 />
@@ -274,7 +274,7 @@ export const SchoolVerificationStep = ({ onNext }: SchoolVerificationStepProps) 
                     isOpen={showMountPopUp}
                     type="info"
                     title="본인의 현재 상태를 선택해주세요"
-                    content="상태에 따라 제출 서류가 달라질 수 있습니다"
+                    content="상태에 따라 제출 서류가 달라질 수 있습니다."
                     leftButtonText="졸업생"
                     rightButtonText="재학/휴학생"
                     onLeftClick={() => {
