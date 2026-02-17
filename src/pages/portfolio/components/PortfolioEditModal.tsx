@@ -106,6 +106,8 @@ export default function PortfolioEditModal({
         attachmentFiles: FileItem[];
     } | null>(null);
 
+    const initializedForRef = useRef<number | 'create' | null>(null);
+
     // 변경사항이 있는지 확인
     const hasUnsavedChanges = useMemo(() => {
         if (initialDataRef.current === null) return false;
@@ -133,7 +135,7 @@ export default function PortfolioEditModal({
 
         if (!isEditMode) {
             // 생성 모드 - 한 번만 초기화
-            if (initialDataRef.current !== null) return;
+            if (initializedForRef.current !== 'create') return;
             
             setTitle('');
             setContent('');
@@ -156,18 +158,14 @@ export default function PortfolioEditModal({
                 thumbnailImage: null,
                 attachmentFiles: [],
             };
+            initializedForRef.current = 'create';
             return;
         }
 
         // 수정 모드 - portfolioData가 로드되면 한 번만 실행
         if (!portfolioData) return;
         
-        // 이미 이 포트폴리오 데이터로 초기화했는지 확인
-        if (initialDataRef.current && 
-            initialDataRef.current.title === portfolioData.title &&
-            thumbnailImage?.url === portfolioData.thumbnailUrl) {
-            return; // 이미 로드됨
-        }
+        if (initializedForRef.current === portfolioData.portfolioId) return;
 
         setTitle(portfolioData.title);
         setContent(portfolioData.description);
@@ -216,7 +214,8 @@ export default function PortfolioEditModal({
             thumbnailImage: thumbnail,
             attachmentFiles: attachments,
         };
-    }, [isOpen, isEditMode, portfolioId]);
+        initializedForRef.current = portfolioData.portfolioId;
+    }, [isOpen, isEditMode, portfolioData, assetsData]);
 
 
     // 모달 열림/닫힘 시 body 스크롤 제어
@@ -225,6 +224,8 @@ export default function PortfolioEditModal({
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
+            initializedForRef.current = null;
+            initialDataRef.current = null;
         }
 
         return () => {
@@ -232,7 +233,7 @@ export default function PortfolioEditModal({
         };
     }, [isOpen]);
 
-    //컴포넌트가 unmount될 때 blob을 해제해서 메모리 누수를 막음
+    //컴포넌트가 unmount될 때 blob을 해제
     useEffect(() => {
         return () => {
             if (thumbnailImage?.url?.startsWith('blob:')) {
@@ -882,7 +883,7 @@ console.log('portfolioId:', portfolioId);
                                             />
                                             <button
                                                 onClick={() => setThumbnailImage(null)}
-                                                className="absolute top-[4px] right-[4px] p-[4px] bg-gray-250 rounded-[10px]"
+                                                className="absolute top-[4px] right-[4px] p-[4px] bg-black/30 rounded-full"
                                             >
                                                 <svg width="25" height="25" viewBox="0 0 12 12" fill="none">
                                                     <path d="M9 3L3 9M3 3L9 9" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='shadow-sm'/>
@@ -894,7 +895,7 @@ console.log('portfolioId:', portfolioId);
                                         onClick={() => thumbnailInputRef.current?.click()}
                                         className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-[8px] border border-gray-300 rounded-[10px] bg-gray-50 hover:bg-gray-100"
                                         >
-                                        <ModalIcon name="photo" className="w-[24px] h-[24px] text-gray-400" />
+                                        <ModalIcon name="photo" className="w-[24px] h-[24px] text-gray-650" />
                                         <span className="text-r-12-hn text-gray-500">
                                             대표 이미지를 추가해 주세요<br/>(png, webp, jpg, jpeg)
                                         </span>
@@ -924,7 +925,7 @@ console.log('portfolioId:', portfolioId);
                                                 />
                                                 <button
                                                     onClick={() => removeFile(image.id)}
-                                                    className="absolute top-[4px] right-[4px] p-[4px]"
+                                                    className="absolute top-[4px] right-[4px] p-[4px] bg-black/20 rounded-full"
                                                 >
                                                     <svg width="20" height="20" viewBox="0 0 12 12" fill="none">
                                                         <path d="M9 3L3 9M3 3L9 9" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" className='drop-shadow-[0_0_4px_rgba(0,0,0,0.35)]'/>
