@@ -305,43 +305,43 @@ export const RecruitDetailPage = () => {
         </div>
 
         {/* 하단 버튼 */}
-      <div className='fixed bottom-0 left-0 right-0 z-50 bg-white'>
-        <div
-          className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] px-[25px] py-[15px] box-border'
-        >
-            {isRecruitNow ? (
-                isMine ? (
-                    <button
-                        type="button"
-                        onClick={() => setIsStopRecruitPopupOpen(true)}
-                        className="flex-1 py-[15px] rounded-[5px] bg-[#FFEFEF] text-red text-sb-16-hn border-none active:scale-95 active:brightness-95 transition"
-                    >
-                        모집 완료하기
-                    </button>
+        <div className='fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-150 shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)]'>
+            <div
+                className='mx-auto flex w-full max-w-[720px] items-center gap-[15px] px-[25px] pt-[15px] pb-[calc(15px+env(safe-area-inset-bottom,0px))]'
+            >
+                {isRecruitNow ? (
+                    isMine ? (
+                        <button
+                            type="button"
+                            onClick={() => setIsStopRecruitPopupOpen(true)}
+                            className="flex-1 py-[15px] rounded-[10px] bg-[#FFEFEF] text-red text-sb-16-hn active:scale-95 active:brightness-95 transition"
+                        >
+                            모집 완료하기
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setIsApplyModalOpen(true)}
+                            className="flex-1 py-[15px] rounded-[10px] bg-primary text-white text-sb-16-hn active:scale-95 active:brightness-95 transition"
+                        >
+                            팀원 신청하기
+                        </button>
+                    )
                 ) : (
                     <button
                         type="button"
-                        onClick={() => setIsApplyModalOpen(true)}
-                        className="flex-1 py-[15px] rounded-[5px] bg-primary text-white text-sb-16-hn active:scale-95 active:brightness-95 transition"
+                        disabled
+                        className="flex-1 py-[15px] rounded-[10px] bg-gray-650 text-white text-sb-16-hn"
                     >
-                        팀원 신청하기
+                        팀원 모집 종료
                     </button>
-                )
-            ) : (
-                <button
-                    type="button"
-                    disabled
-                    className="flex-1 py-[15px] rounded-[5px] bg-gray-650 text-white text-sb-16-hn"
-                >
-                    팀원 모집 종료
-                </button>
-            )}
+                )}
 
-            <div className='flex shrink-0 items-center'>
-                <SaveToggle width={24} height={24} isActive={isBookmarked} onToggle={() => bookmarkMutation.mutate()} />
+                <div className='flex shrink-0 items-center'>
+                    <SaveToggle width={24} height={24} isActive={isBookmarked} onToggle={() => bookmarkMutation.mutate()} />
+                </div>
             </div>
         </div>
-      </div>
 
         <BottomSheetModal isOpen={isOptionOpen} onClose={() => setIsOptionOpen(false)} height='auto'>
             <div className='flex min-h-[150px] flex-col px-[clamp(16px,6vw,25px)] pt-[30px]'>
