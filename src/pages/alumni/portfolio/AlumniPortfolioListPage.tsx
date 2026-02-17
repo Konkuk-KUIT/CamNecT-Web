@@ -1,12 +1,12 @@
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getAlumniPortfolioList } from '../../../api/alumni';
 import PopUp from '../../../components/Pop-up';
 import { HeaderLayout } from '../../../layouts/HeaderLayout';
 import { EditHeader } from '../../../layouts/headers/EditHeader';
-import { getAlumniPortfolioList } from '../../../api/alumni';
 import { useAuthStore } from '../../../store/useAuthStore';
 import FavoriteBadge from '../components/FavoriteBadge';
-import { useQuery } from '@tanstack/react-query';
 
 type AlumniPortfolioItem = {
   portfolioId: number;
@@ -61,7 +61,7 @@ export const AlumniPortfolioListPage = () => {
       <PopUp
         type="error"
         title="일시적 오류로 인해\n포트폴리오 목록을 불러올 수 없습니다."
-        titleSecondary="잠시 후 다시 시도해주세요"
+        titleSecondary="잠시 후 다시 시도해주세요."
         isOpen={true}
         rightButtonText="확인"
         onClick={() => navigate('/alumni', { replace: true })}
@@ -78,7 +78,7 @@ export const AlumniPortfolioListPage = () => {
       <PopUp
         type="error"
         title="일시적 오류로 인해\n포트폴리오 목록을 불러올 수 없습니다."
-        titleSecondary="잠시 후 다시 시도해주세요"
+        titleSecondary="잠시 후 다시 시도해주세요."
         isOpen={true}
         rightButtonText="확인"
         onClick={() => navigate('/alumni', { replace: true })}

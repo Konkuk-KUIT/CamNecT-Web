@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import PortfolioEditModal from './components/PortfolioEditModal';
-import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
-import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
-import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
 import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
-import ModalIcon from '../../components/BottomSheetModal/Icon'
+import ModalIcon from '../../components/BottomSheetModal/Icon';
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
+import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
+import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
+import PortfolioEditModal from './components/PortfolioEditModal';
 
 type PortfolioDetailPageProps = {
     ownerId?: string;
@@ -152,7 +152,7 @@ export const PortfolioDetailPage = ({
             <PopUp
                 type="error"
                 title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
-                titleSecondary='잠시 후 다시 시도해주세요'
+                titleSecondary='잠시 후 다시 시도해주세요.'
                 isOpen={true}
                 rightButtonText='돌아가기'
                 onClick={() => navigate(-1)}
@@ -176,7 +176,7 @@ export const PortfolioDetailPage = ({
             <PopUp
                 type="error"
                 title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다.'
-                titleSecondary='잠시 후 다시 시도해주세요'
+                titleSecondary='잠시 후 다시 시도해주세요.'
                 isOpen={true}
                 rightButtonText='확인'
                 onClick={() => window.location.reload()}

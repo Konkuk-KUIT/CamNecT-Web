@@ -219,7 +219,7 @@ export const ProfileStep = ({ onNext }: ProfileStepProps) => {
           isOpen={showErrorPopUp}
           type="error"
           title="업로드 실패"
-          content="이미지 업로드 중 오류가 발생했습니다\n다시 시도해 주세요"
+          content="이미지 업로드 중 오류가 발생했습니다\n다시 시도해 주세요."
           buttonText="확인"
           onClick={() => setShowErrorPopUp(false)}
         />

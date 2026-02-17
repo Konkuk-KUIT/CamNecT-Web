@@ -1,24 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AxiosError } from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+    followUser,
+    getAlumniProfileDetail,
+    sendCoffeeChatRequest,
+    unfollowUser,
+} from '../../api/alumni';
 import Category from '../../components/Category';
+import PopUp from '../../components/Pop-up';
+import { HeaderLayout } from '../../layouts/HeaderLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
+import { useAuthStore } from '../../store/useAuthStore';
+import type { AlumniProfile } from '../../types/alumni/alumniTypes';
+import { mapAlumniProfileDetailToProfile } from '../../utils/alumniMapper';
+import { mapTagNamesToIds } from '../../utils/tagMapper';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
 import FollowButton from './components/FollowButton';
-import PopUp from '../../components/Pop-up';
-import { HeaderLayout } from '../../layouts/HeaderLayout';
-import type { AlumniProfile } from '../../types/alumni/alumniTypes';
-import { MainHeader } from '../../layouts/headers/MainHeader';
-import { useAuthStore } from '../../store/useAuthStore';
-import {
-  followUser,
-  getAlumniProfileDetail,
-  sendCoffeeChatRequest,
-  unfollowUser,
-} from '../../api/alumni';
-import { mapAlumniProfileDetailToProfile } from '../../utils/alumniMapper';
-import { mapTagNamesToIds } from '../../utils/tagMapper';
 
 const profilePlaceholder =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
@@ -161,7 +161,7 @@ const AlumniProfileContent = ({
       if (!loginUserIdValue) {
         setPopUpConfig({
           title: '로그인 필요',
-          content: '팔로우는 로그인 후 이용할 수 있습니다',
+          content: '팔로우는 로그인 후 이용할 수 있습니다.',
         });
         setIsFollowing(prevFollow);
         setFollowerCount(prevCount);
@@ -197,7 +197,7 @@ const AlumniProfileContent = ({
       });
       setPopUpConfig({
         title: '요청 성공',
-        content: '커피챗 요청이 전송되었습니다',
+        content: '커피챗 요청이 전송되었습니다.',
       });
       return true;
     } catch (error) {
@@ -205,17 +205,17 @@ const AlumniProfileContent = ({
       if (status === 400) {
         setPopUpConfig({
           title: '전송 실패',
-          content: '상대방이 커피챗 요청을 받지 않는 상태입니다',
+          content: '상대방이 커피챗 요청을 받지 않는 상태입니다.',
         });
       } else if (status === 409) {
         setPopUpConfig({
           title: '전송 실패',
-          content: '이미 대기 중인 커피챗 요청이 존재합니다',
+          content: '이미 대기 중인 커피챗 요청이 존재합니다.',
         });
       } else {
         setPopUpConfig({
           title: '전송 실패',
-          content: '요청 처리 중 문제가 발생했습니다',
+          content: '요청 처리 중 문제가 발생했습니다.',
         });
       }
       console.error('Failed to send coffee chat request:', error);

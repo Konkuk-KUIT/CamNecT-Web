@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
-import PortfolioEditModal from './components/PortfolioEditModal';
-import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
-import { MOCK_SESSION } from "../../mock/mypages";
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from "../../layouts/HeaderLayout";
 import { EditHeader } from "../../layouts/headers/EditHeader";
+import { MOCK_SESSION } from "../../mock/mypages";
+import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
+import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
+import PortfolioEditModal from './components/PortfolioEditModal';
 
 
 type PortfolioListPageProps = {
@@ -128,7 +128,7 @@ export const  PortfolioListPage = ({
             <PopUp
             type="error"
             title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
-            titleSecondary='잠시 후 다시 시도해주세요'
+            titleSecondary='잠시 후 다시 시도해주세요.'
             isOpen={true}
             rightButtonText='확인'
             onClick={() => window.location.reload()}

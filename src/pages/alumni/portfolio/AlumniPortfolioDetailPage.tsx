@@ -1,16 +1,16 @@
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import PopUp from '../../../components/Pop-up';
-import { PortfolioDetailPage } from '../../portfolio/PortfolioDetailPage';
-import type { PortfolioDetail } from '../../../types/portfolio/portfolioTypes';
-import { getAlumniPortfolioDetail } from '../../../api/alumni';
-import { useAuthStore } from '../../../store/useAuthStore';
 import type {
-  AlumniPortfolioAsset,
-  AlumniPortfolioDetailItem,
-  AlumniPortfolioDetailPayload,
+    AlumniPortfolioAsset,
+    AlumniPortfolioDetailItem,
+    AlumniPortfolioDetailPayload,
 } from '../../../api-types/alumniApiTypes';
-import { useQuery } from '@tanstack/react-query';
+import { getAlumniPortfolioDetail } from '../../../api/alumni';
+import PopUp from '../../../components/Pop-up';
+import { useAuthStore } from '../../../store/useAuthStore';
+import type { PortfolioDetail } from '../../../types/portfolio/portfolioTypes';
+import { PortfolioDetailPage } from '../../portfolio/PortfolioDetailPage';
 
 const parseYearMonth = (value?: string) => {
   if (!value) {
@@ -127,7 +127,7 @@ export const AlumniPortfolioDetailPage = () => {
       <PopUp
         type="error"
         title="일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다."
-        titleSecondary="잠시 후 다시 시도해주세요"
+        titleSecondary="잠시 후 다시 시도해주세요."
         isOpen={true}
         rightButtonText="돌아가기"
         onClick={() => navigate('/alumni', { replace: true })}
@@ -144,7 +144,7 @@ export const AlumniPortfolioDetailPage = () => {
       <PopUp
         type="error"
         title="일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다."
-        titleSecondary="잠시 후 다시 시도해주세요"
+        titleSecondary="잠시 후 다시 시도해주세요."
         isOpen={true}
         rightButtonText="돌아가기"
         onClick={() => navigate('/alumni', { replace: true })}

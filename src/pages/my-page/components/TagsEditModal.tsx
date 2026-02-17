@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { requestTagList } from "../../../api/auth";
+import PopUp from "../../../components/Pop-up";
+import { useModalHistory } from "../../../hooks/useModalHistory";
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
-import { useModalHistory } from "../../../hooks/useModalHistory";
-import PopUp from "../../../components/Pop-up";
-import { useQuery } from "@tanstack/react-query";
-import { requestTagList } from "../../../api/auth";
-import { useNavigate } from "react-router-dom";
 
 interface TagEditModalProps {
     tagIds: number[];
@@ -155,7 +155,7 @@ export default function TagEditModal({ tagIds, onClose, onSave }: TagEditModalPr
                         isOpen={true}
                         type="error"
                         title="오류 발생"
-                        content="태그 목록을 불러오는 중 문제가 발생했습니다"
+                        content="태그 목록을 불러오는 중 문제가 발생했습니다."
                         buttonText="닫기"
                         onClick={() => navigate(-1)}
                     />

@@ -379,7 +379,7 @@ export const RecruitDetailPage = () => {
             isOpen={isReportPopupOpen}
             type='confirm'
             title='현재 제작 중이에요!'
-            content='유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!'
+            content='유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요.'
             onClick={() => setIsReportPopupOpen(false)}
         />
 
