@@ -1,17 +1,17 @@
-import InfoSection from "./components/InfoSection";
-import PortfolioSection from "./components/PortfolioSection";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getInstitution, getMajor } from "../../api/institutionApi";
+import { getMyProfile } from "../../api/profileApi";
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
+import PopUp from "../../components/Pop-up";
 import { FullLayout } from "../../layouts/FullLayout";
 import { MainHeader } from "../../layouts/headers/MainHeader";
-import PopUp from "../../components/Pop-up";
-import { SideBar } from "./components/SideBar";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/useAuthStore";
-import { getMyProfile } from "../../api/profileApi";
-import { getInstitution, getMajor } from "../../api/institutionApi";
-import { mapToPortfolios, mapToEducations, mapToCareers, mapToCertificates } from "./utils/profileMapper";
-import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import InfoSection from "./components/InfoSection";
+import PortfolioSection from "./components/PortfolioSection";
+import { SideBar } from "./components/SideBar";
+import { mapToCareers, mapToCertificates, mapToEducations, mapToPortfolios } from "./utils/profileMapper";
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
@@ -179,7 +179,7 @@ export const MypagePage = () => {
               </div>
             </div>
             <button
-              className="h-[40px] w-full rounded-[6px] flex justify-center items-center bg-primary"
+              className="h-[40px] w-full rounded-[6px] flex justify-center items-center bg-primary active:scale-95 active:brightness-95 transition"
               onClick={() => navigate("/me/edit")}
             >
               <span className="text-SB-14-hn text-white">프로필 수정하기</span>

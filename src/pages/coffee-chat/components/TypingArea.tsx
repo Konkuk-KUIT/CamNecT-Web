@@ -48,7 +48,7 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
                         <button 
                             type="button" 
                             onClick={handleSend}
-                            className="absolute right-[4px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-primary flex items-center justify-center active:opacity-80 transition-opacity"
+                            className="absolute right-[4px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-primary flex items-center justify-center active:scale-95 active:brightness-95 transition"
                         >
                             <Icon name="send" />
                         </button>

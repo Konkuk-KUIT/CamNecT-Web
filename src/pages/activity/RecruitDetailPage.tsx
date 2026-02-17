@@ -1,19 +1,19 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { HeaderLayout } from '../../layouts/HeaderLayout';
-import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
-import { formatOnlyDate, formatTimeAgo } from '../../utils/formatDate';
-import { MainHeader } from '../../layouts/headers/MainHeader';
+import { applyRecruitment, closeRecruitment, getRecruitmentDetail, toggleRecruitmentBookmark } from '../../api/activityApi';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
 import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
 import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
-import PopUp from '../../components/Pop-up';
 import Icon from '../../components/Icon';
-import TeamApplyModal from './components/TeamApplyModal';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PopUp from '../../components/Pop-up';
+import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
+import { HeaderLayout } from '../../layouts/HeaderLayout';
+import { MainHeader } from '../../layouts/headers/MainHeader';
 import { useAuthStore } from '../../store/useAuthStore';
-import { getRecruitmentDetail, toggleRecruitmentBookmark, applyRecruitment, closeRecruitment } from '../../api/activityApi';
-import axios from 'axios';
-import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import { formatOnlyDate, formatTimeAgo } from '../../utils/formatDate';
+import TeamApplyModal from './components/TeamApplyModal';
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
@@ -314,7 +314,7 @@ export const RecruitDetailPage = () => {
                     <button
                         type="button"
                         onClick={() => setIsStopRecruitPopupOpen(true)}
-                        className="flex-1 py-[15px] rounded-[5px] bg-[#FFEFEF] text-red text-sb-16-hn border-none"
+                        className="flex-1 py-[15px] rounded-[5px] bg-[#FFEFEF] text-red text-sb-16-hn border-none active:scale-95 active:brightness-95 transition"
                     >
                         모집 완료하기
                     </button>
@@ -322,7 +322,7 @@ export const RecruitDetailPage = () => {
                     <button
                         type="button"
                         onClick={() => setIsApplyModalOpen(true)}
-                        className="flex-1 py-[15px] rounded-[5px] bg-primary text-white text-sb-16-hn"
+                        className="flex-1 py-[15px] rounded-[5px] bg-primary text-white text-sb-16-hn active:scale-95 active:brightness-95 transition"
                     >
                         팀원 신청하기
                     </button>
