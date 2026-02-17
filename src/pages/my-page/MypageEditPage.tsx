@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Icon from "../../components/Icon";
 import InfoSection from "./components/InfoSection";
-import PortfolioSection from "./components/PortfolioSection";
 import ImageEditModal from "./components/ImageEditModal";
 import { useProfileEdit } from "./hooks/useProfileEdit";
 import { useProfileEditModals } from "./hooks/useProfileEditModal";
@@ -186,7 +185,7 @@ export const MypageEditPage = () => {
     }
     
 
-    const { user, visibility, educations, careers, certificates, portfolios } = data;
+    const { user, visibility, educations, careers, certificates } = data;
 
     return (
         <div>
@@ -308,12 +307,6 @@ export const MypageEditPage = () => {
                         <div className="w-full h-[10px] bg-gray-150"></div>
 
                         <div className="flex flex-col gap-[40px] py-[30px] px-[25px]">
-
-                            <PortfolioSection
-                                portfolios={portfolios}
-                                isEdit={true}
-                            />
-
                             <InfoSection
                                 type="education"
                                 items={educations}
