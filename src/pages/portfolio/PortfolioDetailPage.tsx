@@ -1,164 +1,130 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import PortfolioEditModal from './components/PortfolioEditModal';
 import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
 import ModalIcon from '../../components/BottomSheetModal/Icon';
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
-import { MOCK_PROFILE_DETAIL_BY_UID, MOCK_SESSION } from "../../mock/mypages";
-import { MOCK_PORTFOLIOS_BY_OWNER_ID } from '../../mock/portfolio';
-import type { PortfolioDetail } from '../../types/portfolio/portfolioTypes';
-import PortfolioEditModal from './components/PortfolioEditModal';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getPortfolioDetail, togglePortfolioFavorite, togglePortfolioPublic, deletePortfolio } from '../../api/portfolioApi';
+import type { PortfolioAsset } from '../../api-types/portfolioApiTypes';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import { getFileName } from '../../utils/getFileName';
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type PortfolioDetailPageProps = {
-    ownerId?: string;
+    ownerId?: string | number;
     isMine?: boolean;
-    portfolioId?: string;
-    initialPortfolio?: PortfolioDetail;
+    portfolioId?: string | number;
 };
 
 export const PortfolioDetailPage = ({
     ownerId: ownerIdProp,
     isMine: isMineProp,
     portfolioId: portfolioIdProp,
-    initialPortfolio,
 }: PortfolioDetailPageProps) => {
-    const meUid = MOCK_SESSION.meUid; // TODO: 실제로는 인증에서 가져오기
+    const authUser = useAuthStore(state => state.user);
+    const meUserId = authUser?.id ? parseInt(authUser.id) : null;
+
     const [searchParams] = useSearchParams();
-    const ownerId = ownerIdProp ?? searchParams.get('ownerId') ?? meUid;
+    const ownerIdParam = searchParams.get('ownerId');
+    const portfolioUserId: number = 
+        (typeof ownerIdProp === 'number' ? ownerIdProp : (ownerIdProp ? parseInt(ownerIdProp) : null)) ??
+        (ownerIdParam ? parseInt(ownerIdParam) : meUserId) ?? 
+        0;
+
     const isMineParam = searchParams.get('isMine');
-    const isMine = isMineProp ?? (isMineParam ? isMineParam === 'true' : ownerId === meUid);
-    const userDetail = ownerId ? MOCK_PROFILE_DETAIL_BY_UID[ownerId] : undefined;
-    const user = userDetail?.user;
-    const resolvedUser = user ?? {
-        name: "알 수 없음",
-        profileImg: "",
-        major: "",
-        gradeNumber: "",
-    };
+    const isMine = isMineProp ?? (isMineParam ? isMineParam === 'true' : portfolioUserId === meUserId);
 
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { portfolioId: portfolioIdParam } = useParams();
-    const portfolioId = portfolioIdProp ?? portfolioIdParam;
+    const portfolioId: number | null = 
+        (typeof portfolioIdProp === 'number' ? portfolioIdProp : (portfolioIdProp ? parseInt(portfolioIdProp) : null)) ??
+        (portfolioIdParam ? parseInt(portfolioIdParam) : null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [portfolio, setPortfolio] = useState<PortfolioDetail | null>(initialPortfolio ?? null);
-    const [isLoading, setIsLoading] = useState(!initialPortfolio);
-    const [error, setError] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(() => 
+        new URLSearchParams(window.location.search).get('edit') === 'true'
+    );
     const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
-    //URL에서 edit 파라미터 확인
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const shouldEdit = urlParams.get('edit') === 'true';
-        
-        if (shouldEdit && portfolio && isMine) {
-            setIsModalOpen(true);
-            // URL에서 edit 파라미터 제거
+        if (new URLSearchParams(window.location.search).get('edit') === 'true') {
             window.history.replaceState({}, '', window.location.pathname);
         }
-    }, [portfolio, isMine]);
+    }, []);
 
-    // Mock 데이터에서 포트폴리오 가져오기
-    useEffect(() => {
-        if (initialPortfolio) {
-            setPortfolio(initialPortfolio);
-            setIsLoading(false);
-            setError(null);
-            return;
-        }
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['portfolioDetail', portfolioUserId, portfolioId],
+        queryFn: () => getPortfolioDetail(meUserId!, portfolioUserId, portfolioId!),
+        enabled: !!meUserId && !!portfolioId,
+    });
 
-        const fetchData = async () => {
-            setIsLoading(true);
-            setError(null);
-            
-            try {
-                // TODO: 실제로는 API 호출
-                // const data = await fetchPortfolio(portfolioId);
-                // setPortfolio(data);
-                
-                // Mock 데이터 시뮬레이션 (약간의 지연)
-                await new Promise(resolve => setTimeout(resolve, 200));
-                
-                const userPortfolios = MOCK_PORTFOLIOS_BY_OWNER_ID[ownerId] || [];
-                const found = userPortfolios.find(p => p.portfolioId === portfolioId);
-                
-                if (!found) {
-                    // 데이터가 없는 경우 (404)
-                    setPortfolio(null);
-                } else {
-                    setPortfolio(found);
-                }
-            } catch (err) {
-                // 실제 에러 발생
-                console.error('포트폴리오 로드 실패:', err);
-                setError('포트폴리오를 불러오는 중 오류가 발생했습니다.');
-                setPortfolio(null);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const isMineAPI = data?.data.isMine ?? isMine;
+    const author = data?.data.data.author ?? null;
+    const portfolio = data?.data.data.portfolio ?? null;
+    const assets = data?.data.data.portfolioAssets ?? [];
 
-        fetchData();
-    }, [portfolioId, ownerId, initialPortfolio]);
+    // 작성자 정보 (fallback 처리)
+    const resolvedAuthor = author ?? {
+        name: "알 수 없음",
+        profileImageUrl: DEFAULT_PROFILE_IMAGE,
+        majorName: "",
+        studentNo: "",
+    };
 
-    const handleEdit = () => {
+    //asset 타입 분류 (type 필드로 구분)
+    const imageAssets = useMemo(() => 
+        assets.filter((a: PortfolioAsset) => 
+            a.type.startsWith('image/')
+        ).sort((a, b) => a.sortOrder - b.sortOrder),
+        [assets]
+    );
+
+    const pdfAssets = useMemo(() => 
+        assets.filter((a: PortfolioAsset) => 
+            a.type === 'application/pdf'
+        ).sort((a, b) => a.sortOrder - b.sortOrder),
+        [assets]
+    );
+
+    // 날짜 파싱 
+    const parseDate = (dateStr: string) => {
+        const [year, month] = dateStr.split('-').map(Number);
+        return { year, month };
+    };
+
+    const handleTogglePublic = async () => {
+        if (!portfolio || !meUserId) return;
         setIsMenuOpen(false);
-        setIsModalOpen(true);
+        await togglePortfolioPublic(meUserId, portfolioUserId, portfolio.portfolioId);
+        queryClient.invalidateQueries({ queryKey: ['portfolioDetail', portfolioUserId, portfolioId] });
+        queryClient.invalidateQueries({ queryKey: ['portfolioList', portfolioUserId] });
     };
 
-    const handleDelete = () => {
+    const handleToggleFavorite = async () => {
+        if (!portfolio || !meUserId) return;
         setIsMenuOpen(false);
-        setShowDeleteWarning(true);
+        await togglePortfolioFavorite(meUserId, portfolioUserId, portfolio.portfolioId);
+        queryClient.invalidateQueries({ queryKey: ['portfolioDetail', portfolioUserId, portfolioId] });
+        queryClient.invalidateQueries({ queryKey: ['portfolioList', portfolioUserId] });
     };
 
-    const toggleVisibility = () => {
-        if (!portfolio) return;
-        
-        const newVisibility = !portfolio.portfolioVisibility;
-        setPortfolio({
-            ...portfolio,
-            portfolioVisibility: newVisibility
-        });
-        setIsMenuOpen(false);
-        
-        // TODO: API 호출
-        // await updatePortfolioVisibility(portfolioId, newVisibility);
+    const handleDelete = async () => {
+        if (!portfolio || !meUserId) return;
+        await deletePortfolio(meUserId, portfolioUserId, portfolio.portfolioId);
+        queryClient.invalidateQueries({ queryKey: ['portfolioList', portfolioUserId] });
+        navigate(-1);
     };
 
-    const toggleImportant = () => {
-        if (!portfolio) return;
-        
-        const newImportant = !portfolio.isImportant;
-        setPortfolio({
-            ...portfolio,
-            isImportant: newImportant
-        });
-        setIsMenuOpen(false);
-        
-        // TODO: API 호출
-        // await togglePortfolioImportant(portfolioId);
+    const handleSave = () => {
+        queryClient.invalidateQueries({ queryKey: ['portfolioDetail', portfolioUserId, portfolioId] });
+        queryClient.invalidateQueries({ queryKey: ['portfolioList', portfolioUserId] });
+        setIsModalOpen(false);
     };
-
-    const handleSave = (data: PortfolioDetail) => {
-        console.log('저장할 데이터:', data);
-        // TODO: API 호출
-        setPortfolio(data);
-    };
-
-    // userDetail이 없는 경우 에러 처리
-    if (!userDetail && !initialPortfolio) {
-        return (
-            <PopUp
-                type="error"
-                title='일시적 오류로 인해\n사용자 정보를 찾을 수 없습니다.'
-                titleSecondary='잠시 후 다시 시도해주세요.'
-                isOpen={true}
-                rightButtonText='돌아가기'
-                onClick={() => navigate(-1)}
-            />
-        );
-    }
 
     // 로딩 중
     if (isLoading) {
@@ -171,12 +137,12 @@ export const PortfolioDetailPage = ({
     }
 
     // 에러 발생
-    if (error) {
+    if (isError) {
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다.'
-                titleSecondary='잠시 후 다시 시도해주세요.'
+                title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다'
+                titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
                 onClick={() => window.location.reload()}
@@ -189,8 +155,8 @@ export const PortfolioDetailPage = ({
         return (
             <PopUp
                 type="error"
-                title='포트폴리오를 찾을 수 없습니다.'
-                titleSecondary='요청하신 포트폴리오가 존재하지 않습니다.'
+                title='포트폴리오를 찾을 수 없습니다'
+                content='요청하신 포트폴리오가 존재하지 않습니다.'
                 isOpen={true}
                 rightButtonText='돌아가기'
                 onClick={() => navigate(-1)}
@@ -198,7 +164,7 @@ export const PortfolioDetailPage = ({
         );
     }
 
-    if (!isMine && !portfolio.portfolioVisibility) {
+    if (!isMineAPI && !portfolio.isPublic) {
         return (
             <PopUp
                 type="confirm"
@@ -210,6 +176,9 @@ export const PortfolioDetailPage = ({
             />
         );
     }
+
+    const startDate = parseDate(portfolio.startDate);
+    const endDate = parseDate(portfolio.endDate);
 
     return (
         <div className="min-h-dvh bg-white">
@@ -225,27 +194,26 @@ export const PortfolioDetailPage = ({
                     />
                 }
             >
-                <div className="max-w-screen-sm mx-auto">
+                <div className="w-full h-full">
                     {/* 콘텐츠 */}
-                    <div className="border-t border-gray-150">
+                    <div className="border-t border-gray-150 pb-[20px]">
                         {/* 작성자 정보 */}
                             <div className="px-[25px] py-[20px] flex items-center gap-[15px]">
-                                {resolvedUser.profileImg ? (
+                                {resolvedAuthor.profileImageUrl && (
                                     <img
-                                        src={resolvedUser.profileImg}
-                                        alt={resolvedUser.name}
+                                        src={resolvedAuthor.profileImageUrl || DEFAULT_PROFILE_IMAGE}
+                                        alt={resolvedAuthor.name}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                            e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                        }}
                                         className="w-[40px] h-[40px] rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div
-                                        className="w-[40px] h-[40px] rounded-full bg-gray-200"
-                                        aria-hidden
                                     />
                                 )}
                                 <div className = "flex flex-col gap-[6px] flex-1">
-                                    <div className="text-b-18-hn text-gray-900">{resolvedUser.name}</div>
+                                    <div className="text-b-18-hn text-gray-900">{resolvedAuthor.name}</div>
                                     <div className="text-r-14-hn text-gray-750">
-                                        {resolvedUser.major} {resolvedUser.gradeNumber ? `${resolvedUser.gradeNumber}학번` : ""}
+                                        {resolvedAuthor.majorName} {resolvedAuthor.studentNo ? `${resolvedAuthor.studentNo.slice(2,4)}학번` : ""}
                                     </div>
                                 </div>
                             </div>
@@ -253,9 +221,9 @@ export const PortfolioDetailPage = ({
                             <div className="px-[25px] pb-[40px] flex flex-col gap-[20px]">
                                 {/* 제목 및 내용 */}
                                 <div className="flex flex-col gap-[15px]">
-                                    <span className="text-sb-16-hn text-gray-900">{portfolio.title}</span>
+                                    <span className="text-sb-16-hn text-gray-900 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.title}</span>
                                     <div className="text-r-14 text-gray-750 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]">
-                                        {portfolio.content}
+                                        {portfolio.description}
                                     </div>
                                 </div>
 
@@ -265,105 +233,79 @@ export const PortfolioDetailPage = ({
                                     <div className="flex items-center gap-[10px]">
                                         <span className="text-m-14-hn text-gray-750 min-w-[77px]">프로젝트 기간</span>
                                         <span className="text-r-12-hn text-gray-650">
-                                            {portfolio.startYear}.{String(portfolio.startMonth).padStart(2, '0')} - {portfolio.endYear}.{String(portfolio.endMonth).padStart(2, '0')}
+                                            {startDate.year}.{String(startDate.month).padStart(2, '0')} - {endDate.year}.{String(endDate.month).padStart(2, '0')}
                                         </span>
                                     </div>
 
                                     {/* 프로젝트 역할 */}
                                     <div className="flex items-center gap-[10px]">
                                         <span className="text-m-14-hn text-gray-750 min-w-[77px]">프로젝트 역할</span>
-                                        <span className="text-r-12-hn text-gray-650">{portfolio.role}</span>
+                                        <span className="text-r-12-hn text-gray-650 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.assignedRole[0] || ""}</span>
                                     </div>
 
                                     {/* 사용 기술 */}
                                     <div className="flex items-center gap-[10px]">
                                         <span className="text-m-14-hn text-gray-750 min-w-[77px]">사용 기술</span>
-                                        <span className="text-r-12-hn text-gray-650">{portfolio.skills}</span>
+                                        <span className="text-r-12-hn text-gray-650 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.techStack[0] || ""}</span>
                                     </div>
                                 </div>
                             </div>
 
                     {/* 대표이미지 */}
                     <div className="flex flex-col gap-[3px]">
-                        <div>
-                            <img
-                                src={typeof portfolio.portfolioThumbnail === 'string' ? portfolio.portfolioThumbnail : URL.createObjectURL(portfolio.portfolioThumbnail)}
-                                alt="Portfolio image 0"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        {portfolio.portfolioImage && portfolio.portfolioImage.length > 0 && (
-                        <div className="flex flex-col gap-[3px]">
-                            {portfolio.portfolioImage.map((image, index) => (
-                                <div key={`${portfolioId}-img-${index}`} className="relative w-full flex items-center justify-center">
+                        {portfolio.thumbnailUrl && (
+                            <div>
+                                <img
+                                    src={portfolio.thumbnailUrl}
+                                    alt={portfolio.title}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        )}
+                        {imageAssets.length > 0 && (
+                            <div className="flex flex-col gap-[3px]">
+                                {imageAssets.map((asset: PortfolioAsset) => (
                                     <img
-                                        src={typeof image === 'string' ? image : URL.createObjectURL(image)}
-                                        alt={`Portfolio image ${index + 1}`}
+                                        key={asset.assetId}
+                                        src={asset.fileUrl}
+                                        alt={`Portfolio asset ${asset.assetId}`}
                                         className="w-full h-full object-cover"
                                     />
-                                </div>
-                        
-                            ))}
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="w-full px-[10px] py-[10px] flex flex-col gap-[8px]">
-                        {/* 링크 목록 */}
-                        {portfolio.portfolioLink && portfolio.portfolioLink.length > 0 && (
-                            <div className="w-full flex flex-col gap-[8px]">
-                            {portfolio.portfolioLink.map((link, index) => (
-                                <a
-                                key={`${portfolioId}-link-${index}`}
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-[10px] p-[15px] bg-gray-100 rounded-[10px] text-r-14-hn text-primary"
-                                >
-                                    <ModalIcon name='url' className='w-[20px] h-[20px]'/>
-                                    <span className="flex-1 truncate">{link}</span>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M13.3333 8.88889V13.3333C13.3333 13.687 13.1929 14.0261 12.9428 14.2761C12.6928 14.5262 12.3536 14.6667 12 14.6667H2.66667C2.31304 14.6667 1.97391 14.5262 1.72386 14.2761C1.47381 14.0261 1.33333 13.687 1.33333 13.3333V4C1.33333 3.64638 1.47381 3.30724 1.72386 3.05719C1.97391 2.80714 2.31304 2.66667 2.66667 2.66667H7.11111M10.6667 1.33333H14.6667M14.6667 1.33333V5.33333M14.6667 1.33333L6.66667 9.33333" 
-                                        stroke="currentColor" 
-                                        strokeWidth="1.5" 
-                                        strokeLinecap="round" 
-                                        strokeLinejoin="round"/>
-                                    </svg>
-                                </a>
-                            ))}
-                            </div>
-                        )}
-
                         {/* PDF 파일 목록 */}
-                        {portfolio.portfolioPdf && portfolio.portfolioPdf.length > 0 && (
+                        {pdfAssets.length > 0 && (
                             <div className="w-full flex flex-col gap-[8px]">
-                            {portfolio.portfolioPdf.map((pdf, index) => (
-                                <a
-                                    key={`${portfolioId}-pdf-${index}`}
-                                    href={typeof pdf === 'string' ? pdf : URL.createObjectURL(pdf)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-[10px] p-[15px] bg-gray-100 rounded-[10px] text-r-14-hn text-gray-750"
-                                >
-                                    <ModalIcon name='file' className='w-[20px] h-[20px]'/>
-                                    <span className="flex-1 text-r-14-hn text-gray-750 truncate">
-                                        {typeof pdf === 'string' ? 
-                                        pdf.split('/').pop() || `파일 ${index + 1}.pdf` : pdf.name}
-                                    </span>
-                                </a>
-                            ))}
+                                {pdfAssets.map((asset: PortfolioAsset) => (
+                                    <a
+                                        key={asset.assetId}
+                                        href={asset.fileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-[10px] p-[15px] bg-gray-100 rounded-[10px] text-r-14-hn text-gray-750"
+                                    >
+                                        <ModalIcon name='file' className='w-[20px] h-[20px]' />
+                                        <span className="flex-1 text-r-14-hn text-gray-750 truncate">
+                                            {getFileName(asset.fileUrl) || '첨부파일'}
+                                        </span>
+                                    </a>
+                                ))}
                             </div>
                         )}
                     </div>
 
                     {/* Problem & Solution */}
-                    {portfolio.problemSolution && (
+                    {portfolio.review && (
                     <div>
                         <div className="w-full h-[10px] mt-[40px] mb-[30px] bg-gray-300"/>
                         <div className="px-[25px] flex flex-col gap-[8px]">
                             <span className="text-m-14-hn text-gray-750">Problem & Solution</span>
                             <div className="text-r-12 text-gray-650 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]">
-                                {portfolio.problemSolution}
+                                {portfolio.review}
                             </div>
                         </div>
                     </div>
@@ -373,13 +315,13 @@ export const PortfolioDetailPage = ({
             </HeaderLayout>
 
             {/* 수정 모달 */}
-            {isMine && isModalOpen && (
+            {isMineAPI && isModalOpen && (
                 <PortfolioEditModal
                     key={`edit-${portfolioId}`}
                     isOpen={true}
                     onClose={() => setIsModalOpen(false)}
-                    userId={ownerId}
-                    initialData={portfolio}
+                    userId={portfolioUserId}
+                    portfolioId={portfolioId!}
                     onSave={handleSave}
                 />
             )}
@@ -395,7 +337,7 @@ export const PortfolioDetailPage = ({
                         <div className="px-[25px] pb-[40px]">
                             {/* 프로젝트 수정 */}
                             <button
-                                onClick={handleEdit}
+                                onClick={() => {setIsMenuOpen(false); setIsModalOpen(true);}}
                                 className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-200"
                             >
                                 <ModalIcon name='edit'/>
@@ -404,28 +346,28 @@ export const PortfolioDetailPage = ({
 
                             {/* 프로젝트 비공개 */}
                             <button
-                                onClick={toggleVisibility}
+                                onClick={handleTogglePublic}
                                 className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
                                 >
-                                    <ModalIcon name={portfolio?.portfolioVisibility ? "private" : "public"} />
+                                    <ModalIcon name={portfolio.isPublic ? "private" : "public"} />
                                     <span className="text-m-16-hn text-gray-750">
-                                        {portfolio?.portfolioVisibility ? "프로젝트 비공개" : "프로젝트 공개"}
+                                        {portfolio.isPublic ? "프로젝트 비공개" : "프로젝트 공개"}
                                     </span>
                             </button>
 
 
                             {/* 주요 프로젝트 지정 및 해제 */}
                             <button
-                                onClick={toggleImportant}
+                                onClick={handleToggleFavorite}
                                 className="w-full flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
                             >
                                 <ModalIcon name='favorite'/>
-                                <span className="text-m-16-hn text-gray-750">{portfolio.isImportant ? "주요 프로젝트 지정 해제" : "주요 프로젝트로 지정"}</span>
+                                <span className="text-m-16-hn text-gray-750">{portfolio.isFavorite ? "주요 프로젝트 지정 해제" : "주요 프로젝트로 지정"}</span>
                             </button>
 
                             {/* 삭제 */}
                             <button
-                                onClick={handleDelete}
+                                onClick={() => {setIsMenuOpen(false); setShowDeleteWarning(true);}}
                                 className="w-full flex items-center gap-[17px] pl-[12px] py-[15px]"
                             >
                                 <ModalIcon name='delete' className='w-[20px] h-[20px]'/>
@@ -433,20 +375,21 @@ export const PortfolioDetailPage = ({
                             </button>
                         </div>
                     </BottomSheetModal>
-                    {showDeleteWarning && (<PopUp
-                        type="warning"
-                        title='포트폴리오를 삭제하시겠습니까?'
-                        content='삭제할 시 복구할 수 없습니다.'
-                        isOpen={true}
-                        leftButtonText='삭제하기'
-                        onLeftClick={() => {
-                            setShowDeleteWarning(false);
-                            // TODO: API 호출
-                            console.log('포트폴리오 삭제:', portfolioId);
-                            navigate(-1); 
-                        }}
-                        onRightClick={() => setShowDeleteWarning(false)}
-                    />)}
+
+                    {showDeleteWarning && (
+                        <PopUp
+                            type="warning"
+                            title='포트폴리오를 삭제하시겠습니까?'
+                            content='삭제할 시 복구할 수 없습니다.'
+                            isOpen={true}
+                            leftButtonText='삭제하기'
+                            onLeftClick={() => {
+                                setShowDeleteWarning(false);
+                                handleDelete();
+                            }}
+                            onRightClick={() => setShowDeleteWarning(false)}
+                        />
+                    )}
                 </>
             )}
         </div>

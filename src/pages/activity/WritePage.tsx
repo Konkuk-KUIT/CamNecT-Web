@@ -327,7 +327,7 @@ export const ActivityWritePage = () => {
       queryClient.invalidateQueries({ queryKey: ['activityList'] });
       if (isEditMode && activityId) {
         queryClient.invalidateQueries({ queryKey: ['activityDetail', activityId] });
-        navigate(`/activity/internal/${activityId}`);
+        navigate(`/activity/internal/${activityId}`, {replace: true});
       } else {
         navigate('/activity');
       }

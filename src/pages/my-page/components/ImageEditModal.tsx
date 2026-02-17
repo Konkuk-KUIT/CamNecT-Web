@@ -11,10 +11,8 @@ interface ImageEditModalProps {
 
 export default function ImageEditModal({ isOpen, onClose, onSelect, onDelete }: ImageEditModalProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const cameraInputRef = useRef<HTMLInputElement>(null);
 
     const handleAlbumSelect = () => fileInputRef.current?.click();
-    const handleCameraSelect = () => cameraInputRef.current?.click();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, source: "album" | "camera") => {
         const file = e.target.files?.[0];
@@ -24,31 +22,22 @@ export default function ImageEditModal({ isOpen, onClose, onSelect, onDelete }: 
 
     return (
         <BottomSheetModal isOpen={isOpen} onClose={onClose} height="auto">
-            <div className="w-full px-[25px] pb-[50px] flex flex-col">
+            <div className="w-full px-[25px] pt-[10px] pb-[30px] flex flex-col">
                 <button
                     onClick={handleAlbumSelect}
                     className="flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
                     type="button"
                 >
                     <Icon name="photo" className="w-[20px] h-[20px] block shrink-0" />
-                    <span className="text-m-16 text-gray-750">앨범에서 선택</span>                    
+                    <span className="text-m-16 text-gray-750">프로필 사진 변경</span>                    
                 </button>
-                <button
-                    onClick={handleCameraSelect}
-                    className="flex items-center gap-[15px] pl-[10px] py-[15px] border-b border-gray-150"
-                    type="button"
-                >
-                    <Icon name="camera" className="w-[20px] h-[20px] block shrink-0" />
-                    <span className="text-m-16 text-gray-750">사진 찍기</span>
-                </button>
-
                 <button
                     onClick={onDelete}
                     className="flex items-center gap-[15px] pl-[10px] py-[15px]"
                     type="button"
                 >
                     <Icon name="delete" className="w-[20px] h-[20px] block shrink-0" />
-                    <span className="text-R-16 text-red">삭제</span>
+                    <span className="text-R-16 text-red">사진 삭제</span>
                 </button>
 
                 <input
@@ -57,14 +46,6 @@ export default function ImageEditModal({ isOpen, onClose, onSelect, onDelete }: 
                     accept="image/png, image/webp, image/jpeg"
                     className="hidden"
                     onChange={(e) => handleFileChange(e, 'album')}
-                />
-                <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/png, image/webp, image/jpeg"
-                    capture="environment"
-                    className="hidden"
-                    onChange={(e) => handleFileChange(e, 'camera')}
                 />
             </div>
         </BottomSheetModal>
