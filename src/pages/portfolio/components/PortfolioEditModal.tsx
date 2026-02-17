@@ -96,7 +96,6 @@ export default function PortfolioEditModal({
 
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
-    const cameraInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
 
     //초기 데이터 저장
@@ -998,14 +997,6 @@ export default function PortfolioEditModal({
                     className="hidden"
                 />
                 <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/png, image/webp, image/jpeg, image/jpg"
-                    capture="environment"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                />
-                <input
                     ref={pdfInputRef}
                     type="file"
                     accept=".pdf"
@@ -1032,18 +1023,6 @@ export default function PortfolioEditModal({
                             >
                                 <ModalIcon name="photo" className="w-[24px] h-[24px]" />
                                 <span className="text-m-16-hn text-gray-750">사진</span>
-                            </button>
-
-                            {/* 카메라 */}
-                            <button
-                                onClick={() => {
-                                    cameraInputRef.current?.click();
-                                    setIsFileAddModalOpen(false);
-                                }}
-                                className="w-full flex items-center gap-[15px] p-[15px] border-b border-gray-150"
-                            >
-                                <ModalIcon name="camera" className="w-[24px] h-[24px]" />
-                                <span className="text-r-16-hn text-gray-750">카메라</span>
                             </button>
 
                             {/* 파일 */}
