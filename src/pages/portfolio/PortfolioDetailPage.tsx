@@ -141,8 +141,8 @@ export const PortfolioDetailPage = ({
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다'
-                titleSecondary='잠시 후 다시 시도해주세요'
+                title="일시적 오류"
+                content="잠시 후 다시 시도해주세요."
                 isOpen={true}
                 rightButtonText='확인'
                 onClick={() => window.location.reload()}

@@ -383,7 +383,8 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     return (
       <PopUp
         type="error"
-        title="정보를 불러올 수 없습니다."
+        title="일시적 오류"
+        content="잠시 후 다시 시도해주세요."
         isOpen={true}
         rightButtonText="확인"
         onClick={() => navigate(-1)}
@@ -820,7 +821,7 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
         <PopUp
             isOpen={isFileErrorOpen}
             type="error"
-            title="업로드할 수 없는 파일입니다."
+            title="업로드할 수 없는 파일"
             content={fileErrorMessage}
             rightButtonText="확인"
             onClick={() => setIsFileErrorOpen(false)}

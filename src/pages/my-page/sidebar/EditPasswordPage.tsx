@@ -325,7 +325,7 @@ export const EditPasswordPage = () => {
             <PopUp
                 isOpen={unknownErrorOpen}
                 type="error"
-                title="일시적 오류로 인해 비밀번호 변경에 실패했습니다."
+                title="비밀번경 실패"
                 titleSecondary="잠시 후 다시 시도해주세요"
                 buttonText="확인"
                 onClick={() => setUnknownErrorOpen(false)}

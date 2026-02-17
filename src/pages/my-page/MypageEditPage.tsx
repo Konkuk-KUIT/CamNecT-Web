@@ -175,8 +175,8 @@ export const MypageEditPage = () => {
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n프로필 정보를 찾을 수 없습니다.'
-                titleSecondary='잠시 후 다시 시도해주세요'
+                title="일시적 오류"
+                content="잠시 후 다시 시도해주세요."
                 isOpen={true}
                 rightButtonText='확인'
                 onClick={() => navigate(-1)}
@@ -454,7 +454,7 @@ export const MypageEditPage = () => {
             <PopUp
                 isOpen={!!saveError}
                 type="error"
-                title="일시적 오류로 인해 접근에 실패했습니다."
+                title="일시적 오류"
                 content={saveError || ""}
                 buttonText="확인"
                 onClick={() => setSaveError(null)}
@@ -462,7 +462,7 @@ export const MypageEditPage = () => {
             <PopUp
                 isOpen={!!imageErrorMessage}
                 type="error"
-                title="업로드할 수 없는 파일입니다."
+                title="업로드할 수 없는 파일"
                 content={imageErrorMessage}
                 buttonText="확인"
                 onClick={() => setImageErrorMessage('')}

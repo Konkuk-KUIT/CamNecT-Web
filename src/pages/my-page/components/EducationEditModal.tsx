@@ -528,7 +528,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
             <PopUp
                 isOpen={showSchoolInvalid}
                 type="error"
-                title="해당 학교의 데이터가 없습니다."
+                title="해당 학교의 데이터가 없습니다"
                 content="원하는 학교의 입력이 불가하다면\n문의사항에 남겨주세요."
                 buttonText="확인"
                 onClick={() => setShowSchoolInvalid(false)}

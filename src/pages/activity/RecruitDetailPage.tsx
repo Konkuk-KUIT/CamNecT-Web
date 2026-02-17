@@ -40,6 +40,7 @@ export const RecruitDetailPage = () => {
     const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
     const [isDuplicateApplyPopup, setIsDuplicateApplyPopup] = useState(false);
     const [isApplyFailPopupOpen, setIsApplyFailPopupOpen] = useState(false);
+    const [isApplySuccessPopupOpen, setIsApplySuccessPopupOpen] = useState(false);
 
     const getHttpStatus = (err: unknown): number | undefined => {
         if (axios.isAxiosError(err)) return err.response?.status;
@@ -118,7 +119,8 @@ export const RecruitDetailPage = () => {
         return (
             <PopUp
                 type="error"
-                title="게시글을 찾을 수 없습니다."
+                title="일시적 오류"
+                content="잠시 후 다시 시도해주세요."
                 isOpen={true}
                 rightButtonText="확인"
                 onClick={() => navigate(-1)}
@@ -394,9 +396,17 @@ export const RecruitDetailPage = () => {
         <PopUp
             isOpen={isApplyFailPopupOpen}
             type="confirm"
-            title="신청에 실패했습니다."
+            title="신청 실패"
             content="잠시 후 다시 시도해 주세요."
             onClick={() => setIsApplyFailPopupOpen(false)}
+        />
+
+        <PopUp
+            isOpen={isApplySuccessPopupOpen}
+            type="confirm"
+            title="신청 성공"
+            content="팀원 모집 신청이 발송되었습니다."
+            onClick={() => setIsApplySuccessPopupOpen(false)}
         />
 
         <TeamApplyModal
@@ -406,6 +416,7 @@ export const RecruitDetailPage = () => {
             onSubmit={async (payload) => {
                 try {
                     await applyMutation.mutateAsync(payload.message);
+                    setIsApplySuccessPopupOpen(true);
                     return true;
                 } catch (e: unknown) {
                     const status = getHttpStatus(e);

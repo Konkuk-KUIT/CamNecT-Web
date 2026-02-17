@@ -25,7 +25,7 @@ export const RecruitWritePage = () => {
     const years = Array.from({ length: 10 }, (_, i) => currentYear + i);
 
     //수정 모드: 기존 데이터 로드
-    const { data: editDetailResponse, isLoading: isLoadingEdit } = useQuery({
+    const { data: editDetailResponse, isLoading: isLoadingEdit, isError: isErrorEdit } = useQuery({
         queryKey: ['recruitmentDetail', recruitmentId],
         queryFn: () => getRecruitmentDetail(userId!, recruitmentId!),
         enabled: isEditMode && !!userId && !!recruitmentId,
@@ -119,6 +119,19 @@ export const RecruitWritePage = () => {
             type="loading"
             isOpen={true}
         />
+        );
+    }
+
+    if (isErrorEdit) {
+        return (
+            <PopUp
+                type="error"
+                title="일시적 오류"
+                content="잠시 후 다시 시도해주세요."
+                isOpen={true}
+                rightButtonText="확인"
+                onClick={() => navigate(-1)}
+            />
         );
     }
 
