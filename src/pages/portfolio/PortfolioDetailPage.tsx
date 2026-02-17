@@ -140,7 +140,7 @@ export const PortfolioDetailPage = ({
         return (
             <PopUp
                 type="error"
-                title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다.'
+                title='일시적 오류로 인해\n포트폴리오 정보를 찾을 수 없습니다'
                 titleSecondary='잠시 후 다시 시도해주세요'
                 isOpen={true}
                 rightButtonText='확인'
@@ -154,8 +154,8 @@ export const PortfolioDetailPage = ({
         return (
             <PopUp
                 type="error"
-                title='포트폴리오를 찾을 수 없습니다.'
-                titleSecondary='요청하신 포트폴리오가 존재하지 않습니다.'
+                title='포트폴리오를 찾을 수 없습니다'
+                content='요청하신 포트폴리오가 존재하지 않습니다.'
                 isOpen={true}
                 rightButtonText='돌아가기'
                 onClick={() => navigate(-1)}

@@ -578,7 +578,7 @@ console.log('portfolioId:', portfolioId);
                             <div className="absolute inset-0 z-50">
                                 <PopUp
                                     type="error"
-                                    title='업로드할 수 없는 파일입니다.'
+                                    title='업로드할 수 없는 파일입니다'
                                     titleSecondary={error}
                                     isOpen={true}
                                     rightButtonText='확인'
@@ -590,7 +590,7 @@ console.log('portfolioId:', portfolioId);
                         {isErrorDetail && (
                             <PopUp
                                 type="error"
-                                title='포트폴리오를 불러올 수 없습니다.'
+                                title='포트폴리오를 불러올 수 없습니다'
                                 titleSecondary='일시적인 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.'
                                 isOpen={true}
                                 rightButtonText='닫기'
@@ -603,7 +603,7 @@ console.log('portfolioId:', portfolioId);
                                 <PopUp
                                     type="error"
                                     title='필수 항목을 모두 입력해주세요'
-                                    titleSecondary={`누락된 항목: ${getMissingFields().join(', ')}`}
+                                    titleSecondary={`${getMissingFields().join(', ')} 항목이 누락되어 있습니다.`}
                                     isOpen={true}
                                     rightButtonText='확인'
                                     onClick={() => setShowValidationPopup(false)}
