@@ -56,7 +56,7 @@ export const ActivityWritePage = () => {
   })
 
   //수정일 경우 기존 데이터 로드
-  const { data: editDetailResponse, isLoading: isLoadingEdit } = useQuery({
+  const { data: editDetailResponse, isLoading: isLoadingEdit, isError: isErrorEdit} = useQuery({
     queryKey: ['activityDetail', activityId],
     queryFn: () => getActivityDetail(userId!, activityId!),
     enabled: isEditMode && !!userId && !!activityId,
@@ -335,13 +335,26 @@ export const ActivityWritePage = () => {
   });
 
     if (isEditMode && isLoadingEdit) {
-    return (
-      <PopUp
-        type="loading"
-        isOpen={true}
-      />
-    );
-  }
+      return (
+        <PopUp
+          type="loading"
+          isOpen={true}
+        />
+      );
+    }
+
+    if (isErrorEdit) {
+        return (
+            <PopUp
+                type="error"
+                title="일시적 오류"
+                content="잠시 후 다시 시도해주세요."
+                isOpen={true}
+                rightButtonText="확인"
+                onClick={() => navigate(-1)}
+            />
+        );
+    }
 
   const openBoardSelector = () => {
     setDraftBoardType(boardType);
@@ -634,7 +647,7 @@ export const ActivityWritePage = () => {
       <PopUp
         isOpen={isFileErrorOpen}
         type="error"
-        title="업로드할 수 없는 파일입니다."
+        title="업로드할 수 없는 파일"
         content={fileErrorMessage}
         rightButtonText="확인"
         onClick={() => setIsFileErrorOpen(false)}
