@@ -128,11 +128,11 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="relative min-h-[100dvh] bg-white px-[25px] flex flex-col items-center pb-[60px] overflow-y-auto">
+    <div className="relative min-h-[100dvh] bg-white px-[25px] flex flex-col items-center pb-[105px] overflow-y-auto hide-scrollbar">
       {/* 상단 로고 */}
-      <Logo className="mt-[100px] max-w-[300px] w-full flex-none" />
+      <Logo className="mt-[160px] max-w-[300px] w-full flex-none" />
 
-      <div className="flex-1 min-h-[40px]" />
+      <div className="flex-1" />
 
       <div className="flex flex-col max-w-[335px] w-full gap-[20px] mb-[40px] flex-none">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
