@@ -57,16 +57,17 @@ export const PortfolioListPage = ({
         return localPortfolios.filter(p => p.isPublic);
     }, [isMine, localPortfolios]);
 
-    const allPublic = localPortfolios.every(p => p.isPublic);
+    const allPrivate = localPortfolios.length > 0 && localPortfolios.every(p => p.isPublic === false);
 
-    const handleToggleAllPublic = async () => {
-        const nextPublic = !allPublic;
+    const handleToggleAllPrivate = async () => {
+        const nextAllPrivate = !allPrivate;
+        const targetIsPublic = !nextAllPrivate;
 
         // 로컬 상태 즉시 업데이트
-        setLocalPortfolios(prev => prev.map(p => ({ ...p, isPublic: nextPublic })));
+        setLocalPortfolios(prev => prev.map(p => ({ ...p, isPublic: targetIsPublic })));
 
         // 변경이 필요한 항목만 API 호출
-        const toToggle = localPortfolios.filter(p => p.isPublic !== nextPublic);
+        const toToggle = localPortfolios.filter(p => p.isPublic !== targetIsPublic);
         await Promise.all(toToggle.map(p => togglePortfolioPublic(meUserId!, portfolioUserId, p.portfolioId)));
     };
 
@@ -118,14 +119,14 @@ export const PortfolioListPage = ({
                             <div className="w-full flex items-center justify-between px-[25px] py-[15px] border-t border-b border-gray-150">
                                 <div className="text-sb-14-hn text-gray-900">포트폴리오 전체 비공개</div>
                                 <button
-                                onClick={handleToggleAllPublic}
+                                onClick={handleToggleAllPrivate}
                                 className={`relative w-[50px] h-[24px] rounded-full transition-colors ${
-                                    allPublic  ? "bg-gray-300" : "bg-primary"
+                                    allPrivate  ? "bg-primary" : "bg-gray-300"
                                 }`}
                                 >
                                 <div
                                     className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full transition-transform ${
-                                    allPublic  ? "translate-x-[2px]" : "translate-x-[28px]"
+                                    allPrivate  ? "translate-x-[28px]" : "translate-x-[2px]"
                                     }`}
                                 />
                                 </button>
