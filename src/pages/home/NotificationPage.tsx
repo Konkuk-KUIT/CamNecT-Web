@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { requestNotificationRead, requestNotifications } from '../../api/notifications';
@@ -192,6 +192,7 @@ const renderIcon = (notification: NotificationItem) => {
 
 export const NotificationPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
   const [isErrorDismissed, setIsErrorDismissed] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
@@ -228,6 +229,8 @@ export const NotificationPage = () => {
           userId: userIdParam as string | number,
           id: notification.id,
         });
+        // 알림 읽음 처리 성공 시 안 읽은 개수 쿼리 무효화 (홈 화면 배지 업데이트용)
+        queryClient.invalidateQueries({ queryKey: ['notificationsUnreadCount'] });
       } catch (error) {
         const status = getErrorStatus(error);
         const config = getErrorPopUpConfig(status);
@@ -239,7 +242,9 @@ export const NotificationPage = () => {
 
     switch (notification.type) {
       case 'coffeeChatRequest':
-        navigate('/chat/requests');
+        if (notification.requestId) {
+          navigate(`/chat/requests/${notification.requestId}`);
+        }
         break;
       case 'pointUse':
         // 포인트 사용 - 내역 페이지가 없음 클릭해도 이동 X
