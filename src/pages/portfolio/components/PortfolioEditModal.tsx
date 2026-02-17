@@ -1058,7 +1058,7 @@ console.log('portfolioId:', portfolioId);
                                 className="w-full flex items-center gap-[15px] p-[15px] border-b border-gray-150"
                             >
                                 <ModalIcon name="file" className="w-[24px] h-[24px]" />
-                                <span className="text-m-16-hn text-gray-750">파일</span>
+                                <span className="text-m-16-hn text-gray-750">PDF</span>
                             </button>
                         </div>
                     </div>
