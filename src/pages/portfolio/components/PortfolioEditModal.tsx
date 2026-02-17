@@ -1,58 +1,85 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import Icon from '../../../components/Icon';
-import type { PortfolioDetail, Media } from '../../../types/portfolio/portfolioTypes';
-import { useImageUpload } from '../../../hooks/useImageUpload';
 import ModalIcon from '../../../components/BottomSheetModal/Icon';
 import BottomSheetModal from '../../../components/BottomSheetModal/BottomSheetModal';
 import PopUp from '../../../components/Pop-up';
 import { HeaderLayout } from "../../../layouts/HeaderLayout";
 import { EditHeader } from "../../../layouts/headers/EditHeader";
 import { useModalHistory } from '../../../hooks/useModalHistory';
-import SingleInput from '../../../components/common/SingleInput';
+import { useQuery } from '@tanstack/react-query';
+import { useFileUpload } from '../../../hooks/useFileUpload';
+import { uploadFileToS3 } from '../../../utils/s3Upload';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { getPortfolioDetail, presignThumbnail, presignAssets, createPortfolio, updatePortfolio } from '../../../api/portfolioApi';
+import type { PortfolioAsset } from '../../../api-types/portfolioApiTypes';
+import replaceImg from "../../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
+
+const MAX_SIZE_MB = 10;
+const THUMBNAIL_MAX_SIZE_MB = 5;
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/jpg'];
+const ALLOWED_FILE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf', 'image/jpg'];
 
 interface PortfolioEditModalProps {
     isOpen: boolean;
     onClose: () => void;
-    userId: string;
-    initialData?: PortfolioDetail;
-    onSave: (data: PortfolioDetail) => void;
+    userId: number;
+    portfolioId?: number;
+    onSave: () => void;
 }
 
-interface ImageData {
-    media: Media;
-    previewUrl: string;
+interface FileItem {
+    id: string;
+    file?: File;
+    url?: string;
+    fileKey?: string;
+    type?: string;
+    isExisting: boolean;
 }
 
 export default function PortfolioEditModal({
     isOpen,
     onClose,
     userId,
-    initialData,
+    portfolioId,
     onSave,
 }: PortfolioEditModalProps) {
-    const [title, setTitle] = useState(initialData?.title || '');
-    const [content, setContent] = useState(initialData?.content || '');
-    const [startYear, setStartYear] = useState(initialData?.startYear || new Date().getFullYear());
-    const [startMonth, setStartMonth] = useState(initialData?.startMonth || 1);
-    const [endYear, setEndYear] = useState(initialData?.endYear || new Date().getFullYear());
-    const [endMonth, setEndMonth] = useState(initialData?.endMonth || 1);
-    const [role, setRole] = useState(initialData?.role || '');
-    const [skills, setSkills] = useState(initialData?.skills || '');
-    
-    // 이미지는 별도로 관리 (미리보기 URL 포함)
-    const [thumbnailImage, setThumbnailImage] = useState<ImageData | null>(null);
-    const [portfolioImages, setPortfolioImages] = useState<ImageData[]>([]);
-    const [portfolioPdf, setPortfolioPdf] = useState<Media[]>(initialData?.portfolioPdf || []);
-    const [portfolioLink, setPortfolioLink] = useState<string[]>(initialData?.portfolioLink || []);
-    const [problemSolution, setProblemSolution] = useState(initialData?.problemSolution || '');
+    const authUser = useAuthStore(state => state.user);
+    const meUserId = authUser?.id ? parseInt(authUser.id) : null;
+    const isEditMode = Boolean(portfolioId);
+
+    const { prepareFile, revokeUrl } = useFileUpload({
+        maxSizeMB: MAX_SIZE_MB,
+        allowedTypes: ALLOWED_FILE_TYPES,
+    });
+
+    // 상세 조회 (수정 모드)
+    const { data: detailData, isLoading: isLoadingDetail, isError: isErrorDetail} = useQuery({
+        queryKey: ['portfolioDetail', userId, portfolioId],
+        queryFn: () => getPortfolioDetail(meUserId!, userId, portfolioId!),
+        enabled: isEditMode && !!meUserId && !!portfolioId,
+    });
+
+    const portfolioData = detailData?.data.data.portfolio;
+    const assetsData = detailData?.data.data.portfolioAssets || [];
+
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [startYear, setStartYear] = useState(new Date().getFullYear());
+    const [startMonth, setStartMonth] = useState(1);
+    const [endYear, setEndYear] = useState(new Date().getFullYear());
+    const [endMonth, setEndMonth] = useState(1);
+    const [role, setRole] = useState('');
+    const [skills, setSkills] = useState('');
+    const [problemSolution, setProblemSolution] = useState('');
+
+    const [thumbnailImage, setThumbnailImage] = useState<FileItem | null>(null);
+    const [attachmentFiles, setAttachmentFiles] = useState<FileItem[]>([]);
     
     // 모달 상태
     const [isFileAddModalOpen, setIsFileAddModalOpen] = useState(false);
-    const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-    const [linkInput, setLinkInput] = useState('');
-    const [linkError, setLinkError] = useState<string|undefined>(undefined);
     const [isSaving, setIsSaving] = useState(false);
-    const [isInitializing, setIsInitializing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showValidationPopup, setShowValidationPopup] = useState(false);
     const [showCloseWarning, setShowCloseWarning] = useState(false);
@@ -63,23 +90,20 @@ export default function PortfolioEditModal({
     const [showEndYearDropdown, setShowEndYearDropdown] = useState(false);
     const [showEndMonthDropdown, setShowEndMonthDropdown] = useState(false);
 
-    const { prepareImage } = useImageUpload();
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
 
-    // 초기 데이터 저장 (변경사항 추적용)
+    //초기 데이터 저장
     const initialDataRef = useRef<{
         title: string;
         content: string;
         role: string;
         skills: string;
-        thumbnailImage: ImageData | null;
-        portfolioImages: ImageData[];
-        portfolioPdf: Media[];
-        portfolioLink: string[];
         problemSolution: string;
+        thumbnailImage: FileItem | null;
+        attachmentFiles: FileItem[];
     } | null>(null);
 
     // 변경사항이 있는지 확인
@@ -94,127 +118,106 @@ export default function PortfolioEditModal({
             role !== initial.role ||
             skills !== initial.skills ||
             problemSolution !== initial.problemSolution ||
-            
-            // 썸네일 (previewUrl만 비교)
-            thumbnailImage?.previewUrl !== initial.thumbnailImage?.previewUrl ||
-            // 이미지 배열 (길이 + 각 previewUrl)
-            portfolioImages.length !== initial.portfolioImages.length ||
-            portfolioImages.some((img, i) => 
-                img.previewUrl !== initial.portfolioImages[i]?.previewUrl
-            ) ||
-            // PDF (길이 + 파일명/URL)
-            portfolioPdf.length !== initial.portfolioPdf.length ||
-            portfolioPdf.some((pdf, i) => {
-                const initialPdf = initial.portfolioPdf[i];
-                if (pdf instanceof File && initialPdf instanceof File) {
-                    return (
-                        pdf.name !== initialPdf.name ||
-                        pdf.size !== initialPdf.size ||
-                        pdf.lastModified !== initialPdf.lastModified
-                    );
-                }
-                return pdf !== initialPdf;
-            }) ||
-            JSON.stringify(portfolioLink) !== JSON.stringify(initial.portfolioLink)
+            thumbnailImage?.url !== initial.thumbnailImage?.url ||
+            attachmentFiles.length !== initial.attachmentFiles.length ||
+            attachmentFiles.some((f, i) => f.url !== initial.attachmentFiles[i]?.url)
         );
-    }, [
-        title,
-        content,
-        role,
-        skills,
-        problemSolution,
-        thumbnailImage,
-        portfolioImages,
-        portfolioPdf,
-        portfolioLink,
-    ]);
+    }, [title, content, role, skills, problemSolution, thumbnailImage, attachmentFiles]);
 
     // useModalHistory 훅 사용
     useModalHistory(onClose, hasUnsavedChanges, () => setShowCloseWarning(true));
 
-    // initialData 변경 시 state 업데이트
+    //초기 데이터 로딩
     useEffect(() => {
-        const loadData = async () => {
-            if (initialData) {
-                setIsInitializing(true);
-                setError(null);
-                
-                try {
-                    setTitle(initialData.title);
-                    setContent(initialData.content || '');
-                    setStartYear(initialData.startYear || new Date().getFullYear());
-                    setStartMonth(initialData.startMonth || 1);
-                    setEndYear(initialData.endYear || new Date().getFullYear());
-                    setEndMonth(initialData.endMonth || 1);
-                    setRole(initialData.role || '');
-                    setSkills(initialData.skills || '');
-                    
-                    // 썸네일 이미지 처리
-                    let thumbnail = null;
-                    if (initialData.portfolioThumbnail) {
-                        thumbnail = {
-                        media: initialData.portfolioThumbnail,
-                        previewUrl: typeof initialData.portfolioThumbnail === 'string' 
-                            ? initialData.portfolioThumbnail 
-                            : URL.createObjectURL(initialData.portfolioThumbnail)
-                        };
-                        setThumbnailImage(thumbnail);
-                    }
-                    
-                    // 추가 이미지 처리
-                    const additionalImages = (initialData.portfolioImage || []).map(img => ({
-                        media: img,
-                        previewUrl: typeof img === 'string' ? img : URL.createObjectURL(img)
-                    }));
-                    setPortfolioImages(additionalImages);
-                    
-                    setPortfolioPdf(initialData.portfolioPdf || []);
-                    setPortfolioLink(initialData.portfolioLink || []);
-                    setProblemSolution(initialData.problemSolution || '');
+        if (!isOpen) return;
 
-                    // 초기 데이터 저장 (변경사항 추적용)
-                    initialDataRef.current = {
-                        title: initialData.title,
-                        content: initialData.content || '',
-                        role: initialData.role || '',
-                        skills: initialData.skills || '',
-                        thumbnailImage: thumbnail,
-                        portfolioImages: additionalImages,
-                        portfolioPdf: initialData.portfolioPdf || [],
-                        portfolioLink: initialData.portfolioLink || [],
-                        problemSolution: initialData.problemSolution || '',
-                    };
-                    
-                    // 약간의 지연 후 로딩 완료
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                } catch (err) {
-                    console.error('데이터 로드 실패:', err);
-                    setError('데이터를 불러오는 중 오류가 발생했습니다.');
-                } finally {
-                    setIsInitializing(false);
-                }
-            } else {
-                // 새 포트폴리오 작성 - 빈 초기 데이터
-                initialDataRef.current = {
-                    title: '',
-                    content: '',
-                    role: '',
-                    skills: '',
-                    thumbnailImage: null,
-                    portfolioImages: [],
-                    portfolioPdf: [],
-                    portfolioLink: [],
-                    problemSolution: '',
-                };
-                setIsInitializing(false);
-                setError(null);
-            }
-        };
+        if (!isEditMode) {
+            // 생성 모드 - 한 번만 초기화
+            if (initialDataRef.current !== null) return;
+            
+            setTitle('');
+            setContent('');
+            setStartYear(new Date().getFullYear());
+            setStartMonth(1);
+            setEndYear(new Date().getFullYear());
+            setEndMonth(1);
+            setRole('');
+            setSkills('');
+            setProblemSolution('');
+            setThumbnailImage(null);
+            setAttachmentFiles([]);
 
-        if (isOpen) {
-            loadData();
+            initialDataRef.current = {
+                title: '',
+                content: '',
+                role: '',
+                skills: '',
+                problemSolution: '',
+                thumbnailImage: null,
+                attachmentFiles: [],
+            };
+            return;
         }
-    }, [initialData, isOpen]);
+
+        // 수정 모드 - portfolioData가 로드되면 한 번만 실행
+        if (!portfolioData) return;
+        
+        // 이미 이 포트폴리오 데이터로 초기화했는지 확인
+        if (initialDataRef.current && 
+            initialDataRef.current.title === portfolioData.title &&
+            thumbnailImage?.url === portfolioData.thumbnailUrl) {
+            return; // 이미 로드됨
+        }
+
+        setTitle(portfolioData.title);
+        setContent(portfolioData.description);
+
+        const [startY, startM] = portfolioData.startDate.split('-').map(Number);
+        setStartYear(startY);
+        setStartMonth(startM);
+
+        const [endY, endM] = portfolioData.endDate.split('-').map(Number);
+        setEndYear(endY);
+        setEndMonth(endM);
+
+        setRole(portfolioData.assignedRole[0] || '');
+        setSkills(portfolioData.techStack[0] || '');
+        setProblemSolution(portfolioData.review || '');
+
+        // 썸네일
+        let thumbnail: FileItem | null = null;
+        if (portfolioData.thumbnailUrl) {
+            thumbnail = {
+                id: 'thumbnail-existing',
+                url: portfolioData.thumbnailUrl,
+                isExisting: true,
+            };
+            setThumbnailImage(thumbnail);
+        } else {
+            setThumbnailImage(null);
+        }
+
+        // 첨부파일
+        const attachments: FileItem[] = assetsData.map((asset: PortfolioAsset) => ({
+            id: `asset-${asset.assetId}`,
+            url: asset.fileUrl,
+            fileKey: asset.fileKey,
+            type: asset.type,
+            isExisting: true,
+        }));
+        setAttachmentFiles(attachments);
+
+        initialDataRef.current = {
+            title: portfolioData.title,
+            content: portfolioData.description,
+            role: portfolioData.assignedRole[0] || '',
+            skills: portfolioData.techStack[0] || '',
+            problemSolution: portfolioData.review || '',
+            thumbnailImage: thumbnail,
+            attachmentFiles: attachments,
+        };
+    }, [isOpen, isEditMode, portfolioId]);
+
 
     // 모달 열림/닫힘 시 body 스크롤 제어
     useEffect(() => {
@@ -232,153 +235,116 @@ export default function PortfolioEditModal({
     //컴포넌트가 unmount될 때 blob을 해제해서 메모리 누수를 막음
     useEffect(() => {
         return () => {
-            // Blob URL cleanup
-            if (thumbnailImage?.previewUrl?.startsWith('blob:')) {
-                URL.revokeObjectURL(thumbnailImage.previewUrl);
+            if (thumbnailImage?.url?.startsWith('blob:')) {
+                URL.revokeObjectURL(thumbnailImage.url);
             }
-            
-            portfolioImages.forEach(img => {
-                if (img.previewUrl.startsWith('blob:')) {
-                URL.revokeObjectURL(img.previewUrl);
+
+            attachmentFiles.forEach(f => {
+                if (f.url?.startsWith('blob:')) {
+                    URL.revokeObjectURL(f.url);
                 }
             });
         };
-    }, [portfolioImages, thumbnailImage?.previewUrl]);
+    }, [thumbnailImage, attachmentFiles]);
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setError('이미지는 webp / jpeg / jpg / png 형식만 업로드 가능합니다.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > THUMBNAIL_MAX_SIZE_MB  * 1024 * 1024) {
+            setError(`이미지가 파일 용량 제한을 초과합니다. (최대 ${THUMBNAIL_MAX_SIZE_MB }MB)`);
+            e.target.value = '';
+            return;
+        }
+
+        const prepared = prepareFile(file);
+        if (!prepared) {
+            setError('파일을 업로드할 수 없어요. 형식/용량을 확인해주세요.');
+            e.target.value = '';
+            return;
+        }
+
+        if (thumbnailImage?.url?.startsWith('blob:')) {
+            revokeUrl(thumbnailImage.url);
+        }
+
+        setThumbnailImage({
+            id: prepared.id,
+            file: prepared.file,
+            url: prepared.previewUrl,
+            isExisting: false,
+        });
+
+        e.target.value = '';
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const file = files[0]; // 첫 번째 파일만
-        const result = prepareImage(file);
-        if (result) {
-            setThumbnailImage({
-                media: result.file,
-                previewUrl: result.previewUrl
+        const newFiles: FileItem[] = [];
+        let errorMsg: string | null = null;
+
+        for (const file of files) {
+            // PDF는 형식만 체크
+            if (file.type === 'application/pdf') {
+                if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                    errorMsg = `파일이 용량 제한을 초과합니다. (최대 ${MAX_SIZE_MB}MB)`;
+                    continue;
+                }
+            } else if (file.type.startsWith('image/')) {
+                if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+                    errorMsg = '이미지는 webp / jpeg / jpg / png 형식만 업로드 가능합니다.';
+                    continue;
+                }
+                if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                    errorMsg = `이미지가 파일 용량 제한을 초과합니다. (최대 ${MAX_SIZE_MB}MB)`;
+                    continue;
+                }
+            } else {
+                errorMsg = '지원하지 않는 파일 형식입니다.';
+                continue;
+            }
+
+            const prepared = prepareFile(file);
+            if (!prepared) {
+                errorMsg = '파일을 업로드할 수 없어요.';
+                continue;
+            }
+
+            newFiles.push({
+                id: prepared.id,
+                file: prepared.file,
+                url: prepared.previewUrl,
+                isExisting: false,
             });
         }
 
-        // input 초기화
-        if (thumbnailInputRef.current) {
-            thumbnailInputRef.current.value = '';
+        if (newFiles.length > 0) {
+            setAttachmentFiles(prev => [...prev, ...newFiles]);
         }
+
+        if (errorMsg) {
+            setError(errorMsg);
+        }
+
+        e.target.value = '';
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        const newImages: ImageData[] = [];
-
-        files.forEach(file => {
-            const result = prepareImage(file);
-            if (result) {
-                newImages.push({
-                media: result.file,
-                previewUrl: result.previewUrl
-                });
+    const removeFile = (id: string) => {
+        setAttachmentFiles(prev => {
+            const target = prev.find(f => f.id === id);
+            if (target && !target.isExisting && target.url) {
+                revokeUrl(target.url);
             }
+            return prev.filter(f => f.id !== id);
         });
-
-        setPortfolioImages([...portfolioImages, ...newImages]);
-    
-        // input 초기화
-        if (imageInputRef.current) {
-            imageInputRef.current.value = '';
-        }
-    };
-
-    const handleCameraUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length === 0) return;
-
-        const file = files[0]; // 카메라는 보통 한 장씩
-        const result = prepareImage(file);
-        if (result) {
-            setPortfolioImages([...portfolioImages, {
-                media: result.file,
-                previewUrl: result.previewUrl
-            }]);
-        }
-    
-        // input 초기화
-        if (cameraInputRef.current) {
-            cameraInputRef.current.value = '';
-        }
-    };
-
-    const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        if (files.length > 0) {
-            setPortfolioPdf([...portfolioPdf, ...files]);
-        }
-        
-        // input 초기화
-        if (pdfInputRef.current) {
-            pdfInputRef.current.value = '';
-        }
-    };
-
-    const removeImage = (index: number) => {
-        setPortfolioImages(portfolioImages.filter((_, i) => i !== index));
-    };
-
-    const removePdf = (index: number) => {
-        setPortfolioPdf(portfolioPdf.filter((_, i) => i !== index));
-    };
-
-    const removeLink = (index: number) => {
-        setPortfolioLink(portfolioLink.filter((_, i) => i !== index));
-    };
-
-    const isUrl = (input: string) => {
-        const s = input.trim();
-        if (!s) return null;
-
-        const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
-
-        try {
-            const url = new URL(withScheme);
-            if (!url.hostname.includes(".")) return null;
-            return url.toString();
-        } catch {
-            return null;
-        }
-    };
-
-    const canSave = !!isUrl(linkInput);
-
-    const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const next = e.target.value;
-        setLinkInput(next);
-
-        //입력이 유효해지는 순간 에러 제거
-        if (linkError && isUrl(next)) {
-            setLinkError(undefined);
-        }
-
-        if (!next.trim()) {
-            setLinkError(undefined);
-        }
-    };
-
-
-    const handleLinkSave = () => {
-        const link = isUrl(linkInput);
-        if (!link) {
-            setLinkError("올바른 링크 형식을 적어주세요.");
-            return;
-        }
-        setPortfolioLink([...portfolioLink, link]);
-        setLinkInput("");
-        setLinkError(undefined);
-        setIsLinkModalOpen(false);
-    };
-
-    const handleLinkModalClose = () => {
-        setLinkInput('');
-        setLinkError(undefined);
-        setIsLinkModalOpen(false);
     };
 
     const getMissingFields = () => {
@@ -400,7 +366,8 @@ export default function PortfolioEditModal({
     }
 
     const handleSaveClick = () => {
-        if (!hasEssential) {
+        const missing = getMissingFields();
+        if (missing.length > 0) {
             setShowValidationPopup(true);
         } else {
             setConfirm(true);
@@ -408,40 +375,147 @@ export default function PortfolioEditModal({
     };
 
     const handleSave = async () => {
+        if (isSaving) return;
         setIsSaving(true);
         setError(null);
-        
+
         try {
-            const data: PortfolioDetail = {
-                ...(initialData || {}),
-                portfolioId: initialData?.portfolioId || `pf_${userId}_${Date.now()}`,
-                id: initialData?.uid || userId,
-                title,
-                content,
-                startYear,
-                startMonth,
-                endYear,
-                endMonth,
-                role,
-                skills,
-                portfolioImage: portfolioImages.map(img => img.media),
-                portfolioPdf,
-                portfolioLink: portfolioLink.filter(link => link.trim() !== ''),
-                problemSolution,
-                portfolioThumbnail: thumbnailImage?.media || initialData?.portfolioThumbnail || '',
-                updatedAt: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, ''),
-                portfolioVisibility: initialData?.portfolioVisibility ?? true,
-                isImportant: initialData?.isImportant ?? false,
-            } as PortfolioDetail;
+            // 1. 썸네일 처리
+            let thumbnailKey: string | null = null;
 
-            // TODO: 실제로는 API 호출
-            // await savePortfolio(data);
-            await new Promise(resolve => setTimeout(resolve, 200));
+            if (isEditMode) {
+                const originalThumbnail = initialDataRef.current?.thumbnailImage;
 
-            onSave(data);
+                if (!thumbnailImage && originalThumbnail) {
+                    // 삭제됨
+                    thumbnailKey = "";
+                } else if (thumbnailImage && !thumbnailImage.isExisting) {
+                    // 새로 업로드
+                    const presignRes = await presignThumbnail(meUserId!, userId, {
+                        contentType: thumbnailImage.file!.type,
+                        size: thumbnailImage.file!.size,
+                        originalFilename: thumbnailImage.file!.name,
+                    });
+
+                    await uploadFileToS3(
+                        presignRes.data.uploadUrl,
+                        thumbnailImage.file!,
+                        presignRes.data.requiredHeaders
+                    );
+
+                    thumbnailKey = presignRes.data.fileKey;
+                }
+                // 유지: thumbnailKey = null
+            } else {
+                // 생성 모드
+                if (thumbnailImage?.file) {
+                    const presignRes = await presignThumbnail(meUserId!, userId, {
+                        contentType: thumbnailImage.file.type,
+                        size: thumbnailImage.file.size,
+                        originalFilename: thumbnailImage.file.name,
+                    });
+
+                    await uploadFileToS3(
+                        presignRes.data.uploadUrl,
+                        thumbnailImage.file,
+                        presignRes.data.requiredHeaders
+                    );
+
+                    thumbnailKey = presignRes.data.fileKey;
+                }
+            }
+
+            // 2. 첨부파일 처리
+            let attachmentKeys: string[] | null = null;
+
+            const newFiles = attachmentFiles.filter(f => !f.isExisting && f.file);
+
+            // 새 파일 업로드
+            let uploadedKeys: string[] = [];
+            if (newFiles.length > 0) {
+                const presignRes = await presignAssets(meUserId!, userId, {
+                    items: newFiles.map(f => ({
+                        contentType: f.file!.type,
+                        size: f.file!.size,
+                        originalFilename: f.file!.name,
+                    })),
+                });
+
+                await Promise.all(
+                    presignRes.data.items.map((item, i) =>
+                        uploadFileToS3(item.uploadUrl, newFiles[i].file!, item.requiredHeaders)
+                    )
+                );
+
+                uploadedKeys = presignRes.data.items.map(item => item.fileKey);
+            }
+
+            if (isEditMode) {
+                const originalCount = initialDataRef.current?.attachmentFiles.length || 0;
+                const currentCount = attachmentFiles.length;
+
+                if (currentCount === 0 && originalCount > 0) {
+                    // 전체 삭제
+                    attachmentKeys = [];
+                } else if (currentCount > 0) {
+                    // 기존 key + 새 key
+                    const existingKeys = attachmentFiles
+                        .filter(f => f.isExisting && f.fileKey)
+                        .map(f => f.fileKey!);
+
+                    attachmentKeys = [...existingKeys, ...uploadedKeys];
+                }
+                // 유지: attachmentKeys = null
+            } else {
+                // 생성 모드
+                if (uploadedKeys.length > 0) {
+                    attachmentKeys = uploadedKeys;
+                }
+            }
+
+            // 3. API 호출
+            const payload = {
+                projectTitle: title.trim(),
+                description: content.trim(),
+                startedAt: `${startYear}-${String(startMonth).padStart(2, '0')}-01`,
+                endedAt: `${endYear}-${String(endMonth).padStart(2, '0')}-01`,
+                project_role: role.trim(),
+                techStack: [skills.trim()],  // 단일 문자열을 배열로
+                review: problemSolution.trim(),
+                thumbnailKey,
+                attachmentKeys,
+            };
+
+            console.log('=== Portfolio Save Request ===');  // 👈 여기!
+console.log('Mode:', isEditMode ? 'UPDATE' : 'CREATE');
+console.log('Payload:', JSON.stringify(payload, null, 2));
+console.log('meUserId:', meUserId);
+console.log('userId:', userId);
+console.log('portfolioId:', portfolioId);
+
+            if (isEditMode) {
+                await updatePortfolio(meUserId!, userId, portfolioId!, payload);
+            } else {
+                await createPortfolio(meUserId!, userId, payload);
+            }
+
+            onSave();
             onClose();
         } catch (error) {
             console.error('저장 실패:', error);
+            
+            // 에러 세부 정보 로깅
+            if (error instanceof Error) {
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+            }
+            
+            // Axios 에러인 경우
+            if ((error as any)?.response) {
+                console.error('API Error Response:', (error as any).response.data);
+                console.error('API Error Status:', (error as any).response.status);
+            }
+            
             setError('포트폴리오 저장에 실패했습니다. 다시 시도해주세요.');
         } finally {
             setIsSaving(false);
@@ -454,32 +528,44 @@ export default function PortfolioEditModal({
         role.trim() !== '' && 
         skills.trim() !== '' && 
         thumbnailImage !== null;
+
     const contentLength = content.length;
     const problemLength = problemSolution.length;
 
-    // 연도 옵션 생성
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-    if (!isOpen) return null;
+    // 파일 타입 구분
+    const imageFiles = attachmentFiles.filter(f => 
+        f.isExisting 
+            ? f.type?.startsWith('image/') 
+            : f.file?.type.startsWith('image/')
+    );
 
+    const pdfFiles = attachmentFiles.filter(f => 
+        f.isExisting 
+            ? f.type === 'application/pdf' 
+            : f.file?.type === 'application/pdf'
+    );
+
+    if (!isOpen) return null;
     return (
         <div className='flex items-center justify-center fixed inset-0 z-50 bg-white'>
             <div className="w-full max-w-[430px] h-full bg-white flex flex-col">
                 <HeaderLayout
                     headerSlot = {
                         <EditHeader
-                            title={initialData?.portfolioId ? '프로젝트 수정' : '프로젝트 추가'}
+                            title={isEditMode ? '프로젝트 수정' : '프로젝트 추가'}
                             leftAction = {{onClick: handleClose}}
                             rightElement = {
                                 <button
                                     onClick={handleSaveClick}
                                     className={`text-m-14-hn ${
-                                        hasEssential && !isSaving && !isInitializing ? 'text-primary': 'text-gray-650'
+                                        hasEssential && !isSaving && !isLoadingDetail  ? 'text-primary': 'text-gray-650'
                                     }`}
                                 >
-                                    완료
+                                    {isSaving ? '저장중..' : '완료'}
                                 </button>
                             }
                         />
@@ -488,7 +574,7 @@ export default function PortfolioEditModal({
 
                     <div className="w-full max-w-screen-sm h-dvh bg-white animate-slide-up flex flex-col pb-[50px]">
                         {/* 로딩 오버레이 */}
-                        {(isInitializing || isSaving) && (
+                        {(isLoadingDetail  || isSaving) && (
                             <div className="absolute inset-0 z-50">
                                 <PopUp
                                     type="loading"
@@ -497,18 +583,28 @@ export default function PortfolioEditModal({
                             </div>
                         )}
 
-                        {/* 에러 오버레이 */}
                         {error && (
                             <div className="absolute inset-0 z-50">
                                 <PopUp
                                     type="error"
-                                    title='일시적 오류가 발생했습니다.'
+                                    title='업로드할 수 없는 파일입니다.'
                                     titleSecondary={error}
                                     isOpen={true}
                                     rightButtonText='확인'
                                     onClick={() => setError(null)}
                                 />
                             </div>
+                        )}
+
+                        {isErrorDetail && (
+                            <PopUp
+                                type="error"
+                                title='포트폴리오를 불러올 수 없습니다.'
+                                titleSecondary='일시적인 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.'
+                                isOpen={true}
+                                rightButtonText='닫기'
+                                onClick={onClose}
+                            />
                         )}
 
                         {showValidationPopup && (
@@ -775,19 +871,23 @@ export default function PortfolioEditModal({
                                     {/* 썸네일 이미지 (1개만) */}
                                     {thumbnailImage ? (
                                         <div className="relative w-full aspect-[4/3]">
-                                        <img
-                                            src={thumbnailImage.previewUrl}
-                                            alt="Thumbnail"
-                                            className="w-full h-full object-cover rounded-[10px]"
-                                        />
-                                        <button
-                                            onClick={() => setThumbnailImage(null)}
-                                            className="absolute top-[4px] right-[4px] p-[4px]"
-                                        >
-                                            <svg width="25" height="25" viewBox="0 0 12 12" fill="none">
-                                                <path d="M9 3L3 9M3 3L9 9" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='shadow-sm'/>
-                                            </svg>
-                                        </button>
+                                            <img
+                                                src={thumbnailImage.url}
+                                                alt="썸네일"
+                                                onError={(e) => {
+                                                    e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                                    e.currentTarget.src = REPLACE_IMAGE;
+                                                }}
+                                                className="w-full max-h-[500px] h-full object-cover rounded-[10px]"
+                                            />
+                                            <button
+                                                onClick={() => setThumbnailImage(null)}
+                                                className="absolute top-[4px] right-[4px] p-[4px] bg-gray-250 rounded-[10px]"
+                                            >
+                                                <svg width="25" height="25" viewBox="0 0 12 12" fill="none">
+                                                    <path d="M9 3L3 9M3 3L9 9" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='shadow-sm'/>
+                                                </svg>
+                                            </button>
                                         </div>
                                     ) : (
                                         <button
@@ -796,7 +896,7 @@ export default function PortfolioEditModal({
                                         >
                                         <ModalIcon name="photo" className="w-[24px] h-[24px] text-gray-400" />
                                         <span className="text-r-12-hn text-gray-500">
-                                            대표 이미지를 추가해 주세요<br/>(png, webp, jpeg ...)
+                                            대표 이미지를 추가해 주세요<br/>(png, webp, jpg, jpeg)
                                         </span>
                                         </button>
                                     )}
@@ -809,17 +909,21 @@ export default function PortfolioEditModal({
                                     </span>
                                 
                                     {/* 이미지 3x3 그리드 */}
-                                    {portfolioImages.length > 0 && (
+                                    {imageFiles.length > 0 && (
                                         <div className="grid grid-cols-3 gap-[10px]">
-                                        {portfolioImages.map((image, index) => (
-                                            <div key={index} className="relative aspect-square">
+                                        {imageFiles.map((image) => (
+                                            <div key={image.id} className="relative aspect-square">
                                                 <img
-                                                    src={image.previewUrl}
-                                                    alt={`Portfolio ${index + 1}`}
+                                                    src={image.url}
+                                                    alt={"포트폴리오 이미지"}
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                                        e.currentTarget.src = REPLACE_IMAGE;
+                                                    }}
                                                     className="w-full h-full object-cover rounded-[10px]"
                                                 />
                                                 <button
-                                                    onClick={() => removeImage(index)}
+                                                    onClick={() => removeFile(image.id)}
                                                     className="absolute top-[4px] right-[4px] p-[4px]"
                                                 >
                                                     <svg width="20" height="20" viewBox="0 0 12 12" fill="none">
@@ -832,43 +936,23 @@ export default function PortfolioEditModal({
                                     )}
 
                                     {/* PDF 파일 리스트 */}
-                                    {portfolioPdf.length > 0 && (
+                                    {pdfFiles.length > 0 && (
                                         <div className="flex flex-col gap-[8px]">
-                                            {portfolioPdf.map((pdf, index) => {
-                                                const fileName = typeof pdf === 'string' 
-                                                ? pdf.split('/').pop() || `파일 ${index + 1}`
-                                                : pdf.name;
+                                            {pdfFiles.map((pdf) => {
+                                                const fileName = pdf.file?.name || pdf.fileKey?.split('/').pop() || '파일';
                                                 return (
-                                                <div key={`pdf-${index}`} className="flex items-center gap-[10px] px-[15px] py-[12px] bg-gray-100 rounded-[10px]">
-                                                    <ModalIcon name="file" className="w-[20px] h-[20px] text-gray-750" />
-                                                    <span className="flex-1 text-r-14-hn text-gray-750 truncate">{fileName}</span>
-                                                    <button
-                                                    onClick={() => removePdf(index)}
-                                                    className="p-[4px]"
-                                                    >
-                                                    <Icon name='cancel' className='w-[16px] h-[16px]'/>
-                                                    </button>
-                                                </div>
+                                                    <div key={pdf.id} className="flex items-center gap-[10px] px-[15px] py-[12px] bg-gray-100 rounded-[10px]">
+                                                        <ModalIcon name="file" className="w-[20px] h-[20px] text-gray-750" />
+                                                        <span className="flex-1 text-r-14-hn text-gray-750 truncate">{fileName}</span>
+                                                        <button
+                                                            onClick={() => removeFile(pdf.id)}
+                                                            className="p-[4px]"
+                                                        >
+                                                            <Icon name='cancel' className='w-[16px] h-[16px]'/>
+                                                        </button>
+                                                    </div>
                                                 );
                                             })}
-                                        </div>
-                                    )}
-
-                                    {/* 링크 리스트 */}
-                                    {portfolioLink.length > 0 && (
-                                        <div className="flex flex-col gap-[8px]">
-                                            {portfolioLink.map((link, index) => (
-                                                <div key={`link-${index}`} className="flex items-center gap-[10px] px-[15px] py-[12px] bg-gray-100 rounded-[10px]">
-                                                    <ModalIcon name="url" className="w-[20px] h-[20px] text-gray-750" />
-                                                    <span className="flex-1 text-r-14-hn text-primary truncate">{link}</span>
-                                                    <button
-                                                        onClick={() => removeLink(index)}
-                                                        className="p-[4px]"
-                                                    >
-                                                        <Icon name='cancel' className='w-[16px] h-[16px]'/>
-                                                    </button>
-                                                </div>
-                                            ))}
                                         </div>
                                     )}
 
@@ -878,7 +962,7 @@ export default function PortfolioEditModal({
                                         className="w-full px-[15px] py-[12px] rounded-[10px] text-gray-650 bg-gray-150 flex flex-col"
                                     >
                                         <span className='text-m-14-hn'>파일 추가</span>
-                                        <span className='text-r-10-hn'>(링크, 이미지, pdf...)</span>
+                                        <span className='text-r-10-hn'>(pdf, 이미지)</span>
                                     </button>
                                 </div>
                             </div>
@@ -913,32 +997,32 @@ export default function PortfolioEditModal({
                 <input
                     ref={thumbnailInputRef}
                     type="file"
-                    accept="image/png, image/webp, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg, image/jpg"
                     onChange={handleThumbnailUpload}
                     className="hidden"
                 />
                 <input
                     ref={imageInputRef}
                     type="file"
-                    accept="image/png, image/webp, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg, image/jpg"
                     multiple
-                    onChange={handleImageUpload}
+                    onChange={handleFileUpload}
                     className="hidden"
                 />
                 <input
                     ref={cameraInputRef}
                     type="file"
-                    accept="image/png, image/webp, image/jpeg"
+                    accept="image/png, image/webp, image/jpeg, image/jpg"
                     capture="environment"
-                    onChange={handleCameraUpload}
+                    onChange={handleFileUpload}
                     className="hidden"
                 />
                 <input
                     ref={pdfInputRef}
                     type="file"
-                    accept=".pdf" //TODO: 파일 제한을 얼마나 둘 것인가 정하기
+                    accept=".pdf"
                     multiple
-                    onChange={handlePdfUpload}
+                    onChange={handleFileUpload}
                     className="hidden"
                 />
             
@@ -985,61 +1069,21 @@ export default function PortfolioEditModal({
                                 <ModalIcon name="file" className="w-[24px] h-[24px]" />
                                 <span className="text-m-16-hn text-gray-750">파일</span>
                             </button>
-
-                            {/* 링크 */}
-                            <button
-                                onClick={() => {
-                                    setIsFileAddModalOpen(false);
-                                    setIsLinkModalOpen(true);
-                                }}
-                                className="w-full flex items-center gap-[15px] p-[15px]"
-                            >
-                                <ModalIcon name="url" className="w-[24px] h-[24px] text-gray-750" />
-                                <span className="text-r-16-hn text-gray-750">링크</span>
-                            </button>
                         </div>
                     </div>
                 </BottomSheetModal>
                 
-                {/* 링크 추가 모달 */}
-                <BottomSheetModal 
-                    isOpen={isLinkModalOpen} 
-                    onClose={handleLinkModalClose} 
-                    height="auto"
-                >
-                    <div className="px-[25px] pb-[40px]">
-                        {/* 헤더 */}
-                        <div className="relative flex items-center justify-center">
-                            <span className="text-sb-18 text-gray-900">링크 추가</span>
-                            <button
-                                onClick={handleLinkSave}
-                                disabled={!linkInput.trim()}
-                                className={`absolute top-[4px] right-[20px] text-b-16-hn ${canSave ? 'text-primary' : 'text-gray-650'}`}
-                            >
-                                완료
-                            </button>
-                        </div>
-                        {/* URL 입력 */}
-                        <div className="mt-[18px]">
-                        <SingleInput
-                            type="url"
-                            value={linkInput}
-                            onChange={handleLinkChange}
-                            placeholder="URL 입력..."
-                            error={linkError}
-                        />
-                        </div>
-
-                    </div>
-                </BottomSheetModal>
                 <PopUp
                     isOpen={confirm}
-                    type="confirm"
-                    title={initialData?.portfolioId ? '수정사항이 저장되었습니다!' : '포트폴리오가 생성되었습니다!'}
-                    buttonText="확인"
-                    onClick={() => {
-                        handleSave();
+                    type="info"
+                    title={isEditMode ? '수정사항을 저장하시겠습니까?' : '포트폴리오를 생성하시겠습니까?'}
+                    content={isEditMode ? '이전 내용으로 되돌릴 수 없습니다.' : '생성 후에도 수정/삭제가 가능합니다.'}
+                    leftButtonText="아니오"
+                    rightButtonText="네"
+                    onLeftClick={() => setConfirm(false)}
+                    onRightClick={() => {
                         setConfirm(false);
+                        handleSave();
                     }}
                 />
             </div>
