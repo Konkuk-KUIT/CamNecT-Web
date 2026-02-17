@@ -228,6 +228,7 @@ export const useChatRequestRespond = () => {
             // 요청 목록, 채팅 목록 최신화
             queryClient.invalidateQueries({ queryKey: ['chatRequests'] });
             queryClient.invalidateQueries({ queryKey: ['chatRooms'] });
+            queryClient.invalidateQueries({ queryKey: ['home'] });
         }
     });
 };
