@@ -279,7 +279,7 @@ export const PortfolioDetailPage = ({
                         {/* PDF 파일 목록 */}
                         {pdfAssets.length > 0 && (
                             <div className="w-full flex flex-col gap-[8px]">
-                                {pdfAssets.map((asset: PortfolioAsset) => (
+                                {pdfAssets.map((asset: PortfolioAsset, idx) => (
                                     <a
                                         key={asset.assetId}
                                         href={asset.fileUrl}
@@ -289,7 +289,7 @@ export const PortfolioDetailPage = ({
                                     >
                                         <ModalIcon name='file' className='w-[20px] h-[20px]' />
                                         <span className="flex-1 text-r-14-hn text-gray-750 truncate">
-                                            {asset.fileKey.split('/').pop() || `파일 ${asset.assetId}`}
+                                            {`첨부파일${idx+1}.pdf`}
                                         </span>
                                     </a>
                                 ))}
