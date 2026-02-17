@@ -468,10 +468,14 @@ const ChatRoomContent = ({ roomId }: { roomId: string }) => {
                                                         <img 
                                                             src={roomInfo.profileImg} 
                                                             alt={`${roomInfo.name} 프로필`} 
-                                                            className="w-[32px] h-[32px] rounded-full object-cover shrink-0" 
+                                                            className="w-[32px] h-[32px] rounded-full object-cover shrink-0 cursor-pointer" 
+                                                            onClick={() => navigate(`/alumni/profile/${roomInfo?.id}`)}
                                                         />
                                                     ) : (
-                                                        <div className="w-[32px] h-[32px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                                                        <div 
+                                                            className="w-[32px] h-[32px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shrink-0 cursor-pointer"
+                                                            onClick={() => navigate(`/alumni/profile/${roomInfo?.id}`)}
+                                                        >
                                                             <span className="text-[12px] font-bold text-gray-600">
                                                                 {roomInfo?.name.charAt(0)}
                                                             </span>
