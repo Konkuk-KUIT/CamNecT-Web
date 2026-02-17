@@ -128,11 +128,14 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="relative min-h-[100dvh] bg-white px-[25px] flex flex-col items-center pb-[105px] overflow-y-auto hide-scrollbar">
-      {/* 상단 로고 */}
-      <Logo className="mt-[160px] max-w-[300px] w-full flex-none" />
+    <div className="w-full min-h-[100dvh] bg-white px-[25px] flex flex-col items-center overflow-y-auto hide-scrollbar">
+      {/* 상단 로고 영역: 마진 대신 div로 확실하게 상단 공간 확보 */}
+      <div className="pt-[160px] w-full max-w-[300px] flex-none">
+        <Logo className="w-full h-auto" />
+      </div>
 
-      <div className="flex-1" />
+      {/* 가변 공간: min-h를 두어 화면이 작아져도 로고와 폼이 절대 겹치지 않게 함 */}
+      <div className="flex-1 min-h-[60px]" />
 
       <div className="flex flex-col max-w-[335px] w-full gap-[20px] mb-[40px] flex-none">
         <input type="text" placeholder="아이디를 입력해주세요" aria-label="아이디"
@@ -170,6 +173,9 @@ export const LoginPage = () => {
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
+      {/* 하단 패딩 영역: 스크롤 시 여백을 보장하기 위해 명시적인 div 사용 */}
+      <div className="pb-[105px] flex-none" />
+
       {popUpConfig && (
         <PopUp
           isOpen={true}
@@ -179,7 +185,6 @@ export const LoginPage = () => {
           onClick={() => setPopUpConfig(null)}
         />
       )}
-
     </div>
   );
 };
