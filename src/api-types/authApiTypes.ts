@@ -249,3 +249,15 @@ export interface DeleteAccountRequest {
 }
 
 export type DeleteAccountResponse = boolean;
+// 토큰 재발급 DTO (/api/auth/refresh)
+export interface TokenRefreshResponse {
+    status: number;
+    message: string;
+    data: {
+        tokenType: string;
+        accessToken: string;
+        accessTokenExpiresInMs: number;
+        refreshToken: string;
+        refreshTokenExpiresInMs: number;
+    };
+}
