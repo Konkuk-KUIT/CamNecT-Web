@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTags, getActivityDetail, deleteActivity, toggleActivityBookmark, closeActivity } from '../../api/activityApi';
 import { mapDetailToActivityPost } from './utils/activityMapper';
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import ImagePopUp from '../../components/ImagePopUp';
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
@@ -52,7 +53,7 @@ const ActivityPostPage = () => {
     return map;
   }, [tagData]);
 
-  if (isLoading) {
+  if (isLoading || !tagData) {
     return (
       <PopUp
         type="loading"
@@ -115,6 +116,7 @@ const ActivityPostContent = ({
   const [isCloseRecruitPopupOpen, setIsCloseRecruitPopupOpen] = useState(false);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   
   //북마크 토글
   const bookmarkMutation = useMutation({
@@ -176,7 +178,7 @@ const ActivityPostContent = ({
       }
     }
     if (item.id === 'report-post') setIsReportPopupOpen(true);
-    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`);
+    if (item.id === 'edit-post') navigate(`/activity/edit/${activityId}`, {replace:true});
     if (item.id === 'delete-post') setIsDeletePopupOpen(true);
     setIsOptionOpen(false);
   };
@@ -189,7 +191,7 @@ const ActivityPostContent = ({
       headerSlot={
         <MainHeader
           title='대외활동'
-          leftAction={{onClick: () => navigate('/activity')}}
+          leftAction={{onClick: () => navigate(-1)}}
           rightActions={[
             { icon: 'option', onClick: () => setIsOptionOpen(true), ariaLabel: '게시글 옵션 열기' },
           ]}
@@ -314,6 +316,7 @@ const ActivityPostContent = ({
                           src={imageUrl}
                           alt={`${selectedPost.title} 이미지 ${index + 1}`}
                           className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
+                          onClick={() => setSelectedImageUrl(imageUrl)}
                           onError={() =>
                             setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
                           }
@@ -386,6 +389,12 @@ const ActivityPostContent = ({
         title='현재 제작 중이에요!'
         content='유저분들이 더 즐겁게 소통할 수 있도록\n꼼꼼히 준비해서 돌아올게요!'
         onClick={() => setIsReportPopupOpen(false)}
+      />
+
+      <ImagePopUp
+        isOpen={Boolean(selectedImageUrl)}
+        imageUrl={selectedImageUrl}
+        onClose={() => setSelectedImageUrl(null)}
       />
     </HeaderLayout>
   );
