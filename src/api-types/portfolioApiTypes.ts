@@ -1,7 +1,6 @@
 // src/api-types/portfolioApiTypes.ts
 
-// ===== 공통 =====
-
+//presign 공통
 export interface PresignRequest {
   contentType: string;
   size: number;
@@ -15,33 +14,39 @@ export interface PresignResult {
   requiredHeaders: Record<string, string>;
 }
 
-// ===== 목록 조회 =====
-
-// 포트폴리오 요약 (목록에서 사용)
+//목록 조회
 export interface PortfolioPreview {
   portfolioId: number;
   title: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   isPublic: boolean;
   isFavorite: boolean;
-}
-
-export interface PortfolioListData {
-  isMine: boolean;
-  data: PortfolioPreview[];
+  updatedAt: string;
 }
 
 export interface PortfolioListResponse {
   status: number;
   message: string;
-  data: PortfolioListData;
+  data: {
+    isMine: boolean;
+    data: PortfolioPreview[];
+  };
 }
 
-// ===== 상세 조회 =====
+//상세 조회
+
+export interface PortfolioAuthor {
+  userId: number;
+  name: string;
+  profileImageUrl: string;
+  studentNo: string;
+  majorName: string;
+}
+
 
 export interface PortfolioAsset {
   assetId: number;
-  type: string;         // "IMAGE" | "PDF" | "LINK" 등 (백엔드 확인 필요)
+  type: string;
   fileKey: string;
   fileUrl: string;
   sortOrder: number;
@@ -58,59 +63,59 @@ export interface PortfolioDetailData {
   description: string;
   isPublic: boolean;
   isFavorite: boolean;
-  projectField: string[];
   assignedRole: string[];
   techStack: string[];
-  review: string;               // Problem & Solution
+  review: string;
   createdAt: string;
   updatedAt: string;
-  // TODO: 백엔드에 추가 요청 필요
-  // portfolioLinks: string[];   // 링크 목록 (현재 assets에 없음)
-}
-
-export interface PortfolioDetailWrapper {
-  portfolio: PortfolioDetailData;
-  portfolioAssets: PortfolioAsset[];
-}
-
-export interface PortfolioDetailResponseData {
-  isMine: boolean;
-  data: PortfolioDetailWrapper;
 }
 
 export interface PortfolioDetailResponse {
   status: number;
   message: string;
-  data: PortfolioDetailResponseData;
+  data: {
+    isMine: boolean;
+    data: {
+      author: PortfolioAuthor;
+      portfolio: PortfolioDetailData;
+      portfolioAssets: PortfolioAsset[];
+    };
+  };
 }
 
-// ===== 생성 / 수정 요청 =====
-
+//생성/수정
 export interface PortfolioCreateRequest {
   projectTitle: string;
   description: string;
-  startedAt: string;      // "YYYY-MM-DD"
-  endedAt: string;        // "YYYY-MM-DD"
-  project_role: string;   // TODO: 백엔드 필드명 오타 확인 필요 (snake_case 혼용)
+  startedAt: string;
+  endedAt: string;
+  project_role: string;
+  techStack: string[];
   review: string;
-  thumbnailKey: string;
-  attachmentKeys: string[];
-  // TODO: 백엔드에 추가 요청 필요
-  // projectField: string[];     // 프로젝트 분야 (현재 요청에 없음)
-  // techStack: string[];        // 기술 스택 (현재 요청에 없음)
+  thumbnailKey: string | null;
+  attachmentKeys: string[] | null;
 }
 
-export type PortfolioUpdateRequest = PortfolioCreateRequest;
+export interface PortfolioUpdateRequest {
+  projectTitle: string;
+  description: string;
+  startedAt: string;
+  endedAt: string;
+  project_role: string;
+  techStack: string[];
+  review: string;
+  thumbnailKey: string | null;
+  attachmentKeys: string[] | null;
+}
 
-// 생성/수정 응답 data
+//생성/수정 응답 데이터
 export type PortfolioMutateResponse = {
   status: number;
   message: string;
   data: PortfolioPreview;
 }
 
-// ===== Presign =====
-
+//이미지 업로드
 export interface ThumbnailPresignResponse {
   status: number;
   message: string;
@@ -129,18 +134,16 @@ export interface AssetsPresignResponse {
   };
 }
 
-// ===== 삭제 =====
-
+//삭제
 export interface PortfolioDeleteResponse {
   status: number;
   message: string;
   data: string;
 }
 
-// ===== 토글 =====
-
+//토글
 export interface PortfolioToggleResponse {
   status: number;
   message: string;
-  data: boolean;  // 최종 상태값 반환
+  data: boolean;
 }
