@@ -19,7 +19,7 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
 
     return (
         <>
-            <div className="flex justify-center fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-[25px] pt-[6px] pb-[calc(40px+env(safe-area-inset-bottom))] z-50">
+            <div className="flex justify-center fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white px-[25px] pt-[6px] pb-[calc(25px+env(safe-area-inset-bottom))] focus-within:pb-[12px] z-50">
                 <div className="flex items-center gap-[10px] w-full">
                     {/* 추가 버튼 -> MVP 제외*/}
                     {/* <button 
@@ -48,7 +48,7 @@ export const TypingArea = ({ onSend }: TypingAreaProps) => {
                         <button 
                             type="button" 
                             onClick={handleSend}
-                            className="absolute right-[4px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-primary flex items-center justify-center active:opacity-80 transition-opacity"
+                            className="absolute right-[4px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-primary flex items-center justify-center active:scale-95 active:brightness-95 transition"
                         >
                             <Icon name="send" />
                         </button>

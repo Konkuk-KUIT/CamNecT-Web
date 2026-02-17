@@ -1,20 +1,20 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Category from '../../components/Category';
-import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
-import PopUp from '../../components/Pop-up';
-import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
-import Icon from '../../components/Icon';
-import { HeaderLayout } from '../../layouts/HeaderLayout';
-import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
-import { formatOnlyDate } from '../../utils/formatDate';
-import { RecruitPost } from '../../components/posts/RecruitPost';
-import { useAuthStore } from '../../store/useAuthStore';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getTags, getActivityDetail, closeAdminActivity, toggleActivityBookmark } from '../../api/activityApi';
-import { mapDetailToActivityPost, mapRecruitmentItemToTeamRecruitPost } from './utils/activityMapper';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { type ActivityDetailResponse } from '../../api-types/activityApiTypes';
-import replaceImg from "../../assets/image/replaceImg.png"
+import { closeAdminActivity, getActivityDetail, getTags, toggleActivityBookmark } from '../../api/activityApi';
+import replaceImg from "../../assets/image/replaceImg.png";
+import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
+import BottomSheetIcon from '../../components/BottomSheetModal/Icon';
+import Category from '../../components/Category';
+import Icon from '../../components/Icon';
+import PopUp from '../../components/Pop-up';
+import { RecruitPost } from '../../components/posts/RecruitPost';
+import SaveToggle from '../../layouts/BottomChat/components/SaveToggle';
+import { HeaderLayout } from '../../layouts/HeaderLayout';
+import { useAuthStore } from '../../store/useAuthStore';
+import { formatOnlyDate } from '../../utils/formatDate';
+import { mapDetailToActivityPost, mapRecruitmentItemToTeamRecruitPost } from './utils/activityMapper';
 
 const REPLACE_IMAGE = replaceImg;
 
@@ -213,7 +213,7 @@ export const ExternalActivityPostPage = () => {
       )}
       <div className='w-full flex justify-end px-[15px] py-[15px]'>
         <button
-          className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30'
+          className='w-[150px] flex items-center justify-center gap-[7px] px-[15px] py-[10px] rounded-[3px] bg-primary text-white text-m-16-hn z-30 active:scale-95 active:brightness-95 transition'
           onClick={() => navigate(`/activity/${activityId}/recruit-write`)}
         >
           <Icon name='edit' />
@@ -355,7 +355,7 @@ export const ExternalActivityPostPage = () => {
                         href={finalUrl}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='px-[40px] py-[15px] text-center flex items-center justify-center w-full rounded-full bg-primary text-white text-b-16-hn'
+                        className='px-[40px] py-[15px] text-center flex items-center justify-center w-full rounded-full bg-primary text-white text-b-16-hn active:scale-95 active:brightness-95 transition'
                       >
                         공식 홈페이지에서 신청하기
                       </a>

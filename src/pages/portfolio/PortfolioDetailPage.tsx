@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PortfolioEditModal from './components/PortfolioEditModal';
 import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
-import ModalIcon from '../../components/BottomSheetModal/Icon'
+import ModalIcon from '../../components/BottomSheetModal/Icon';
 import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';

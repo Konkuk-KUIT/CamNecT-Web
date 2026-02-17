@@ -1,16 +1,17 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { requestNotificationRead, requestNotifications } from '../../api/notifications';
+import PopUp from '../../components/Pop-up';
 import { HeaderLayout } from '../../layouts/HeaderLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useNotificationStore } from '../../store/useNotificationStore';
 import {
   notificationIconAssets,
   type NotificationItem,
   type NotificationType,
 } from './notificationData';
-import { requestNotificationRead, requestNotifications } from '../../api/notifications';
-import PopUp from '../../components/Pop-up';
-import { useNotificationStore } from '../../store/useNotificationStore';
-import { useAuthStore } from '../../store/useAuthStore';
 import { mapNotificationResponseToItems } from './notificationMapper';
 
 type PopUpConfig = {
@@ -190,6 +191,8 @@ const renderIcon = (notification: NotificationItem) => {
 };
 
 export const NotificationPage = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [popUpConfig, setPopUpConfig] = useState<PopUpConfig | null>(null);
   const [isErrorDismissed, setIsErrorDismissed] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
@@ -226,6 +229,8 @@ export const NotificationPage = () => {
           userId: userIdParam as string | number,
           id: notification.id,
         });
+        // 알림 읽음 처리 성공 시 안 읽은 개수 쿼리 무효화 (홈 화면 배지 업데이트용)
+        queryClient.invalidateQueries({ queryKey: ['notificationsUnreadCount'] });
       } catch (error) {
         const status = getErrorStatus(error);
         const config = getErrorPopUpConfig(status);
@@ -237,22 +242,22 @@ export const NotificationPage = () => {
 
     switch (notification.type) {
       case 'coffeeChatRequest':
-        // TODO: 커피챗 요청 - 해당하는 유저의 요청 수락 페이지로 이동
+        if (notification.requestId) {
+          navigate(`/chat/requests/${notification.requestId}`);
+        }
         break;
       case 'pointUse':
-        // TODO: 포인트 사용 - 포인트 내역 페이지 연결
+        // 포인트 사용 - 내역 페이지가 없음 클릭해도 이동 X
         break;
       case 'pointEarn':
-        // TODO: 포인트 적립 - 포인트 내역 페이지 연결
+        // 포인트 적립 - 내역 페이지가 없음 클릭해도 이동 X
         break;
       case 'commentAccepted':
-        // TODO: 댓글 채택 - 해당 게시물로 이동
-        break;
       case 'reply':
-        // TODO: 답글 - 해당하는 답글이 달린 게시물 연결
-        break;
       case 'comment':
-        // TODO: 댓글 - 해당하는 댓글이 달린 게시물 연결
+        if (notification.postId) {
+          navigate(`/community/post/${notification.postId}`);
+        }
         break;
       default:
         break;

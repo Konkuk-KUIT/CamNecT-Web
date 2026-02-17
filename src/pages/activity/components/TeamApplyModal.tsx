@@ -110,10 +110,10 @@ const TeamApplyModal = ({ isOpen, onClose, activityName, onSubmit }: TeamApplyMo
                 type='button'
                 onClick={handleSubmit}
                 disabled={!isSubmitEnabled}
-                className={`h-[50px] w-full rounded-full text-sb-18 ${
+                className={`h-[50px] w-full rounded-full text-sb-18 transition ${
                     isSubmitEnabled
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-150 text-gray-650'
+                    ? 'bg-primary text-white cursor-pointer active:scale-95 active:brightness-95'
+                    : 'bg-gray-150 text-gray-650 cursor-not-allowed'
                 }`}
                 >
                 팀원 신청하기
