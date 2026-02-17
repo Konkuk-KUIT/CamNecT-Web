@@ -11,6 +11,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPortfolioDetail, togglePortfolioFavorite, togglePortfolioPublic, deletePortfolio } from '../../api/portfolioApi';
 import type { PortfolioAsset } from '../../api-types/portfolioApiTypes';
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import { getFileName } from '../../utils/getFileName';
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
@@ -220,7 +221,7 @@ export const PortfolioDetailPage = ({
                             <div className="px-[25px] pb-[40px] flex flex-col gap-[20px]">
                                 {/* 제목 및 내용 */}
                                 <div className="flex flex-col gap-[15px]">
-                                    <span className="text-sb-16-hn text-gray-900">{portfolio.title}</span>
+                                    <span className="text-sb-16-hn text-gray-900 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.title}</span>
                                     <div className="text-r-14 text-gray-750 whitespace-pre-wrap break-keep [overflow-wrap:anywhere]">
                                         {portfolio.description}
                                     </div>
@@ -239,13 +240,13 @@ export const PortfolioDetailPage = ({
                                     {/* 프로젝트 역할 */}
                                     <div className="flex items-center gap-[10px]">
                                         <span className="text-m-14-hn text-gray-750 min-w-[77px]">프로젝트 역할</span>
-                                        <span className="text-r-12-hn text-gray-650">{portfolio.assignedRole[0] || ""}</span>
+                                        <span className="text-r-12-hn text-gray-650 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.assignedRole[0] || ""}</span>
                                     </div>
 
                                     {/* 사용 기술 */}
                                     <div className="flex items-center gap-[10px]">
                                         <span className="text-m-14-hn text-gray-750 min-w-[77px]">사용 기술</span>
-                                        <span className="text-r-12-hn text-gray-650">{portfolio.techStack[0] || ""}</span>
+                                        <span className="text-r-12-hn text-gray-650 whitespace-pre-line break-keep [overflow-wrap:anywhere]">{portfolio.techStack[0] || ""}</span>
                                     </div>
                                 </div>
                             </div>
@@ -279,7 +280,7 @@ export const PortfolioDetailPage = ({
                         {/* PDF 파일 목록 */}
                         {pdfAssets.length > 0 && (
                             <div className="w-full flex flex-col gap-[8px]">
-                                {pdfAssets.map((asset: PortfolioAsset, idx) => (
+                                {pdfAssets.map((asset: PortfolioAsset) => (
                                     <a
                                         key={asset.assetId}
                                         href={asset.fileUrl}
@@ -289,7 +290,7 @@ export const PortfolioDetailPage = ({
                                     >
                                         <ModalIcon name='file' className='w-[20px] h-[20px]' />
                                         <span className="flex-1 text-r-14-hn text-gray-750 truncate">
-                                            {`첨부파일${idx+1}.pdf`}
+                                            {getFileName(asset.fileUrl) || '첨부파일'}
                                         </span>
                                     </a>
                                 ))}
