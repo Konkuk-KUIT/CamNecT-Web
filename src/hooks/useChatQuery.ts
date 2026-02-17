@@ -135,7 +135,8 @@ export const useChatRequests = (type: ChatRoomListItemType) => {
     const { user } = useAuthStore();
 
     return useQuery<ChatRoomListItem[]>({
-        queryKey: ['chatRequests'],
+        // type이 바뀔때 마다 재요청
+        queryKey: ['chatRequests', user?.id, type],
         queryFn: async () => { 
 
             // API 호출
@@ -158,8 +159,11 @@ export const useChatRequests = (type: ChatRoomListItemType) => {
                 lastMessage: room.requestContent,
                 lastMessageDate: room.createdAt,
                 unreadCount: 0, // 요청은 1번 밖에 못보내므로 
+                requestPostTitle: room.recruitmentTitle,
+                recruitmentId: room.recruitmentId,
             }));
-        }
+        },
+        enabled: !!user?.id
     });
 };
 
