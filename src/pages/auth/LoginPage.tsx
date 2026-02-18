@@ -172,6 +172,9 @@ export const LoginPage = () => {
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
+      {/* 하단 패딩 영역: 스크롤 시 여백을 보장하기 위해 명시적인 div 사용 */}
+      <div className="pb-[105px] flex-none" />
+
       {popUpConfig && (
         <PopUp
           isOpen={true}
