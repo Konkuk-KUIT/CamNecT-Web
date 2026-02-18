@@ -1,7 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import Card from '../../../components/Card';
 import Category from '../../../components/Category';
 import Icon from '../../../components/Icon';
-import { useNavigate } from 'react-router-dom';
 
 
 type RecommendBoxProps = {
@@ -28,10 +28,11 @@ function RecommendBox({
     onRequestChat,
 }: RecommendBoxProps) {
     const navigate = useNavigate();
-    const shortStudentId = studentId?.slice(2, 4) ?? '';
+    const formattedStudentId = !isNaN(Number(studentId)) && studentId?.length >= 2 
+        ? `${studentId.length >= 4 ? studentId.slice(2, 4) : studentId.slice(0, 2)}학번`
+        : studentId;
 
     return (
-        //TODO: 동문추천 page 라우터 연결
         <Card
             width="100%"
             height="auto"
@@ -69,7 +70,7 @@ function RecommendBox({
                                 {name}
                             </div>
                             <div className="text-r-14 text-[color:var(--ColorGray2,#A1A1A1)]">
-                                {major} {shortStudentId}학번
+                                {major} {formattedStudentId}
                             </div>
                         </div>
                     </div>
