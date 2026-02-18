@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import type { AxiosError } from 'axios';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
+import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
+import BoardTypeToggle from '../../components/BoardTypeToggle';
+import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
+import FilterHeader from '../../components/FilterHeader';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
-import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
-import { EmptyLayout } from '../../layouts/EmptyLayout';
-import BoardTypeToggle from '../../components/BoardTypeToggle';
-import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useTagList } from '../../hooks/useTagList';
+import { EmptyLayout } from '../../layouts/EmptyLayout';
 import { useAuthStore } from '../../store/useAuthStore';
-import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
-import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
 import type { CommunityPostDetail } from '../../types/community';
-import { mapToCommunityPost } from './utils/post';
 import { mapToCommunityPostDetail } from '../../utils/communityMapper';
+import { mapToCommunityPost } from './utils/post';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -44,8 +44,7 @@ export const WritePage = () => {
     // 입력 폼 상태
     const [title, setTitle] = useState(initialTitle);
     const [content, setContent] = useState(initialContent);
-    // 키보드가 올라올 때 하단 사진 버튼 위치 보정
-    const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
     // 완료 확인 모달 상태
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,23 +205,17 @@ export const WritePage = () => {
         const viewport = window.visualViewport;
         if (!viewport) return;
 
-        const updateOffset = () => {
-            const keyboardHeight = Math.max(
-                0,
-                window.innerHeight - viewport.height - viewport.offsetTop,
-            );
-            setPhotoButtonOffset(keyboardHeight > 0 ? keyboardHeight + 16 : 0);
+        const updateHeight = () => {
+            setViewportHeight(viewport.height);
         };
 
-        updateOffset();
-        viewport.addEventListener('resize', updateOffset);
-        viewport.addEventListener('scroll', updateOffset);
-        window.addEventListener('resize', updateOffset);
+        updateHeight();
+        viewport.addEventListener('resize', updateHeight);
+        viewport.addEventListener('scroll', updateHeight);
 
         return () => {
-            viewport.removeEventListener('resize', updateOffset);
-            viewport.removeEventListener('scroll', updateOffset);
-            window.removeEventListener('resize', updateOffset);
+            viewport.removeEventListener('resize', updateHeight);
+            viewport.removeEventListener('scroll', updateHeight);
         };
     }, []);
 
@@ -404,10 +397,10 @@ export const WritePage = () => {
 
     return (
         <EmptyLayout>
-            <div className='flex min-h-screen w-full flex-col bg-white'>
+            <div className='flex w-full flex-col bg-white overflow-hidden' style={{ height: `${viewportHeight}px` }}>
                 {/* 상단 헤더: 뒤로가기, 게시판 선택, 완료 버튼 */}
                 <header
-                    className='flex w-full items-center justify-between bg-white'
+                    className='flex w-full shrink-0 items-center justify-between bg-white'
                     style={{
                         padding: '10px 25px',
                         paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
@@ -469,7 +462,7 @@ export const WritePage = () => {
                 </header>
 
                 {/* 글쓰기 본문 영역 */}
-                <section className='flex w-full flex-1 flex-col px-[25px]'>
+                <section className='flex w-full flex-1 flex-col px-[25px] overflow-y-auto'>
                     {/* 제목 입력 */}
                     <div
                         className='flex w-full flex-col'
@@ -510,7 +503,7 @@ export const WritePage = () => {
                     </div>
 
                     {/* 내용 입력 */}
-                    <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 193px' }}>
+                    <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 40px' }}>
                         <textarea
                             id='community-content'
                             name='content'
@@ -527,15 +520,9 @@ export const WritePage = () => {
                         />
                     </div>
                 </section>
-            </div>
 
-            {/* 하단 사진 추가/미리보기 영역 */}
-            <div
-                className='fixed left-1/2 z-40 w-[clamp(320px,100vw,540px)] -translate-x-1/2'
-                style={{
-                    bottom: `calc(${photoButtonOffset}px + env(safe-area-inset-bottom, 0px))`,
-                }}
-            >
+                {/* 하단 사진 추가/미리보기 영역 */}
+                <div className='w-full shrink-0 bg-white'>
                 <div className='flex w-full px-[25px] pb-[25px]'>
                     <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
                         {/* 사진 추가 버튼 */}
@@ -660,6 +647,7 @@ export const WritePage = () => {
                         />
                     </div>
                 </div>
+            </div>
             </div>
 
             {/* 게시판 선택 모달 */}

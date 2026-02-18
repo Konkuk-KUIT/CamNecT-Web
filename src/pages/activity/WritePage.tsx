@@ -1,25 +1,21 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import Icon from '../../components/Icon';
-import PopUp from '../../components/Pop-up';
-import { EmptyLayout } from '../../layouts/EmptyLayout';
+import type { ActivityCategory } from '../../api-types/activityApiTypes';
+import {
+  createActivity, getActivityAttachmentsPresignUrl, getActivityDetail,
+  getActivityThumbnailPresignUrl, getTags, updateActivity
+} from '../../api/activityApi';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
+import Icon from '../../components/Icon';
+import PopUp from '../../components/Pop-up';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { getTags } from '../../api/activityApi';
-import { mapApiTagCategoryToUiTagCategory } from './utils/activityMapper';
-import { useAuthStore } from '../../store/useAuthStore';
-import {
-  createActivity,
-  updateActivity,
-  getActivityDetail,
-  getActivityThumbnailPresignUrl,
-  getActivityAttachmentsPresignUrl,
-} from '../../api/activityApi';
-import type { ActivityCategory } from '../../api-types/activityApiTypes';
-import { uploadFileToS3 } from '../../utils/s3Upload';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { EmptyLayout } from '../../layouts/EmptyLayout';
+import { useAuthStore } from '../../store/useAuthStore';
+import { uploadFileToS3 } from '../../utils/s3Upload';
+import { mapApiTagCategoryToUiTagCategory } from './utils/activityMapper';
 
 const MAX_SIZE_MB = 10;
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
@@ -96,8 +92,8 @@ export const ActivityWritePage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-  const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
   const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview[]>(() => initialValues?.photos ?? []);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isFileErrorOpen, setIsFileErrorOpen] = useState(false);
   const [fileErrorMessage, setFileErrorMessage] = useState('');
@@ -121,18 +117,15 @@ export const ActivityWritePage = () => {
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
-    const updateOffset = () => {
-      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-      setPhotoButtonOffset(keyboardHeight > 0 ? keyboardHeight + 16 : 0);
+    const updateHeight = () => {
+      setViewportHeight(viewport.height);
     };
-    updateOffset();
-    viewport.addEventListener('resize', updateOffset);
-    viewport.addEventListener('scroll', updateOffset);
-    window.addEventListener('resize', updateOffset);
+    updateHeight();
+    viewport.addEventListener('resize', updateHeight);
+    viewport.addEventListener('scroll', updateHeight);
     return () => {
-      viewport.removeEventListener('resize', updateOffset);
-      viewport.removeEventListener('scroll', updateOffset);
-      window.removeEventListener('resize', updateOffset);
+      viewport.removeEventListener('resize', updateHeight);
+      viewport.removeEventListener('scroll', updateHeight);
     };
   }, []);
 
@@ -395,9 +388,9 @@ export const ActivityWritePage = () => {
 
   return (
     <EmptyLayout>
-      <div className='flex min-h-screen w-full flex-col bg-white'>
+      <div className='flex w-full flex-col bg-white overflow-hidden' style={{ height: `${viewportHeight}px` }}>
         <header
-          className='flex w-full items-center justify-between bg-white'
+          className='flex w-full shrink-0 items-center justify-between bg-white'
           style={{
             padding: '10px 25px',
             paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
@@ -484,7 +477,7 @@ export const ActivityWritePage = () => {
             />
           </div>
 
-          <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 193px' }}>
+          <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 40px' }}>
             <textarea
               id='activity-content'
               name='content'
@@ -501,14 +494,8 @@ export const ActivityWritePage = () => {
             />
           </div>
         </section>
-      </div>
 
-      <div
-        className='fixed left-1/2 z-40 w-[clamp(320px,100vw,540px)] -translate-x-1/2'
-        style={{
-          bottom: `calc(${photoButtonOffset}px + env(safe-area-inset-bottom, 0px))`,
-        }}
-      >
+        <div className='w-full shrink-0 bg-white'>
         <div className='flex w-full px-[25px] pb-[25px]'>
           <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
             <button
@@ -587,6 +574,7 @@ export const ActivityWritePage = () => {
             ))}
           </div>
         </div>
+      </div>
       </div>
 
       {isBoardOpen && (
