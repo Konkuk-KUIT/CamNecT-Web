@@ -16,6 +16,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import type { CommunityPostDetail } from '../../types/community';
 import { mapToCommunityPostDetail } from '../../utils/communityMapper';
 import { mapToCommunityPost } from './utils/post';
+import { getFileName } from '../../utils/getFileName';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -33,7 +34,6 @@ export const WritePage = () => {
     const initialBoardType = (editPost?.boardType as BoardType | undefined) ?? null;
     const initialTitle = editPost?.title ?? '';
     const initialContent = editPost?.content ?? '';
-    const initialPhotoUrls = editPost?.postImages ?? [];
 
     // 페이지 공통 상태: 게시판/입력/모달/미리보기
     // 게시판 선택 모달 상태
@@ -58,7 +58,9 @@ export const WritePage = () => {
         previewUrl: string;
         kind: 'image' | 'pdf';
     };
-    const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(initialPhotoUrls);
+    const [existingAttachments, setExistingAttachments] = useState(
+        editPost?.attachments ?? []
+    );
     const [newAttachments, setNewAttachments] = useState<AttachmentItem[]>([]);
     // 숨김 파일 input 제어
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -105,7 +107,7 @@ export const WritePage = () => {
     const hasDraftContent =
         title.trim().length > 0 ||
         content.trim().length > 0 ||
-        existingPhotoUrls.length > 0 ||
+        existingAttachments.length > 0 ||
         newAttachments.length > 0 ||
         Boolean(boardType) ||
         selectedTags.length > 0;
@@ -251,7 +253,7 @@ export const WritePage = () => {
         setTitle(editPost.title);
         setContent(editPost.content);
         setSelectedTags(mappedTags);
-        setExistingPhotoUrls(editPost.postImages ?? []);
+        setExistingAttachments(editPost.attachments ?? []);
         setNewAttachments([]);
         didInitEditRef.current = true;
     }, [isEditMode, editPost, mapTagIdsToNames]);
@@ -323,7 +325,7 @@ export const WritePage = () => {
                 })),
                 numericUserId,
             );
-            const existingAttachments = (editPost?.attachments ?? [])
+            const existingAttachmentsToSend = existingAttachments
                 .slice()
                 .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((attachment) => ({
@@ -332,7 +334,7 @@ export const WritePage = () => {
                     height: attachment.height,
                     fileSize: attachment.fileSize,
                 }));
-            const mergedAttachments = [...existingAttachments, ...uploadedAttachments];
+            const mergedAttachments = [...existingAttachmentsToSend, ...uploadedAttachments];
 
             if (isEditMode && postId) {
                 await updateCommunityPost({
@@ -343,9 +345,7 @@ export const WritePage = () => {
                         content: content.trim(),
                         anonymous: false,
                         tagIds,
-                        ...(mergedAttachments.length > 0
-                            ? { attachments: mergedAttachments }
-                            : {}),
+                        attachments: mergedAttachments,
                     },
                 });
                 navigate(`/community/post/${postId}`);
@@ -571,25 +571,42 @@ export const WritePage = () => {
                                 </span>
                         </button>
                         {/* 기존 이미지 미리보기 */}
-                        {existingPhotoUrls.map((url, index) => (
+                        {existingAttachments.map((attachment, index) => (
                             <div
-                                key={`existing-${index}-${url}`}
+                                key={`existing-${index}`}
                                 className='relative flex-shrink-0'
                                 style={{ 
                                     width: isKeyboardUp ? '130px' : '170px', 
                                     height: isKeyboardUp ? '80px' : '128px' 
                                 }}
                             >
-                                <img
-                                    src={url}
-                                    alt='existing'
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: '12px',
-                                        objectFit: 'cover',
-                                    }}
-                                />
+                                {attachment.fileKey.endsWith('.pdf') ? (
+                                    <div className='flex h-full w-full flex-col items-center justify-center rounded-[12px] border border-[#ECECEC] bg-white text-center'
+                                        style={{ gap: '6px', padding: '10px' }}
+                                    >
+                                        <span className='text-b-14-hn text-gray-900'>PDF</span>
+                                        <span className='text-r-12 text-gray-650 line-clamp-2'>
+                                            {getFileName(attachment.downloadUrl)}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <img
+                                        src={attachment.downloadUrl}
+                                        alt='existing'
+                                        style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }}
+                                    />
+                                )}
+                                <button
+                                    type='button'
+                                    aria-label='파일 삭제'
+                                    className='absolute'
+                                    style={{ top: '10px', right: '10px' }}
+                                    onClick={() => setExistingAttachments((prev) => prev.filter((_, i) => i !== index))}
+                                >
+                                    <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'>
+                                        <path d='M6 18L18 6M6 6L18 18' stroke='#646464' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
+                                    </svg>
+                                </button>
                             </div>
                         ))}
                         {/* 새 파일 미리보기 */}
