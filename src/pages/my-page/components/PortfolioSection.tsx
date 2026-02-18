@@ -54,8 +54,7 @@ export default function PortfolioSection({
                         onClick={() => handlePortfolioClick(p.portfolioId)}
                     >
                         <div className="w-[160px] h-[90px] overflow-hidden rounded-[12px] relative">
-                        {thumbnail ? (
-                            <img
+                        <img
                             src={thumbnail}
                             alt={p.title}
                             onError={(e) => {
@@ -63,12 +62,7 @@ export default function PortfolioSection({
                                 e.currentTarget.src = REPLACE_IMAGE;
                             }}
                             className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-r-12-hn text-gray-750">
-                            No Image
-                            </div>
-                        )}
+                        />
 
                         {isEdit && (
                             <>

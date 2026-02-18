@@ -11,6 +11,9 @@ import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
 import CoffeeChatButton from './components/CoffeeChatButton';
+import defaultImg from "../../assets/image/defaultProfileImg.png"
+
+const profilePlaceholder = defaultImg;
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
@@ -166,18 +169,15 @@ export const AlumniSearchPage = () => {
                 <section className='flex justify-between'>
                   <div className='flex items-center'>
                     <div className='flex items-center gap-[13px]'>
-                      {alumni.profileImage ? (
-                        <img
-                          src={alumni.profileImage}
-                          alt={`${alumni.author.name} 프로필`}
-                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
-                        />
-                      ) : (
-                        <div
-                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full bg-[#D5D5D5]'
-                          aria-hidden
-                        />
-                      )}
+                      <img
+                        src={alumni.profileImage ?? profilePlaceholder}
+                        alt={`${alumni.author.name} 프로필`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = profilePlaceholder;
+                        }}
+                        className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
+                      />
 
                       <div className='flex min-w-0 flex-col gap-[3px]'>
                         <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>

@@ -859,7 +859,7 @@ export default function PortfolioEditModal({
                                     {thumbnailImage ? (
                                         <div className="relative w-full aspect-[4/3]">
                                             <img
-                                                src={thumbnailImage.url}
+                                                src={thumbnailImage.url ?? REPLACE_IMAGE}
                                                 alt="썸네일"
                                                 onError={(e) => {
                                                     e.currentTarget.onerror = null; //이미지 깨짐 방지
@@ -901,7 +901,7 @@ export default function PortfolioEditModal({
                                         {imageFiles.map((image) => (
                                             <div key={image.id} className="relative aspect-square">
                                                 <img
-                                                    src={image.url}
+                                                    src={image.url ?? REPLACE_IMAGE}
                                                     alt={"포트폴리오 이미지"}
                                                     onError={(e) => {
                                                         e.currentTarget.onerror = null; //이미지 깨짐 방지

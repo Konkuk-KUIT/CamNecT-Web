@@ -149,7 +149,7 @@ export const PortfolioListPage = ({
                             >
                                 {/* 썸네일 */}
                                 <div className="h-[128px] relative w-full bg-gray-200">
-                                    {portfolio.thumbnailUrl && portfolio.thumbnailUrl !== "기본이미지" ? (
+                                    {portfolio.thumbnailUrl !== "기본이미지" ? (
                                         <img
                                             src={portfolio.thumbnailUrl ?? REPLACE_IMAGE}
                                             alt={portfolio.title}
@@ -160,7 +160,11 @@ export const PortfolioListPage = ({
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <div className="flex items-center justify-center w-full h-full bg-gray-150"/>
+                                        <img
+                                            src={REPLACE_IMAGE}
+                                            alt={portfolio.title}
+                                            className="w-full h-full object-cover"
+                                        />
                                     )}
                                 
                                     {/* 중요 표시 */}
