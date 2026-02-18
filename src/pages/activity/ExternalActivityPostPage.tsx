@@ -267,7 +267,7 @@ export const ExternalActivityPostPage = () => {
         <div className='flex w-full justify-center bg-white'>
             <div className='flex w-full max-w-[720px] flex-col'>
                 {/* 썸네일 이미지 */}
-                    <div className='w-full relative min-h-[200px] max-h-[500px]'>
+                    <div className='relative min-h-[200px] max-h-[600px]'>
                         <img
                             src={thumbnailUrl ?? REPLACE_IMAGE}
                             alt={selectedPost.title}
@@ -275,7 +275,7 @@ export const ExternalActivityPostPage = () => {
                                 e.currentTarget.onerror = null; //이미지 깨짐 방지
                                 e.currentTarget.src = REPLACE_IMAGE;
                             }}
-                            className='w-full h-full object-cover rounded-none'
+                            className='w-full h-full object-contain rounded-none'
                         />
                     </div>
 
