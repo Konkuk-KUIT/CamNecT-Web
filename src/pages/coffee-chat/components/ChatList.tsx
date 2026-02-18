@@ -38,7 +38,7 @@ export const ChatList = ({ chatRoom, isFirstPaddingDisabled = true, isClosed = f
                             {chatRoom.partner.name}
                         </span>
                         <span className="truncate text-[14px] font-normal text-gray-800 leading-[140%] tracking-[-0.56px] whitespace-nowrap">
-                            · {chatRoom.partner.major} {chatRoom.partner.studentId}
+                            · {chatRoom.partner.major} {!isNaN(Number(chatRoom.partner.studentId)) && chatRoom.partner.studentId.length >= 2 ? `${chatRoom.partner.studentId.slice(2, 4)}학번` : chatRoom.partner.studentId}
                         </span>
                     </div>
                     {/* 날짜 */}
