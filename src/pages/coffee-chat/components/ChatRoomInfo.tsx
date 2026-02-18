@@ -19,11 +19,11 @@ export const ChatRoomInfo = ({ partner, requestInfo }: ChatRoomInfoProps) => {
         <div className="flex flex-col gap-[10px] px-[25px]">
             <section className="flex flex-col items-center gap-[40px]">
                 <div className="flex flex-col gap-[20px]">
-                    <div className="flex flex-col items-center gap-[15px]">
-                        <div 
-                            className="shrink-0 cursor-pointer" 
-                            onClick={() => navigate(`/alumni/profile/${partner.id}`)}
-                        >
+                    <div 
+                        className="flex flex-col items-center gap-[15px] cursor-pointer"
+                        onClick={() => navigate(`/alumni/profile/${partner.id}`)}
+                    >
+                        <div className="shrink-0">
                             {partner.profileImg ? (
                                 <img src={partner.profileImg} alt="프로필 이미지" className="w-[84px] h-[84px] rounded-full object-cover" />
                             ) : (
