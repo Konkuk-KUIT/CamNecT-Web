@@ -10,19 +10,16 @@ export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
             accessToken: null,
-            refreshToken: null,
             isAuthenticated: false,
             user: null,
             
-            setLogin: (accessToken, refreshToken, user) => set({
+            setLogin: (accessToken, user) => set({
                 accessToken: accessToken,
-                refreshToken: refreshToken,
                 isAuthenticated: true,
                 user: user
             }),
             setLogout: () => set({
                 accessToken: null,
-                refreshToken: null,
                 isAuthenticated: false,
                 user: null
             }),

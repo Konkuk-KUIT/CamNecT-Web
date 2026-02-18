@@ -9,10 +9,9 @@ export type AuthUser = {
 
 export interface AuthState {
     accessToken: string | null;
-    refreshToken: string | null;
     isAuthenticated: boolean;
     user: AuthUser | null;
-    setLogin: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+    setLogin: (accessToken: string, user: AuthUser) => void;
     setLogout: () => void;
     setUserId: (userId: string) => void;
 }   
