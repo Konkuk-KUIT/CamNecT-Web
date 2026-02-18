@@ -26,6 +26,18 @@ export const getAlumniList = async (
       name: params.name,
       tags: params.tags,
     },
+    paramsSerializer: (p) => {
+      const searchParams = new URLSearchParams();
+      Object.entries(p).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (Array.isArray(value)) {
+          value.forEach((v) => searchParams.append(key, String(v)));
+        } else {
+          searchParams.append(key, String(value));
+        }
+      });
+      return searchParams.toString();
+    },
     signal: params.signal,
   });
   return response.data;

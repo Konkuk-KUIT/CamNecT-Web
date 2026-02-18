@@ -8,6 +8,10 @@ import { EditHeader } from '../../../layouts/headers/EditHeader';
 import { useAuthStore } from '../../../store/useAuthStore';
 import FavoriteBadge from '../components/FavoriteBadge';
 import { formatDotDate } from '../../../utils/formatDate';
+import replaceImg from "../../../assets/image/replaceImg.png"
+
+const REPLACE_IMAGE = replaceImg;
+
 
 type AlumniPortfolioItem = {
   portfolioId: number;
@@ -107,18 +111,15 @@ export const AlumniPortfolioListPage = () => {
                 className="h-[200px] flex flex-col items-start rounded-[10px] overflow-hidden border border-gray-150"
               >
                 <div className="h-[128px] relative w-full bg-gray-200">
-                  {portfolio.thumbnailUrl ? (
                     <img
-                      src={portfolio.thumbnailUrl}
+                      src={portfolio.thumbnailUrl ?? REPLACE_IMAGE}
                       alt={portfolio.title}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                        e.currentTarget.src = REPLACE_IMAGE;
+                      }}
                       className="w-full h-full object-cover"
                     />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full text-gray-400 text-R-12-hn">
-                      No Image
-                    </div>
-                  )}
-
                   {portfolio.isFavorite && (
                     <div className="absolute top-0 right-0 p-[12px]">
                       <FavoriteBadge className="w-[24px] h-[24px]" />

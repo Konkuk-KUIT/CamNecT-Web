@@ -19,11 +19,12 @@ import { mapTagNamesToIds } from '../../utils/tagMapper';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import CoffeeChatModal from './components/CoffeeChatModal';
 import FollowButton from './components/FollowButton';
+import replaceImg from "../../assets/image/replaceImg.png"
+import defaultImg from "../../assets/image/defaultProfileImg.png"
 
-const profilePlaceholder =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><rect width='84' height='84' fill='%23D5D5D5'/></svg>";
-const portfolioPlaceholder =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='90'><rect width='160' height='90' fill='%23D5D5D5'/></svg>";
+const REPLACE_IMAGE = replaceImg;
+
+const profilePlaceholder = defaultImg;
 
 type AlumniProfilePageProps = {
   enableCoffeeChatModal?: boolean;
@@ -237,19 +238,15 @@ const AlumniProfileContent = ({
           <div
             className='grid items-start [grid-template-columns:auto_minmax(0,1fr)] [column-gap:clamp(24px,6cqw,32px)] [row-gap:clamp(14px,4.5cqw,20px)]'
           >
-            {profile.profileImage ? (
-              <img
-                src={profile.profileImage}
-                alt={`${profile.author.name} 프로필`}
-                className='h-[clamp(64px,22.4cqw,84px)] w-[clamp(64px,22.4cqw,84px)] shrink-0 rounded-full object-cover'
-              />
-            ) : (
-              <div
-                className='h-[clamp(64px,22.4cqw,84px)] w-[clamp(64px,22.4cqw,84px)] shrink-0 rounded-full'
-                style={{ background: `url("${profilePlaceholder}") center/cover` }}
-                aria-hidden
-              />
-            )}
+            <img
+              src={profile.profileImage ?? profilePlaceholder}
+              alt={`${profile.author.name} 프로필`}
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = profilePlaceholder;
+              }}
+              className='h-[clamp(64px,22.4cqw,84px)] w-[clamp(64px,22.4cqw,84px)] shrink-0 rounded-full object-cover'
+            />
 
             {/* 이름/학과/팔로우 버튼/카테고리 영역 */}
             <div className='flex min-w-0 flex-1 flex-col [gap:clamp(10px,3.5cqw,14px)]'>
@@ -261,7 +258,7 @@ const AlumniProfileContent = ({
                     {profile.author.name}
                   </div>
                   <div className='text-r-12 text-[color:var(--ColorGray3,#646464)]'>
-                    {profile.author.major} {profile.author.studentId}
+                    {profile.author.major} {profile.author.studentId}학번
                   </div>
                 </div>
 
@@ -389,12 +386,12 @@ const AlumniProfileContent = ({
                     >
                       <div className='h-[90px] w-[160px] overflow-hidden rounded-[12px] bg-[var(--ColorGray1,#D5D5D5)]'>
                         <img
-                          src={item.image ?? portfolioPlaceholder}
+                          src={item.image ?? REPLACE_IMAGE}
                           alt={item.title}
                           className='h-full w-full object-cover'
                           onError={(event) => {
                             event.currentTarget.onerror = null;
-                            event.currentTarget.src = portfolioPlaceholder;
+                            event.currentTarget.src = REPLACE_IMAGE;
                           }}
                         />
                       </div>
