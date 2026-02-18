@@ -25,6 +25,9 @@ import { usePost } from './hooks/usePost';
 import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
 import { formatPostDisplayDate } from './utils/post';
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+
+const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
 type PopUpConfig = {
   type: 'info' | 'warning' | 'confirm' | 'error' | 'loading';
@@ -681,15 +684,15 @@ const CommunityPostPage = () => {
                   })
                 }
               >
-                {selectedPost.author.profileImageUrl ? (
-                  <img
-                    src={selectedPost.author.profileImageUrl}
-                    alt={`${selectedPost.author.name} 프로필`}
-                    className='h-[32px] w-[32px] rounded-full object-cover'
-                  />
-                ) : (
-                  <div className='h-[32px] w-[32px] rounded-full bg-[#ECECEC]' aria-hidden='true' />
-                )}
+                <img
+                  src={selectedPost.author.profileImageUrl ?? DEFAULT_PROFILE_IMAGE}
+                  alt={`${selectedPost.author.name} 프로필`}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null; //이미지 깨짐 방지
+                    e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                  }}
+                  className='h-[32px] w-[32px] rounded-full object-cover'
+                />
                 <div className='flex flex-col gap-[4px]'>
                   <div className='text-[14px] font-semibold text-[var(--ColorBlack,#202023)]'>
                     {selectedPost.author.name}

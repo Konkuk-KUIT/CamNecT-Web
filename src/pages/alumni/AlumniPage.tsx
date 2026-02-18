@@ -11,9 +11,16 @@ import { FullLayout } from '../../layouts/FullLayout';
 import { MainHeader } from '../../layouts/headers/MainHeader';
 import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
 import CoffeeChatButton from './components/CoffeeChatButton';
+import defaultImg from "../../assets/image/defaultProfileImg.png"
+import { useAuthStore } from '../../store/useAuthStore';
+
+const profilePlaceholder = defaultImg;
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
+  const authUser = useAuthStore(state => state.user);
+  const meUserId = authUser?.id ? parseInt(authUser.id) : null;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -45,6 +52,7 @@ export const AlumniSearchPage = () => {
         setIsLoading(true);
         // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
         const response = await getAlumniList({
+          userId: meUserId ?? undefined,
           name: isTagSearch ? undefined : trimmedName || undefined,
           tags: selectedTagIds,
           signal: controller.signal,
@@ -166,18 +174,15 @@ export const AlumniSearchPage = () => {
                 <section className='flex justify-between'>
                   <div className='flex items-center'>
                     <div className='flex items-center gap-[13px]'>
-                      {alumni.profileImage ? (
-                        <img
-                          src={alumni.profileImage}
-                          alt={`${alumni.author.name} 프로필`}
-                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
-                        />
-                      ) : (
-                        <div
-                          className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full bg-[#D5D5D5]'
-                          aria-hidden
-                        />
-                      )}
+                      <img
+                        src={alumni.profileImage ?? profilePlaceholder}
+                        alt={`${alumni.author.name} 프로필`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = profilePlaceholder;
+                        }}
+                        className='h-[clamp(48px,14cqw,60px)] w-[clamp(48px,14cqw,60px)] shrink-0 rounded-full object-cover'
+                      />
 
                       <div className='flex min-w-0 flex-col gap-[3px]'>
                         <div className='text-sb-16-hn text-[color:var(--ColorBlack,#202023)]'>

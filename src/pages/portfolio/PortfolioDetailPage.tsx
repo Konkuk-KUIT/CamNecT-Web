@@ -10,10 +10,12 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPortfolioDetail, togglePortfolioFavorite, togglePortfolioPublic, deletePortfolio } from '../../api/portfolioApi';
 import type { PortfolioAsset } from '../../api-types/portfolioApiTypes';
-import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import defaultProfileImg from "../../assets/image/defaultProfileImg.png";
+import replaceImg from "../../assets/image/replaceImg.png";
 import { getFileName } from '../../utils/getFileName';
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
+const REPLACE_IMAGE = replaceImg;
 
 type PortfolioDetailPageProps = {
     ownerId?: string | number;
@@ -253,15 +255,17 @@ export const PortfolioDetailPage = ({
 
                     {/* 대표이미지 */}
                     <div className="flex flex-col gap-[3px]">
-                        {portfolio.thumbnailUrl && (
                             <div>
                                 <img
-                                    src={portfolio.thumbnailUrl}
+                                    src={portfolio.thumbnailUrl ?? REPLACE_IMAGE}
                                     alt={portfolio.title}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; //이미지 깨짐 방지
+                                        e.currentTarget.src = REPLACE_IMAGE;
+                                    }}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                        )}
                         {imageAssets.length > 0 && (
                             <div className="flex flex-col gap-[3px]">
                                 {imageAssets.map((asset: PortfolioAsset) => (
