@@ -51,17 +51,7 @@ const Divider = () => {
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setLogin = useAuthStore((state) => state.setLogin);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { handleRedirect } = useAuthRedirect(); // 리다이렉트 훅 추가
-
-  const user = useAuthStore((state) => state.user);
-
-  // 이미 로그인된 상태라면 역할에 맞게 리다이렉트
-  useEffect(() => {
-    if (isAuthenticated && user) {
-        handleRedirect(user.role || 'USER', user.nextStep || 'HOME');
-    }
-  }, [isAuthenticated, user, handleRedirect]);
 
   const [showPassword, setShowPassword] = useState(false);
   const [id, setId] = useState("");
@@ -76,19 +66,16 @@ export const LoginPage = () => {
 
     // data : 서버의 response (AxiosResponse)
     onSuccess: (data) => {
-      const { accessToken, refreshToken, userId, role, nextStep } = data;
+      const { accessToken, userId, role, nextStep } = data;
       
       // 모든 로그인 성공 시 토큰과 유저 정보 저장 (AccessToken 필수)
-      // refresh token도 저장 필요
-      setLogin(accessToken, refreshToken, {
+      setLogin(accessToken, {
         id: String(userId),
         role,
         nextStep
       });
 
-      if (role === 'ADMIN') {
-        handleRedirect(role, nextStep);
-      } else if (nextStep === 'HOME') {
+      if (nextStep === 'HOME') {
         setShowSplash(true); 
       } else {
         // 회원가입 단계가 남은 경우 해당 단계로 리다이렉트
@@ -185,9 +172,6 @@ export const LoginPage = () => {
         <button className="text-gray-650 text-r-12 tracking-[-0.24px]" onClick={() => navigate("/signup")}>회원가입</button>
       </div>
 
-      {/* 하단 패딩 영역: 스크롤 시 여백을 보장하기 위해 명시적인 div 사용 */}
-      <div className="pb-[105px] flex-none" />
-
       {popUpConfig && (
         <PopUp
           isOpen={true}
@@ -197,6 +181,7 @@ export const LoginPage = () => {
           onClick={() => setPopUpConfig(null)}
         />
       )}
+
     </div>
   );
 };
