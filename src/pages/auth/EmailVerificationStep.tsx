@@ -33,7 +33,7 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
         }))
     );
 
-    const setAuthUserId = useAuthStore((state) => state.setUserId);
+    const setLogin = useAuthStore((state) => state.setLogin);
 
     // 이메일 인증 폼 검증 (zod)
     const emailSchema = z.object({
@@ -98,9 +98,14 @@ export const EmailVerificationStep = ({ onNext }: EmailVerificationStepProps) =>
     const emailVerifyMutation = useMutation({
         mutationFn: verifyEmailCode,
         onSuccess: (data) => {
-            if(data.userId) {
-                setAuthUserId(String(data.userId));
-            }
+            // 서버에서 받은 tempToken을 accessToken으로 저장
+            // 이후 학교 인증(presign) 등 인증 정보가 필요한 API 호출 시 자동으로 헤더에 포함됨
+            setLogin(data.tempToken, {
+                id: String(data.userId),
+                role: 'USER',
+                nextStep: 'DOCUMENT_REQUIRED'
+            });
+            
             setPopUpConfig({ title: "인증완료", content: "" });
             setIsEmailVerificated(true);
         },
