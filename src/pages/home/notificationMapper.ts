@@ -1,6 +1,6 @@
 import type { NotificationApiItem, NotificationApiType, NotificationListResponse } from "../../api-types/notificationApiTypes";
-import type { NotificationItem } from "./notificationData";
 import { formatTimeAgo } from "../../utils/formatDate";
+import type { NotificationItem } from "./notificationData";
 
 const COMMENT_ACCEPTED_MESSAGE = '내 댓글이 채택되었어요. 지금바로 확인해보세요!';
 
@@ -27,8 +27,18 @@ const mapType = (type: NotificationApiType): NotificationItem['type'] => {
             return 'comment';
         case 'COMMENT_REPLIED':
             return 'reply';
+        case 'FOLLOWING_POSTED':
+            return 'followingPosted';
+        case 'TEAM_APPLICATION_RECEIVED':
+            return 'teamApplicationReceived';
+        case 'COFFEE_CHAT_ACCEPTED':
+            return 'coffeeChatAccepted';
+        case 'TEAM_RECRUIT_ACCEPTED':
+            return 'teamRecruitAccepted';
+        case 'CHAT_MESSAGE_RECEIVED':
+            return 'chatMessageReceived';
         default:
-            return 'comment';
+            return 'default';
     }
 };
 
@@ -42,19 +52,14 @@ const toNotificationItem = (item: NotificationApiItem): NotificationItem => {
         message: item.message,
         link: item.link,
         actorUserId: item.actorUserId,
+        name: item.actorName,
+        profileImageUrl: item.actorProfileImageUrl || undefined,
         postId: item.postId,
         commentId: item.commentId,
         requestId: item.requestId,
     };
 
     switch (type) {
-        case 'coffeeChatRequest':
-            return {
-                ...base,
-                type,
-                name: item.actorName,
-                profileImageUrl: item.actorProfileImageUrl || undefined,
-            };
         case 'pointEarn':
         case 'pointUse':
             return {
@@ -85,10 +90,7 @@ const toNotificationItem = (item: NotificationApiItem): NotificationItem => {
         default:
             return {
                 ...base,
-                type: 'comment',
-                postTitle: '',
-                commentContent: item.message,
-            };
+            } as NotificationItem;
     }
 };
 

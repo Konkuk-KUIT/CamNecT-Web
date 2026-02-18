@@ -68,6 +68,12 @@ const titleMap: Record<NotificationType, string> = {
   reply: '답글',
   comment: '댓글',
   commentAccepted: '댓글 채택',
+  followingPosted: '새 게시글',
+  teamApplicationReceived: '팀 지원 신청',
+  coffeeChatAccepted: '커피챗 수락',
+  teamRecruitAccepted: '팀 모집 수락',
+  chatMessageReceived: '새 메시지',
+  default: '알림',
 };
 
 const formatPoints = (points: number) => points.toLocaleString('ko-KR');
@@ -161,24 +167,54 @@ const renderContent = (notification: NotificationItem) => {
           </span>
         </div>
       );
+    case 'followingPosted':
+    case 'teamApplicationReceived':
+    case 'coffeeChatAccepted':
+    case 'teamRecruitAccepted':
+    case 'chatMessageReceived':
+    case 'default':
+      return (
+        <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+          {notification.message}
+        </p>
+      );
     default:
       return null;
   }
 };
 
 const renderIcon = (notification: NotificationItem) => {
-  if (notification.type === 'coffeeChatRequest') {
-    return notification.profileImageUrl ? (
-      <img
-        src={notification.profileImageUrl}
-        alt={`${notification.name} 프로필`}
-        className="h-[50px] w-[50px] rounded-full object-cover bg-[#ECECEC]"
+  // 1. 포인트 또는 새 게시글 알림은 서버에서 이미지를 주더라도 무조건 전용 SVG(또는 기본 로고) 아이콘을 우선함
+  if (
+    notification.type === 'pointUse' ||
+    notification.type === 'pointEarn' ||
+    notification.type === 'followingPosted'
+  ) {
+    const svg = getIconSvg(notification.type);
+    return (
+      <div
+        className="h-[50px] w-[50px]"
+        aria-hidden
+        dangerouslySetInnerHTML={{ __html: svg ?? '' }}
       />
-    ) : (
-      <div className="h-[50px] w-[50px] rounded-full bg-[#ECECEC]" />
     );
   }
 
+  // 2. 프로필 이미지가 있고, 서버에서 주는 기본값(default.png)이 아닌 경우에만 이미지 렌더링
+  if (
+    notification.profileImageUrl &&
+    !notification.profileImageUrl.includes('default.png')
+  ) {
+    return (
+      <img
+        src={notification.profileImageUrl}
+        alt={`${notification.name || '유저'} 프로필`}
+        className="h-[50px] w-[50px] rounded-full object-cover bg-[#ECECEC]"
+      />
+    );
+  }
+
+  // 3. 그 외에는 기본 로고 SVG 아이콘 출력
   const svg = getIconSvg(notification.type);
 
   return (
@@ -238,6 +274,12 @@ export const NotificationPage = () => {
           setPopUpConfig(config);
         }
       }
+    }
+
+    // 서버가 준 link가 있다면 최우선적으로 거기로 이동
+    if (notification.link) {
+      navigate(notification.link);
+      return;
     }
 
     switch (notification.type) {
