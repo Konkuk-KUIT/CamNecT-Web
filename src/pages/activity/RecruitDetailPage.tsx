@@ -270,7 +270,7 @@ export const RecruitDetailPage = () => {
                         <div className='flex'>
                             <span className='min-w-[100px] text-sb-16-hn text-gray-750'>공고</span>
                             <button
-                                className='text-r-16-hn text-primary underline'
+                                className='text-r-16-hn text-primary underline text-left'
                                 onClick={() => navigate(`/activity/external/${recruitment.activityId}`)}
                             >
                                 {activityName}
