@@ -258,7 +258,7 @@ const AlumniProfileContent = ({
                     {profile.author.name}
                   </div>
                   <div className='text-r-12 text-[color:var(--ColorGray3,#646464)]'>
-                    {profile.author.major} {profile.author.studentId}
+                    {profile.author.major} {profile.author.studentId}학번
                   </div>
                 </div>
 

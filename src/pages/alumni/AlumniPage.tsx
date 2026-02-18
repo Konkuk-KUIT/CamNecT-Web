@@ -12,11 +12,15 @@ import { MainHeader } from '../../layouts/headers/MainHeader';
 import { mapAlumniApiListToProfiles } from '../../utils/alumniMapper';
 import CoffeeChatButton from './components/CoffeeChatButton';
 import defaultImg from "../../assets/image/defaultProfileImg.png"
+import { useAuthStore } from '../../store/useAuthStore';
 
 const profilePlaceholder = defaultImg;
 
 export const AlumniSearchPage = () => {
   const navigate = useNavigate();
+  const authUser = useAuthStore(state => state.user);
+  const meUserId = authUser?.id ? parseInt(authUser.id) : null;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -48,6 +52,7 @@ export const AlumniSearchPage = () => {
         setIsLoading(true);
         // 서버 필터 결과를 받아 클라이언트 모델로 변환합니다.
         const response = await getAlumniList({
+          userId: meUserId ?? undefined,
           name: isTagSearch ? undefined : trimmedName || undefined,
           tags: selectedTagIds,
           signal: controller.signal,
