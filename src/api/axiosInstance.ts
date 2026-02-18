@@ -1,122 +1,56 @@
 import axios from "axios";
 import { useAuthStore } from "../store/useAuthStore";
 
-// Axios 인스턴스 (API 모듈화)
+// Axios 인스턴스 설정
 export const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    timeout: 9500, // Vercel Proxy는 10초이상 응답 지연 시 504 에러 발생 
+    timeout: 9500,
     headers: {
         "Content-Type": "application/json",
     }
 });
 
-// Request Interceptor (요청 직전에 수행하는 작업)
-axiosInstance.interceptors.request.use(
-    (config) => {
-        const accessToken = useAuthStore.getState().accessToken;
-
-        if (accessToken) {
-            // 로그인된 유저의 accessToken 붙이기
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+// [요청] 모든 API 요청 앞에 자동으로 토큰을 붙여줍니다.
+axiosInstance.interceptors.request.use((config) => {
+    const token = useAuthStore.getState().accessToken;
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
-);
+    return config;
+});
 
-let isRefreshing = false;
-let failedQueue: { resolve: (token: string | null) => void; reject: (error: unknown) => void }[] = [];
-
-const processQueue = (error: unknown, token: string | null = null) => {
-    failedQueue.forEach(prom => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token);
-        }
-    });
-    failedQueue = [];
-};
-
-// Response Interceptor
+// [응답] 에러가 났을 때(특히 토큰 만료) 처리합니다.
 axiosInstance.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response, // 성공하면 그냥 통과
     async (error) => {
         const originalRequest = error.config;
-        const status = error.response?.status;
-        const url = originalRequest?.url ?? "";
-        
-        // 비밀번호 변경 시의 401은 강제 로그아웃 안 되도록 예외처리
-        const isPasswordChange = url.includes("/api/profile/password");
-        // 토큰 재발급 요청 자체가 401인 경우 체크
-        const isRefreshUrl = url.includes("/api/auth/refresh");
 
-        // 401 Unauthorized 에러이고, 리프레시 요청이 아니며, 비밀번호 변경이 아닐 때만 리프레시 시도
-        if (status === 401 && !isPasswordChange && !isRefreshUrl && !originalRequest._retry) {
-            
-            if (isRefreshing) {
-                // 이미 리프레시 중이라면 큐에 쌓아두고 나중에 한꺼번에 처리
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                }).then(token => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
-                    return axiosInstance(originalRequest);
-                }).catch(err => Promise.reject(err));
-            }
-
-            originalRequest._retry = true;
-            isRefreshing = true;
-
-            const refreshToken = useAuthStore.getState().refreshToken;
-
-            // 리프레시 토큰이 없으면 그냥 로그아웃
-            if (!refreshToken) {
-                useAuthStore.getState().setLogout();
-                return Promise.reject(error);
-            }
+        // 1. 401(토큰 만료) 에러가 났고, 아직 한 번도 직접 재시도를 안 했다면
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true; // 무한 반복 방지 (딱 한 번만 다시 해보기)
 
             try {
-                // 토큰 재발급 API 호출 (인터셉터 무한 루프 방지를 위해 axios 직속 호출)
-                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/refresh`, {
+                const refreshToken = useAuthStore.getState().refreshToken;
+
+                // 2. 서버에 새 토큰을 달라고 요청합니다. (이때는 순수 axios 사용)
+                const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/refresh`, {
                     refreshToken
                 });
 
-                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-                const user = useAuthStore.getState().user;
+                const { accessToken, refreshToken: newRefreshToken } = res.data.data;
 
-                // 새로운 토큰 저장
-                if (user) {
-                    useAuthStore.getState().setLogin(newAccessToken, newRefreshToken, user);
-                }
+                // 3. 새로 받은 토큰들을 전역 상태(Zustand)에 업데이트합니다.
+                useAuthStore.getState().setLogin(accessToken, newRefreshToken, useAuthStore.getState().user!);
 
-                // 대기 중이던 요청들 처리
-                processQueue(null, newAccessToken);
-                
-                // 현재 원래 요청 재시도
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                return axiosInstance(originalRequest);
-
-            } catch (refreshError) {
-                // 리프레시 실패 시 큐에 대기 중인 모든 요청 거부 및 로그아웃
-                processQueue(refreshError, null);
+                // 4. 실패했던 원래 요청에 새 토큰을 갈아 끼워서 다시 보냅니다.
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                return axiosInstance(originalRequest); 
+            } catch (err) {
+                // 만약 리프레시 토큰까지 만료되어 살리기에 실패하면 로그아웃 시킵니다.
                 useAuthStore.getState().setLogout();
-                return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
+                return Promise.reject(err);
             }
         }
-
-        // 리프레시 토큰까지 만료되었거나 다른 401 에러인 경우
-        if (status === 401 && !isPasswordChange) {
-            console.log("Unauthorized(401) - Force Logout");
-            useAuthStore.getState().setLogout();
-        }
-
         return Promise.reject(error);
     }
 );

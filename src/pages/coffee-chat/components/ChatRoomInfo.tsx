@@ -32,7 +32,7 @@ export const ChatRoomInfo = ({ partner, requestInfo }: ChatRoomInfoProps) => {
                                 {partner.name}
                             </h3>
                             <p className="text-r-12-hn text-gray-750 text-center tracking-[-0.48px]">
-                                {partner.major} {partner.studentId}
+                                {partner.major} {!isNaN(Number(partner.studentId)) && partner.studentId.length >= 2 ? `${partner.studentId.slice(2, 4)}학번` : partner.studentId}
                             </p>
                         </div>
                     </div>
