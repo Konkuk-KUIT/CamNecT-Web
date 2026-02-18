@@ -68,6 +68,12 @@ const titleMap: Record<NotificationType, string> = {
   reply: '답글',
   comment: '댓글',
   commentAccepted: '댓글 채택',
+  followingPosted: '새 게시글',
+  teamApplicationReceived: '팀 지원 신청',
+  coffeeChatAccepted: '커피챗 수락',
+  teamRecruitAccepted: '팀 모집 수락',
+  chatMessageReceived: '새 메시지',
+  default: '알림',
 };
 
 const formatPoints = (points: number) => points.toLocaleString('ko-KR');
@@ -160,6 +166,17 @@ const renderContent = (notification: NotificationItem) => {
             새로운 댓글이 달렸어요: {notification.commentContent}
           </span>
         </div>
+      );
+    case 'followingPosted':
+    case 'teamApplicationReceived':
+    case 'coffeeChatAccepted':
+    case 'teamRecruitAccepted':
+    case 'chatMessageReceived':
+    case 'default':
+      return (
+        <p className="text-r-14 text-[var(--ColorGray3,#646464)]">
+          {notification.message}
+        </p>
       );
     default:
       return null;
