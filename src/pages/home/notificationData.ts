@@ -4,7 +4,13 @@ export type NotificationType =
   | 'pointEarn'
   | 'reply'
   | 'comment'
-  | 'commentAccepted';
+  | 'commentAccepted'
+  | 'followingPosted'
+  | 'teamApplicationReceived'
+  | 'coffeeChatAccepted'
+  | 'teamRecruitAccepted'
+  | 'chatMessageReceived'
+  | 'default';
 
 export type NotificationBase = {
   id: string;
@@ -14,15 +20,16 @@ export type NotificationBase = {
   message?: string;
   link?: string;
   actorUserId?: number;
+  name?: string;
+  profileImageUrl?: string;
   postId?: number;
   commentId?: number;
   requestId?: number;
+  points?: number;
 };
 
 export type CoffeeChatRequestNotification = NotificationBase & {
   type: 'coffeeChatRequest';
-  name: string;
-  profileImageUrl?: string;
 };
 
 export type PointNotification = NotificationBase & {
@@ -46,12 +53,42 @@ export type CommentNotification = NotificationBase & {
   commentContent: string;
 };
 
+export type FollowingNotification = NotificationBase & {
+  type: 'followingPosted';
+};
+
+export type TeamApplicationNotification = NotificationBase & {
+  type: 'teamApplicationReceived';
+};
+
+export type CoffeeChatAcceptedNotification = NotificationBase & {
+  type: 'coffeeChatAccepted';
+};
+
+export type TeamRecruitAcceptedNotification = NotificationBase & {
+  type: 'teamRecruitAccepted';
+};
+
+export type ChatMessageNotification = NotificationBase & {
+  type: 'chatMessageReceived';
+};
+
+export type DefaultNotification = NotificationBase & {
+  type: 'default';
+};
+
 export type NotificationItem =
   | CoffeeChatRequestNotification
   | PointNotification
   | ReplyNotification
   | CommentNotification
-  | CommentAcceptedNotification;
+  | CommentAcceptedNotification
+  | FollowingNotification
+  | TeamApplicationNotification
+  | CoffeeChatAcceptedNotification
+  | TeamRecruitAcceptedNotification
+  | ChatMessageNotification
+  | DefaultNotification;
 
 type NotificationIconAsset = {
   type: 'pointUse' | 'pointEarn' | 'default';

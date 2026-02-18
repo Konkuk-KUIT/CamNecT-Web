@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import type { AxiosError } from 'axios';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
+import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
+import BoardTypeToggle from '../../components/BoardTypeToggle';
+import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
+import FilterHeader from '../../components/FilterHeader';
 import Icon from '../../components/Icon';
 import PopUp from '../../components/Pop-up';
-import BottomSheetModal from '../../components/BottomSheetModal/BottomSheetModal';
-import { EmptyLayout } from '../../layouts/EmptyLayout';
-import BoardTypeToggle from '../../components/BoardTypeToggle';
-import FilterHeader from '../../components/FilterHeader';
 import TagsFilterModal from '../../components/TagsFilterModal';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useTagList } from '../../hooks/useTagList';
+import { EmptyLayout } from '../../layouts/EmptyLayout';
 import { useAuthStore } from '../../store/useAuthStore';
-import { createCommunityPost, getCommunityPostDetail, postCommunityUploadPresign, updateCommunityPost } from '../../api/community';
-import type { CommunityUploadPresignItemResponse } from '../../api-types/communityApiTypes';
 import type { CommunityPostDetail } from '../../types/community';
-import { mapToCommunityPost } from './utils/post';
 import { mapToCommunityPostDetail } from '../../utils/communityMapper';
+import { mapToCommunityPost } from './utils/post';
 
 //TODO: 사진 미리보기 개수 제한이나 파일 크기 제한을 정책으로 추가할지 결정 필요
 const boardTypes = ['정보', '질문'] as const;
@@ -44,8 +44,8 @@ export const WritePage = () => {
     // 입력 폼 상태
     const [title, setTitle] = useState(initialTitle);
     const [content, setContent] = useState(initialContent);
-    // 키보드가 올라올 때 하단 사진 버튼 위치 보정
-    const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+    const isKeyboardUp = window.innerHeight - viewportHeight > 100;
     // 완료 확인 모달 상태
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -206,23 +206,17 @@ export const WritePage = () => {
         const viewport = window.visualViewport;
         if (!viewport) return;
 
-        const updateOffset = () => {
-            const keyboardHeight = Math.max(
-                0,
-                window.innerHeight - viewport.height - viewport.offsetTop,
-            );
-            setPhotoButtonOffset(keyboardHeight > 0 ? keyboardHeight + 16 : 0);
+        const updateHeight = () => {
+            setViewportHeight(viewport.height);
         };
 
-        updateOffset();
-        viewport.addEventListener('resize', updateOffset);
-        viewport.addEventListener('scroll', updateOffset);
-        window.addEventListener('resize', updateOffset);
+        updateHeight();
+        viewport.addEventListener('resize', updateHeight);
+        viewport.addEventListener('scroll', updateHeight);
 
         return () => {
-            viewport.removeEventListener('resize', updateOffset);
-            viewport.removeEventListener('scroll', updateOffset);
-            window.removeEventListener('resize', updateOffset);
+            viewport.removeEventListener('resize', updateHeight);
+            viewport.removeEventListener('scroll', updateHeight);
         };
     }, []);
 
@@ -404,10 +398,10 @@ export const WritePage = () => {
 
     return (
         <EmptyLayout>
-            <div className='flex min-h-screen w-full flex-col bg-white'>
+            <div className='flex w-full flex-col bg-white overflow-hidden' style={{ height: `${viewportHeight}px` }}>
                 {/* 상단 헤더: 뒤로가기, 게시판 선택, 완료 버튼 */}
                 <header
-                    className='flex w-full items-center justify-between bg-white'
+                    className='flex w-full shrink-0 items-center justify-between bg-white'
                     style={{
                         padding: '10px 25px',
                         paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
@@ -469,7 +463,7 @@ export const WritePage = () => {
                 </header>
 
                 {/* 글쓰기 본문 영역 */}
-                <section className='flex w-full flex-1 flex-col px-[25px]'>
+                <section className='flex w-full flex-1 flex-col px-[25px] overflow-y-auto'>
                     {/* 제목 입력 */}
                     <div
                         className='flex w-full flex-col'
@@ -510,7 +504,7 @@ export const WritePage = () => {
                     </div>
 
                     {/* 내용 입력 */}
-                    <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 193px' }}>
+                    <div className='flex w-full flex-1 flex-col' style={{ padding: isKeyboardUp ? '10px 10px 20px' : '15px 10px 40px' }}>
                         <textarea
                             id='community-content'
                             name='content'
@@ -527,31 +521,30 @@ export const WritePage = () => {
                         />
                     </div>
                 </section>
-            </div>
 
-            {/* 하단 사진 추가/미리보기 영역 */}
-            <div
-                className='fixed left-1/2 z-40 w-[clamp(320px,100vw,540px)] -translate-x-1/2'
-                style={{
-                    bottom: `calc(${photoButtonOffset}px + env(safe-area-inset-bottom, 0px))`,
-                }}
-            >
-                <div className='flex w-full px-[25px] pb-[25px]'>
-                    <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
-                        {/* 사진 추가 버튼 */}
-                        <button
-                            type='button'
-                            className='flex h-[128px] w-[128px] flex-col items-center justify-center rounded-[12px] flex-shrink-0'
-                            style={{ background: 'var(--ColorGray1, #ECECEC)', gap: '10px' }}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <svg
-                                xmlns='http://www.w3.org/2000/svg'
-                                width='30'
-                                height='30'
-                                viewBox='0 0 30 30'
-                                fill='none'
+                {/* 하단 사진 추가/미리보기 영역 */}
+                <div className='w-full shrink-0 bg-white'>
+                    <div className='flex w-full px-[25px]' style={{ paddingBottom: isKeyboardUp ? '10px' : '25px' }}>
+                        <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
+                            {/* 사진 추가 버튼 */}
+                            <button
+                                type='button'
+                                className='flex flex-col items-center justify-center rounded-[12px] flex-shrink-0'
+                                style={{ 
+                                    background: 'var(--ColorGray1, #ECECEC)', 
+                                    gap: isKeyboardUp ? '4px' : '10px',
+                                    width: isKeyboardUp ? '100px' : '128px',
+                                    height: isKeyboardUp ? '80px' : '128px'
+                                }}
+                                onClick={() => fileInputRef.current?.click()}
                             >
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    width={isKeyboardUp ? '24' : '30'}
+                                    height={isKeyboardUp ? '24' : '30'}
+                                    viewBox='0 0 30 30'
+                                    fill='none'
+                                >
                                 <path
                                     d='M8.53375 7.71852C8.30874 8.07466 8.00852 8.37725 7.65417 8.60506C7.29982 8.83287 6.89991 8.98039 6.4825 9.03727C6.0075 9.10477 5.53625 9.17727 5.065 9.25602C3.74875 9.47477 2.8125 10.6335 2.8125 11.9673V22.4998C2.8125 23.2457 3.10882 23.9611 3.63626 24.4885C4.16371 25.016 4.87908 25.3123 5.625 25.3123H24.375C25.1209 25.3123 25.8363 25.016 26.3637 24.4885C26.8912 23.9611 27.1875 23.2457 27.1875 22.4998V11.9673C27.1875 10.6335 26.25 9.47477 24.935 9.25602C24.4634 9.17744 23.9909 9.10452 23.5175 9.03727C23.1003 8.98022 22.7006 8.83262 22.3465 8.60481C21.9924 8.37701 21.6924 8.07451 21.4675 7.71852L20.44 6.07352C20.2092 5.69864 19.8915 5.38489 19.5138 5.15881C19.1361 4.93274 18.7094 4.80101 18.27 4.77477C16.0916 4.65776 13.9084 4.65776 11.73 4.77477C11.2906 4.80101 10.8639 4.93274 10.4862 5.15881C10.1085 5.38489 9.79077 5.69864 9.56 6.07352L8.53375 7.71852Z'
                                     stroke='#A1A1A1'
@@ -567,19 +560,25 @@ export const WritePage = () => {
                                     strokeLinejoin='round'
                                 />
                             </svg>
-                            <span
-                                className='text-[16px] font-normal leading-[140%] tracking-[-0.64px]'
-                                style={{ color: 'var(--ColorGray2, #A1A1A1)' }}
-                            >
-                                파일추가
-                            </span>
+                                <span
+                                    className='font-normal leading-[140%] tracking-[-0.64px]'
+                                    style={{ 
+                                        color: 'var(--ColorGray2, #A1A1A1)',
+                                        fontSize: isKeyboardUp ? '13px' : '16px'
+                                    }}
+                                >
+                                    파일추가
+                                </span>
                         </button>
                         {/* 기존 이미지 미리보기 */}
                         {existingPhotoUrls.map((url, index) => (
                             <div
                                 key={`existing-${index}-${url}`}
                                 className='relative flex-shrink-0'
-                                style={{ width: '170px', height: '128px' }}
+                                style={{ 
+                                    width: isKeyboardUp ? '130px' : '170px', 
+                                    height: isKeyboardUp ? '80px' : '128px' 
+                                }}
                             >
                                 <img
                                     src={url}
@@ -598,7 +597,10 @@ export const WritePage = () => {
                             <div
                                 key={attachment.id}
                                 className='relative flex-shrink-0'
-                                style={{ width: '170px', height: '128px' }}
+                                style={{ 
+                                    width: isKeyboardUp ? '130px' : '170px', 
+                                    height: isKeyboardUp ? '80px' : '128px' 
+                                }}
                             >
                                 {attachment.kind === 'image' ? (
                                     <img
@@ -660,6 +662,7 @@ export const WritePage = () => {
                         />
                     </div>
                 </div>
+            </div>
             </div>
 
             {/* 게시판 선택 모달 */}

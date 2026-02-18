@@ -1,25 +1,21 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import Icon from '../../components/Icon';
-import PopUp from '../../components/Pop-up';
-import { EmptyLayout } from '../../layouts/EmptyLayout';
+import type { ActivityCategory } from '../../api-types/activityApiTypes';
+import {
+  createActivity, getActivityAttachmentsPresignUrl, getActivityDetail,
+  getActivityThumbnailPresignUrl, getTags, updateActivity
+} from '../../api/activityApi';
 import BoardTypeToggle from '../../components/BoardTypeToggle';
 import FilterHeader from '../../components/FilterHeader';
+import Icon from '../../components/Icon';
+import PopUp from '../../components/Pop-up';
 import TagsFilterModal from '../../components/TagsFilterModal';
-import { getTags } from '../../api/activityApi';
-import { mapApiTagCategoryToUiTagCategory } from './utils/activityMapper';
-import { useAuthStore } from '../../store/useAuthStore';
-import {
-  createActivity,
-  updateActivity,
-  getActivityDetail,
-  getActivityThumbnailPresignUrl,
-  getActivityAttachmentsPresignUrl,
-} from '../../api/activityApi';
-import type { ActivityCategory } from '../../api-types/activityApiTypes';
-import { uploadFileToS3 } from '../../utils/s3Upload';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { EmptyLayout } from '../../layouts/EmptyLayout';
+import { useAuthStore } from '../../store/useAuthStore';
+import { uploadFileToS3 } from '../../utils/s3Upload';
+import { mapApiTagCategoryToUiTagCategory } from './utils/activityMapper';
 
 const MAX_SIZE_MB = 10;
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
@@ -96,8 +92,9 @@ export const ActivityWritePage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelWarningOpen, setIsCancelWarningOpen] = useState(false);
-  const [photoButtonOffset, setPhotoButtonOffset] = useState(0);
   const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview[]>(() => initialValues?.photos ?? []);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const isKeyboardUp = window.innerHeight - viewportHeight > 100;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isFileErrorOpen, setIsFileErrorOpen] = useState(false);
   const [fileErrorMessage, setFileErrorMessage] = useState('');
@@ -121,18 +118,15 @@ export const ActivityWritePage = () => {
   useEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
-    const updateOffset = () => {
-      const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-      setPhotoButtonOffset(keyboardHeight > 0 ? keyboardHeight + 16 : 0);
+    const updateHeight = () => {
+      setViewportHeight(viewport.height);
     };
-    updateOffset();
-    viewport.addEventListener('resize', updateOffset);
-    viewport.addEventListener('scroll', updateOffset);
-    window.addEventListener('resize', updateOffset);
+    updateHeight();
+    viewport.addEventListener('resize', updateHeight);
+    viewport.addEventListener('scroll', updateHeight);
     return () => {
-      viewport.removeEventListener('resize', updateOffset);
-      viewport.removeEventListener('scroll', updateOffset);
-      window.removeEventListener('resize', updateOffset);
+      viewport.removeEventListener('resize', updateHeight);
+      viewport.removeEventListener('scroll', updateHeight);
     };
   }, []);
 
@@ -395,9 +389,9 @@ export const ActivityWritePage = () => {
 
   return (
     <EmptyLayout>
-      <div className='flex min-h-screen w-full flex-col bg-white'>
+      <div className='flex w-full flex-col bg-white overflow-hidden min-h-0' style={{ height: `${viewportHeight}px` }}>
         <header
-          className='flex w-full items-center justify-between bg-white'
+          className='flex w-full shrink-0 items-center justify-between bg-white'
           style={{
             padding: '10px 25px',
             paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
@@ -484,7 +478,7 @@ export const ActivityWritePage = () => {
             />
           </div>
 
-          <div className='flex w-full flex-1 flex-col' style={{ padding: '15px 10px 193px' }}>
+          <div className='flex w-full flex-1 flex-col' style={{ padding: isKeyboardUp ? '10px 10px 20px' : '15px 10px 40px' }}>
             <textarea
               id='activity-content'
               name='content'
@@ -501,23 +495,22 @@ export const ActivityWritePage = () => {
             />
           </div>
         </section>
-      </div>
 
-      <div
-        className='fixed left-1/2 z-40 w-[clamp(320px,100vw,540px)] -translate-x-1/2'
-        style={{
-          bottom: `calc(${photoButtonOffset}px + env(safe-area-inset-bottom, 0px))`,
-        }}
-      >
-        <div className='flex w-full px-[25px] pb-[25px]'>
-          <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
-            <button
-              type='button'
-              className='flex h-[128px] w-[128px] flex-col items-center justify-center rounded-[12px] flex-shrink-0'
-              style={{ background: 'var(--ColorGray1, #ECECEC)', gap: '10px' }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30' fill='none'>
+        <div className='w-full shrink-0 bg-white'>
+          <div className='flex w-full px-[25px]' style={{ paddingBottom: isKeyboardUp ? '10px' : '25px' }}>
+            <div className='flex w-full items-center overflow-x-auto' style={{ gap: '12px' }}>
+              <button
+                type='button'
+                className='flex flex-col items-center justify-center rounded-[12px] flex-shrink-0'
+                style={{ 
+                  background: 'var(--ColorGray1, #ECECEC)', 
+                  gap: isKeyboardUp ? '4px' : '10px',
+                  width: isKeyboardUp ? '100px' : '128px',
+                  height: isKeyboardUp ? '80px' : '128px'
+                }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <svg xmlns='http://www.w3.org/2000/svg' width={isKeyboardUp ? '24' : '30'} height={isKeyboardUp ? '24' : '30'} viewBox='0 0 30 30' fill='none'>
                 <path
                   d='M8.53375 7.71852C8.30874 8.07466 8.00852 8.37725 7.65417 8.60506C7.29982 8.83287 6.89991 8.98039 6.4825 9.03727C6.0075 9.10477 5.53625 9.17727 5.065 9.25602C3.74875 9.47477 2.8125 10.6335 2.8125 11.9673V22.4998C2.8125 23.2457 3.10882 23.9611 3.63626 24.4885C4.16371 25.016 4.87908 25.3123 5.625 25.3123H24.375C25.1209 25.3123 25.8363 25.016 26.3637 24.4885C26.8912 23.9611 27.1875 23.2457 27.1875 22.4998V11.9673C27.1875 10.6335 26.25 9.47477 24.935 9.25602C24.4634 9.17744 23.9909 9.10452 23.5175 9.03727C23.1003 8.98022 22.7006 8.83262 22.3465 8.60481C21.9924 8.37701 21.6924 8.07451 21.4675 7.71852L20.44 6.07352C20.2092 5.69864 19.8915 5.38489 19.5138 5.15881C19.1361 4.93274 18.7094 4.80101 18.27 4.77477C16.0916 4.65776 13.9084 4.65776 11.73 4.77477C11.2906 4.80101 10.8639 4.93274 10.4862 5.15881C10.1085 5.38489 9.79077 5.69864 9.56 6.07352L8.53375 7.71852Z'
                   stroke='#A1A1A1'
@@ -533,12 +526,15 @@ export const ActivityWritePage = () => {
                   strokeLinejoin='round'
                 />
               </svg>
-              <span
-                className='text-[16px] font-normal leading-[140%] tracking-[-0.64px]'
-                style={{ color: 'var(--ColorGray2, #A1A1A1)' }}
-              >
-                사진추가
-              </span>
+                <span
+                  className='font-normal leading-[140%] tracking-[-0.64px]'
+                  style={{ 
+                    color: 'var(--ColorGray2, #A1A1A1)',
+                    fontSize: isKeyboardUp ? '13px' : '16px'
+                  }}
+                >
+                  사진추가
+                </span>
             </button>
             <input
               ref={fileInputRef}
@@ -554,7 +550,10 @@ export const ActivityWritePage = () => {
               <div
                 key={preview.id}
                 className='relative flex-shrink-0'
-                style={{ width: '170px', height: '128px' }}
+                style={{ 
+                  width: isKeyboardUp ? '130px' : '170px', 
+                  height: isKeyboardUp ? '80px' : '128px' 
+                }}
               >
                 <img
                   src={preview.url}
@@ -587,6 +586,7 @@ export const ActivityWritePage = () => {
             ))}
           </div>
         </div>
+      </div>
       </div>
 
       {isBoardOpen && (

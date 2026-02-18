@@ -4,7 +4,12 @@ export type NotificationApiType =
   | 'POINT_EARNED'
   | 'POINT_SPENT'
   | 'POST_COMMENTED'
-  | 'COMMENT_REPLIED';
+  | 'COMMENT_REPLIED'
+  | 'FOLLOWING_POSTED'
+  | 'TEAM_APPLICATION_RECEIVED'
+  | 'COFFEE_CHAT_ACCEPTED'
+  | 'TEAM_RECRUIT_ACCEPTED'
+  | 'CHAT_MESSAGE_RECEIVED';
 
 export interface NotificationListRequest {
   userId: number | string;
@@ -46,6 +51,7 @@ export interface NotificationListData {
 export interface NotificationApiItem {
   id: number;
   type: NotificationApiType;
+  title: string;
   message: string;
   read: boolean;
   actorUserId: number;
