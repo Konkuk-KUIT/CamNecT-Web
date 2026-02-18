@@ -22,9 +22,9 @@ const MainBox = ({ post }: MainBoxProps) => {
     <Link to={`/community/post/${post.id}`} className='block'>
       <Card
         width="100%"
-        height="246px"
-        className="flex flex-col"
-        style={{ padding: '20px', gap: '24px' }}
+        height="260px"
+        className="flex flex-col justify-between"
+        style={{ padding: '20px'}}
       >
         <div className='flex flex-col' style={{ gap: '15px' }}>
           <div className='flex flex-col' style={{ gap: '10px' }}>
