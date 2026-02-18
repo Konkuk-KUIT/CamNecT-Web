@@ -26,6 +26,7 @@ import { findCommentAuthorId } from './utils/comment';
 import { isEditOption, type OptionItemId } from './utils/option';
 import { formatPostDisplayDate } from './utils/post';
 import defaultProfileImg from "../../assets/image/defaultProfileImg.png"
+import { getFileName } from '../../utils/getFileName';
 
 const DEFAULT_PROFILE_IMAGE = defaultProfileImg;
 
@@ -738,33 +739,47 @@ const CommunityPostPage = () => {
                   <div className='text-[16px] leading-[160%] text-[var(--ColorGray3,#646464)] whitespace-pre-wrap'>
                     {selectedPost.content}
                   </div>
-                  {selectedPost.postImages && selectedPost.postImages.length > 0 ? (
+                  {selectedPost.attachments && selectedPost.attachments.length > 0 ? (
                     <div className='mt-[30px] -mr-5 overflow-x-auto sm:-mr-[25px]'>
                       <div className='flex w-max gap-[5px] pr-[20px]'>
-                        {selectedPost.postImages.map((imageUrl: string, index: number) => {
-                          const imageKey = `${selectedPost.id}-image-${index + 1}`;
-                          if (failedImages[imageKey]) {
+                        {selectedPost.attachments
+                          .slice()
+                          .sort((a, b) => a.sortOrder - b.sortOrder)
+                          .map((attachment, index) => {
+                            const itemKey = `${selectedPost.id}-attachment-${index + 1}`;
+                            if (attachment.fileKey.endsWith('.pdf')) {
+                              return (
+                                <a
+                                  key={itemKey}
+                                  href={attachment.downloadUrl}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  className='flex h-[150px] w-[150px] shrink-0 flex-col items-center justify-center rounded-[5px] border border-[#ECECEC] bg-white text-center'
+                                  style={{ gap: '6px', padding: '10px' }}
+                                >
+                                  <span className='text-b-14-hn text-gray-900'>PDF</span>
+                                  <span className='text-r-12 text-gray-650 line-clamp-2'>
+                                    {getFileName(attachment.downloadUrl)}
+                                  </span>
+                                </a>
+                              );
+                            }
+                            if (failedImages[itemKey]) {
+                              return (
+                                <div key={itemKey} className='h-[150px] w-[150px] shrink-0 rounded-[5px] bg-[#D9D9D9]' aria-label='이미지 불러오기 실패' />
+                              );
+                            }
                             return (
-                              <div
-                                key={imageKey}
-                                className='h-[150px] w-[150px] shrink-0 rounded-[5px] bg-[#D9D9D9]'
-                                aria-label='이미지 불러오기 실패'
+                              <img
+                                key={itemKey}
+                                src={attachment.downloadUrl}
+                                alt={`${selectedPost.title} 이미지 ${index + 1}`}
+                                className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
+                                onClick={() => setSelectedImageUrl(attachment.downloadUrl)}
+                                onError={() => setFailedImages((prev) => ({ ...prev, [itemKey]: true }))}
                               />
                             );
-                          }
-                          return (
-                            <img
-                              key={imageKey}
-                              src={imageUrl}
-                              alt={`${selectedPost.title} 이미지 ${index + 1}`}
-                              className='h-[150px] w-[150px] shrink-0 rounded-[5px] object-cover'
-                              onClick={() => setSelectedImageUrl(imageUrl)}
-                              onError={() =>
-                                setFailedImages((prev) => ({ ...prev, [imageKey]: true }))
-                              }
-                            />
-                          );
-                        })}
+                          })}
                       </div>
                     </div>
                   ) : null}
