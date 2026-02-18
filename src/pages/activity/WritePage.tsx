@@ -389,7 +389,7 @@ export const ActivityWritePage = () => {
 
   return (
     <EmptyLayout>
-      <div className='flex w-full flex-col bg-white overflow-hidden' style={{ height: `${viewportHeight}px` }}>
+      <div className='flex w-full flex-col bg-white overflow-hidden min-h-0' style={{ height: `${viewportHeight}px` }}>
         <header
           className='flex w-full shrink-0 items-center justify-between bg-white'
           style={{
