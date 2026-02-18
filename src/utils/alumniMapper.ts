@@ -145,7 +145,7 @@ export const mapAlumniProfileDetailToProfile = (
       date: formatCertificatePeriod(item.acquiredDate),
       name: item.certificateName,
     })),
-    isFollowing: false,
+    isFollowing: detail.isFollowing,
     categories: Array.from(
       new Set(detail.tags.map((tag) => tag.name).filter((name) => name && name.trim()))
     ),

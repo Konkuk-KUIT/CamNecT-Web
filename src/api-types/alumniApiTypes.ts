@@ -122,6 +122,7 @@ export type AlumniProfileDetail = {
   userId: number;
   name: string;
   basics: AlumniProfileBasics;
+  isFollowing: boolean;
   following: number;
   follower: number;
   myPoint?: number;
