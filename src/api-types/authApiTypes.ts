@@ -60,7 +60,7 @@ export interface EmailVerificationRequest {
 
 export interface EmailVerificationResponse {
   userId: number;
-  verificationToken: string;
+  tempToken: string;
   expiresMinutes: number;
 }
 
