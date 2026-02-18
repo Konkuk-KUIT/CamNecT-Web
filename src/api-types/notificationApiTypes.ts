@@ -51,6 +51,7 @@ export interface NotificationListData {
 export interface NotificationApiItem {
   id: number;
   type: NotificationApiType;
+  title: string;
   message: string;
   read: boolean;
   actorUserId: number;

@@ -52,19 +52,14 @@ const toNotificationItem = (item: NotificationApiItem): NotificationItem => {
         message: item.message,
         link: item.link,
         actorUserId: item.actorUserId,
+        name: item.actorName,
+        profileImageUrl: item.actorProfileImageUrl || undefined,
         postId: item.postId,
         commentId: item.commentId,
         requestId: item.requestId,
     };
 
     switch (type) {
-        case 'coffeeChatRequest':
-            return {
-                ...base,
-                type,
-                name: item.actorName,
-                profileImageUrl: item.actorProfileImageUrl || undefined,
-            };
         case 'pointEarn':
         case 'pointUse':
             return {
@@ -95,10 +90,7 @@ const toNotificationItem = (item: NotificationApiItem): NotificationItem => {
         default:
             return {
                 ...base,
-                type: 'comment',
-                postTitle: '',
-                commentContent: item.message,
-            };
+            } as NotificationItem;
     }
 };
 

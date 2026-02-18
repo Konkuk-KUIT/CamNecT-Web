@@ -20,15 +20,16 @@ export type NotificationBase = {
   message?: string;
   link?: string;
   actorUserId?: number;
+  name?: string;
+  profileImageUrl?: string;
   postId?: number;
   commentId?: number;
   requestId?: number;
+  points?: number;
 };
 
 export type CoffeeChatRequestNotification = NotificationBase & {
   type: 'coffeeChatRequest';
-  name: string;
-  profileImageUrl?: string;
 };
 
 export type PointNotification = NotificationBase & {

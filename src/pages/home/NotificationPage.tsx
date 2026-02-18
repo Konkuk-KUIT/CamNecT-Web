@@ -184,18 +184,33 @@ const renderContent = (notification: NotificationItem) => {
 };
 
 const renderIcon = (notification: NotificationItem) => {
-  if (notification.type === 'coffeeChatRequest') {
-    return notification.profileImageUrl ? (
-      <img
-        src={notification.profileImageUrl}
-        alt={`${notification.name} 프로필`}
-        className="h-[50px] w-[50px] rounded-full object-cover bg-[#ECECEC]"
+  // 1. 포인트 관련 알림은 서버에서 이미지를 주더라도 무조건 전용 SVG 아이콘을 우선함
+  if (notification.type === 'pointUse' || notification.type === 'pointEarn') {
+    const svg = getIconSvg(notification.type);
+    return (
+      <div
+        className="h-[50px] w-[50px]"
+        aria-hidden
+        dangerouslySetInnerHTML={{ __html: svg ?? '' }}
       />
-    ) : (
-      <div className="h-[50px] w-[50px] rounded-full bg-[#ECECEC]" />
     );
   }
 
+  // 2. 프로필 이미지가 있고, 서버에서 주는 기본값(default.png)이 아닌 경우에만 이미지 렌더링
+  if (
+    notification.profileImageUrl &&
+    !notification.profileImageUrl.includes('default.png')
+  ) {
+    return (
+      <img
+        src={notification.profileImageUrl}
+        alt={`${notification.name || '유저'} 프로필`}
+        className="h-[50px] w-[50px] rounded-full object-cover bg-[#ECECEC]"
+      />
+    );
+  }
+
+  // 3. 그 외에는 기본 로고 SVG 아이콘 출력
   const svg = getIconSvg(notification.type);
 
   return (
@@ -255,6 +270,12 @@ export const NotificationPage = () => {
           setPopUpConfig(config);
         }
       }
+    }
+
+    // 서버가 준 link가 있다면 최우선적으로 거기로 이동
+    if (notification.link) {
+      navigate(notification.link);
+      return;
     }
 
     switch (notification.type) {
