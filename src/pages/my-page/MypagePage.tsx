@@ -94,7 +94,7 @@ export const MypagePage = () => {
     profileImg: profileData.basics.profileImageUrl ?? null,
     univ: schoolName, 
     major: majorName,
-    gradeNumber: profileData.basics.studentNo.slice(2, 4),
+    gradeNumber: profileData.basics.studentNo ? profileData.basics.studentNo.slice(2, 4) : "00",
     userTags: profileData.tags.map(t => t.name),
     following: profileData.following,
     follower: profileData.follower,
@@ -107,7 +107,7 @@ export const MypagePage = () => {
     name: profileData.name,
     univ: schoolName,
     major: majorName,
-    gradeNumber: profileData.basics.studentNo.slice(2, 4),
+    gradeNumber: profileData.basics.studentNo ? profileData.basics.studentNo.slice(2, 4) : "00",
     point: profileData.myPoint,
   };
 
