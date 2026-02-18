@@ -49,7 +49,7 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
     const [schoolSearchQuery, setSchoolSearchQuery] = useState("");
 
     // 학교 검색 API 호출
-    const { data: schoolSearchResult, isLoading: isSearching } = useQuery({
+    const { data: schoolSearchResult } = useQuery({
         queryKey: ["searchInstitutions", schoolSearchQuery],
         queryFn: () => searchInstitutions({ keyword: schoolSearchQuery }),
         enabled: schoolSearchQuery.length > 0,
@@ -362,12 +362,6 @@ export default function EducationModal({ educations, initialShowPublic, onClose,
                                                 {institution.nameKor}
                                             </button>
                                         ))}
-                                    </div>
-                                )}
-
-                                {isSearching && schoolSearchQuery.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 bg-gray-100 border border-gray-150 rounded-[5px] z-10 p-[15px]">
-                                        <div className="text-r-14 text-gray-650">검색 중...</div>
                                     </div>
                                 )}
                             </div>
