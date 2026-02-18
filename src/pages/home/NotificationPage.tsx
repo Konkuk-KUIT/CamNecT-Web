@@ -184,8 +184,12 @@ const renderContent = (notification: NotificationItem) => {
 };
 
 const renderIcon = (notification: NotificationItem) => {
-  // 1. 포인트 관련 알림은 서버에서 이미지를 주더라도 무조건 전용 SVG 아이콘을 우선함
-  if (notification.type === 'pointUse' || notification.type === 'pointEarn') {
+  // 1. 포인트 또는 새 게시글 알림은 서버에서 이미지를 주더라도 무조건 전용 SVG(또는 기본 로고) 아이콘을 우선함
+  if (
+    notification.type === 'pointUse' ||
+    notification.type === 'pointEarn' ||
+    notification.type === 'followingPosted'
+  ) {
     const svg = getIconSvg(notification.type);
     return (
       <div
