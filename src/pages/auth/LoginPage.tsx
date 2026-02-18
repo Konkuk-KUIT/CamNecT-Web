@@ -54,12 +54,14 @@ export const LoginPage = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { handleRedirect } = useAuthRedirect(); // 리다이렉트 훅 추가
 
-  // 이미 로그인된 상태라면 홈으로 이동
+  const user = useAuthStore((state) => state.user);
+
+  // 이미 로그인된 상태라면 역할에 맞게 리다이렉트
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home', { replace: true });
+    if (isAuthenticated && user) {
+        handleRedirect(user.role || 'USER', user.nextStep || 'HOME');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, handleRedirect]);
 
   const [showPassword, setShowPassword] = useState(false);
   const [id, setId] = useState("");
@@ -84,7 +86,9 @@ export const LoginPage = () => {
         nextStep
       });
 
-      if (nextStep === 'HOME') {
+      if (role === 'ADMIN') {
+        handleRedirect(role, nextStep);
+      } else if (nextStep === 'HOME') {
         setShowSplash(true); 
       } else {
         // 회원가입 단계가 남은 경우 해당 단계로 리다이렉트
