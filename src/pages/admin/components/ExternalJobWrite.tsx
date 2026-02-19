@@ -111,7 +111,11 @@ export const ExternalJobWrite = ({ type }: ExternalJobWritePageProps) => {
     const tagNameToIdMap = useMemo(() => {
         const map = new Map<string, number>();
         tagData?.data.forEach((cat) => {
-        cat.tags.forEach((tag) => map.set(tag.name, tag.id));
+            cat.tags.forEach((tag) => {
+                if (!map.has(tag.name)) {  // 이미 있으면 건너뜀
+                    map.set(tag.name, tag.id);
+                }
+            });
         });
         return map;
     }, [tagData]);

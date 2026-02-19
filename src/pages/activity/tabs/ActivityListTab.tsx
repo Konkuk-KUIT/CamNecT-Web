@@ -75,7 +75,9 @@ const ActivityListTab = ({
     const map = new Map<string, number>();
     tagData?.data.forEach((category) => {
       category.tags.forEach((tag) => {
-        map.set(tag.name, tag.id);
+        if (!map.has(tag.name)) {
+          map.set(tag.name, tag.id);
+        }
       });
     });
     return map;
