@@ -49,11 +49,24 @@ export const InterestsStep = ({ onNext }: InterestsStepProps) => {
             }))
         }));
 
+        // 중복 태그명 제거 (첫 번째 등장만 유지)
+        const seenTagNames = new Set<string>();
+        const dedupedCategories = categories.map(cat => ({
+            ...cat,
+            tags: cat.tags.filter(tag => {
+                if (seenTagNames.has(tag.name)) {
+                    return false; // 중복이면 제거
+                }
+                seenTagNames.add(tag.name);
+                return true;
+            })
+        }));
+
         // flatMap : map -> flat (이중배열 -> 단일 배열)
         // -> 계층형데이터를 단일 배열로
-        const tags = categories.flatMap(cat => cat.tags);
+        const tags = dedupedCategories.flatMap(cat => cat.tags);
 
-        return { formattedCategories: categories, allTags: tags };
+        return { formattedCategories: dedupedCategories, allTags: tags };
     }, [tagList?.data]);
 
     // 태그 토글 핸들러 (부모에서 관리)
