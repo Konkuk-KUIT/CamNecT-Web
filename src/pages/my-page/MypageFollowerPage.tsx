@@ -186,7 +186,7 @@ export const FollowerPage = () => {
                                                 },
                                             })
                                         }
-                                        className="min-w-[83px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
+                                        className="min-w-[87px] p-[10px] rounded-[10px] border border-primary bg-white text-m-12-hn text-primary"
                                     >
                                         커피챗 보내기
                                     </button>
