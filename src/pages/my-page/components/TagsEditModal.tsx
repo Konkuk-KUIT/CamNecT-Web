@@ -62,7 +62,20 @@ export default function TagEditModal({ tagIds, onClose, onSave }: TagEditModalPr
                 })),
             }));
 
-        const tags: UiTag[] = categories.flatMap((cat) => cat.tags);
+        // 중복 태그명 제거 (첫 번째 등장만 유지)
+        const seenTagNames = new Set<string>();
+        const dedupedCategories = categories.map(cat => ({
+            ...cat,
+            tags: cat.tags.filter(tag => {
+                if (seenTagNames.has(tag.name)) {
+                    return false; // 중복이면 제거
+                }
+                seenTagNames.add(tag.name);
+                return true;
+            })
+        }));
+
+        const tags: UiTag[] = dedupedCategories.flatMap((cat) => cat.tags);
 
         const idMap = new Map<number, UiTag>();
         tags.forEach((t) => idMap.set(t.id, t));

@@ -75,9 +75,12 @@ export const useTagList = () => {
     }));
 
     const signupTags = signupCategories.flatMap((category) => category.tags);
-    const tagNameToId = new Map(
-      signupTags.map((tag) => [tag.name, tag.id] as const),
-    );
+    const tagNameToId = new Map<string, number>();
+    signupTags.forEach((tag) => {
+      if (!tagNameToId.has(tag.name)) {
+        tagNameToId.set(tag.name, tag.id);
+      }
+    });
     const tagIdToName = new Map(
       signupTags.map((tag) => [tag.id, tag.name] as const),
     );

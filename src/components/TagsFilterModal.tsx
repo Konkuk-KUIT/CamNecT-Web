@@ -106,18 +106,31 @@ const TagsFilterModalContent = ({
     setSelectedTags(selectedTags.filter((tag) => tag !== tagName));
   };
 
+  const dedupedCategories = useMemo(() => {
+    const seenTagNames = new Set<string>();
+    return categories.map(category => ({
+      ...category,
+      tags: category.tags.filter(tag => {
+        if (seenTagNames.has(tag.name)) {
+          return false; // 중복이면 제거
+        }
+        seenTagNames.add(tag.name);
+        return true;
+      })
+    }));
+  }, [categories]);
+
   const filteredCategories = useMemo(() => {
-    if (!searchQuery) return categories;
-    const filtered = allTags.filter((tag) =>
-      tag.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-    return categories
+    if (!searchQuery) return dedupedCategories;
+    return dedupedCategories
       .map((category) => ({
         ...category,
-        tags: filtered.filter((tag) => tag.category === category.id),
+        tags: category.tags.filter((tag) =>
+          tag.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        ),
       }))
       .filter((category) => category.tags.length > 0);
-  }, [allTags, categories, searchQuery]);
+  }, [allTags, dedupedCategories, searchQuery]);
 
   const filteredExtraCategories = useMemo(() => {
     if (extraCategories.length === 0) return [];
