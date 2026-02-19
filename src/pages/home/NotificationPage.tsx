@@ -267,6 +267,8 @@ export const NotificationPage = () => {
         });
         // 알림 읽음 처리 성공 시 안 읽은 개수 쿼리 무효화 (홈 화면 배지 업데이트용)
         queryClient.invalidateQueries({ queryKey: ['notificationsUnreadCount'] });
+        // 알림 목록 데이터 업데이트 (목록 UI 갱신용)
+        queryClient.invalidateQueries({ queryKey: ['notifications', userIdParam] });
       } catch (error) {
         const status = getErrorStatus(error);
         const config = getErrorPopUpConfig(status);
