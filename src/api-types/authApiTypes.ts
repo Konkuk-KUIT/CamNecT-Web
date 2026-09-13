@@ -164,11 +164,7 @@ export interface ProfileOnboardingRequest {
 }
 
 export interface ProfileOnboardingResponse {
-  status: number;
-  message: string;
-  data: {
-    status: string; // ex, 'EMAIL_PENDING'
-  };
+  status: 'ADMIN_PENDING' | 'ACTIVE' | 'SUSPENDED' | 'WITHDRAWN';
 }
 
 // 관리자 인증서 리스트 조회 DTO (/api/admin/verification/documents)

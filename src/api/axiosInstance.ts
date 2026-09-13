@@ -93,7 +93,7 @@ export const refreshAccessToken = (refreshToken: string) => {
             // (로그아웃이면 null, 다른 계정이거나 같은 계정 재로그인이어도 새 값)
             // 늦게 도착한 응답으로 이미 끝난 세션의 토큰을 되살리지 않는다.
             if (useAuthStore.getState().refreshToken !== refreshToken) {
-                return;
+                throw new Error("인증 세션이 변경되어 요청을 중단했습니다.");
             }
 
             // access, refreskToken 갱신
